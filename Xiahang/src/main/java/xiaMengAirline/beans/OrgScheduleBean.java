@@ -1,4 +1,4 @@
-package Xiahang.bean;
+package xiaMengAirline.beans;
 
 import java.math.BigDecimal;
 import java.util.Date;
