@@ -11,6 +11,8 @@ public class Flight {
 	private Date adjustedArrivalTime;
 	private Date adjustedDepartureTime;
 	private Date adjustedReadinessTime;
+	private boolean isCancel;
+	
 	public String getId() {
 		return id;
 	}
@@ -58,6 +60,12 @@ public class Flight {
 	}
 	public void setAdjustedReadinessTime(Date adjustedReadinessTime) {
 		this.adjustedReadinessTime = adjustedReadinessTime;
+	}
+	public boolean isCancel() {
+		return isCancel;
+	}
+	public void setCancel(boolean isCancel) {
+		this.isCancel = isCancel;
 	}
 	
 	
