@@ -36,7 +36,7 @@ public class AirPort {
 	
 	static public HashMap<Integer, List<Integer>> getCircuitAirports (List<AirPort> airPortList) {
 		HashMap<Integer, List<Integer>> retCircuitAirPortList = new HashMap<Integer, List<Integer>> ();
-		for (int i=0;i < airPortList.size()-1;i++) {
+		for (int i=0;i <= airPortList.size()-1;i++) {
 			ArrayList<Integer> matchList = new ArrayList<Integer> ();
 			for (int j=i+2; j < airPortList.size()-1;j++) {
 				if (airPortList.get(i).equal(airPortList.get(j))) {

@@ -7,6 +7,8 @@ public class Aircraft {
 	private String id;
 	private String type;
 	private List<Flight> flightChain;
+	boolean isCancel;
+	long cost;
 
 	public String getId() {
 		return id;
@@ -23,8 +25,22 @@ public class Aircraft {
 	public List<Flight> getFlightChain() {
 		return flightChain;
 	}
+	public Flight getFlight(int position) {
+		return this.flightChain.get(position);
+	}
 	public void setFlightChain(List<Flight> flightChain) {
 		this.flightChain = flightChain;
+	}
+	public void insertFlightChain (Aircraft sourceAircraft, List<Integer> addFlights, int position) {
+		List<Flight> newFlights = new ArrayList<Flight> (); 
+		for (int anAdd:addFlights) {
+			newFlights.add(sourceAircraft.getFlight(anAdd));
+		}
+		this.flightChain.addAll(position,newFlights );
+	}
+	public void removeFlightChain (List<Integer> deleteFlights)  {
+		for (int aDelete:deleteFlights)
+			this.flightChain.remove(aDelete);
 	}
 	
 	public List<AirPort>  getAirports() {
@@ -38,6 +54,24 @@ public class Aircraft {
 		}
 		return (retAirPortList);
 		
+	}
+	public boolean isCancel() {
+		return isCancel;
+	}
+	public void setCancel(boolean isCancel) {
+		this.isCancel = isCancel;
+	}
+	
+	public Aircraft clone() {
+		Aircraft aNew = this.clone();
+		aNew.setFlightChain(new ArrayList<Flight>(flightChain));
+		return (aNew);
+	}
+	public long getCost() {
+		return cost;
+	}
+	public void setCost(long cost) {
+		this.cost = cost;
 	}
 
 }
