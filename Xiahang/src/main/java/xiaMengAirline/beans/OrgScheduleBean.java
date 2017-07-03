@@ -5,28 +5,29 @@ import java.util.Date;
 
 public class OrgScheduleBean {
 	
-	private String schdID;
-	private String schdDate;
+	private int schdID;
+	private Date schdDate;
 	private boolean interFlg;
-	private String schdNo;
-	private String startPort;
-	private String endPort;
+	private int schdNo;
+	private int startPort;
+	private int endPort;
 	private Date startTime;
 	private Date endTime;
-	private String airID;
-	private String airType;
+	private int airID;
+	private int airType;
+	private int passengers;
+	private int jointPassengers;	
 	private BigDecimal impCoe;
-	
-	public String getSchdID() {
+	public int getSchdID() {
 		return schdID;
 	}
-	public void setSchdID(String schdID) {
+	public void setSchdID(int schdID) {
 		this.schdID = schdID;
 	}
-	public String getSchdDate() {
+	public Date getSchdDate() {
 		return schdDate;
 	}
-	public void setSchdDate(String schdDate) {
+	public void setSchdDate(Date schdDate) {
 		this.schdDate = schdDate;
 	}
 	public boolean isInterFlg() {
@@ -35,22 +36,22 @@ public class OrgScheduleBean {
 	public void setInterFlg(boolean interFlg) {
 		this.interFlg = interFlg;
 	}
-	public String getSchdNo() {
+	public int getSchdNo() {
 		return schdNo;
 	}
-	public void setSchdNo(String schdNo) {
+	public void setSchdNo(int schdNo) {
 		this.schdNo = schdNo;
 	}
-	public String getStartPort() {
+	public int getStartPort() {
 		return startPort;
 	}
-	public void setStartPort(String startPort) {
+	public void setStartPort(int startPort) {
 		this.startPort = startPort;
 	}
-	public String getEndPort() {
+	public int getEndPort() {
 		return endPort;
 	}
-	public void setEndPort(String endPort) {
+	public void setEndPort(int endPort) {
 		this.endPort = endPort;
 	}
 	public Date getStartTime() {
@@ -65,17 +66,29 @@ public class OrgScheduleBean {
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
 	}
-	public String getAirID() {
+	public int getAirID() {
 		return airID;
 	}
-	public void setAirID(String airID) {
+	public void setAirID(int airID) {
 		this.airID = airID;
 	}
-	public String getAirType() {
+	public int getAirType() {
 		return airType;
 	}
-	public void setAirType(String airType) {
+	public void setAirType(int airType) {
 		this.airType = airType;
+	}
+	public int getPassengers() {
+		return passengers;
+	}
+	public void setPassengers(int passengers) {
+		this.passengers = passengers;
+	}
+	public int getJointPassengers() {
+		return jointPassengers;
+	}
+	public void setJointPassengers(int jointPassengers) {
+		this.jointPassengers = jointPassengers;
 	}
 	public BigDecimal getImpCoe() {
 		return impCoe;
@@ -83,6 +96,9 @@ public class OrgScheduleBean {
 	public void setImpCoe(BigDecimal impCoe) {
 		this.impCoe = impCoe;
 	}
+	
+	
+	
 	
 
 }
