@@ -30,6 +30,20 @@ public class ConnectedDestinationPort {
 		this.secondAircraftDestinationFlightIndex = secondAircraftDestinationFlightIndex;
 	}
 	
+	public boolean isFirstAircraftDestNextSource () {
+		if (firstAircraftDestinationFlightIndex == firstAircraftSourceFlightIndex + 1) {
+			return true;
+		} else
+			return false;
+	}
+	
+	public boolean isSecondAircraftDestNextSource () {
+		if (secondAircraftDestinationFlightIndex == secondAircraftSourceFlightIndex + 1) {
+			return true;
+		} else
+			return false;
+	}
+	
 	
 
 	

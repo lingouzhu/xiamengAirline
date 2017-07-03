@@ -8,6 +8,7 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.AircraftConstrains;
 import xiaMengAirline.beans.AircraftCost;
+import xiaMengAirline.beans.ConnectedDestinationPort;
 
 public class PairSearch {
 	List<Aircraft> pairSearch (Aircraft aircraft1, Aircraft airraft2) {
@@ -47,6 +48,12 @@ public class PairSearch {
 
 						}
 					}
+					//validate & cost
+					if (AircraftConstrains.validate(newAircraft1)
+							&& AircraftConstrains.validate(newAircraft2)) {
+						newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
+						newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
+					}
 					//if aircraft2 flights is circuit, insert circuit in front of flight u
 					if (!aircraft1.isCancel() && u!=0) {
 						AirPort sourcePort1 = aircraft1.getAirport(u, true);
@@ -60,38 +67,46 @@ public class PairSearch {
 
 						}
 					}
-					//if aircraft1/aircraft2 flights same source and same destination, do exchange  
-					AirPort sourcePort1 = aircraft1.getAirport(u, true);
-					AirPort sourcePort2 = aircraft2.getAirport(x, true);
-					if (sourcePort1.getId().equals(sourcePort2.getId())) {
-						
-						List<Integer> circuitChain = overlappedAirports.get(u);
-						newAircraft2.insertFlightChain(aircraft1, circuitChain, x);
-						newAircraft1.removeFlightChain(circuitChain);
-						if (AircraftConstrains.validate(newAircraft1) && AircraftConstrains.validate(newAircraft2)) {
-							newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
-							newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
-							newAircraft1.setAdjusted(true);
-							newAircraft2.setAdjusted(true);
-						}
-
-					}
 					//validate & cost
 					if (AircraftConstrains.validate(newAircraft1)
 							&& AircraftConstrains.validate(newAircraft2)) {
 						newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
 						newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
 					}
+					//if aircraft1/aircraft2 flights same source and same destination, do exchange  
+					List<ConnectedDestinationPort> matchedList = AirPort.getMatchedAirports(overlappedAirports, u, x);
+					for (ConnectedDestinationPort aConnectedPort:matchedList) {
+						//if dest port is next to source port, nothing can be exchanged
+						if (aConnectedPort.isFirstAircraftDestNextSource()) {
+							newAircraft1.insertFlightChain(aircraft2, aConnectedPort.getSecondAircraftSourceFlightIndex()+1, aConnectedPort.getSecondAircraftDestinationFlightIndex()-1, aConnectedPort.getFirstAircraftSourceFlightIndex(), false);
+							newAircraft2.removeFlightChain(aConnectedPort.getSecondAircraftSourceFlightIndex()+1, aConnectedPort.getSecondAircraftDestinationFlightIndex()-1);
+						} else if (aConnectedPort.isSecondAircraftDestNextSource()) {
+							newAircraft2.insertFlightChain(aircraft1, aConnectedPort.getFirstAircraftSourceFlightIndex()+1, aConnectedPort.getFirstAircraftDestinationFlightIndex()-1, aConnectedPort.getSecondAircraftSourceFlightIndex(), false);
+							newAircraft1.removeFlightChain(aConnectedPort.getFirstAircraftSourceFlightIndex()+1, aConnectedPort.getFirstAircraftDestinationFlightIndex()-1);
+						} else {
+							newAircraft1.insertFlightChain(aircraft2, aConnectedPort.getSecondAircraftSourceFlightIndex()+1, aConnectedPort.getSecondAircraftDestinationFlightIndex()-1, aConnectedPort.getFirstAircraftSourceFlightIndex(), false);
+							newAircraft2.insertFlightChain(aircraft1, aConnectedPort.getFirstAircraftSourceFlightIndex()+1, aConnectedPort.getFirstAircraftDestinationFlightIndex()-1, aConnectedPort.getSecondAircraftSourceFlightIndex(), false);
+							newAircraft1.removeFlightChain(aConnectedPort.getFirstAircraftSourceFlightIndex()+1, aConnectedPort.getFirstAircraftDestinationFlightIndex()-1);
+							newAircraft2.removeFlightChain(aConnectedPort.getSecondAircraftSourceFlightIndex()+1, aConnectedPort.getSecondAircraftDestinationFlightIndex()-1);
+						}
+						newAircraft1.setAdjusted(true);
+						newAircraft2.setAdjusted(true);
+						//validate & cost
+						if (AircraftConstrains.validate(newAircraft1)
+								&& AircraftConstrains.validate(newAircraft2)) {
+							newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
+							newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
+						}						
+						
+					}
+
+
 
 				}
 
 			}
 
-			for (Integer firstFlightIndex:overlappedAirports.keySet()) {
-				List<Integer> secondFlightOverlapped = overlappedAirports.get(firstFlightIndex);
-				//reconstruct new schedule for the two aircrafts
-				
-			}
+			
 		}
 	}
 }

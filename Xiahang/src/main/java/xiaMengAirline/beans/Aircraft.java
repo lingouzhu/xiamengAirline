@@ -39,9 +39,24 @@ public class Aircraft {
 		}
 		this.flightChain.addAll(position,newFlights );
 	}
+	public void insertFlightChain (Aircraft sourceAircraft, int addFlightStartPosition, int addFlightEndPosition, int position, boolean isBefore) {
+		List<Flight> newFlights = new ArrayList<Flight> (); 
+		for (int i=addFlightStartPosition+1;i<=addFlightEndPosition;i++) {
+			newFlights.add(sourceAircraft.getFlight(i));
+		}
+		if (isBefore)
+			this.flightChain.addAll(position,newFlights );
+		else
+			this.flightChain.addAll(position+1,newFlights );
+	}
+
 	public void removeFlightChain (List<Integer> deleteFlights)  {
 		for (int aDelete:deleteFlights)
 			this.flightChain.remove(aDelete);
+	}
+	public void removeFlightChain (int removeStartPosition, int removeEndPosition)  {
+		for (int i=removeStartPosition; i <= removeEndPosition; i++)
+			this.flightChain.remove(i);
 	}
 	
 	public List<AirPort>  getAirports() {

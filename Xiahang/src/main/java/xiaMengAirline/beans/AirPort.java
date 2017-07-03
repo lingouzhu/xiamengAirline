@@ -36,8 +36,8 @@ public class AirPort {
 		return (retOverlappedAirPortList);
 	}
 	
-	static public ConnectedDestinationPort getFirstMatchedDestinationAirport (HashMap<Integer, List<Integer>> overlappedList, int startPosition1, int startPosition2) {
-		ConnectedDestinationPort retConnected = null;
+	static public List<ConnectedDestinationPort> getMatchedAirports (HashMap<Integer, List<Integer>> overlappedList, int startPosition1, int startPosition2) {
+		ArrayList<ConnectedDestinationPort> retConnected = new ArrayList<ConnectedDestinationPort> ();
 		//check source airport matched first
 		if (overlappedList.containsKey(startPosition1)) {
 			if (overlappedList.get(startPosition1).contains(startPosition2)) {
@@ -46,12 +46,12 @@ public class AirPort {
 						List<Integer> overlapped2nd = overlappedList.get(aKey);
 						for (int aConnected:overlapped2nd) {
 							if (aConnected > startPosition2) {
-								retConnected = new ConnectedDestinationPort();
-								retConnected.setFirstAircraftSourceFlightIndex(startPosition1);
-								retConnected.setFirstAircraftDestinationFlightIndex(aKey);
-								retConnected.setSecondAircraftSourceFlightIndex(startPosition2);
-								retConnected.setSecondAircraftDestinationFlightIndex(aConnected);
-								return (retConnected);
+								ConnectedDestinationPort aConnectedPort = new ConnectedDestinationPort();
+								aConnectedPort.setFirstAircraftSourceFlightIndex(startPosition1);
+								aConnectedPort.setFirstAircraftDestinationFlightIndex(aKey);
+								aConnectedPort.setSecondAircraftSourceFlightIndex(startPosition2);
+								aConnectedPort.setSecondAircraftDestinationFlightIndex(aConnected);
+								retConnected.add(aConnectedPort);
 							}
 						}
 					}
