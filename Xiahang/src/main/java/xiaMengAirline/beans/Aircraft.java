@@ -8,6 +8,7 @@ public class Aircraft {
 	private String type;
 	private List<Flight> flightChain;
 	boolean isCancel;
+	boolean isAdjusted;
 	long cost;
 
 	public String getId() {
@@ -55,6 +56,13 @@ public class Aircraft {
 		return (retAirPortList);
 		
 	}
+	
+	public AirPort getAirport (int position, boolean isSource) {
+		if (isSource)
+			return (flightChain.get(position).getSourceAirPort());
+		else
+			return (flightChain.get(position).getDesintationAirport());
+	}
 	public boolean isCancel() {
 		return isCancel;
 	}
@@ -64,6 +72,7 @@ public class Aircraft {
 	
 	public Aircraft clone() {
 		Aircraft aNew = this.clone();
+		aNew.setAdjusted(false);
 		aNew.setFlightChain(new ArrayList<Flight>(flightChain));
 		return (aNew);
 	}
@@ -73,5 +82,12 @@ public class Aircraft {
 	public void setCost(long cost) {
 		this.cost = cost;
 	}
+	public boolean isAdjusted() {
+		return isAdjusted;
+	}
+	public void setAdjusted(boolean isAdjusted) {
+		this.isAdjusted = isAdjusted;
+	}
+	
 
 }
