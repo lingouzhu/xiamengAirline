@@ -48,12 +48,6 @@ public class PairSearch {
 
 						}
 					}
-					//validate & cost
-					if (AircraftConstrains.validate(newAircraft1)
-							&& AircraftConstrains.validate(newAircraft2)) {
-						newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
-						newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
-					}
 					//if aircraft2 flights is circuit, insert circuit in front of flight u
 					if (!aircraft1.isCancel() && u!=0) {
 						AirPort sourcePort1 = aircraft1.getAirport(u, true);
@@ -66,14 +60,15 @@ public class PairSearch {
 							newAircraft2.setAdjusted(true);
 
 						}
+						//validate & cost
+						if (AircraftConstrains.validate(newAircraft1)
+								&& AircraftConstrains.validate(newAircraft2)) {
+							newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
+							newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
+						}
+
 					}
-					//validate & cost
-					if (AircraftConstrains.validate(newAircraft1)
-							&& AircraftConstrains.validate(newAircraft2)) {
-						newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
-						newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
-					}
-					//if aircraft1/aircraft2 flights same source and same destination, do exchange  
+					//if aircraft1/aircraft2 flights same source and same destination, do exchange overlapped part 
 					List<ConnectedDestinationPort> matchedList = AirPort.getMatchedAirports(overlappedAirports, u, x);
 					for (ConnectedDestinationPort aConnectedPort:matchedList) {
 						//if dest port is next to source port, nothing can be exchanged
@@ -99,7 +94,52 @@ public class PairSearch {
 						}						
 						
 					}
+					//if aircraft1/2 have the same source, do exchange to end
+					if (u == x && !aircraft1.isCancel() && !aircraft2.isCancel()) {
+						newAircraft1.insertFlightChain(aircraft2, x+1, aircraft1.getFlightChain().size()-1, u, false);
+						newAircraft2.insertFlightChain(aircraft1, u+1, aircraft2.getFlightChain().size()-1, x, false);
+						newAircraft1.setAdjusted(true);
+						newAircraft2.setAdjusted(true);
+						//validate & cost
+						if (AircraftConstrains.validate(newAircraft1)
+								&& AircraftConstrains.validate(newAircraft2)) {
+							newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
+							newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
+						}
+					}
 
+					//if aircraft1 flights is circuit, place it into cancellation route 
+					if (!aircraft1.isCancel() && u!=0) {
+						if (circuitAirports1.containsKey(u)) {
+							List<Integer> circuitChain = circuitAirports1.get(u);
+							newAircraft2.insertFlightChain(aircraft1, circuitChain, x);
+							newAircraft2.setCancel(true);
+							newAircraft1.removeFlightChain(circuitChain);
+							if (AircraftConstrains.validate(newAircraft1)) {
+								newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
+								newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
+								newAircraft1.setAdjusted(true);
+								newAircraft2.setAdjusted(true);
+							}
+
+						}
+					}
+					//if aircraft2 flights is circuit, place it into cancellation route 
+					if (!aircraft2.isCancel() && u!=0) {
+						if (circuitAirports2.containsKey(u)) {
+							List<Integer> circuitChain = circuitAirports2.get(u);
+							newAircraft1.insertFlightChain(aircraft2, circuitChain, x);
+							newAircraft1.setCancel(true);
+							newAircraft2.removeFlightChain(circuitChain);
+							if (AircraftConstrains.validate(newAircraft2)) {
+								newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
+								newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
+								newAircraft1.setAdjusted(true);
+								newAircraft2.setAdjusted(true);
+							}
+
+						}
+					}
 
 
 				}

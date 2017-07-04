@@ -1,11 +1,15 @@
 package xiaMengAirline.beans;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 public class Flight {
-	private String id;
+	private String flightId;
+	private Date schdDate;
 	private AirPort sourceAirPort;
 	private AirPort desintationAirport;
+	private boolean interFlg;
+	private int schdNo;
 	private Date plannedArrivalTime;
 	private Date plannedDepartureTime;
 	private Date adjustedArrivalTime;
@@ -13,12 +17,15 @@ public class Flight {
 	private Date adjustedReadinessTime;
 	private boolean isCancel;
 	private Aircraft assignedFlight;
+	private int passengers;
+	private int jointPassengers;	
+	private BigDecimal impCoe;
 	
-	public String getId() {
-		return id;
+	public String getFlightId() {
+		return flightId;
 	}
-	public void setId(String id) {
-		this.id = id;
+	public void setFlightId(String id) {
+		this.flightId = id;
 	}
 	public AirPort getSourceAirPort() {
 		return sourceAirPort;
@@ -73,6 +80,42 @@ public class Flight {
 	}
 	public void setAssignedFlight(Aircraft assignedFlight) {
 		this.assignedFlight = assignedFlight;
+	}
+	public Date getSchdDate() {
+		return schdDate;
+	}
+	public void setSchdDate(Date schdDate) {
+		this.schdDate = schdDate;
+	}
+	public boolean isInterFlg() {
+		return interFlg;
+	}
+	public void setInterFlg(boolean interFlg) {
+		this.interFlg = interFlg;
+	}
+	public int getSchdNo() {
+		return schdNo;
+	}
+	public void setSchdNo(int schdNo) {
+		this.schdNo = schdNo;
+	}
+	public int getPassengers() {
+		return passengers;
+	}
+	public void setPassengers(int passengers) {
+		this.passengers = passengers;
+	}
+	public int getJointPassengers() {
+		return jointPassengers;
+	}
+	public void setJointPassengers(int jointPassengers) {
+		this.jointPassengers = jointPassengers;
+	}
+	public BigDecimal getImpCoe() {
+		return impCoe;
+	}
+	public void setImpCoe(BigDecimal impCoe) {
+		this.impCoe = impCoe;
 	}
 	
 	
