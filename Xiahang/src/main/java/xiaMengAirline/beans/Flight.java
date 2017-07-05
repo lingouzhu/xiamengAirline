@@ -16,7 +16,7 @@ public class Flight {
 	private Date adjustedDepartureTime;
 	private Date adjustedReadinessTime;
 	private boolean isCancel;
-	private Aircraft assignedFlight;
+	//private Aircraft assignedFlight;
 	private int passengers;
 	private int jointPassengers;	
 	private BigDecimal impCoe;
@@ -75,12 +75,12 @@ public class Flight {
 	public void setCancel(boolean isCancel) {
 		this.isCancel = isCancel;
 	}
-	public Aircraft getAssignedFlight() {
-		return assignedFlight;
-	}
-	public void setAssignedFlight(Aircraft assignedFlight) {
-		this.assignedFlight = assignedFlight;
-	}
+	//public Aircraft getAssignedFlight() {
+	//	return assignedFlight;
+	//}
+	//public void setAssignedFlight(Aircraft assignedFlight) {
+	//	this.assignedFlight = assignedFlight;
+	//}
 	public Date getSchdDate() {
 		return schdDate;
 	}

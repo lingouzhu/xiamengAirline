@@ -9,6 +9,7 @@ public class Aircraft {
 	private List<Flight> flightChain;
 	boolean isCancel;
 	boolean isAdjusted;
+	boolean isValdiated = false;
 	long cost;
 
 	public String getId() {
@@ -110,6 +111,15 @@ public class Aircraft {
 		}
 		return true;
 		
+	}
+	public void adjustment  () {
+		
+	}
+	public boolean isValdiated() {
+		return isValdiated;
+	}
+	public void setValdiated(boolean isValdiated) {
+		this.isValdiated = isValdiated;
 	}
 	
 
