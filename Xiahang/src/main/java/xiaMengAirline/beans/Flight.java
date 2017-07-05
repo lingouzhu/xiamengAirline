@@ -3,7 +3,7 @@ package xiaMengAirline.beans;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class Flight {
+public class Flight implements Cloneable {
 	private String flightId;
 	private Date schdDate;
 	private AirPort sourceAirPort;
@@ -115,8 +115,8 @@ public class Flight {
 		return true;
 	}
 	
-	public Flight clone() {
-		return (this.clone());
+	public Flight clone() throws CloneNotSupportedException {
+		return (Flight) (super.clone());
 	}
 	
 

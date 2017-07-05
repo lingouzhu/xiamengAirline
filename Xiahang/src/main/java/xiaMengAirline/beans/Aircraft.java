@@ -3,7 +3,7 @@ package xiaMengAirline.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Aircraft {
+public class Aircraft implements Cloneable{
 	private String id;
 	private String type;
 	private List<Flight> flightChain;
@@ -41,7 +41,7 @@ public class Aircraft {
 	}
 	public void insertFlightChain (Aircraft sourceAircraft, int addFlightStartPosition, int addFlightEndPosition, int position, boolean isBefore) {
 		List<Flight> newFlights = new ArrayList<Flight> (); 
-		for (int i=addFlightStartPosition+1;i<=addFlightEndPosition;i++) {
+		for (int i=addFlightStartPosition;i<addFlightEndPosition;i++) {
 			newFlights.add(sourceAircraft.getFlight(i));
 		}
 		if (isBefore)
@@ -51,12 +51,19 @@ public class Aircraft {
 	}
 
 	public void removeFlightChain (List<Integer> deleteFlights)  {
-		for (int aDelete:deleteFlights)
-			this.flightChain.remove(aDelete);
+		List<Flight> removeList = new ArrayList<Flight> ();
+		for (Integer i:deleteFlights) 
+			removeList.add(this.flightChain.get(i));
+
+		this.flightChain.removeAll(removeList);
 	}
 	public void removeFlightChain (int removeStartPosition, int removeEndPosition)  {
-		for (int i=removeStartPosition; i <= removeEndPosition; i++)
-			this.flightChain.remove(i);
+		List<Flight> removeList = new ArrayList<Flight> ();
+		
+		for (int i=removeStartPosition; i < removeEndPosition; i++)
+			removeList.add(this.flightChain.get(i));
+		
+		this.flightChain.removeAll(removeList);
 	}
 	
 	public List<AirPort>  getAirports() {
@@ -85,8 +92,8 @@ public class Aircraft {
 		this.isCancel = isCancel;
 	}
 	
-	public Aircraft clone() {
-		Aircraft aNew = this.clone();
+	public Aircraft clone() throws CloneNotSupportedException{
+		Aircraft aNew = (Aircraft) super.clone();
 		List<Flight> newFlightChain = new ArrayList<Flight> ();
 		for (Flight aFlight:flightChain) {
 			newFlightChain.add(aFlight.clone());

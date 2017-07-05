@@ -11,7 +11,7 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 
 public class LocalSearch {
 
-	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution) {
+	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution) throws CloneNotSupportedException {
 		RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
 		List<Aircraft> aircrafts = bestSolution.getSchedule();
 		int r = aircrafts.size();
@@ -42,28 +42,31 @@ public class LocalSearch {
 									Aircraft newAircraft1 = aircraft1.clone();
 									Aircraft newAircraft2 = aircraft2.clone();
 									List<Integer> circuitChain = circuitAirports1.get(u);
-									newAircraft2.insertFlightChain(aircraft1, circuitChain, x);
-									newAircraft1.removeFlightChain(circuitChain);
-									if (newAircraft1.validate() && newAircraft2.validate()) {
-										newAircraft1.adjustment();
-										newAircraft2.adjustment();
+									for (Integer aCircuit:circuitChain) {
+										newAircraft2.insertFlightChain(aircraft1, u, aCircuit, x, true);
+										newAircraft1.removeFlightChain(u, aCircuit);
+										if (newAircraft1.validate() && newAircraft2.validate()) {
+											newAircraft1.adjustment();
+											newAircraft2.adjustment();
 
-										newAircraft1.refreshCost();
-										newAircraft2.refreshCost();
+											newAircraft1.refreshCost();
+											newAircraft2.refreshCost();
 
-										long newCost = newAircraft1.getCost() + newAircraft2.getCost();
-										long oldCost = aircraft1.getCost() + aircraft2.getCost();
-										// only update solution when new change
-										// goes better
-										if (newCost < oldCost) {
-											XiaMengAirlineSolution aNewSolution = bestSolution.clone();
-											aNewSolution.replaceOrAddNewAircraft(newAircraft1);
-											aNewSolution.replaceOrAddNewAircraft(newAircraft2);
-											aNewSolution.refreshCost();
-											neighboursResult.addSolution(aNewSolution);
-										}
+											long newCost = newAircraft1.getCost() + newAircraft2.getCost();
+											long oldCost = aircraft1.getCost() + aircraft2.getCost();
+											// only update solution when new change
+											// goes better
+											if (newCost < oldCost) {
+												XiaMengAirlineSolution aNewSolution = bestSolution.clone();
+												aNewSolution.replaceOrAddNewAircraft(newAircraft1);
+												aNewSolution.replaceOrAddNewAircraft(newAircraft2);
+												aNewSolution.refreshCost();
+												neighboursResult.addSolution(aNewSolution);
+											}
 
+										}									
 									}
+
 
 								}
 							}

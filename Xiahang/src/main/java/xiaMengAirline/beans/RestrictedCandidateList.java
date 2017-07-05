@@ -68,7 +68,7 @@ public class RestrictedCandidateList {
 		bestSolutionList.clear();
 	}
 	
-	public XiaMengAirlineSolution selectASoluiton () {
+	public XiaMengAirlineSolution selectASoluiton () throws CloneNotSupportedException {
 		if (!bestSolutionList.isEmpty()) {
 			// randomly select one
 			int lowest = 0;

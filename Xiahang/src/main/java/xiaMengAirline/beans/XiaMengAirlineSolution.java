@@ -3,7 +3,7 @@ package xiaMengAirline.beans;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XiaMengAirlineSolution {
+public class XiaMengAirlineSolution implements Cloneable{
 	private long cost;
 	private List<Aircraft> schedule;
 	public long getCost() {
@@ -18,8 +18,8 @@ public class XiaMengAirlineSolution {
 	public void setSchedule(List<Aircraft> schedule) {
 		this.schedule = schedule;
 	}
-	public XiaMengAirlineSolution clone() {
-		XiaMengAirlineSolution aNewSolution = this.clone();
+	public XiaMengAirlineSolution clone() throws CloneNotSupportedException{
+		XiaMengAirlineSolution aNewSolution = (XiaMengAirlineSolution) super.clone();
 		List<Aircraft> newSchedule = new ArrayList<Aircraft> ();
 		for (Aircraft aAir:schedule) {
 			newSchedule.add(aAir.clone());
