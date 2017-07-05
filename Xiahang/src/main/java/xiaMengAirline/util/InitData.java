@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.OrgScheduleBean;
@@ -112,6 +113,12 @@ public class InitData {
 				Flight flight = new Flight();
 				flight.setFlightId(String.valueOf(orgDataBean.getSchdID()));
 				flight.setSchdDate(orgDataBean.getSchdDate());
+				AirPort sourceAirPort = new AirPort();
+				sourceAirPort.setId(String.valueOf(orgDataBean.getStartPort()));
+				flight.setSourceAirPort(sourceAirPort);
+				AirPort desintationAirport = new AirPort();
+				desintationAirport.setId(String.valueOf(orgDataBean.getEndPort()));
+				flight.setDesintationAirport(desintationAirport);
 				flight.setSchdNo(orgDataBean.getSchdNo());
 				flight.setPlannedDepartureTime(orgDataBean.getStartTime());
 				flight.setPlannedArrivalTime(orgDataBean.getEndTime());
@@ -210,6 +217,19 @@ public class InitData {
 				String time = fightTimeInfo[3];
 				
 				fightTimeMap.put(air + "_" + startPort + "_" + endPort, time);
+			}
+			
+			for (int i = 0; i < initDataList.size(); i++) {
+				OrgScheduleBean tmpBean = initDataList.get(i);
+				
+				String startPort = String.valueOf(tmpBean.getStartPort());
+				String endPort =  String.valueOf(tmpBean.getEndPort());
+				String airID =  String.valueOf(tmpBean.getAirID());
+				
+				if (airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
+					System.out.println(tmpBean.getSchdID());
+				}
+				
 			}
 			
 			
