@@ -89,6 +89,7 @@ public class PairSearch {
 						//validate & cost
 						if (AircraftConstrains.validate(newAircraft1)
 								&& AircraftConstrains.validate(newAircraft2)) {
+							newAircraft1.adjustment(cancelQueue);
 							newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
 							newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
 						}						

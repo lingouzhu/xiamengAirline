@@ -8,8 +8,7 @@ public class Aircraft {
 	private String type;
 	private List<Flight> flightChain;
 	boolean isCancel;
-	boolean isAdjusted;
-	boolean isValdiated = false;
+	boolean isAdjusted = false;;
 	long cost;
 
 	public String getId() {
@@ -89,7 +88,11 @@ public class Aircraft {
 	public Aircraft clone() {
 		Aircraft aNew = this.clone();
 		aNew.setAdjusted(false);
-		aNew.setFlightChain(new ArrayList<Flight>(flightChain));
+		List<Flight> newFlightChain = new ArrayList<Flight> ();
+		for (Flight aFlight:flightChain) {
+			newFlightChain.add(aFlight.clone());
+		}
+		aNew.setFlightChain(newFlightChain);
 		return (aNew);
 	}
 	public long getCost() {
@@ -115,12 +118,7 @@ public class Aircraft {
 	public void adjustment  () {
 		
 	}
-	public boolean isValdiated() {
-		return isValdiated;
-	}
-	public void setValdiated(boolean isValdiated) {
-		this.isValdiated = isValdiated;
-	}
+
 	
 
 }

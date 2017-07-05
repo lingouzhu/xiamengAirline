@@ -122,5 +122,9 @@ public class Flight {
 		return true;
 	}
 	
+	public Flight clone() {
+		return (this.clone());
+	}
+	
 
 }
