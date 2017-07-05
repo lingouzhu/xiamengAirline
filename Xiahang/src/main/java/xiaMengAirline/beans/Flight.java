@@ -15,7 +15,6 @@ public class Flight {
 	private Date adjustedArrivalTime;
 	private Date adjustedDepartureTime;
 	private Date adjustedReadinessTime;
-	private boolean isCancel;
 	//private Aircraft assignedFlight;
 	private int passengers;
 	private int jointPassengers;	
@@ -68,12 +67,6 @@ public class Flight {
 	}
 	public void setAdjustedReadinessTime(Date adjustedReadinessTime) {
 		this.adjustedReadinessTime = adjustedReadinessTime;
-	}
-	public boolean isCancel() {
-		return isCancel;
-	}
-	public void setCancel(boolean isCancel) {
-		this.isCancel = isCancel;
 	}
 	//public Aircraft getAssignedFlight() {
 	//	return assignedFlight;

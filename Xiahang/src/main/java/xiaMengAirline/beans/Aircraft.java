@@ -7,9 +7,9 @@ public class Aircraft {
 	private String id;
 	private String type;
 	private List<Flight> flightChain;
-	boolean isCancel;
-	boolean isAdjusted = false;;
-	long cost;
+	private boolean isCancel;
+	private Aircraft cancelAircrafted = null;
+	private long cost;
 
 	public String getId() {
 		return id;
@@ -87,7 +87,6 @@ public class Aircraft {
 	
 	public Aircraft clone() {
 		Aircraft aNew = this.clone();
-		aNew.setAdjusted(false);
 		List<Flight> newFlightChain = new ArrayList<Flight> ();
 		for (Flight aFlight:flightChain) {
 			newFlightChain.add(aFlight.clone());
@@ -101,27 +100,57 @@ public class Aircraft {
 	public void setCost(long cost) {
 		this.cost = cost;
 	}
-	public boolean isAdjusted() {
-		return isAdjusted;
-	}
-	public void setAdjusted(boolean isAdjusted) {
-		this.isAdjusted = isAdjusted;
-	}
 	
 	public boolean validate () {
-		for (Flight aFligth:flightChain) {
-			aFligth.valdiate();
-		}
-		return true;
+		if (!isCancel) {
+			for (Flight aFligth:flightChain) {
+				aFligth.valdiate();
+			}
+			return true;			
+		} else
+			return true;
+
 		
 	}
 	public void adjustment  () {
+		if (!isCancel) {
+			
+		}
 		
 	}
 	public long refreshCost () {
-		this.cost = 0;
-		return cost;
+		if (!isCancel) {
+			this.cost = 0;
+			return cost;
+		} else 
+			return 0;
+
 	}
+	public Aircraft getCancelAircrafted() {
+		return cancelAircrafted;
+	}
+	public void setCancelAircrafted(Aircraft cancelAircrafted) {
+		this.cancelAircrafted = cancelAircrafted;
+	}
+	public Aircraft getCancelledAircraft() {
+		Aircraft retCancelled = cancelAircrafted;
+		if (retCancelled == null) {
+			retCancelled = new Aircraft();
+			retCancelled.setCancel(true);
+			retCancelled.setCost(0);
+			retCancelled.setFlightChain(new ArrayList<Flight> ());
+			retCancelled.setId(this.id);
+			retCancelled.setType(this.type);
+			this.cancelAircrafted = retCancelled;
+		}
+		return retCancelled;
+	}
+	
+	public void clear() {
+		flightChain.clear();
+	}
+	
+	
 
 	
 

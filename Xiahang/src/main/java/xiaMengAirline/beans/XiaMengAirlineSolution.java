@@ -1,5 +1,6 @@
 package xiaMengAirline.beans;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class XiaMengAirlineSolution {
@@ -17,7 +18,40 @@ public class XiaMengAirlineSolution {
 	public void setSchedule(List<Aircraft> schedule) {
 		this.schedule = schedule;
 	}
-	
+	public XiaMengAirlineSolution clone() {
+		XiaMengAirlineSolution aNewSolution = this.clone();
+		List<Aircraft> newSchedule = new ArrayList<Aircraft> ();
+		for (Aircraft aAir:schedule) {
+			newSchedule.add(aAir.clone());
+		}
+		aNewSolution.setSchedule(newSchedule);
+		return aNewSolution;
+	}
+	public void replaceOrAddNewAircraft (Aircraft aNewAircraft) {
+		boolean isFound = false;
+		for (Aircraft aAir:schedule) {
+			if ((aAir.getId().equals(aNewAircraft.getId()))
+				&& (aAir.isCancel() == aNewAircraft.isCancel())) 
+			{
+				schedule.set(schedule.indexOf(aAir), aNewAircraft);
+				aAir.clear();
+				isFound = true;
+				break;
+			}
+		}
+		if (!isFound)
+			schedule.add(aNewAircraft);
+	}
+	public void refreshCost () {
+		this.cost = 0;
+		for (Aircraft aAir:schedule) {
+			this.cost += aAir.getCost();
+		}
+	}
+	public void clear () {
+		for (Aircraft aAir:schedule) 
+			aAir.clear();
+	}
 	
 
 }
