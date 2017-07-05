@@ -118,6 +118,10 @@ public class Aircraft {
 	public void adjustment  () {
 		
 	}
+	public long refreshCost () {
+		this.cost = 0;
+		return cost;
+	}
 
 	
 

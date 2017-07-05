@@ -6,7 +6,6 @@ import java.util.List;
 
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
-import xiaMengAirline.beans.AircraftConstrains;
 import xiaMengAirline.beans.AircraftCost;
 import xiaMengAirline.beans.ConnectedDestinationPort;
 
@@ -38,8 +37,9 @@ public class PairSearch {
 							List<Integer> circuitChain = circuitAirports1.get(u);
 							newAircraft2.insertFlightChain(aircraft1, circuitChain, x);
 							newAircraft1.removeFlightChain(circuitChain);
-							if (AircraftConstrains.validate(newAircraft1)
-									&& AircraftConstrains.validate(newAircraft2)) {
+							if (newAircraft1.validate()
+									&& newAircraft2.validate()) {
+								
 								newAircraft1.setCost(AircraftCost.cacluate(newAircraft1));
 								newAircraft2.setCost(AircraftCost.cacluate(newAircraft2));
 								newAircraft1.setAdjusted(true);
