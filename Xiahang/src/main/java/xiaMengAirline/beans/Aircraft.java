@@ -104,5 +104,13 @@ public class Aircraft {
 		this.isAdjusted = isAdjusted;
 	}
 	
+	public boolean validate () {
+		for (Flight aFligth:flightChain) {
+			aFligth.valdiate();
+		}
+		return true;
+		
+	}
+	
 
 }
