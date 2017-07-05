@@ -118,6 +118,9 @@ public class Flight {
 		this.impCoe = impCoe;
 	}
 	
+	public boolean valdiate () {
+		return true;
+	}
 	
 
 }

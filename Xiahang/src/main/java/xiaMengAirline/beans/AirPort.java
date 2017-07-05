@@ -1,13 +1,14 @@
 package xiaMengAirline.beans;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import com.steadystate.css.parser.selectors.SelectorFactoryImpl;
-
 public class AirPort {
 	private String id;
+	private List<AirPortClose> closeSchedule;
+
 
 	public String getId() {
 		return id;
@@ -78,4 +79,18 @@ public class AirPort {
 		
 	}
 
+	
+	public FlightTime requestAirport (FlightTime requestTime ) {
+		return requestTime;
+	}
+
+
+
+	public List<AirPortClose> getCloseSchedule() {
+		return closeSchedule;
+	}
+
+	public void setCloseSchedule(List<AirPortClose> closeSchedule) {
+		this.closeSchedule = closeSchedule;
+	}
 }
