@@ -1,6 +1,7 @@
 package xiaMengAirline.beans;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Aircraft implements Cloneable{
@@ -27,7 +28,11 @@ public class Aircraft implements Cloneable{
 		return flightChain;
 	}
 	public Flight getFlight(int position) {
-		return this.flightChain.get(position);
+		if (position >= 0)
+			return this.flightChain.get(position);
+		else	
+			return null;
+				
 	}
 	public void setFlightChain(List<Flight> flightChain) {
 		this.flightChain = flightChain;
@@ -39,15 +44,22 @@ public class Aircraft implements Cloneable{
 		}
 		this.flightChain.addAll(position,newFlights );
 	}
-	public void insertFlightChain (Aircraft sourceAircraft, int addFlightStartPosition, int addFlightEndPosition, int position, boolean isBefore) {
+	public void insertFlightChain (Aircraft sourceAircraft, Flight startFlight, Flight endFlight, Flight insertFlight, boolean isBefore) {
 		List<Flight> newFlights = new ArrayList<Flight> (); 
-		for (int i=addFlightStartPosition;i<addFlightEndPosition;i++) {
+		int addFlightStartPosition = sourceAircraft.getFlightChain().indexOf(startFlight);
+		int addFlightEndPosition = sourceAircraft.getFlightChain().indexOf(endFlight);
+		int insertFlightPosition = this.flightChain.indexOf(insertFlight);
+		for (int i=addFlightStartPosition;i<=addFlightEndPosition;i++) {
 			newFlights.add(sourceAircraft.getFlight(i));
 		}
-		if (isBefore)
-			this.flightChain.addAll(position,newFlights );
-		else
-			this.flightChain.addAll(position+1,newFlights );
+		if (insertFlight != null) {
+			if (isBefore)
+				this.flightChain.addAll(insertFlightPosition,newFlights );
+			else
+				this.flightChain.addAll(insertFlightPosition+1,newFlights );			
+		} else 
+			this.flightChain.addAll(newFlights );
+
 	}
 
 	public void removeFlightChain (List<Integer> deleteFlights)  {
@@ -57,10 +69,12 @@ public class Aircraft implements Cloneable{
 
 		this.flightChain.removeAll(removeList);
 	}
-	public void removeFlightChain (int removeStartPosition, int removeEndPosition)  {
+	public void removeFlightChain (Flight startFlight, Flight endFlight)  {
 		List<Flight> removeList = new ArrayList<Flight> ();
+		int removeSFlighttartPosition = this.flightChain.indexOf(startFlight);
+		int removeFlightEndPosition = this.flightChain.indexOf(endFlight);
 		
-		for (int i=removeStartPosition; i < removeEndPosition; i++)
+		for (int i=removeSFlighttartPosition; i <= removeFlightEndPosition; i++)
 			removeList.add(this.flightChain.get(i));
 		
 		this.flightChain.removeAll(removeList);
@@ -133,12 +147,12 @@ public class Aircraft implements Cloneable{
 			return 0;
 
 	}
-	public Aircraft getCancelAircrafted() {
-		return cancelAircrafted;
-	}
-	public void setCancelAircrafted(Aircraft cancelAircrafted) {
-		this.cancelAircrafted = cancelAircrafted;
-	}
+//	public Aircraft getCancelAircrafted() {
+//		return cancelAircrafted;
+//	}
+//	public void setCancelAircrafted(Aircraft cancelAircrafted) {
+//		this.cancelAircrafted = cancelAircrafted;
+//	}
 	public Aircraft getCancelledAircraft() {
 		Aircraft retCancelled = cancelAircrafted;
 		if (retCancelled == null) {
@@ -157,6 +171,62 @@ public class Aircraft implements Cloneable{
 		flightChain.clear();
 	}
 	
+	public HashMap<Flight, List<Flight>> getCircuitFlights () {
+		HashMap<Flight, List<Flight>> retCircuitList = new HashMap<Flight, List<Flight>> ();
+		
+		for (Flight aFlight:flightChain) {
+			ArrayList<Flight> matchedList = new ArrayList<Flight> ();
+			int currentPos = flightChain.indexOf(aFlight);
+			String currentSourceAirport = aFlight.getSourceAirPort().getId();
+			for (int j=currentPos+1;j < flightChain.size();j++) {
+				String nextDestAirport = flightChain.get(j).getDesintationAirport().getId();
+				if (currentSourceAirport.equals(nextDestAirport)) {
+					matchedList.add(flightChain.get(j));
+				}
+			}
+			
+			if (!matchedList.isEmpty()) 
+				retCircuitList.put(aFlight, matchedList);
+		}
+		
+		return (retCircuitList);
+		
+	}
+	
+	public HashMap<Flight, List<MatchedFlight>> getMatchedFlights (Aircraft air2) {
+		HashMap<Flight, List<MatchedFlight>> retMatchedList = new HashMap<Flight, List<MatchedFlight>> ();
+		
+		for (Flight aFlight:flightChain) {
+			String sourceAirPortAir1 = aFlight.getSourceAirPort().getId();
+			for (Flight bFlight:air2.getFlightChain()) {
+				String sourceAirPortAir2 = bFlight.getSourceAirPort().getId();
+				if (sourceAirPortAir1.equals(sourceAirPortAir2)) {
+					List<MatchedFlight> matchedList = new ArrayList<MatchedFlight>();
+					for (int i=flightChain.indexOf(aFlight);i < flightChain.size();i++) {
+						String airPortA = getFlight(i).getDesintationAirport().getId();
+						for (int j=air2.getFlightChain().indexOf(bFlight);j < air2.getFlightChain().size();j++) {
+							String airPortB = air2.getFlight(j).getDesintationAirport().getId();
+							if (airPortA.equals(airPortB)) {
+								MatchedFlight aMatched = new MatchedFlight();
+								aMatched.setAir1SourceFlight(flightChain.indexOf(aFlight));
+								aMatched.setAir1DestFlight(i);
+								aMatched.setAir2SourceFlight(air2.getFlightChain().indexOf(bFlight));
+								aMatched.setAir2DestFlight(j);
+								matchedList.add(aMatched);
+							}
+						}
+					}
+					if (!matchedList.isEmpty()) {
+						retMatchedList.put(aFlight, matchedList);
+					} else {
+						//means source airport overlapped but no destination overlapped
+						;
+					}
+				}
+			}
+		}
+		return retMatchedList;
+	}
 	
 
 	
