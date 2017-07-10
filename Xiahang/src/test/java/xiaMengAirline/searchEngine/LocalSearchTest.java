@@ -58,10 +58,8 @@ public class LocalSearchTest {
 		LocalSearch searchEngine = new LocalSearch();
 		
 		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
-		List<Aircraft> airList = new ArrayList<Aircraft> ();
-		aSolution.setSchedule(airList);
-		airList.add(air1);
-		airList.add(air2);
+		aSolution.replaceOrAddNewAircraft(air1);
+		aSolution.replaceOrAddNewAircraft(air2);
 		
 		searchEngine.constructNewSolution(aSolution);
 	}

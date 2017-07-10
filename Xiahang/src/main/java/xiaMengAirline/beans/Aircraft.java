@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import xiaMengAirline.util.Utils;
+
 public class Aircraft implements Cloneable{
 	private String id;
 	private String type;
-	private List<Flight> flightChain;
+	private List<Flight> flightChain = new ArrayList<Flight>() ;
 	private boolean isCancel;
 	private Aircraft cancelAircrafted = null;
 
@@ -36,6 +38,10 @@ public class Aircraft implements Cloneable{
 	public void setFlightChain(List<Flight> flightChain) {
 		this.flightChain = flightChain;
 	}
+	public void addFlight (Flight aFlight) {
+		flightChain.add(aFlight);
+	}
+	
 	public void insertFlightChain (Aircraft sourceAircraft, List<Integer> addFlights, int position) {
 		List<Flight> newFlights = new ArrayList<Flight> (); 
 		for (int anAdd:addFlights) {
@@ -213,7 +219,9 @@ public class Aircraft implements Cloneable{
 		return retMatchedList;
 	}
 	
-
+	public void sortFlights () {
+		Utils.sort(flightChain, "departureTime", true);
+	}
 	
 
 }

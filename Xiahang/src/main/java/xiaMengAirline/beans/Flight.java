@@ -10,15 +10,10 @@ public class Flight implements Cloneable {
 	private AirPort desintationAirport;
 	private boolean interFlg;
 	private int schdNo;
-	private Date plannedArrivalTime;
-	private Date plannedDepartureTime;
-	private Date adjustedArrivalTime;
-	private Date adjustedDepartureTime;
-	private Date adjustedReadinessTime;
+	private Date arrivalTime;
+	private Date departureTime;
 	//private Aircraft assignedFlight;
-	private int passengers;
-	private int jointPassengers;	
-	private BigDecimal impCoe;
+	private double impCoe;
 	
 	public String getFlightId() {
 		return flightId;
@@ -38,36 +33,19 @@ public class Flight implements Cloneable {
 	public void setDesintationAirport(AirPort desintationAirport) {
 		this.desintationAirport = desintationAirport;
 	}
-	public Date getPlannedArrivalTime() {
-		return plannedArrivalTime;
+	public Date getArrivalTime() {
+		return arrivalTime;
 	}
-	public void setPlannedArrivalTime(Date plannedArrivalTime) {
-		this.plannedArrivalTime = plannedArrivalTime;
+	public void setArrivalTime(Date arrivalTime) {
+		this.arrivalTime = arrivalTime;
 	}
-	public Date getPlannedDepartureTime() {
-		return plannedDepartureTime;
+	public Date getDepartureTime() {
+		return departureTime;
 	}
-	public void setPlannedDepartureTime(Date plannedDepartureTime) {
-		this.plannedDepartureTime = plannedDepartureTime;
+	public void setDepartureTime(Date departureTime) {
+		this.departureTime = departureTime;
 	}
-	public Date getAdjustedArrivalTime() {
-		return adjustedArrivalTime;
-	}
-	public void setAdjustedArrivalTime(Date adjustedArrivalTime) {
-		this.adjustedArrivalTime = adjustedArrivalTime;
-	}
-	public Date getAdjustedDepartureTime() {
-		return adjustedDepartureTime;
-	}
-	public void setAdjustedDepartureTime(Date adjustedDepartureTime) {
-		this.adjustedDepartureTime = adjustedDepartureTime;
-	}
-	public Date getAdjustedReadinessTime() {
-		return adjustedReadinessTime;
-	}
-	public void setAdjustedReadinessTime(Date adjustedReadinessTime) {
-		this.adjustedReadinessTime = adjustedReadinessTime;
-	}
+
 	//public Aircraft getAssignedFlight() {
 	//	return assignedFlight;
 	//}
@@ -92,22 +70,11 @@ public class Flight implements Cloneable {
 	public void setSchdNo(int schdNo) {
 		this.schdNo = schdNo;
 	}
-	public int getPassengers() {
-		return passengers;
-	}
-	public void setPassengers(int passengers) {
-		this.passengers = passengers;
-	}
-	public int getJointPassengers() {
-		return jointPassengers;
-	}
-	public void setJointPassengers(int jointPassengers) {
-		this.jointPassengers = jointPassengers;
-	}
-	public BigDecimal getImpCoe() {
+
+	public double getImpCoe() {
 		return impCoe;
 	}
-	public void setImpCoe(BigDecimal impCoe) {
+	public void setImpCoe(double impCoe) {
 		this.impCoe = impCoe;
 	}
 	

@@ -1,16 +1,14 @@
 package xiaMengAirline.util;
 
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -19,17 +17,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.OrgScheduleBean;
 import xiaMengAirline.beans.PortCloseBean;
 import xiaMengAirline.beans.ScheduleByAirBean;
+import xiaMengAirline.beans.XiaMengAirlineSolution;
 
 
 
 
 public class InitData {
-	
-	/** init org data */
-	public static List<OrgScheduleBean> initDataList = new ArrayList<OrgScheduleBean>();
+	private static final Logger logger = Logger.getLogger(InitData.class);
 	
 	/** sort by air data */
 	public static List<ScheduleByAirBean> airDataList = new ArrayList<ScheduleByAirBean>();
@@ -44,19 +40,20 @@ public class InitData {
 	public static Map<String, String> fightTimeMap = new HashMap<String, String>();
 	
 	/** aircraft list */
-	public static List<Aircraft> aircraftList = new ArrayList<Aircraft>();
+	public static XiaMengAirlineSolution originalSolution = new XiaMengAirlineSolution();
 	
 
 	
 	public static void initData(String initDatafile, String fightTimeFile) {
 		
+				
 		try {
 			
 			InputStream stream = new FileInputStream(initDatafile);  
 			Workbook wb = new XSSFWorkbook(stream);  
 			
 			/****************************************机场关闭限制*************************************************/
-			Sheet portCloseSheet = wb.getSheet("机场关闭限制");  
+/*			Sheet portCloseSheet = wb.getSheet("机场关闭限制");  
 			int cnt = 0;
 			for (Row row : portCloseSheet) { 
 				if (cnt == 0) {
@@ -73,87 +70,56 @@ public class InitData {
 				
 				portCloseList.add(portCloseBean);
 				
-			}
+			}*/
 			
 			
 			/****************************************航班*************************************************/
 			Sheet schdSheet = wb.getSheet("航班");  
-			cnt = 0;
+			int cnt = 0;
 			for (Row row : schdSheet) { 
 				if (cnt == 0) {
 					cnt++;
 					continue;
 				}
-				OrgScheduleBean orgDataBean = new OrgScheduleBean();
-    			orgDataBean.setSchdID((int)row.getCell(0).getNumericCellValue());
-    			orgDataBean.setSchdDate(row.getCell(1).getDateCellValue());
-    			orgDataBean.setInterFlg(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
-    			orgDataBean.setSchdNo((int)row.getCell(3).getNumericCellValue());
-    			orgDataBean.setStartPort((int)row.getCell(4).getNumericCellValue());
-    			orgDataBean.setEndPort((int)row.getCell(5).getNumericCellValue());
-    			orgDataBean.setStartTime(row.getCell(6).getDateCellValue());
-    			orgDataBean.setEndTime(row.getCell(7).getDateCellValue());
-    			orgDataBean.setAirID((int)row.getCell(8).getNumericCellValue());
-    			orgDataBean.setAirType((int)row.getCell(9).getNumericCellValue());
-    			orgDataBean.setPassengers((int)row.getCell(10).getNumericCellValue());
-    			orgDataBean.setJointPassengers((int)row.getCell(11).getNumericCellValue());
-    			orgDataBean.setImpCoe(new BigDecimal(row.getCell(11).getNumericCellValue()));
-    			
-    			initDataList.add(orgDataBean);
+				Flight aFlight = new Flight();
+				aFlight.setFlightId(String.valueOf((int)row.getCell(0).getNumericCellValue()));
+				aFlight.setSchdDate(row.getCell(1).getDateCellValue());
+				aFlight.setInterFlg(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
+				aFlight.setSchdNo((int)row.getCell(3).getNumericCellValue());
 				
-	        }  
-			
-			Utils.sort(initDataList, "airID", true);
-			int tmpAirID = 0;
-			
-			Aircraft aircraftBean = new Aircraft();
-			
-			
-			for (OrgScheduleBean orgDataBean : initDataList) {
-				Flight flight = new Flight();
-				flight.setFlightId(String.valueOf(orgDataBean.getSchdID()));
-				flight.setSchdDate(orgDataBean.getSchdDate());
-				AirPort sourceAirPort = new AirPort();
-				sourceAirPort.setId(String.valueOf(orgDataBean.getStartPort()));
-				flight.setSourceAirPort(sourceAirPort);
-				AirPort desintationAirport = new AirPort();
-				desintationAirport.setId(String.valueOf(orgDataBean.getEndPort()));
-				flight.setDesintationAirport(desintationAirport);
-				flight.setSchdNo(orgDataBean.getSchdNo());
-				flight.setPlannedDepartureTime(orgDataBean.getStartTime());
-				flight.setPlannedArrivalTime(orgDataBean.getEndTime());
-				flight.setPassengers(orgDataBean.getPassengers());
-				flight.setJointPassengers(orgDataBean.getJointPassengers());
-				flight.setImpCoe(orgDataBean.getImpCoe());
+				AirPort aAirport = new AirPort();
+				aAirport.setId(String.valueOf((int)row.getCell(4).getNumericCellValue()));
+				aFlight.setSourceAirPort(aAirport);
 				
-				if (tmpAirID != orgDataBean.getAirID()) {
-					if (tmpAirID != 0) {
-						Utils.sort(aircraftBean.getFlightChain(), "plannedDepartureTime", true);
-						
-						aircraftList.add(aircraftBean);
-					}
-					
-					tmpAirID = orgDataBean.getAirID();
-					
-					aircraftBean = new Aircraft();
-					aircraftBean.setId(String.valueOf(tmpAirID));
-					aircraftBean.setType(String.valueOf(orgDataBean.getAirType()));
-					
-					List<Flight> flightList = new ArrayList<Flight>();
-					
-					
-					
-					flightList.add(flight);
-					aircraftBean.setFlightChain(flightList);
-					
-				} else {
-					aircraftBean.getFlightChain().add(flight);
-				}
+				aAirport = new AirPort();
+				aAirport.setId(String.valueOf((int)row.getCell(5).getNumericCellValue()));
+				aFlight.setDesintationAirport(aAirport);
 				
+				aFlight.setArrivalTime(row.getCell(6).getDateCellValue());
+				aFlight.setDepartureTime(row.getCell(7).getDateCellValue());
+				
+				String airId = String.valueOf((int)row.getCell(8).getNumericCellValue());
+				String airType = String.valueOf((int)row.getCell(9).getNumericCellValue());
+				
+				Aircraft aAir = originalSolution.getAircraft(airId, airType, true);
+				
+				aFlight.setImpCoe(row.getCell(10).getNumericCellValue());
+				aAir.addFlight(aFlight);
+				originalSolution.addAircraft(aAir);
+	        }
+			
+			List<Aircraft> schedule = new ArrayList<Aircraft> ( originalSolution.getSchedule().values());
+			for (Aircraft aAir:schedule) {
+				aAir.sortFlights();
 			}
 			
-			Utils.sort(aircraftBean.getFlightChain(), "plannedDepartureTime", true);
-			aircraftList.add(aircraftBean);
+			List<Aircraft> scheduleCheck = new ArrayList<Aircraft> ( originalSolution.getSchedule().values());
+			for (Aircraft aAir:scheduleCheck) {
+				logger.info("Air id " + aAir.getId());
+				for (Flight aFlight:aAir.getFlightChain()) {
+					logger.info("		Flight id " + aFlight.getSchdNo());
+				}
+			}
 			
 //			ScheduleByAirBean scheduleByAirBean = new ScheduleByAirBean();
 //			
@@ -184,7 +150,7 @@ public class InitData {
 //			airDataList.add(scheduleByAirBean);
 			
 			
-			/****************************************航班 飞机限制*************************************************/
+/*			*//****************************************航班 飞机限制*************************************************//*
 			Sheet airLimitSheet = wb.getSheet("航线-飞机限制");  
 			cnt = 0;
 			for (Row row : airLimitSheet) { 
@@ -201,7 +167,7 @@ public class InitData {
 			
 			
 			
-			/****************************************飞行时间*************************************************/
+			*//****************************************飞行时间*************************************************//*
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fightTimeFile)));
 			String line;
 			cnt = 0;
@@ -230,7 +196,7 @@ public class InitData {
 					System.out.println(tmpBean.getSchdID());
 				}
 				
-			}
+			}*/
 			
 			
 		} catch (Exception e) {

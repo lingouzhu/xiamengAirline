@@ -1,5 +1,6 @@
 package xiaMengAirline.searchEngine;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class LocalSearch {
 	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
 			throws CloneNotSupportedException {
 		RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
-		List<Aircraft> aircrafts = bestSolution.getSchedule();
+		List<Aircraft> aircrafts = new ArrayList<Aircraft> ( bestSolution.getSchedule().values());
 		int r = aircrafts.size();
 		for (int i = 0; i < r - 1; i++) {
 			Aircraft aircraft1 = aircrafts.get(i);
