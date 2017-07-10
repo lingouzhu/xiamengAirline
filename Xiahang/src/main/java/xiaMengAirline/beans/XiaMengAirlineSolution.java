@@ -48,6 +48,16 @@ public class XiaMengAirlineSolution implements Cloneable{
 			this.cost += aAir.getCost();
 		}
 	}
+	public void refreshCost (long detla) {
+		this.cost += detla;
+	}
+	public long calcuateDeltaCost (XiaMengAirlineSolution oldSoluiton) {
+		long deltaCost = 0;
+		for (Aircraft aAir:schedule) {
+			deltaCost += aAir.getCost();
+		}
+		return deltaCost;
+	}
 	public void clear () {
 		for (Aircraft aAir:schedule) 
 			aAir.clear();

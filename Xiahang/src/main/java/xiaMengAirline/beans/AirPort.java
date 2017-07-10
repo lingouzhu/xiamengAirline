@@ -8,6 +8,7 @@ import java.util.List;
 public class AirPort {
 	private String id;
 	private List<AirPortClose> closeSchedule;
+	private List<AirPortClose> closeNormalSchedule;
 
 
 	public String getId() {
