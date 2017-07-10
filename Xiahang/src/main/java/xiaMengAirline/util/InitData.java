@@ -17,9 +17,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.PortCloseBean;
-import xiaMengAirline.beans.ScheduleByAirBean;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.beans.backup.PortCloseBean;
+import xiaMengAirline.beans.backup.ScheduleByAirBean;
 
 
 
@@ -51,26 +51,6 @@ public class InitData {
 			
 			InputStream stream = new FileInputStream(initDatafile);  
 			Workbook wb = new XSSFWorkbook(stream);  
-			
-			/****************************************机场关闭限制*************************************************/
-/*			Sheet portCloseSheet = wb.getSheet("机场关闭限制");  
-			int cnt = 0;
-			for (Row row : portCloseSheet) { 
-				if (cnt == 0) {
-					cnt++;
-					continue;
-				}
-				
-				PortCloseBean portCloseBean = new PortCloseBean();
-				portCloseBean.setPort((int)row.getCell(0).getNumericCellValue());
-				portCloseBean.setCloseTime(Utils.timeFormatter(row.getCell(1).getDateCellValue()).substring(11));
-				portCloseBean.setOpenTime(Utils.timeFormatter(row.getCell(2).getDateCellValue()).substring(11));
-				portCloseBean.setCloseDate(Utils.dateFormatter(row.getCell(3).getDateCellValue()));
-				portCloseBean.setOpenDate(Utils.dateFormatter(row.getCell(4).getDateCellValue()));
-				
-				portCloseList.add(portCloseBean);
-				
-			}*/
 			
 			
 			/****************************************航班*************************************************/
@@ -121,6 +101,41 @@ public class InitData {
 				}
 			}
 			
+			//****************************************航班 飞机限制*************************************************//*
+			Sheet airLimitSheet = wb.getSheet("航线-飞机限制");  
+			cnt = 0;
+			for (Row row : airLimitSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				String startPort =  String.valueOf((int)row.getCell(0).getNumericCellValue());
+				String endPort =  String.valueOf((int)row.getCell(1).getNumericCellValue());
+				String airID =  String.valueOf((int)row.getCell(2).getNumericCellValue());
+				
+				airLimitationList.add(airID + "_" + startPort + "_" + endPort);
+			}
+			
+/*			*//****************************************机场关闭限制*************************************************//*
+			Sheet portCloseSheet = wb.getSheet("机场关闭限制");  
+			int cnt = 0;
+			for (Row row : portCloseSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				
+				PortCloseBean portCloseBean = new PortCloseBean();
+				portCloseBean.setPort((int)row.getCell(0).getNumericCellValue());
+				portCloseBean.setCloseTime(Utils.timeFormatter(row.getCell(1).getDateCellValue()).substring(11));
+				portCloseBean.setOpenTime(Utils.timeFormatter(row.getCell(2).getDateCellValue()).substring(11));
+				portCloseBean.setCloseDate(Utils.dateFormatter(row.getCell(3).getDateCellValue()));
+				portCloseBean.setOpenDate(Utils.dateFormatter(row.getCell(4).getDateCellValue()));
+				
+				portCloseList.add(portCloseBean);
+				
+			}*/
+			
 //			ScheduleByAirBean scheduleByAirBean = new ScheduleByAirBean();
 //			
 //			for (OrgScheduleBean orgDataBean : initDataList) {
@@ -150,53 +165,29 @@ public class InitData {
 //			airDataList.add(scheduleByAirBean);
 			
 			
-/*			*//****************************************航班 飞机限制*************************************************//*
-			Sheet airLimitSheet = wb.getSheet("航线-飞机限制");  
-			cnt = 0;
-			for (Row row : airLimitSheet) { 
-				if (cnt == 0) {
-					cnt++;
-					continue;
-				}
-				String startPort =  String.valueOf((int)row.getCell(0).getNumericCellValue());
-				String endPort =  String.valueOf((int)row.getCell(1).getNumericCellValue());
-				String airID =  String.valueOf((int)row.getCell(2).getNumericCellValue());
-				
-				airLimitationList.add(airID + "_" + startPort + "_" + endPort);
-			}
+
 			
 			
 			
-			*//****************************************飞行时间*************************************************//*
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fightTimeFile)));
-			String line;
-			cnt = 0;
-			while ((line = br.readLine()) != null ) {
-				if (cnt == 0) {
-					cnt++;
-					continue;
-				}
-				String fightTimeInfo[] = line.split(",");
-				String air = fightTimeInfo[0];
-				String startPort = fightTimeInfo[1];
-				String endPort = fightTimeInfo[2];
-				String time = fightTimeInfo[3];
-				
-				fightTimeMap.put(air + "_" + startPort + "_" + endPort, time);
-			}
+			//****************************************飞行时间*************************************************//*
+//			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fightTimeFile)));
+//			String line;
+//			cnt = 0;
+//			while ((line = br.readLine()) != null ) {
+//				if (cnt == 0) {
+//					cnt++;
+//					continue;
+//				}
+//				String fightTimeInfo[] = line.split(",");
+//				String air = fightTimeInfo[0];
+//				String startPort = fightTimeInfo[1];
+//				String endPort = fightTimeInfo[2];
+//				String time = fightTimeInfo[3];
+//				
+//				fightTimeMap.put(air + "_" + startPort + "_" + endPort, time);
+//			}
 			
-			for (int i = 0; i < initDataList.size(); i++) {
-				OrgScheduleBean tmpBean = initDataList.get(i);
-				
-				String startPort = String.valueOf(tmpBean.getStartPort());
-				String endPort =  String.valueOf(tmpBean.getEndPort());
-				String airID =  String.valueOf(tmpBean.getAirID());
-				
-				if (airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
-					System.out.println(tmpBean.getSchdID());
-				}
-				
-			}*/
+			
 			
 			
 		} catch (Exception e) {

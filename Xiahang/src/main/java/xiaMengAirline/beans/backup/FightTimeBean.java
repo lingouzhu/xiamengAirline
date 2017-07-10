@@ -1,4 +1,4 @@
-package xiaMengAirline.beans;
+package xiaMengAirline.beans.backup;
 
 import java.util.List;
 
