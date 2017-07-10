@@ -4,9 +4,7 @@ package xiaMengAirline.util;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
@@ -18,8 +16,6 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.beans.backup.PortCloseBean;
-import xiaMengAirline.beans.backup.ScheduleByAirBean;
 
 
 
@@ -28,16 +24,16 @@ public class InitData {
 	private static final Logger logger = Logger.getLogger(InitData.class);
 	
 	/** sort by air data */
-	public static List<ScheduleByAirBean> airDataList = new ArrayList<ScheduleByAirBean>();
+	//public static List<ScheduleByAirBean> airDataList = new ArrayList<ScheduleByAirBean>();
 
 	/** air limitation list air_startPort_endPort */
 	public static List<String> airLimitationList = new ArrayList<String>();
 	
 	/** port close list */
-	public static List<PortCloseBean> portCloseList = new ArrayList<PortCloseBean>();
+	//public static List<PortCloseBean> portCloseList = new ArrayList<PortCloseBean>();
 	
 	/** flght time map key: air_startport_endport value: time */
-	public static Map<String, String> fightTimeMap = new HashMap<String, String>();
+	//public static Map<String, String> fightTimeMap = new HashMap<String, String>();
 	
 	/** aircraft list */
 	public static XiaMengAirlineSolution originalSolution = new XiaMengAirlineSolution();
