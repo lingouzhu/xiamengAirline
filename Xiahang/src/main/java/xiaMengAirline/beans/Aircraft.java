@@ -10,7 +10,6 @@ public class Aircraft implements Cloneable{
 	private List<Flight> flightChain;
 	private boolean isCancel;
 	private Aircraft cancelAircrafted = null;
-	private long cost;
 
 	public String getId() {
 		return id;
@@ -115,12 +114,6 @@ public class Aircraft implements Cloneable{
 		aNew.setFlightChain(newFlightChain);
 		return (aNew);
 	}
-	public long getCost() {
-		return cost;
-	}
-	public void setCost(long cost) {
-		this.cost = cost;
-	}
 	
 	public boolean validate () {
 		if (!isCancel) {
@@ -139,14 +132,7 @@ public class Aircraft implements Cloneable{
 		}
 		
 	}
-	public long refreshCost () {
-		if (!isCancel) {
-			this.cost = 0;
-			return cost;
-		} else 
-			return 0;
 
-	}
 //	public Aircraft getCancelAircrafted() {
 //		return cancelAircrafted;
 //	}
@@ -158,7 +144,6 @@ public class Aircraft implements Cloneable{
 		if (retCancelled == null) {
 			retCancelled = new Aircraft();
 			retCancelled.setCancel(true);
-			retCancelled.setCost(0);
 			retCancelled.setFlightChain(new ArrayList<Flight> ());
 			retCancelled.setId(this.id);
 			retCancelled.setType(this.type);
