@@ -85,8 +85,8 @@ public class InitData {
 				
 				aFlight.setImpCoe(row.getCell(10).getNumericCellValue());
 				aFlight.setAssignedAir(aAir);
-				aFlight.setPlannedAir(aAir);
-				aFlight.setPlannedFlight(aFlight);
+				aFlight.setPlannedAir(aAir.clone());
+				aFlight.setPlannedFlight(aFlight.clone());
 				aAir.addFlight(aFlight);
 				originalSolution.addAircraft(aAir);
 	        }
