@@ -3,6 +3,7 @@ package xiaMengAirline.util;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +80,7 @@ public class InitData {
 				
 				Aircraft aAir = originalSolution.getAircraft(airId, airType, true);
 				
-				aFlight.setImpCoe(row.getCell(10).getNumericCellValue());
+				aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()));
 				aFlight.setAssignedAir(aAir);
 				Aircraft aPlannedAir = aAir.clone();
 				aPlannedAir.clear();
@@ -188,7 +189,7 @@ public class InitData {
 				fightDurationMap.put(airType + "_" + startPort + "_" + endPort, time);
 			}
 			
-			
+			 
 			
 			
 		} catch (Exception e) {

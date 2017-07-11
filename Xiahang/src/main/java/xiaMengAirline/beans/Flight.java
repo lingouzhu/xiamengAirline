@@ -1,5 +1,6 @@
 package xiaMengAirline.beans;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -14,7 +15,7 @@ public class Flight implements Cloneable {
 	private int schdNo;
 	private Date arrivalTime;
 	private Date departureTime;
-	private double impCoe;
+	private BigDecimal impCoe;
 	private Aircraft assignedAir;
 	private Aircraft plannedAir;
 	private Flight plannedFlight;
@@ -69,13 +70,12 @@ public class Flight implements Cloneable {
 		this.schdNo = schdNo;
 	}
 
-	public double getImpCoe() {
+	public BigDecimal getImpCoe() {
 		return impCoe;
 	}
-	public void setImpCoe(double impCoe) {
+	public void setImpCoe(BigDecimal impCoe) {
 		this.impCoe = impCoe;
 	}
-	
 	public boolean valdiate () {
 		return true;
 	}
