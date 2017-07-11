@@ -1,5 +1,6 @@
 package xiaMengAirline.searchEngine;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,23 +12,32 @@ import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
 import xiaMengAirline.beans.RestrictedCandidateList;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.util.Utils;
 
 public class LocalSearch {
 
 	private static final Logger logger = Logger.getLogger(LocalSearch.class);
 	
 	private long calcuateDeltaCost(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) {
-		XiaMengAirlineSolution aNewLocalSolution = new XiaMengAirlineSolution();
-		aNewLocalSolution.replaceOrAddNewAircraft(newAir1);
-		aNewLocalSolution.replaceOrAddNewAircraft(newAir2);
+//		XiaMengAirlineSolution aNewLocalSolution = new XiaMengAirlineSolution();
+//		aNewLocalSolution.replaceOrAddNewAircraft(newAir1);
+//		aNewLocalSolution.replaceOrAddNewAircraft(newAir2);
+//		
+//		XiaMengAirlineSolution aOldLocalSolution = new XiaMengAirlineSolution();
+//		aOldLocalSolution.replaceOrAddNewAircraft(oldAir1);
+//		aOldLocalSolution.replaceOrAddNewAircraft(oldAir2);
+//		
+//		long deltaCost = aNewLocalSolution.calcuateDeltaCost(aOldLocalSolution);
 		
-		XiaMengAirlineSolution aOldLocalSolution = new XiaMengAirlineSolution();
-		aOldLocalSolution.replaceOrAddNewAircraft(oldAir1);
-		aOldLocalSolution.replaceOrAddNewAircraft(oldAir2);
+		BigDecimal newCost = new BigDecimal("0");
+		newCost.add(Utils.normalAircraftCost(newAir1));
+		newCost.add(Utils.canceledAircraftCost(newAir2));
 		
-		long deltaCost = aNewLocalSolution.calcuateDeltaCost(aOldLocalSolution);
+		BigDecimal oldCost = new BigDecimal("0");
+		oldCost.add(Utils.normalAircraftCost(oldAir1));
+		oldCost.add(Utils.canceledAircraftCost(oldAir2));
 		
-		return deltaCost;
+		return newCost.subtract(oldCost).longValue();
 		
 	}
 	

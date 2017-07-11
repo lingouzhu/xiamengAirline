@@ -1,7 +1,5 @@
 package xiaMengAirline.beans.backup;
 
-import java.util.Date;
-
 public class PortCloseBean {
 	
 	private int port;
@@ -9,6 +7,9 @@ public class PortCloseBean {
 	private String openTime;
 	private String closeDate;
 	private String openDate;
+	boolean noDepFlg;
+	boolean noArrFlg;
+	int stopNum;
 	
 	public int getPort() {
 		return port;
@@ -39,6 +40,24 @@ public class PortCloseBean {
 	}
 	public void setOpenDate(String openDate) {
 		this.openDate = openDate;
+	}
+	public boolean isNoDepFlg() {
+		return noDepFlg;
+	}
+	public void setNoDepFlg(boolean noDepFlg) {
+		this.noDepFlg = noDepFlg;
+	}
+	public boolean isNoArrFlg() {
+		return noArrFlg;
+	}
+	public void setNoArrFlg(boolean noArrFlg) {
+		this.noArrFlg = noArrFlg;
+	}
+	public int getStopNum() {
+		return stopNum;
+	}
+	public void setStopNum(int stopNum) {
+		this.stopNum = stopNum;
 	}
 	
 	
