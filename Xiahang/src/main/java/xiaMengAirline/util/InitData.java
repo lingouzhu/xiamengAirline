@@ -1,10 +1,14 @@
 package xiaMengAirline.util;
 
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
@@ -33,7 +37,7 @@ public class InitData {
 	//public static List<PortCloseBean> portCloseList = new ArrayList<PortCloseBean>();
 	
 	/** flght time map key: air_startport_endport value: time */
-	//public static Map<String, String> fightTimeMap = new HashMap<String, String>();
+	public static Map<String, Integer> fightTimeMap = new HashMap<String, Integer>();
 	
 	/** aircraft list */
 	public static XiaMengAirlineSolution originalSolution = new XiaMengAirlineSolution();
@@ -80,6 +84,8 @@ public class InitData {
 				Aircraft aAir = originalSolution.getAircraft(airId, airType, true);
 				
 				aFlight.setImpCoe(row.getCell(10).getNumericCellValue());
+				aFlight.setAssignedAir(aAir);
+				aFlight.setPlannedAir(aAir);
 				aAir.addFlight(aFlight);
 				originalSolution.addAircraft(aAir);
 	        }
@@ -166,22 +172,21 @@ public class InitData {
 			
 			
 			//****************************************飞行时间*************************************************//*
-//			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fightTimeFile)));
-//			String line;
-//			cnt = 0;
-//			while ((line = br.readLine()) != null ) {
-//				if (cnt == 0) {
-//					cnt++;
-//					continue;
-//				}
-//				String fightTimeInfo[] = line.split(",");
-//				String air = fightTimeInfo[0];
-//				String startPort = fightTimeInfo[1];
-//				String endPort = fightTimeInfo[2];
-//				String time = fightTimeInfo[3];
-//				
-//				fightTimeMap.put(air + "_" + startPort + "_" + endPort, time);
-//			}
+			Sheet flightTimeSheet = wb.getSheet("航线-飞机限制");  
+			cnt = 0;
+			for (Row row : flightTimeSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				
+				String airType = String.valueOf((int)row.getCell(0).getNumericCellValue());
+				String startPort = String.valueOf((int)row.getCell(1).getNumericCellValue());
+				String endPort = String.valueOf((int)row.getCell(2).getNumericCellValue());
+				int time = (int)row.getCell(3).getNumericCellValue();
+				
+				fightTimeMap.put(airType + "_" + startPort + "_" + endPort, time);
+			}
 			
 			
 			

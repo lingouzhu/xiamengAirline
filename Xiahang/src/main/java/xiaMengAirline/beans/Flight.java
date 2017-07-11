@@ -1,7 +1,9 @@
 package xiaMengAirline.beans;
 
-import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
+
+import xiaMengAirline.util.InitData;
 
 public class Flight implements Cloneable {
 	private String flightId;
@@ -12,8 +14,9 @@ public class Flight implements Cloneable {
 	private int schdNo;
 	private Date arrivalTime;
 	private Date departureTime;
-	//private Aircraft assignedFlight;
 	private double impCoe;
+	private Aircraft assignedAir;
+	private Aircraft plannedAir;
 	
 	public String getFlightId() {
 		return flightId;
@@ -46,12 +49,6 @@ public class Flight implements Cloneable {
 		this.departureTime = departureTime;
 	}
 
-	//public Aircraft getAssignedFlight() {
-	//	return assignedFlight;
-	//}
-	//public void setAssignedFlight(Aircraft assignedFlight) {
-	//	this.assignedFlight = assignedFlight;
-	//}
 	public Date getSchdDate() {
 		return schdDate;
 	}
@@ -86,5 +83,33 @@ public class Flight implements Cloneable {
 		return (Flight) (super.clone());
 	}
 	
+	public Date calcuateNextArrivalTime () {
+		//find out flight time
+		String searchKey = assignedAir.getType();
+		searchKey += "_";
+		searchKey += sourceAirPort.getId();
+		searchKey += "_";
+		searchKey += desintationAirport.getId();
+		
+		int flightDur =  InitData.fightTimeMap.get(searchKey);
+		
+	    Calendar cl = Calendar. getInstance();
+	    cl.setTime(departureTime);
+	    cl.add(Calendar.MINUTE, flightDur);
+	    return (cl.getTime());
+	}
+	public Aircraft getAssignedAir() {
+		return assignedAir;
+	}
+	public void setAssignedAir(Aircraft assignedAir) {
+		this.assignedAir = assignedAir;
+	}
+	public Aircraft getPlannedAir() {
+		return plannedAir;
+	}
+	public void setPlannedAir(Aircraft plannedAir) {
+		this.plannedAir = plannedAir;
+	}
+
 
 }
