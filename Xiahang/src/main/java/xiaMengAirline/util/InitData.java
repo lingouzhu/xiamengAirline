@@ -1,10 +1,8 @@
 package xiaMengAirline.util;
 
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +19,7 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.beans.backup.PortCloseBean;
 
 
 
@@ -36,6 +35,12 @@ public class InitData {
 	
 	/** port close list */
 	//public static List<PortCloseBean> portCloseList = new ArrayList<PortCloseBean>();
+	
+	/** normal port close list */
+	public static List<PortCloseBean> nPortCloseList = new ArrayList<PortCloseBean>();
+	
+	/** typhoon port close list */
+	public static List<PortCloseBean> tPortCloseList = new ArrayList<PortCloseBean>();
 	
 	/** flght time map key: air_startport_endport value: time */
 	public static Map<String, Integer> fightTimeMap = new HashMap<String, Integer>();
@@ -120,7 +125,71 @@ public class InitData {
 				airLimitationList.add(airID + "_" + startPort + "_" + endPort);
 			}
 			
+			
+			/****************************************机场关闭限制*************************************************/
+			Sheet portCloseSheet = wb.getSheet("机场关闭限制");  
+			cnt = 0;
+			for (Row row : portCloseSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				
+				PortCloseBean portCloseBean = new PortCloseBean();
+				portCloseBean.setPort((int)row.getCell(0).getNumericCellValue());
+				portCloseBean.setCloseTime(Utils.timeFormatter(row.getCell(1).getDateCellValue()).substring(11));
+				portCloseBean.setOpenTime(Utils.timeFormatter(row.getCell(2).getDateCellValue()).substring(11));
+				portCloseBean.setCloseDate(Utils.dateFormatter(row.getCell(3).getDateCellValue()));
+				portCloseBean.setOpenDate(Utils.dateFormatter(row.getCell(4).getDateCellValue()));
+				portCloseBean.setNoArrFlg(true);
+				portCloseBean.setNoDepFlg(true);
+				portCloseBean.setStopNum(999);
+				
+				nPortCloseList.add(portCloseBean);
+				
+			}
+			
+			
+			/****************************************机场关闭限制*************************************************/
+			Sheet tPortCloseSheet = wb.getSheet("台风场景");  
+			cnt = 0;
+			for (Row row : tPortCloseSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				
+				
+				PortCloseBean portCloseBean = new PortCloseBean();
+				portCloseBean.setCloseTime(Utils.timeFormatter(row.getCell(0).getDateCellValue()));
+				portCloseBean.setOpenTime(Utils.timeFormatter(row.getCell(1).getDateCellValue()));
+				
+				if ("起飞".equals(row.getCell(2).getStringCellValue())){
+					portCloseBean.setNoDepFlg(true);
+				} else if ("降落".equals(row.getCell(2).getStringCellValue())) {
+					portCloseBean.setNoArrFlg(true);
+				} else if ("停机".equals(row.getCell(2).getStringCellValue())) {
+					portCloseBean.setStopNum(0);
+				}
+				
+				
+				portCloseBean.setPort((int)row.getCell(3).getNumericCellValue());
+				
+				portCloseBean.setCloseTime(Utils.timeFormatter(row.getCell(1).getDateCellValue()).substring(11));
+				portCloseBean.setOpenTime(Utils.timeFormatter(row.getCell(2).getDateCellValue()).substring(11));
+				portCloseBean.setCloseDate(Utils.dateFormatter(row.getCell(3).getDateCellValue()));
+				portCloseBean.setOpenDate(Utils.dateFormatter(row.getCell(4).getDateCellValue()));
+				portCloseBean.setNoArrFlg(true);
+				portCloseBean.setNoDepFlg(true);
+				portCloseBean.setStopNum(999);
+				
+				tPortCloseList.add(portCloseBean);
+				
+			}
+			
+			
 /*			*//****************************************机场关闭限制*************************************************//*
+ * 
 			Sheet portCloseSheet = wb.getSheet("机场关闭限制");  
 			int cnt = 0;
 			for (Row row : portCloseSheet) { 
