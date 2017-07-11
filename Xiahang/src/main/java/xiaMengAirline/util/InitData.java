@@ -86,6 +86,7 @@ public class InitData {
 				aFlight.setImpCoe(row.getCell(10).getNumericCellValue());
 				aFlight.setAssignedAir(aAir);
 				aFlight.setPlannedAir(aAir);
+				aFlight.setPlannedFlight(aFlight);
 				aAir.addFlight(aFlight);
 				originalSolution.addAircraft(aAir);
 	        }
@@ -172,7 +173,7 @@ public class InitData {
 			
 			
 			//****************************************飞行时间*************************************************//*
-			Sheet flightTimeSheet = wb.getSheet("航线-飞机限制");  
+			Sheet flightTimeSheet = wb.getSheet("飞行时间");  
 			cnt = 0;
 			for (Row row : flightTimeSheet) { 
 				if (cnt == 0) {

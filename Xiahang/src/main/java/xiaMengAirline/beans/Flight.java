@@ -17,6 +17,7 @@ public class Flight implements Cloneable {
 	private double impCoe;
 	private Aircraft assignedAir;
 	private Aircraft plannedAir;
+	private Flight plannedFlight;
 	
 	public String getFlightId() {
 		return flightId;
@@ -109,6 +110,12 @@ public class Flight implements Cloneable {
 	}
 	public void setPlannedAir(Aircraft plannedAir) {
 		this.plannedAir = plannedAir;
+	}
+	public Flight getPlannedFlight() {
+		return plannedFlight;
+	}
+	public void setPlannedFlight(Flight plannedFlight) {
+		this.plannedFlight = plannedFlight;
 	}
 
 
