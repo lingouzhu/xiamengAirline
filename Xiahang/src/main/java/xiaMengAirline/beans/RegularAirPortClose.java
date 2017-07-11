@@ -1,8 +1,10 @@
-package xiaMengAirline.beans.backup;
+package xiaMengAirline.beans;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class PortCloseBean {
+public class RegularAirPortClose {
 	
 	private int port;
 	private String closeTime;
@@ -40,6 +42,7 @@ public class PortCloseBean {
 	public void setOpenDate(String openDate) {
 		this.openDate = openDate;
 	}
+
 	
 	
 

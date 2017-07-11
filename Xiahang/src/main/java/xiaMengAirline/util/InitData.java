@@ -1,10 +1,8 @@
 package xiaMengAirline.util;
 
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +15,11 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import xiaMengAirline.beans.AirPort;
+import xiaMengAirline.beans.AirPortClose;
+import xiaMengAirline.beans.AirPortList;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 
 
@@ -27,20 +28,17 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 public class InitData {
 	private static final Logger logger = Logger.getLogger(InitData.class);
 	
-	/** sort by air data */
-	//public static List<ScheduleByAirBean> airDataList = new ArrayList<ScheduleByAirBean>();
 
 	/** air limitation list air_startPort_endPort */
 	public static List<String> airLimitationList = new ArrayList<String>();
 	
-	/** port close list */
-	//public static List<PortCloseBean> portCloseList = new ArrayList<PortCloseBean>();
-	
 	/** flght time map key: air_startport_endport value: time */
-	public static Map<String, Integer> fightTimeMap = new HashMap<String, Integer>();
+	public static Map<String, Integer> fightDurationMap = new HashMap<String, Integer>();
 	
 	/** aircraft list */
 	public static XiaMengAirlineSolution originalSolution = new XiaMengAirlineSolution();
+	
+	public static AirPortList airportList = new AirPortList();
 	
 
 	
@@ -67,12 +65,10 @@ public class InitData {
 				aFlight.setInterFlg(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
 				aFlight.setSchdNo((int)row.getCell(3).getNumericCellValue());
 				
-				AirPort aAirport = new AirPort();
-				aAirport.setId(String.valueOf((int)row.getCell(4).getNumericCellValue()));
+				AirPort aAirport = airportList.getAirport(String.valueOf((int)row.getCell(4).getNumericCellValue()));
 				aFlight.setSourceAirPort(aAirport);
 				
-				aAirport = new AirPort();
-				aAirport.setId(String.valueOf((int)row.getCell(5).getNumericCellValue()));
+				aAirport = airportList.getAirport(String.valueOf((int)row.getCell(5).getNumericCellValue()));
 				aFlight.setDesintationAirport(aAirport);
 				
 				aFlight.setArrivalTime(row.getCell(6).getDateCellValue());
@@ -85,10 +81,14 @@ public class InitData {
 				
 				aFlight.setImpCoe(row.getCell(10).getNumericCellValue());
 				aFlight.setAssignedAir(aAir);
-				aFlight.setPlannedAir(aAir.clone());
+				Aircraft aPlannedAir = aAir.clone();
+				aPlannedAir.clear();
+				aFlight.setPlannedAir(aPlannedAir);
 				aFlight.setPlannedFlight(aFlight.clone());
 				aAir.addFlight(aFlight);
 				originalSolution.addAircraft(aAir);
+				
+				
 	        }
 			
 			List<Aircraft> schedule = new ArrayList<Aircraft> ( originalSolution.getSchedule().values());
@@ -119,57 +119,56 @@ public class InitData {
 				airLimitationList.add(airID + "_" + startPort + "_" + endPort);
 			}
 			
-/*			*//****************************************机场关闭限制*************************************************//*
+			/****************************************机场关闭限制*************************************************/
 			Sheet portCloseSheet = wb.getSheet("机场关闭限制");  
-			int cnt = 0;
+			cnt = 0;
 			for (Row row : portCloseSheet) { 
 				if (cnt == 0) {
 					cnt++;
 					continue;
 				}
 				
-				PortCloseBean portCloseBean = new PortCloseBean();
-				portCloseBean.setPort((int)row.getCell(0).getNumericCellValue());
+				RegularAirPortClose portCloseBean = new RegularAirPortClose();
+				String airPortId = String.valueOf((int)row.getCell(0).getNumericCellValue());
+				AirPort aAirport = airportList.getAirport(airPortId);
 				portCloseBean.setCloseTime(Utils.timeFormatter(row.getCell(1).getDateCellValue()).substring(11));
 				portCloseBean.setOpenTime(Utils.timeFormatter(row.getCell(2).getDateCellValue()).substring(11));
 				portCloseBean.setCloseDate(Utils.dateFormatter(row.getCell(3).getDateCellValue()));
 				portCloseBean.setOpenDate(Utils.dateFormatter(row.getCell(4).getDateCellValue()));
 				
-				portCloseList.add(portCloseBean);
+				aAirport.addRegularCloseSchedule(portCloseBean);
 				
-			}*/
+			}
 			
-//			ScheduleByAirBean scheduleByAirBean = new ScheduleByAirBean();
-//			
-//			for (OrgScheduleBean orgDataBean : initDataList) {
-//				if (tmpAirID != orgDataBean.getAirID()) {
-//					if (tmpAirID != 0) {
-//						Utils.sort(scheduleByAirBean.getScheduBeanList(), "startTime", true);
-//						
-//						airDataList.add(scheduleByAirBean);
-//					}
-//					
-//					tmpAirID = orgDataBean.getAirID();
-//					
-//					scheduleByAirBean = new ScheduleByAirBean();
-//					scheduleByAirBean.setAirID(tmpAirID);
-//					
-//					List<OrgScheduleBean> scheduBeanList = new ArrayList<OrgScheduleBean>();
-//					scheduBeanList.add(orgDataBean);
-//					scheduleByAirBean.setScheduBeanList(scheduBeanList);
-//					
-//				} else {
-//					scheduleByAirBean.getScheduBeanList().add(orgDataBean);
-//				}
-//				
-//			}
-//			
-//			Utils.sort(scheduleByAirBean.getScheduBeanList(), "startTime", true);
-//			airDataList.add(scheduleByAirBean);
+			/****************************************台风场景*************************************************/
+			Sheet taifengSheet = wb.getSheet("台风场景");  
+			cnt = 0;
+			for (Row row : taifengSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				
+				AirPortClose portCloseBean = new AirPortClose();
+				String airPortId = String.valueOf((int)row.getCell(4).getNumericCellValue());
+				AirPort aAirport = airportList.getAirport(airPortId);
+				portCloseBean.setStartTime(row.getCell(0).getDateCellValue());
+				portCloseBean.setEndTime(row.getCell(1).getDateCellValue());
+				String impactType = row.getCell(2).getStringCellValue();
+				if (impactType.equals("降落")) {
+					portCloseBean.setAllowForLanding(false);
+				} else if (impactType.equals("起飞")) {
+					portCloseBean.setAllowForTakeoff(false);
+				} else if (impactType.equals("停机")) {
+					portCloseBean.setMaximumParking(0);
+				}
+				
+				
+				aAirport.addCloseSchedule(portCloseBean);
+				
+			}
 			
-			
-
-			
+	
 			
 			
 			//****************************************飞行时间*************************************************//*
@@ -186,7 +185,7 @@ public class InitData {
 				String endPort = String.valueOf((int)row.getCell(2).getNumericCellValue());
 				int time = (int)row.getCell(3).getNumericCellValue();
 				
-				fightTimeMap.put(airType + "_" + startPort + "_" + endPort, time);
+				fightDurationMap.put(airType + "_" + startPort + "_" + endPort, time);
 			}
 			
 			

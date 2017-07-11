@@ -1,7 +1,5 @@
 package xiaMengAirline.searchEngine;
 
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,16 +10,16 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.util.InitData;
 
 public class LocalSearchTest {
 
 	private Flight createFlight(int flightId, String srcPort, String destPort) {
 		Flight flight = new Flight();
 		flight.setSchdNo(flightId);
-		AirPort aAirport = new AirPort();
-		AirPort bAirport = new AirPort();
-		aAirport.setId(srcPort);
-		bAirport.setId(destPort);
+		AirPort aAirport = InitData.airportList.getAirport(srcPort);
+		AirPort bAirport = InitData.airportList.getAirport(destPort);
+		
 
 		flight.setSourceAirPort(aAirport);
 		flight.setDesintationAirport(bAirport);

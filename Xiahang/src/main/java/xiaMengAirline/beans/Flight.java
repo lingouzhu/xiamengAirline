@@ -92,7 +92,7 @@ public class Flight implements Cloneable {
 		searchKey += "_";
 		searchKey += desintationAirport.getId();
 		
-		int flightDur =  InitData.fightTimeMap.get(searchKey);
+		int flightDur =  InitData.fightDurationMap.get(searchKey);
 		
 	    Calendar cl = Calendar. getInstance();
 	    cl.setTime(departureTime);

@@ -5,8 +5,8 @@ import java.util.Date;
 public class AirPortClose {
 	private Date startTime;
 	private Date endTime;
-	private boolean allowForTakeoff;
-	private boolean allowForLanding;
+	private boolean allowForTakeoff = true;
+	private boolean allowForLanding = true;
 	private int maximumParking = Integer.MAX_VALUE;
 	private int allocatedParking = 0;
 	
@@ -46,8 +46,6 @@ public class AirPortClose {
 	public void setAllocatedParking(int allocatedParking) {
 		this.allocatedParking = allocatedParking;
 	}
-
-	
 	
 
 }
