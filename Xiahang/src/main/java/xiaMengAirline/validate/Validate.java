@@ -1,13 +1,24 @@
 package xiaMengAirline.validate;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.util.InitData;
 
 public class Validate {
+	
+	public boolean checkSolution (XiaMengAirlineSolution aSolution) {
+		
+		List<Aircraft> schedule = new ArrayList<Aircraft> ( aSolution.getSchedule().values());
+		for (Aircraft aAir:schedule) {
+			if (!checkAircraft(aAir)) return false;
+		}
+		return true;
+	}
 
 	
 	public boolean checkAircraft(Aircraft aircraft) {  

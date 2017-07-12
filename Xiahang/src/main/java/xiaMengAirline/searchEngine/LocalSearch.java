@@ -12,32 +12,24 @@ import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
 import xiaMengAirline.beans.RestrictedCandidateList;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.util.Utils;
 
 public class LocalSearch {
 
 	private static final Logger logger = Logger.getLogger(LocalSearch.class);
 	
-	private long calcuateDeltaCost(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) {
-//		XiaMengAirlineSolution aNewLocalSolution = new XiaMengAirlineSolution();
-//		aNewLocalSolution.replaceOrAddNewAircraft(newAir1);
-//		aNewLocalSolution.replaceOrAddNewAircraft(newAir2);
-//		
-//		XiaMengAirlineSolution aOldLocalSolution = new XiaMengAirlineSolution();
-//		aOldLocalSolution.replaceOrAddNewAircraft(oldAir1);
-//		aOldLocalSolution.replaceOrAddNewAircraft(oldAir2);
-//		
-//		long deltaCost = aNewLocalSolution.calcuateDeltaCost(aOldLocalSolution);
+	private BigDecimal calcuateDeltaCost(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) {
+		XiaMengAirlineSolution aNewLocalSolution = new XiaMengAirlineSolution();
+		aNewLocalSolution.replaceOrAddNewAircraft(newAir1);
+		aNewLocalSolution.replaceOrAddNewAircraft(newAir2);
+		aNewLocalSolution.refreshCost();
 		
-		BigDecimal newCost = new BigDecimal("0");
-		newCost.add(Utils.normalAircraftCost(newAir1));
-		newCost.add(Utils.canceledAircraftCost(newAir2));
+		XiaMengAirlineSolution aOldLocalSolution = new XiaMengAirlineSolution();
+		aOldLocalSolution.replaceOrAddNewAircraft(oldAir1);
+		aOldLocalSolution.replaceOrAddNewAircraft(oldAir2);
+		aNewLocalSolution.refreshCost();
 		
-		BigDecimal oldCost = new BigDecimal("0");
-		oldCost.add(Utils.normalAircraftCost(oldAir1));
-		oldCost.add(Utils.canceledAircraftCost(oldAir2));
 		
-		return newCost.subtract(oldCost).longValue();
+		return aNewLocalSolution.getCost().subtract(aOldLocalSolution.getCost());
 		
 	}
 	
@@ -100,9 +92,9 @@ public class LocalSearch {
 									if (newAircraft1.validate()) {
 										newAircraft1.adjustment();
 
-										long deltaCost = calcuateDeltaCost(newAircraft1, cancelledAir, aircraft1, aircraft1.getCancelledAircraft());
+										BigDecimal deltaCost = calcuateDeltaCost(newAircraft1, cancelledAir, aircraft1, aircraft1.getCancelledAircraft());
 
-										if (deltaCost < 0) {
+										if (deltaCost.longValue() < 0) {
 											XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 											aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 											aNewSolution.replaceOrAddNewAircraft(cancelledAir);
@@ -151,9 +143,9 @@ public class LocalSearch {
 									if (newAircraft2.validate()) {
 										newAircraft2.adjustment();
 
-										long deltaCost = calcuateDeltaCost(newAircraft2, cancelledAir, aircraft2, aircraft2.getCancelledAircraft());
+										BigDecimal deltaCost = calcuateDeltaCost(newAircraft2, cancelledAir, aircraft2, aircraft2.getCancelledAircraft());
 
-										if (deltaCost < 0) {
+										if (deltaCost.longValue() < 0) {
 											XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 											aNewSolution.replaceOrAddNewAircraft(newAircraft2);
 											aNewSolution.replaceOrAddNewAircraft(cancelledAir);
@@ -206,9 +198,9 @@ public class LocalSearch {
 								// goes better
 								if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
 									
-									long deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
+									BigDecimal deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
 									
-									if (deltaCost < 0) {
+									if (deltaCost.longValue() < 0) {
 										XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 										aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 										aNewSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -253,9 +245,9 @@ public class LocalSearch {
 										// goes better
 										if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
 											
-											long deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
+											BigDecimal deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
 											
-											if (deltaCost < 0) {
+											if (deltaCost.longValue() < 0) {
 												XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 												aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 												aNewSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -299,9 +291,9 @@ public class LocalSearch {
 										// only update solution when new change
 										// goes better
 										if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
-											long deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
+											BigDecimal deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
 											
-											if (deltaCost < 0) {
+											if (deltaCost.longValue() < 0) {
 												XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 												aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 												aNewSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -353,9 +345,9 @@ public class LocalSearch {
 									// only update solution when new change
 									// goes better
 									if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
-										long deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
+										BigDecimal deltaCost = calcuateDeltaCost(newAircraft1, newAircraft2, aircraft1, aircraft2);
 										
-										if (deltaCost < 0) {
+										if (deltaCost.longValue() < 0) {
 											XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 											aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 											aNewSolution.replaceOrAddNewAircraft(newAircraft2);

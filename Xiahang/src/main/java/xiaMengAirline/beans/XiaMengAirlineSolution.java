@@ -1,14 +1,19 @@
 package xiaMengAirline.beans;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import xiaMengAirline.util.Utils;
 
 public class XiaMengAirlineSolution implements Cloneable{
-	private long cost = 0;
+	private BigDecimal cost = new BigDecimal("0");
 	private HashMap<String, Aircraft> schedule = new  HashMap<String, Aircraft>();
-	public long getCost() {
+	public BigDecimal getCost() {
 		return cost;
 	}
-	public void setCost(long cost) {
+	public void setCost(BigDecimal cost) {
 		this.cost = cost;
 	}
 	
@@ -40,21 +45,49 @@ public class XiaMengAirlineSolution implements Cloneable{
 	}
 	
 	public void refreshCost () {
-		this.cost = 0;
-		for (Aircraft aAir:schedule.values()) {
-			this.cost += 0;
+		this.cost = new BigDecimal("0");
+		
+		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
+		for (Aircraft aAir:airList) {
+			if (!aAir.isCancel()) {
+				for (Flight newFlight : aAir.getFlightChain()) {
+
+					if (newFlight.getPlannedAir() == null) {
+						cost.add(new BigDecimal("5000"));
+					} else {
+						if (!newFlight.getPlannedAir().getType().equals(aAir.getType())) {
+							cost.add(new BigDecimal("1000").multiply(newFlight.getImpCoe()));
+						}
+						
+						if (!newFlight.getDepartureTime().equals(newFlight.getPlannedFlight().getDepartureTime())) {
+							BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(), newFlight.getPlannedFlight().getDepartureTime());
+							
+							if (hourDiff.signum() == -1){
+								cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
+							} else {
+								cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
+							}
+						}
+					}
+					
+				}				
+			} else {
+				for (Flight cancelFlight : aAir.getFlightChain()) {
+					if (cancelFlight.getPlannedAir() != null) {
+						cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
+					}
+					
+				}
+			}
+			
 		}
+		
+		
 	}
-	public void refreshCost (long detla) {
-		this.cost += detla;
+	public void refreshCost (BigDecimal detla) {
+		this.cost.add(detla);
 	}
-	public long calcuateDeltaCost (XiaMengAirlineSolution oldSoluiton) {
-		long deltaCost = 0;
-		for (Aircraft aAir:schedule.values()) {
-			deltaCost += 0;
-		}
-		return deltaCost;
-	}
+
 	public void clear () {
 		for (Aircraft aAir:schedule.values()) 
 			aAir.clear();

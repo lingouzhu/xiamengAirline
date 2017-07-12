@@ -12,9 +12,6 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.collections4.comparators.ComparableComparator;
 
-import xiaMengAirline.beans.Aircraft;
-import xiaMengAirline.beans.Flight;
-
 public class Utils {
 
 
@@ -84,47 +81,5 @@ public class Utils {
     }
 	
 	
-	public static BigDecimal normalAircraftCost(Aircraft air) {  
-		BigDecimal cost = new BigDecimal("0");
-		List<Flight> newFlightList = air.getFlightChain();
-		
-		for (Flight newFlight : newFlightList) {
-			if (newFlight.getPlannedAir() == null) {
-				cost.add(new BigDecimal("5000"));
-			} else {
-				if (!newFlight.getPlannedAir().getType().equals(air.getType())) {
-					cost.add(new BigDecimal("1000").multiply(newFlight.getImpCoe()));
-				}
-				
-				if (!newFlight.getDepartureTime().equals(newFlight.getPlannedFlight().getDepartureTime())) {
-					BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(), newFlight.getPlannedFlight().getDepartureTime());
-					
-					if (hourDiff.signum() == -1){
-						cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
-					} else {
-						cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
-					}
-				}
-			}
-			
-		}
-		
-		return cost;
-    }
-	
-	
-	public static BigDecimal canceledAircraftCost(Aircraft air) {  
-		BigDecimal cost = new BigDecimal("0");
-		
-		List<Flight> cancelFlightList = air.getFlightChain(); 
-		for (Flight cancelFlight : cancelFlightList) {
-			if (cancelFlight.getPlannedAir() != null) {
-				cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
-			}
-			
-		}
-		
-		return cost;
-    }
 	
 }

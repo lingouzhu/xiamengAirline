@@ -1,5 +1,6 @@
 package xiaMengAirline.beans;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -7,10 +8,10 @@ import java.util.TreeMap;
 
 public class RestrictedCandidateList {
 	final public static int maxBestSolutions = 20;
-	private long bestScore = -1;
-	private long lowestScore = Long.MAX_VALUE;
+	private BigDecimal bestScore = new BigDecimal(-1);
+	private BigDecimal lowestScore = new BigDecimal(Long.MAX_VALUE);
 	private int currentLevel = 0;
-	private TreeMap<Long, List<XiaMengAirlineSolution>> bestSolutionList = new TreeMap<Long, List<XiaMengAirlineSolution>>  ();
+	private TreeMap<BigDecimal, List<XiaMengAirlineSolution>> bestSolutionList = new TreeMap<BigDecimal, List<XiaMengAirlineSolution>>  ();
 	
 	public boolean addSolution (XiaMengAirlineSolution aNewSolution) {
 		if (currentLevel < maxBestSolutions) {
@@ -22,14 +23,15 @@ public class RestrictedCandidateList {
 				aSolutionList.add(aNewSolution);
 				bestSolutionList.put(aNewSolution.getCost(), aSolutionList);
 				currentLevel++;
-				if (aNewSolution.getCost() < bestScore) 
+				if (aNewSolution.getCost().compareTo(bestScore) == -1) 
 					bestScore = aNewSolution.getCost();
-				if (aNewSolution.getCost() > lowestScore)
+				if (aNewSolution.getCost().compareTo(lowestScore) == 1)
 					lowestScore = aNewSolution.getCost();
 			}
 			return true;
 		} else {
-			if (aNewSolution.getCost() <= lowestScore) {
+			if (aNewSolution.getCost().compareTo(lowestScore) == -1
+					|| aNewSolution.getCost().compareTo(lowestScore) == 0 ) {
 				// when this score already existed
 				if (bestSolutionList.containsKey(aNewSolution.getCost())) {
 					List<XiaMengAirlineSolution> aSolutionList = bestSolutionList.get(aNewSolution.getCost());
@@ -45,7 +47,7 @@ public class RestrictedCandidateList {
 					aSolutionList.add(aNewSolution);
 					bestSolutionList.put(aNewSolution.getCost(), aSolutionList);
 					bestSolutionList.remove(bestSolutionList.lastEntry()).clear();
-					if (aNewSolution.getCost() < bestScore) 
+					if (aNewSolution.getCost().compareTo(bestScore) == -1) 
 						bestScore = aNewSolution.getCost();
 					lowestScore = bestSolutionList.lastEntry().getKey();
 				}
@@ -58,7 +60,7 @@ public class RestrictedCandidateList {
 	}
 	
 	public void clear () {
-		for(Map.Entry<Long, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
+		for(Map.Entry<BigDecimal, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
 			  List<XiaMengAirlineSolution> solutionList= entry.getValue();
 			  for (XiaMengAirlineSolution aSolution:solutionList)
 				  aSolution.clear();
@@ -77,7 +79,7 @@ public class RestrictedCandidateList {
 			
 			
 			List<XiaMengAirlineSolution> allNewSolutions = new ArrayList<XiaMengAirlineSolution> ();
-			for(Map.Entry<Long, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
+			for(Map.Entry<BigDecimal, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
 				  allNewSolutions.addAll(entry.getValue());
 			}
 			
