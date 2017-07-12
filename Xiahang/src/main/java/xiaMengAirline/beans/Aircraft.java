@@ -5,7 +5,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.Utils;
+import xiaMengAirline.validate.Validate;
 
 public class Aircraft implements Cloneable{
 	private String id;
@@ -126,19 +128,18 @@ public class Aircraft implements Cloneable{
 	}
 	
 	public boolean validate () {
+		Validate validateEngine = new Validate();
 		if (!isCancel) {
-			for (Flight aFligth:flightChain) {
-				aFligth.valdiate();
-			}
-			return true;			
+			return validateEngine.checkAircraft(this);			
 		} else
 			return true;
 
 		
 	}
 	public void adjustment  () {
+		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
-			
+			selfAdjustEngine.adjustAircraft(this);
 		}
 		
 	}
