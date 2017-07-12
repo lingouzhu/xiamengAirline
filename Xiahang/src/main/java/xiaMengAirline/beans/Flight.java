@@ -85,19 +85,30 @@ public class Flight implements Cloneable {
 	}
 	
 	public Date calcuateNextArrivalTime () {
-		//find out flight time
-		String searchKey = assignedAir.getType();
-		searchKey += "_";
-		searchKey += sourceAirPort.getId();
-		searchKey += "_";
-		searchKey += desintationAirport.getId();
-		
-		int flightDur =  InitData.fightDurationMap.get(searchKey);
-		
-	    Calendar cl = Calendar. getInstance();
-	    cl.setTime(departureTime);
-	    cl.add(Calendar.MINUTE, flightDur);
-	    return (cl.getTime());
+		if (!plannedFlight.getSourceAirPort().getId().equals(sourceAirPort.getId())
+				|| !plannedFlight.getDesintationAirport().getId().equals(desintationAirport.getId())) {
+			//find out flight time
+			String searchKey = assignedAir.getType();
+			searchKey += "_";
+			searchKey += sourceAirPort.getId();
+			searchKey += "_";
+			searchKey += desintationAirport.getId();
+			
+			int flightDur =  InitData.fightDurationMap.get(searchKey);
+			
+		    Calendar cl = Calendar. getInstance();
+		    cl.setTime(departureTime);
+		    cl.add(Calendar.MINUTE, flightDur);
+		    return (cl.getTime());			
+		} else {
+			long diff = plannedFlight.getArrivalTime().getTime() - plannedFlight.getDepartureTime().getTime();
+			long diffMin = diff / (60 * 1000) % 60;
+			Calendar cl = Calendar. getInstance();
+		    cl.setTime(departureTime);
+		    cl.add(Calendar.MINUTE, (int) diffMin);
+		    return (cl.getTime());
+		}
+
 	}
 	public Aircraft getAssignedAir() {
 		return assignedAir;
