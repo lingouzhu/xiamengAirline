@@ -31,9 +31,9 @@ public class StartUp {
 		}
 		
 		//Step3, loop through to search optimized solutions
-		XiaMengAirlineSolution aBetterSolution = null;
+		XiaMengAirlineSolution aBetterSolution = initalSolution;
 		for (int i = 0; i < iterLength;i++) {
-			aBetterSolution = localEngine.constructNewSolution(initalSolution);
+			aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
 		}
 		
 		//Step4, ensure solution is valid
