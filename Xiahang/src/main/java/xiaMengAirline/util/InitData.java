@@ -42,7 +42,7 @@ public class InitData {
 	public static AirPortList airportList = new AirPortList();
 	
 	/** joint flight -- key: sche no, value : flight id*/
-	public static Map<String, Integer> jointFlightMap = new HashMap<>();
+	public static Map<String, Integer> jointFlightMap = new HashMap<String, Integer>();
 
 	
 	public static void initData(String initDatafile, String fightTimeFile) {
