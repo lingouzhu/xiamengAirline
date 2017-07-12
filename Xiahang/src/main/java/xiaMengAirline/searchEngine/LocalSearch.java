@@ -34,6 +34,7 @@ public class LocalSearch {
 	}
 	
 	private boolean adjust(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) {
+		
 		if (newAir1.validate() && newAir2.validate()) {
 			newAir1.adjustment();
 			newAir2.adjustment();
