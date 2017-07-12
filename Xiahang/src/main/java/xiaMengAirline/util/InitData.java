@@ -42,7 +42,7 @@ public class InitData {
 	public static AirPortList airportList = new AirPortList();
 	
 	/** joint flight -- key: sche no, value : flight id*/
-	public static Map<Integer, String> jointFlightMap = new HashMap<Integer, String>();
+	public static Map<String, Integer> jointFlightMap = new HashMap<>();
 
 	
 	public static void initData(String initDatafile, String fightTimeFile) {
@@ -99,9 +99,13 @@ public class InitData {
 				List<Flight> flightList = aAir.getFlightChain();
 				int tmpSchdNo = 0;
 				// joint flight
-				for (Flight flight : flightList) {
+				for (int i = 0; i < flightList.size(); i++) {
+					
+					Flight flight = flightList.get(i);
 					if (tmpSchdNo == flight.getSchdNo()) {
-						jointFlightMap.put(flight.getSchdNo(), flight.getFlightId());
+						jointFlightMap.put(flight.getFlightId(), flight.getSchdNo());
+						Flight prevFlight = flightList.get(i - 1);
+						jointFlightMap.put(prevFlight.getFlightId(), prevFlight.getSchdNo());
 					}
 					
 					tmpSchdNo = flight.getSchdNo();
