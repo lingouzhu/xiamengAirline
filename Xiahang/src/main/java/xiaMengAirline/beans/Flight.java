@@ -7,7 +7,7 @@ import java.util.Date;
 import xiaMengAirline.util.InitData;
 
 public class Flight implements Cloneable {
-	private String flightId;
+	private int flightId;
 	private Date schdDate;
 	private AirPort sourceAirPort;
 	private AirPort desintationAirport;
@@ -20,10 +20,10 @@ public class Flight implements Cloneable {
 	private Aircraft plannedAir;
 	private Flight plannedFlight;
 	
-	public String getFlightId() {
+	public int getFlightId() {
 		return flightId;
 	}
-	public void setFlightId(String id) {
+	public void setFlightId(int id) {
 		this.flightId = id;
 	}
 	public AirPort getSourceAirPort() {

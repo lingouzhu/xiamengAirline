@@ -2,6 +2,8 @@ package xiaMengAirline.beans;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -245,6 +247,24 @@ public class Aircraft implements Cloneable{
 		}
 		
 		return false;
+	}
+	
+	public void adjustFlightTime (int startPosition) {
+		Date newArrival = null;
+		for (int i=startPosition; i < flightChain.size(); i++) {
+			Flight aFlight = flightChain.get(i);
+			 
+			if (i > startPosition && newArrival!=null) {
+				Calendar cl = Calendar. getInstance();
+			    cl.setTime(newArrival);
+			    cl.add(Calendar.MINUTE, AirPort.GroundingTime);
+			    aFlight.setDepartureTime(cl.getTime());
+			}
+			
+			newArrival = aFlight.calcuateNextArrivalTime();
+			aFlight.setArrivalTime(newArrival);
+		}
+		
 	}
 	
 }

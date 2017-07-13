@@ -25,7 +25,7 @@ public class StartUp {
 		//Step2, construct initial solution & validate it
 		XiaMengAirlineSolution initalSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
 		
-		if (initalSolution.validate()) {
+		if (initalSolution.validate(false)) {
 			System.out.println("Fail to build inital solution! ");
 			return;
 		}
@@ -37,7 +37,7 @@ public class StartUp {
 		}
 		
 		//Step4, ensure solution is valid
-		if (aBetterSolution.validate()) {
+		if (aBetterSolution.validate(false)) {
 			System.out.println("Fail to build final solution! ");
 			return;
 		}
@@ -46,6 +46,7 @@ public class StartUp {
 		aBetterSolution.refreshCost();
 		
 		//Step6, generate output
+		aBetterSolution.generateOutput();
 			
 			
 		

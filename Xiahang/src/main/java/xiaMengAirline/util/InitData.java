@@ -42,8 +42,10 @@ public class InitData {
 	
 	public static AirPortList airportList = new AirPortList();
 	
-	/** joint flight -- key: flight id, value : sche no*/
-	public static Map<String, Integer> jointFlightMap = new HashMap<String, Integer>();
+	/** joint flight -- key: sche no, value : flight id*/
+	public static Map<Integer, Integer> jointFlightMap = new HashMap<Integer, Integer>();
+	
+	public static int maxFligthId = 0;
 
 	
 	public static void initData(String initDatafile, String fightTimeFile) {
@@ -63,7 +65,11 @@ public class InitData {
 					continue;
 				}
 				Flight aFlight = new Flight();
-				aFlight.setFlightId(String.valueOf((int)row.getCell(0).getNumericCellValue()));
+				int aFlightId = (int)row.getCell(0).getNumericCellValue();
+				if (aFlightId > maxFligthId) 
+					maxFligthId = aFlightId;
+				
+				aFlight.setFlightId(aFlightId);
 				aFlight.setSchdDate(row.getCell(1).getDateCellValue());
 				aFlight.setInterFlg(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
 				aFlight.setSchdNo((int)row.getCell(3).getNumericCellValue());
