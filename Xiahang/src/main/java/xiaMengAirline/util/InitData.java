@@ -42,7 +42,7 @@ public class InitData {
 	
 	public static AirPortList airportList = new AirPortList();
 	
-	/** joint flight -- key: sche no, value : flight id*/
+	/** joint flight -- key: flight id, value : next flight id (if no then 0)*/
 	public static Map<Integer, Integer> jointFlightMap = new HashMap<Integer, Integer>();
 	
 	public static int maxFligthId = 0;
@@ -115,9 +115,9 @@ public class InitData {
 					
 					Flight flight = flightList.get(i);
 					if (tmpSchdNo == flight.getSchdNo() && tmpSchdDate.equals(flight.getSchdDate())) {
-						jointFlightMap.put(flight.getFlightId(), flight.getSchdNo());
+						jointFlightMap.put(flight.getFlightId(), 0);
 						Flight prevFlight = flightList.get(i - 1);
-						jointFlightMap.put(prevFlight.getFlightId(), prevFlight.getSchdNo());
+						jointFlightMap.put(prevFlight.getFlightId(), flight.getFlightId());
 					}
 					
 					tmpSchdNo = flight.getSchdNo();
