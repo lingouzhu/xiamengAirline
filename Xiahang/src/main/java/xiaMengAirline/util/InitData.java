@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class InitData {
 	
 	public static AirPortList airportList = new AirPortList();
 	
-	/** joint flight -- key: flight id, value : sche no*/
+	/** joint flight -- key: sche no, value : flight id*/
 	public static Map<String, Integer> jointFlightMap = new HashMap<String, Integer>();
 
 	
@@ -99,19 +98,17 @@ public class InitData {
 				aAir.sortFlights();
 				List<Flight> flightList = aAir.getFlightChain();
 				int tmpSchdNo = 0;
-				Date tmpSchdDate = null;
 				// joint flight
 				for (int i = 0; i < flightList.size(); i++) {
 					
 					Flight flight = flightList.get(i);
-					if (tmpSchdNo == flight.getSchdNo() && tmpSchdDate.equals(flight.getSchdDate())) {
+					if (tmpSchdNo == flight.getSchdNo()) {
 						jointFlightMap.put(flight.getFlightId(), flight.getSchdNo());
 						Flight prevFlight = flightList.get(i - 1);
 						jointFlightMap.put(prevFlight.getFlightId(), prevFlight.getSchdNo());
 					}
 					
 					tmpSchdNo = flight.getSchdNo();
-					tmpSchdDate = flight.getSchdDate();
 				}
 				
 			}
