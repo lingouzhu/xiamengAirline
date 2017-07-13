@@ -114,12 +114,16 @@ public class XiaMengAirlineSolution implements Cloneable{
 		this.schedule = schedule;
 	}
 	
-	public boolean validate () {
+	public boolean validate (boolean isCheckLianChengOnly) {
 		List<Aircraft> schedule = new ArrayList<Aircraft> ( getSchedule().values());
 		for (Aircraft aAir:schedule) {
 			if (aAir.validate()) return false;
 		}
 		return true;
+	}
+	
+	public void generateOutput () {
+		
 	}
 
 }

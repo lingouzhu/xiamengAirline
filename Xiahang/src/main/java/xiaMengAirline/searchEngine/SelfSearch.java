@@ -103,7 +103,7 @@ public class SelfSearch {
 	// create new flight
 	public Flight createNewFlight(Flight replaceFlight, int flightPosition, Aircraft aircraft){
 		Flight newFlight = new Flight();
-		newFlight.setFlightId(Integer.toString(getNextFlightId()));
+		newFlight.setFlightId(getNextFlightId());
 		newFlight.setSourceAirPort(replaceFlight.getSourceAirPort());
 		newFlight.setDesintationAirport(getNextAvaliableAirport(aircraft.getFlightChain(), flightPosition, aircraft));
 		newFlight.setAssignedAir(aircraft);
