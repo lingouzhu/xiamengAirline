@@ -1,6 +1,7 @@
 package xiaMengAirline.searchEngine;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +34,7 @@ public class LocalSearch {
 		
 	}
 	
-	private boolean adjust(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) {
+	private boolean adjust(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) throws CloneNotSupportedException, ParseException {
 		
 		if (newAir1.validate() && newAir2.validate()) {
 			newAir1.adjustment();
@@ -44,7 +45,7 @@ public class LocalSearch {
 	}
 
 	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
-			throws CloneNotSupportedException {
+			throws CloneNotSupportedException, ParseException {
 		RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
 		List<Aircraft> aircrafts = new ArrayList<Aircraft> ( bestSolution.getSchedule().values());
 		int r = aircrafts.size();

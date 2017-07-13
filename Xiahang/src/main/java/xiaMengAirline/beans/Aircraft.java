@@ -1,12 +1,13 @@
 package xiaMengAirline.beans;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import xiaMengAirline.searchEngine.SelfSearch;
+import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
-import xiaMengAirline.validate.Validate;
 
 public class Aircraft implements Cloneable{
 	private String id;
@@ -126,16 +127,7 @@ public class Aircraft implements Cloneable{
 		return (aNew);
 	}
 	
-	public boolean validate () {
-		Validate validateEngine = new Validate();
-		if (!isCancel) {
-			return validateEngine.checkAircraft(this);			
-		} else
-			return true;
-
-		
-	}
-	public void adjustment  () {
+	public void adjustment  () throws CloneNotSupportedException, ParseException {
 		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
 			selfAdjustEngine.adjustAircraft(this);
@@ -227,5 +219,32 @@ public class Aircraft implements Cloneable{
 		Utils.sort(flightChain, "departureTime", true);
 	}
 	
+	public boolean validate () {
+		
+		if (isCancel) return true;
+		
+		List<Flight> flightChain = getFlightChain();
+		
+		for (int i = 0; i <= flightChain.size(); i++) {
+			Flight flight = flightChain.get(i);
+			
+			String startPort = flight.getSourceAirPort().getId();
+			String endPort =  flight.getDesintationAirport().getId();
+			String airID =  getId();
+			
+			if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
+				return true;
+			}
+			if (i != 0) {
+				Flight preFlight = flightChain.get(i - 1);
+				
+				if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 	
 }

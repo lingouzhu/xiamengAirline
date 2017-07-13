@@ -1,5 +1,6 @@
 package xiaMengAirline.searchEngine;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class LocalSearchTest {
 	}
 
 	@Test
-	public void testConstructNewSolution() throws CloneNotSupportedException {
+	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException {
 		Aircraft air1 = new Aircraft();
 		List<Flight> flightChain = new ArrayList<Flight>();
 		flightChain.add(createFlight(101, "ORF", "EWR"));

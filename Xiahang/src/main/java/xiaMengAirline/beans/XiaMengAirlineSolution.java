@@ -113,5 +113,13 @@ public class XiaMengAirlineSolution implements Cloneable{
 	public void setSchedule(HashMap<String, Aircraft> schedule) {
 		this.schedule = schedule;
 	}
+	
+	public boolean validate () {
+		List<Aircraft> schedule = new ArrayList<Aircraft> ( getSchedule().values());
+		for (Aircraft aAir:schedule) {
+			if (aAir.validate()) return false;
+		}
+		return true;
+	}
 
 }

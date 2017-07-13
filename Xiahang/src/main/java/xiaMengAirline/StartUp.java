@@ -1,16 +1,17 @@
 package xiaMengAirline;
 
 
+import java.text.ParseException;
+
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
-import xiaMengAirline.validate.Validate;
 
 public class StartUp {
 
 	final public static long iterLength = 10000000L;
-	public static void main(String[] args) throws CloneNotSupportedException {
+	public static void main(String[] args) throws CloneNotSupportedException, ParseException {
 		
 		//Step1, Load all data & initialize
 		String initDatafile = "XiahangData20170705_1.xlsx";
@@ -20,12 +21,11 @@ public class StartUp {
 		
 		LocalSearch localEngine = new LocalSearch();
 		SelfSearch selfEngine = new SelfSearch();
-		Validate validateEngine = new Validate();
 		
 		//Step2, construct initial solution & validate it
 		XiaMengAirlineSolution initalSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
 		
-		if (!validateEngine.checkSolution(initalSolution)) {
+		if (initalSolution.validate()) {
 			System.out.println("Fail to build inital solution! ");
 			return;
 		}
@@ -37,7 +37,7 @@ public class StartUp {
 		}
 		
 		//Step4, ensure solution is valid
-		if (!validateEngine.checkSolution(aBetterSolution)) {
+		if (aBetterSolution.validate()) {
 			System.out.println("Fail to build final solution! ");
 			return;
 		}
