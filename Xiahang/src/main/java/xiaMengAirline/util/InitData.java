@@ -46,6 +46,7 @@ public class InitData {
 	public static Map<Integer, Integer> jointFlightMap = new HashMap<Integer, Integer>();
 	
 	public static int maxFligthId = 0;
+	public static int plannedMaxFligthId = 0;
 
 	
 	public static void initData(String initDatafile, String fightTimeFile) {
@@ -66,8 +67,11 @@ public class InitData {
 				}
 				Flight aFlight = new Flight();
 				int aFlightId = (int)row.getCell(0).getNumericCellValue();
-				if (aFlightId > maxFligthId) 
+				if (aFlightId > maxFligthId) {
 					maxFligthId = aFlightId;
+					plannedMaxFligthId = maxFligthId;
+				}
+					
 				
 				aFlight.setFlightId(aFlightId);
 				aFlight.setSchdDate(row.getCell(1).getDateCellValue());
