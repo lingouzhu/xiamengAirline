@@ -114,7 +114,7 @@ public class InitData {
 				for (int i = 0; i < flightList.size(); i++) {
 					
 					Flight flight = flightList.get(i);
-					if (tmpSchdNo == flight.getSchdNo() && tmpSchdDate.equals(flight.getSchdDate())) {
+					if (tmpSchdNo == flight.getSchdNo() && tmpSchdDate.equals(flight.getSchdDate()) && flight.isInterFlg()) {
 						jointFlightMap.put(flight.getFlightId(), 0);
 						Flight prevFlight = flightList.get(i - 1);
 						jointFlightMap.put(prevFlight.getFlightId(), flight.getFlightId());
