@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.openqa.selenium.firefox.UnableToCreateProfileException;
+
+import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
@@ -249,20 +252,36 @@ public class Aircraft implements Cloneable{
 		return false;
 	}
 	
-	public void adjustFlightTime (int startPosition) {
-		Date newArrival = null;
+	//must secure the flight can departure at departureTime
+	public void adjustFlightTime (int startPosition) throws ParseException, AirportNotAcceptArrivalTime {
+		Flight currentFlight = null;
+		Flight nextFlight = null;
 		for (int i=startPosition; i < flightChain.size(); i++) {
-			Flight aFlight = flightChain.get(i);
+			nextFlight = flightChain.get(i);
 			 
-			if (i > startPosition && newArrival!=null) {
+			if (i > startPosition) {
 				Calendar cl = Calendar. getInstance();
-			    cl.setTime(newArrival);
+			    cl.setTime(currentFlight.getArrivalTime());
 			    cl.add(Calendar.MINUTE, AirPort.GroundingTime);
-			    aFlight.setDepartureTime(cl.getTime());
+			    FlightTime aScheduledTime = new FlightTime();
+			    aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
+			    aScheduledTime.setDepartureTime(cl.getTime());
+			    FlightTime newFlightTime = nextFlight.getSourceAirPort().requestAirport(aScheduledTime);
+			    if (newFlightTime!=null) {
+			    	if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
+			    		throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
+			    	} else {
+				    	nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+			    	}
+			    } else {
+			    	nextFlight.setDepartureTime(aScheduledTime.getDepartureTime());
+			    }
 			}
 			
-			newArrival = aFlight.calcuateNextArrivalTime();
-			aFlight.setArrivalTime(newArrival);
+			currentFlight = nextFlight;
+			
+			Date newArrival = currentFlight.calcuateNextArrivalTime();
+			currentFlight.setArrivalTime(newArrival);
 		}
 		
 	}
