@@ -2,6 +2,7 @@ package xiaMengAirline.util;
 
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,6 +45,26 @@ public class Utils {
 		
 		if (date != null) {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			result = formatter.format(date);
+			
+		}
+		return result;
+    }
+	
+	public static Date stringFormatToTime2(String aDate) throws ParseException {  
+		Date result;
+		
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		result = formatter.parse(aDate);
+			
+		return result;
+    }
+	
+	public static String timeFormatToString2(Date date) {  
+		String result = "";
+		
+		if (date != null) {
+			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 			result = formatter.format(date);
 			
 		}

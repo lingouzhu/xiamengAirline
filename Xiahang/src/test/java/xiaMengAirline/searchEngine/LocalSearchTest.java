@@ -43,6 +43,9 @@ public class LocalSearchTest {
 		flightChain.add(createFlight(105, "BDL", "CLE"));
 		air1.setFlightChain(flightChain);
 		air1.setId("1");
+		for (Flight aFlight:flightChain) {
+			aFlight.setAssignedAir(air1);
+		}
 
 		Aircraft air2 = new Aircraft();
 		List<Flight> flightChain2 = new ArrayList<Flight>();
@@ -53,6 +56,9 @@ public class LocalSearchTest {
 		flightChain2.add(createFlight(205, "CLE", "MDW"));
 		air2.setFlightChain(flightChain2);
 		air2.setId("2");
+		for (Flight aFlight:flightChain2) {
+			aFlight.setAssignedAir(air2);
+		}
 		
 		LocalSearch searchEngine = new LocalSearch();
 		

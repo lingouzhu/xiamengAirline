@@ -40,13 +40,16 @@ public class AirPort {
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aClose.getEndTime());
 					cl.add(Calendar.MINUTE, GroundingTime);
-					retFlightTime.setDepartureTime(cl.getTime());
+					if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
+						retFlightTime.setDepartureTime(cl.getTime());
+					else
+						retFlightTime.setDepartureTime(requestTime.getDepartureTime());
 				} 
 			} 
 			if (requestTime.getDepartureTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
 				if (retFlightTime == null) {
-					if (!aClose.isAllowForTakeoff() || aClose.getAllocatedParking() == 0) {
+					if (!aClose.isAllowForTakeoff()) {
 						retFlightTime = new FlightTime();
 						//check if enough grounding time
 						Calendar cl = Calendar.getInstance();
@@ -54,7 +57,7 @@ public class AirPort {
 						cl.add(Calendar.MINUTE, GroundingTime);
 						if (cl.getTime().before(aClose.getStartTime())) {
 							retFlightTime.setArrivalTime(requestTime.getArrivalTime());
-							retFlightTime.setDepartureTime(cl.getTime());
+							retFlightTime.setDepartureTime(aClose.getStartTime());
 						} else {
 							retFlightTime.setArrivalTime(aClose.getEndTime());
 							cl.setTime(aClose.getEndTime());
@@ -64,6 +67,15 @@ public class AirPort {
 					}
 				}
 			}
+			//adjust departure time to closer its planned time
+			if (retFlightTime != null) {
+				if (requestTime.getDepartureTime().after(aClose.getStartTime())
+						&& retFlightTime.getDepartureTime().before(aClose.getStartTime())) {
+					retFlightTime.setDepartureTime(aClose.getStartTime());
+					
+				}
+			}
+
 		}
 		if (retFlightTime == null) {
 			for (RegularAirPortClose aClose : regularCloseSchedule) {
@@ -87,7 +99,10 @@ public class AirPort {
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aOpenDate);
 					cl.add(Calendar.MINUTE, GroundingTime);
-					retFlightTime.setDepartureTime(cl.getTime());
+					if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
+						retFlightTime.setDepartureTime(cl.getTime());
+					else
+						retFlightTime.setDepartureTime(requestTime.getDepartureTime());
 				}
 				
 				if (retFlightTime == null) {
@@ -110,7 +125,7 @@ public class AirPort {
 
 		}
 		
-		return requestTime;
+		return retFlightTime;
 	}
 
 	public List<AirPortClose> getCloseSchedule() {
