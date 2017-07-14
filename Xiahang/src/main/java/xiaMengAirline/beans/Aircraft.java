@@ -227,7 +227,7 @@ public class Aircraft implements Cloneable{
 		
 		List<Flight> flightChain = getFlightChain();
 		
-		for (int i = 0; i <= flightChain.size(); i++) {
+		for (int i = 0; i < flightChain.size(); i++) {
 			Flight flight = flightChain.get(i);
 			
 			String startPort = flight.getSourceAirPort().getId();
