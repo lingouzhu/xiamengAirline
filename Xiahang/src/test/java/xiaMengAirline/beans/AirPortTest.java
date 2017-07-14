@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class AirPortTest {
 
@@ -26,6 +27,10 @@ public class AirPortTest {
 		flightChain.add(createFlight(105, "BDL", "CLE"));
 		air1.setFlightChain(flightChain);
 		air1.setId("1");
+		
+		for (Flight aFlight:flightChain) {
+			aFlight.setAssignedAir(air1);
+		}
 
 		Aircraft air2 = new Aircraft();
 		List<Flight> flightChain2 = new ArrayList<Flight>();
@@ -36,8 +41,81 @@ public class AirPortTest {
 		flightChain2.add(createFlight(205, "CLE", "MDW"));
 		air2.setFlightChain(flightChain2);
 		air2.setId("2");
+		
+		for (Flight aFlight:flightChain2) {
+			aFlight.setAssignedAir(air2);
+		}
 
 		HashMap<Flight, List<MatchedFlight>> matchedFlights = air1.getMatchedFlights(air2);
+		
+		//air1 Flight 104 shall match
+		assertEquals(true, matchedFlights.containsKey(air1.getFlight(3))); 
+		
+		//air1 Flight 102-103 (EWR - CLE) shall match air2 203-204 (EWR - CLE)
+		assertEquals(true, matchedFlights.containsKey(air1.getFlight(1)));
+		MatchedFlight aMatched = matchedFlights.get(air1.getFlight(1)).get(0);
+		assertEquals(air2.getFlight(aMatched.getAir2SourceFlight()).getSourceAirPort().getId()
+				, air1.getFlight(aMatched.getAir1SourceFlight()).getSourceAirPort().getId());
+		assertEquals(air2.getFlight(aMatched.getAir2DestFlight()).getDesintationAirport().getId()
+				, air1.getFlight(aMatched.getAir1DestFlight()).getDesintationAirport().getId());
+				
+		//test exchange
+		//air 1 101, 203, 204, 104, 105
+		//air 2 201, 202, 102, 103, 205
+		Aircraft newAircraftt1 = air1.clone();
+		Aircraft newAircraftt2 = air2.clone();
+		Flight air1SourcetFlight = newAircraftt1.getFlight(aMatched.getAir1SourceFlight());
+		Flight air1DesttFlight = newAircraftt1.getFlight(aMatched.getAir1DestFlight());
+		Flight air2SourcetFlight = newAircraftt2.getFlight(aMatched.getAir2SourceFlight());
+		Flight air2DesttFlight = newAircraftt2.getFlight(aMatched.getAir2DestFlight());
+		newAircraftt1.insertFlightChain(air2, air2.getFlight(aMatched.getAir2SourceFlight()), 
+				air2.getFlight(aMatched.getAir2DestFlight()),
+				air1DesttFlight, false);
+		newAircraftt2.insertFlightChain(air1, air1.getFlight(aMatched.getAir1SourceFlight()), 
+				air1.getFlight(aMatched.getAir1DestFlight()),
+				air2DesttFlight, false);
+		newAircraftt1.removeFlightChain(air1SourcetFlight, 
+				air1DesttFlight);
+		newAircraftt2.removeFlightChain(air2SourcetFlight,air2DesttFlight);
+		
+		List<Integer> air1FlightList = new ArrayList<Integer> ();
+		air1FlightList.add(101);
+		air1FlightList.add(203);
+		air1FlightList.add(204);
+		air1FlightList.add(104);
+		air1FlightList.add(105);
+		
+		List<Integer> air2FlightList = new ArrayList<Integer> ();
+		air2FlightList.add(201);
+		air2FlightList.add(202);
+		air2FlightList.add(102);
+		air2FlightList.add(103);
+		air2FlightList.add(205);
+		
+		Flight testF203 = null;
+		Flight testF104 = null;
+		List<Integer> air1FlightListAct = new ArrayList<Integer> ();
+		for (Flight aFlight:newAircraftt1.getFlightChain()) {
+			air1FlightListAct.add(aFlight.getSchdNo());
+			if (aFlight.getSchdNo() == 203) 
+				testF203 = aFlight;
+			else if (aFlight.getSchdNo() == 104)
+				testF104 = aFlight;
+			
+		}
+		
+		assertEquals(air1FlightList, air1FlightListAct);
+		assertEquals(air1.getId(), testF203.getAssignedAir().getId());
+		assertEquals(air1.getId(), testF104.getAssignedAir().getId());
+		
+		List<Integer> air2FlightListAct = new ArrayList<Integer> ();
+		for (Flight aFlight:newAircraftt2.getFlightChain()) {
+			air2FlightListAct.add(aFlight.getSchdNo());
+		}
+		
+		assertEquals(air2FlightList, air2FlightListAct);
+		
+		
 
 		System.out.println("testGetMatchedAirports - start");
 		for (Map.Entry<Flight, List<MatchedFlight>> entry : matchedFlights.entrySet()) {
@@ -103,10 +181,16 @@ public class AirPortTest {
 		flightChain.add(createFlight(101, "ORF", "EWR"));
 		flightChain.add(createFlight(102, "EWR", "STL"));
 		flightChain.add(createFlight(103, "STL", "CLE"));
-		flightChain.add(createFlight(104, "CLE", "BDL"));
-		flightChain.add(createFlight(105, "BDL", "CLE"));
+		Flight f104 = createFlight(104, "CLE", "BDL");
+		flightChain.add(f104);
+		Flight f105 = createFlight(105, "BDL", "CLE");
+		flightChain.add(f105);
 		air1.setFlightChain(flightChain);
 		air1.setId("1");
+		for (Flight aFlight:flightChain) {
+			aFlight.setAssignedAir(air1);
+		}
+		
 
 		Aircraft air2 = new Aircraft();
 		List<Flight> flightChain2 = new ArrayList<Flight>();
@@ -117,9 +201,59 @@ public class AirPortTest {
 		flightChain2.add(createFlight(205, "CLE", "MDW"));
 		air2.setFlightChain(flightChain2);
 		air2.setId("2");
+		for (Flight aFlight:flightChain2) {
+			aFlight.setAssignedAir(air2);
+		}
 
 		HashMap<Flight, List<Flight>> circuitFlightsAir1 = air1.getCircuitFlights();
 		HashMap<Flight, List<Flight>> circuitFlightsAir2 = air2.getCircuitFlights();
+		
+		assertEquals(true, circuitFlightsAir1.containsKey(f104));
+		assertEquals(f105, circuitFlightsAir1.get(f104).get(0));
+		
+		//test cancel
+		Aircraft newAirt1 = air1.clone();
+		Aircraft cancelledtAir = newAirt1.getCancelledAircraft();
+		Flight sourcetFlight = newAirt1.getFlight(air1.getFlightChain().indexOf(f104));
+		Flight desttFlight = newAirt1.getFlight(air1.getFlightChain().indexOf(f105));
+		
+
+		cancelledtAir.insertFlightChain(air1, f104, f105,
+				cancelledtAir.getFlight(cancelledtAir.getFlightChain().size() - 1), false);
+		newAirt1.removeFlightChain(sourcetFlight, desttFlight);
+		
+		List<Integer> air1FlightList = new ArrayList<Integer> ();
+		air1FlightList.add(101);
+		air1FlightList.add(102);
+		air1FlightList.add(103);
+		
+		List<Integer> air2FlightList = new ArrayList<Integer> ();
+		air2FlightList.add(104);
+		air2FlightList.add(105);
+		
+		Flight testF102 = null;
+		List<Integer> air1FlightListAct = new ArrayList<Integer> ();
+		for (Flight aFlight:newAirt1.getFlightChain()) {
+			air1FlightListAct.add(aFlight.getSchdNo());
+			if (aFlight.getSchdNo() == 102) 
+				testF102 = aFlight;
+		}
+		
+		assertEquals(air1FlightList, air1FlightListAct);
+		
+		Flight testF105 = null;
+		List<Integer> air2FlightListAct = new ArrayList<Integer> ();
+		for (Flight aFlight:cancelledtAir.getFlightChain()) {
+			air2FlightListAct.add(aFlight.getSchdNo());
+			if (aFlight.getSchdNo() == 105)
+				testF105 = aFlight;
+		}
+		
+		assertEquals(air2FlightList, air2FlightListAct);
+		assertEquals(false,testF102.getAssignedAir().isCancel());
+		assertEquals(true,testF105.getAssignedAir().isCancel());
+		assertEquals(cancelledtAir,newAirt1.getCancelledAircraft());
+		
 
 		for (Map.Entry<Flight, List<Flight>> entry : circuitFlightsAir1.entrySet()) {
 			Flight key = entry.getKey();
