@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
 
 public class XiaMengAirlineSolution implements Cloneable{
@@ -47,12 +48,15 @@ public class XiaMengAirlineSolution implements Cloneable{
 	public void refreshCost () {
 		this.cost = new BigDecimal("0");
 		
+		List<Flight> joint1FlightList = new ArrayList<Flight>();
+		List<Flight> joint2CancelFlightList = new ArrayList<Flight>();
+		
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		for (Aircraft aAir:airList) {
 			if (!aAir.isCancel()) {
 				for (Flight newFlight : aAir.getFlightChain()) {
 
-					if (newFlight.getPlannedAir() == null) {
+					if (newFlight.getFlightId() > InitData.plannedMaxFligthId) {
 						cost.add(new BigDecimal("5000"));
 					} else {
 						if (!newFlight.getPlannedAir().getType().equals(aAir.getType())) {
@@ -68,21 +72,49 @@ public class XiaMengAirlineSolution implements Cloneable{
 								cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
 							}
 						}
+						
+						if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null && InitData.jointFlightMap.get(newFlight.getFlightId()) != 0) {
+							
+							joint1FlightList.add(newFlight);
+						}
+						
 					}
 					
 				}				
 			} else {
 				for (Flight cancelFlight : aAir.getFlightChain()) {
-					if (cancelFlight.getPlannedAir() != null) {
+					if (cancelFlight.getFlightId() > InitData.plannedMaxFligthId) {
+						continue;
+					}
+					if (InitData.jointFlightMap.get(cancelFlight.getFlightId()) != null && InitData.jointFlightMap.get(cancelFlight.getFlightId()) == 0) {
+						joint2CancelFlightList.add(cancelFlight);
+					} else {
 						cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
 					}
+					
 					
 				}
 			}
 			
 		}
-		
-		
+		// joint flight 
+		for (Flight cancelFlight : joint2CancelFlightList) {
+			boolean jointFlight = false;
+			for (Flight flight : joint1FlightList) {
+				if (InitData.jointFlightMap.get(flight.getFlightId()) == cancelFlight.getFlightId()
+						&& flight.getSourceAirPort().getId() == cancelFlight.getSourceAirPort().getId()) {
+					
+					cost.add(new BigDecimal("750").multiply(flight.getImpCoe()));
+					cost.add(new BigDecimal("750").multiply(cancelFlight.getImpCoe()));
+					
+					jointFlight = true;
+				}
+			}
+			
+			if (!jointFlight) {
+				cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
+			}
+		}
 	}
 	public void refreshCost (BigDecimal detla) {
 		this.cost.add(detla);
