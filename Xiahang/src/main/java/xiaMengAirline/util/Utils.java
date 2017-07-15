@@ -83,6 +83,36 @@ public class Utils {
 		return result;
     }
 	
+	
+	public static Date timeStr2date(String str) {  
+		Date date = null;
+		try {
+			if (str != null) {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+				date = sdf.parse(str);
+			}
+		} catch (ParseException e) {
+				// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return date;
+    }
+	
+	
+	public static Date dateStr2date(String str) {  
+		Date date = null;
+		try {
+			if (str != null) {
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  
+				date = sdf.parse(str);
+			}
+		} catch (ParseException e) {
+				// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return date;
+    }
+	
 	@SuppressWarnings("unchecked")
 	public static <T> void sort(List<T> list, String fieldName, boolean asc) {
         Comparator<?> mycmp = ComparableComparator.INSTANCE;
@@ -98,6 +128,15 @@ public class Utils {
 		long days = diff / (1000 * 60 * 60 * 24);  
 		
 		long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60 * 60);
+		
+		return new BigDecimal(hours);
+    }
+	
+	public static BigDecimal minutiesBetweenTime(Date date1, Date date2) {  
+		long diff = date1.getTime() - date2.getTime();
+		long days = diff / (1000 * 60 * 60 * 24);  
+		
+		long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60);
 		
 		return new BigDecimal(hours);
     }

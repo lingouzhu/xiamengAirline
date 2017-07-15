@@ -44,6 +44,12 @@ public class InitData {
 	/** joint flight -- key: flight id, value : next flight id (if no then 0)*/
 	public static Map<Integer, Integer> jointFlightMap = new HashMap<Integer, Integer>();
 	
+	/** fist flight*/
+	public static Map<String, Flight> firstFlightMap = new HashMap<String, Flight>();
+	
+	/** last flight*/
+	public static Map<String, Flight> lastFlightMap = new HashMap<String, Flight>();
+	
 	public static int maxFligthId = 0;
 	public static int plannedMaxFligthId = 0;
 
@@ -109,7 +115,16 @@ public class InitData {
 			for (Aircraft aAir:schedule) {
 				aAir.sortFlights();
 				List<Flight> flightList = aAir.getFlightChain();
-				for (Flight aFlight:flightList) {
+				for (int i = 0; i < flightList.size(); i++) {
+					Flight aFlight = flightList.get(i);
+					if (i == 0) {
+						firstFlightMap.put(aAir.getId(), aFlight);
+					}
+					
+					if (i == flightList.size() - 1) {
+						lastFlightMap.put(aAir.getId(), aFlight);
+					}
+					
 					String aKey = Integer.toString(aFlight.getSchdNo());
 					aKey += "_";
 					aKey += Utils.dateFormatter(aFlight.getSchdDate());
