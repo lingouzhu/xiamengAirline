@@ -140,6 +140,13 @@ public class SelfSearch {
 				}
 			}
 		}
+		
+		// remove flights in canceledFlightIDs
+		List<Flight> removedFlight = new ArrayList<Flight>();
+		for (int flightId : canceledFlightIDs){
+			removedFlight.add(thisAc.getFlightByFlightId(flightId));
+		}
+		thisAc.getFlightChain().removeAll(removedFlight);
 		return thisAc;
 	}
 	
