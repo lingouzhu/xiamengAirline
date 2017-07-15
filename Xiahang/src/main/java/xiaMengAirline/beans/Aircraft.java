@@ -50,6 +50,9 @@ public class Aircraft implements Cloneable{
 		aFlight.setAssignedAir(this);
 		flightChain.add(aFlight);
 	}
+	public boolean hasFlight (Flight aFlight) {
+		return flightChain.contains(aFlight);
+	}
 	
 	public void insertFlightChain (Aircraft sourceAircraft, List<Integer> addFlights, int position) {
 		List<Flight> newFlights = new ArrayList<Flight> (); 
@@ -269,7 +272,7 @@ public class Aircraft implements Cloneable{
 			    	aScheduledTime.setDepartureTime(nextFlight.getDepartureTime());
 			    else
 			    	aScheduledTime.setDepartureTime(cl.getTime());
-			    FlightTime newFlightTime = nextFlight.getSourceAirPort().requestAirport(aScheduledTime);
+			    FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime);
 			    if (newFlightTime!=null) {
 			    	if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
 			    		throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
