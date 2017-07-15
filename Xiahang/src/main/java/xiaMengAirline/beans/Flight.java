@@ -127,6 +127,20 @@ public class Flight implements Cloneable {
 	public void setPlannedFlight(Flight plannedFlight) {
 		this.plannedFlight = plannedFlight;
 	}
+	
+	public int getGroundingTime (Flight previousFlight) {
+		//check  if actual grounding time is less than the standard
+		Calendar cl = Calendar. getInstance();
+	    cl.setTime(previousFlight.plannedFlight.getArrivalTime());
+	    cl.add(Calendar.MINUTE, AirPort.GroundingTime);
+	    if (cl.getTime().after(plannedFlight.getDepartureTime())) {
+	    	long diff = plannedFlight.getDepartureTime().getTime() - previousFlight.getPlannedFlight().getArrivalTime().getTime();
+			long diffMin = diff / (60 * 1000);
+			System.out.println("Warning: Flight" + schdNo + " changed grounding time to " + diffMin);
+			return (int) diffMin;
+	    } else 
+	    	return AirPort.GroundingTime;
+	}
 
 
 }

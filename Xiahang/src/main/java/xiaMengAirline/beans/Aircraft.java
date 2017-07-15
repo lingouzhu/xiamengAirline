@@ -265,14 +265,15 @@ public class Aircraft implements Cloneable{
 			if (i > startPosition) {
 				Calendar cl = Calendar. getInstance();
 			    cl.setTime(currentFlight.getArrivalTime());
-			    cl.add(Calendar.MINUTE, AirPort.GroundingTime);
+			    int plannedGroundingTime = nextFlight.getGroundingTime(currentFlight);
+			    cl.add(Calendar.MINUTE, plannedGroundingTime);
 			    FlightTime aScheduledTime = new FlightTime();
 			    aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
 			    if (cl.getTime().before(nextFlight.getDepartureTime()))
 			    	aScheduledTime.setDepartureTime(nextFlight.getDepartureTime());
 			    else
 			    	aScheduledTime.setDepartureTime(cl.getTime());
-			    FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime);
+			    FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime, plannedGroundingTime );
 			    if (newFlightTime!=null) {
 			    	if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
 			    		throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);

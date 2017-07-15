@@ -36,7 +36,7 @@ public class SelfSearch {
 			Date thisDeparture = thisFlight.getDepartureTime();
 			flightPair.setArrivalTime(lastArrival);
 			flightPair.setDepartureTime(thisDeparture);
-			flightPair = thisAirport.requestAirport(flightPair);
+			flightPair = thisAirport.requestAirport(flightPair, thisFlight.getGroundingTime(lastFlight));
 			if (flightPair.getArrivalTime() != null){
 				if (!isEligibalDelay(getPlannedArrival(lastFlight), flightPair.getArrivalTime(), lastFlight.isInterFlg())){
 					// cancel flight, add empty flight
