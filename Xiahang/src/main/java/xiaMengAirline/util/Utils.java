@@ -4,6 +4,7 @@ package xiaMengAirline.util;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -100,6 +101,13 @@ public class Utils {
 		
 		return new BigDecimal(hours);
     }
+	
+	public static Date addMinutes (Date aDate, int minutes) {
+		Calendar cl = Calendar. getInstance();
+	    cl.setTime(aDate);
+	    cl.add(Calendar.MINUTE, (int) minutes);
+	    return cl.getTime();
+	}
 	
 	
 	

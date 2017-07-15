@@ -101,7 +101,7 @@ public class Flight implements Cloneable {
 		    return (cl.getTime());			
 		} else {
 			long diff = plannedFlight.getArrivalTime().getTime() - plannedFlight.getDepartureTime().getTime();
-			long diffMin = diff / (60 * 1000) % 60;
+			long diffMin = diff / (60 * 1000) ;
 			Calendar cl = Calendar. getInstance();
 		    cl.setTime(departureTime);
 		    cl.add(Calendar.MINUTE, (int) diffMin);

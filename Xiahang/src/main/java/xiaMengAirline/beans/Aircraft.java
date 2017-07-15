@@ -284,7 +284,8 @@ public class Aircraft implements Cloneable{
 			currentFlight = nextFlight;
 			
 			Date newArrival = currentFlight.calcuateNextArrivalTime();
-			currentFlight.setArrivalTime(newArrival);
+			if (newArrival.compareTo(currentFlight.getArrivalTime()) !=0 )
+				currentFlight.setArrivalTime(newArrival);
 		}
 		
 	}
