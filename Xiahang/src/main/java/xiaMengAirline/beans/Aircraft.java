@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.xml.ws.RespectBindingFeature;
+
 import org.openqa.selenium.firefox.UnableToCreateProfileException;
 
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
@@ -41,6 +43,25 @@ public class Aircraft implements Cloneable{
 			return this.flightChain.get(position);
 		else	
 			return null;
+				
+	}
+	public Flight getFlightByFlightId(int aFlightId) {
+		for (Flight aFlight:flightChain) {
+			if (aFlight.getFlightId() == aFlightId)
+				return aFlight;
+		}
+		return null;
+				
+	}
+	public List<Flight> getFlightByScheduleId(int aScheduleId) {
+		List<Flight> retFlights = new ArrayList<Flight> ();
+		for (Flight aFlight:flightChain) {
+			if (aFlight.getSchdNo() == aScheduleId) {
+				retFlights.add(aFlight);
+			}
+				
+		}
+		return retFlights;
 				
 	}
 	public void setFlightChain(List<Flight> flightChain) {

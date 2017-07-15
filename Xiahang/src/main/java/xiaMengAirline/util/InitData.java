@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +74,7 @@ public class InitData {
 				
 				aFlight.setFlightId(aFlightId);
 				aFlight.setSchdDate(row.getCell(1).getDateCellValue());
-				aFlight.setInterFlg(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
+				aFlight.setInternationalFlight(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
 				aFlight.setSchdNo((int)row.getCell(3).getNumericCellValue());
 				
 				AirPort aAirport = airportList.getAirport(String.valueOf((int)row.getCell(4).getNumericCellValue()));
@@ -92,7 +91,8 @@ public class InitData {
 				
 				Aircraft aAir = originalSolution.getAircraft(airId, airType, true);
 				
-				aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()));
+				//aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()));
+				aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
 				aFlight.setAssignedAir(aAir);
 				Aircraft aPlannedAir = aAir.clone();
 				aPlannedAir.clear();
@@ -105,34 +105,32 @@ public class InitData {
 	        }
 			
 			List<Aircraft> schedule = new ArrayList<Aircraft> ( originalSolution.getSchedule().values());
+			HashMap<String, Flight> flightScheduleNumber = new HashMap<String, Flight> ();
 			for (Aircraft aAir:schedule) {
 				aAir.sortFlights();
 				List<Flight> flightList = aAir.getFlightChain();
-				int tmpSchdNo = 0;
-				Date tmpSchdDate = null;
-				// joint flight
-				for (int i = 0; i < flightList.size(); i++) {
+				for (Flight aFlight:flightList) {
+					String aKey = Integer.toString(aFlight.getSchdNo());
+					aKey += "_";
+					aKey += Utils.dateFormatter(aFlight.getSchdDate());
 					
-					Flight flight = flightList.get(i);
-					if (tmpSchdNo == flight.getSchdNo() && tmpSchdDate.equals(flight.getSchdDate()) && flight.isInterFlg()) {
-						jointFlightMap.put(flight.getFlightId(), 0);
-						Flight prevFlight = flightList.get(i - 1);
-						jointFlightMap.put(prevFlight.getFlightId(), flight.getFlightId());
+					Flight lastFlight = flightScheduleNumber.put(aKey, aFlight);
+					if (lastFlight !=null) {
+						jointFlightMap.put(lastFlight.getFlightId(),aFlight.getFlightId());
+						jointFlightMap.put(aFlight.getFlightId(),0);
 					}
 					
-					tmpSchdNo = flight.getSchdNo();
-					tmpSchdDate = flight.getSchdDate();
 				}
 				
 			}
 			
-			List<Aircraft> scheduleCheck = new ArrayList<Aircraft> ( originalSolution.getSchedule().values());
-			for (Aircraft aAir:scheduleCheck) {
-				logger.info("Air id " + aAir.getId());
-				for (Flight aFlight:aAir.getFlightChain()) {
-					logger.info("		Flight id " + aFlight.getSchdNo());
-				}
-			}
+//			List<Aircraft> scheduleCheck = new ArrayList<Aircraft> ( originalSolution.getSchedule().values());
+//			for (Aircraft aAir:scheduleCheck) {
+//				logger.debug("Air id " + aAir.getId());
+//				for (Flight aFlight:aAir.getFlightChain()) {
+//					logger.debug("		Flight id " + aFlight.getSchdNo());
+//				}
+//			}
 			
 			//****************************************航班 飞机限制*************************************************//*
 			Sheet airLimitSheet = wb.getSheet("航线-飞机限制");  
@@ -180,7 +178,7 @@ public class InitData {
 				}
 				
 				AirPortClose portCloseBean = new AirPortClose();
-				String airPortId = String.valueOf((int)row.getCell(4).getNumericCellValue());
+				String airPortId = String.valueOf((int)row.getCell(3).getNumericCellValue());
 				AirPort aAirport = airportList.getAirport(airPortId);
 				portCloseBean.setStartTime(row.getCell(0).getDateCellValue());
 				portCloseBean.setEndTime(row.getCell(1).getDateCellValue());

@@ -4,14 +4,18 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import xiaMengAirline.util.InitData;
 
 public class Flight implements Cloneable {
+	private static final Logger logger = Logger.getLogger(Flight.class);
+	
 	private int flightId;
 	private Date schdDate;
 	private AirPort sourceAirPort;
 	private AirPort desintationAirport;
-	private boolean interFlg;
+	private boolean internationalFlight;
 	private int schdNo;
 	private Date arrivalTime;
 	private Date departureTime;
@@ -57,11 +61,11 @@ public class Flight implements Cloneable {
 	public void setSchdDate(Date schdDate) {
 		this.schdDate = schdDate;
 	}
-	public boolean isInterFlg() {
-		return interFlg;
+	public boolean isInternationalFlight() {
+		return internationalFlight;
 	}
-	public void setInterFlg(boolean interFlg) {
-		this.interFlg = interFlg;
+	public void setInternationalFlight(boolean interFlg) {
+		this.internationalFlight = interFlg;
 	}
 	public int getSchdNo() {
 		return schdNo;
@@ -136,7 +140,7 @@ public class Flight implements Cloneable {
 	    if (cl.getTime().after(plannedFlight.getDepartureTime())) {
 	    	long diff = plannedFlight.getDepartureTime().getTime() - previousFlight.getPlannedFlight().getArrivalTime().getTime();
 			long diffMin = diff / (60 * 1000);
-			System.out.println("Warning: Flight" + schdNo + " changed grounding time to " + diffMin);
+			logger.warn("Flight" + schdNo + " changed grounding time to " + diffMin);
 			return (int) diffMin;
 	    } else 
 	    	return AirPort.GroundingTime;

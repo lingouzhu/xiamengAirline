@@ -27,9 +27,9 @@ public class Utils {
 	
 	public static boolean interToBoolean(String str) {  
 		if ("国内".equals(str)) {
-			return true;
-		} else {
 			return false;
+		} else {
+			return true;
 		}
     }
 	

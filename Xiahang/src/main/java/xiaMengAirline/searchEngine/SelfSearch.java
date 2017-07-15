@@ -38,7 +38,7 @@ public class SelfSearch {
 			flightPair.setDepartureTime(thisDeparture);
 			flightPair = thisAirport.requestAirport(flightPair, thisFlight.getGroundingTime(lastFlight));
 			if (flightPair.getArrivalTime() != null){
-				if (!isEligibalDelay(getPlannedArrival(lastFlight), flightPair.getArrivalTime(), lastFlight.isInterFlg())){
+				if (!isEligibalDelay(getPlannedArrival(lastFlight), flightPair.getArrivalTime(), lastFlight.isInternationalFlight())){
 					// cancel flight, add empty flight
 					if (1 != 1){
 						// dummy chain flight
@@ -53,7 +53,7 @@ public class SelfSearch {
 				}
 			}
 			if (flightPair.getDepartureTime() != null){
-				if (!isEligibalDelay(getPlannedDeparture(thisFlight), flightPair.getDepartureTime(), thisFlight.isInterFlg())){
+				if (!isEligibalDelay(getPlannedDeparture(thisFlight), flightPair.getDepartureTime(), thisFlight.isInternationalFlight())){
 					// cancel flight, add empty flight
 					if (1 != 1){
 						// dummy chain flight
