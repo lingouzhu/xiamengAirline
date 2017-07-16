@@ -28,6 +28,17 @@ public class AirPortTest {
 		int time = 120;
 
 		InitData.fightDurationMap.put(airType + "_" + startPort + "_" + endPort, time);
+		
+		Flight f1 = createFlight(102, "EWR", "STL");
+		f1.setFlightId(102);
+		f1.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 18:30:00"));
+		f1.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 22:30:00"));
+		Flight f2= createFlight(103, "STL", "CLE");
+		f2.setFlightId(103);
+		f2.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 23:00:00"));
+		f2.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 23:30:00"));
+		InitData.jointFlightMap.put(102, f2);
+		InitData.jointFlightMap.put(103, null);
 
 	}
 
@@ -798,6 +809,16 @@ public class AirPortTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		f102.setFlightId(102);
+		f102.setDepartureTime(Utils.stringFormatToTime2("26/06/2017 06:20:00"));
+		f102.setArrivalTime(Utils.stringFormatToTime2("26/06/2017 14:00:00"));
+		f102.setPlannedFlight(f102.clone());
+		f102.setDesintationAirport(InitData.airportList.getAirport("CLE"));
+		air1.setType("2");
+		f102.calcuateNextArrivalTime();
+		assertEquals(Utils.stringFormatToTime2("26/06/2017 14:30:00"), f102.calcuateNextArrivalTime());
+
 
 	}
 

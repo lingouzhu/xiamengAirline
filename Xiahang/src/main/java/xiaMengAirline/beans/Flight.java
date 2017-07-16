@@ -107,7 +107,7 @@ public class Flight implements Cloneable {
 					throw new FlightDurationNotFound(this, searchKey);
 				else {
 					long diff = plannedFlight.getArrivalTime().getTime() - plannedFlight.getDepartureTime().getTime();
-					diff += linkedFlight.getPlannedFlight().getArrivalTime().getTime() - linkedFlight.getPlannedFlight().getDepartureTime().getTime();
+					diff += linkedFlight.getArrivalTime().getTime() - linkedFlight.getDepartureTime().getTime();
 					flightDur = (int) diff / (60 * 1000) ;
 				}
 					
