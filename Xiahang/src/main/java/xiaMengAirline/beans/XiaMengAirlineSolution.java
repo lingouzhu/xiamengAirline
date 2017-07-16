@@ -75,7 +75,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 							}
 						}
 						
-						if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null && InitData.jointFlightMap.get(newFlight.getFlightId()) != 0) {
+						if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null && InitData.jointFlightMap.get(newFlight.getFlightId()).getFlightId() != 0) {
 							
 							joint1FlightList.add(newFlight);
 						}
@@ -88,7 +88,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 					if (cancelFlight.getFlightId() > InitData.plannedMaxFligthId) {
 						continue;
 					}
-					if (InitData.jointFlightMap.get(cancelFlight.getFlightId()) != null && InitData.jointFlightMap.get(cancelFlight.getFlightId()) == 0) {
+					if (InitData.jointFlightMap.get(cancelFlight.getFlightId()) != null && InitData.jointFlightMap.get(cancelFlight.getFlightId()).getFlightId() == 0) {
 						joint2CancelFlightList.add(cancelFlight);
 					} else {
 						cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
@@ -103,7 +103,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 		for (Flight cancelFlight : joint2CancelFlightList) {
 			boolean jointFlight = false;
 			for (Flight flight : joint1FlightList) {
-				if (InitData.jointFlightMap.get(flight.getFlightId()) == cancelFlight.getFlightId()
+				if (InitData.jointFlightMap.get(flight.getFlightId()).getFlightId() == cancelFlight.getFlightId()
 						&& flight.getDesintationAirport().getId() == cancelFlight.getDesintationAirport().getId()) {
 					
 					cost.add(new BigDecimal("750").multiply(flight.getImpCoe()));

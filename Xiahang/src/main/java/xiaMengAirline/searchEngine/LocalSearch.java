@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
@@ -34,7 +35,7 @@ public class LocalSearch {
 		
 	}
 	
-	private boolean adjust(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) throws CloneNotSupportedException, ParseException {
+	private boolean adjust(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
 		
 		if (newAir1.validate() && newAir2.validate()) {
 			newAir1.adjustment();
@@ -45,7 +46,7 @@ public class LocalSearch {
 	}
 
 	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
-			throws CloneNotSupportedException, ParseException {
+			throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
 		RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
 		List<Aircraft> aircrafts = new ArrayList<Aircraft> ( bestSolution.getSchedule().values());
 		int r = aircrafts.size();

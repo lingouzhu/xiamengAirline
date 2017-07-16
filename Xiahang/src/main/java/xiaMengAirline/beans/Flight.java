@@ -6,6 +6,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.util.InitData;
 
 public class Flight implements Cloneable {
@@ -88,7 +89,7 @@ public class Flight implements Cloneable {
 		return (Flight) (super.clone());
 	}
 	
-	public Date calcuateNextArrivalTime () {
+	public Date calcuateNextArrivalTime () throws FlightDurationNotFound {
 		if (!plannedFlight.getDesintationAirport().getId().equals(desintationAirport.getId())) {
 			//find out flight time
 			String searchKey = assignedAir.getType();
@@ -97,8 +98,21 @@ public class Flight implements Cloneable {
 			searchKey += "_";
 			searchKey += desintationAirport.getId();
 			
-			int flightDur =  InitData.fightDurationMap.get(searchKey);
-			
+			int flightDur = 0;
+			if (InitData.fightDurationMap.containsKey(searchKey))
+				flightDur =  InitData.fightDurationMap.get(searchKey);
+			else {
+				Flight linkedFlight = InitData.jointFlightMap.get(flightId);
+				if (linkedFlight == null)
+					throw new FlightDurationNotFound(this, searchKey);
+				else {
+					long diff = plannedFlight.getArrivalTime().getTime() - plannedFlight.getDepartureTime().getTime();
+					diff += linkedFlight.getPlannedFlight().getArrivalTime().getTime() - linkedFlight.getPlannedFlight().getDepartureTime().getTime();
+					flightDur = (int) diff / (60 * 1000) ;
+				}
+					
+			}
+				
 		    Calendar cl = Calendar. getInstance();
 		    cl.setTime(departureTime);
 		    cl.add(Calendar.MINUTE, flightDur);

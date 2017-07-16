@@ -3,6 +3,7 @@ package xiaMengAirline;
 
 import java.text.ParseException;
 
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
@@ -11,13 +12,13 @@ import xiaMengAirline.util.InitData;
 public class StartUp {
 
 	final public static long iterLength = 10000000L;
-	public static void main(String[] args) throws CloneNotSupportedException, ParseException {
+	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
 		
 		//Step1, Load all data & initialize
 		String initDatafile = "XiahangData20170705_1.xlsx";
-		String fightTimeFile = "C://Users//esunnen//Desktop//飞行时间表.csv";
+		//String fightTimeFile = "C://Users//esunnen//Desktop//飞行时间表.csv";
 		
-		InitData.initData(initDatafile, fightTimeFile);
+		InitData.initData(initDatafile);
 		
 		LocalSearch localEngine = new LocalSearch();
 		SelfSearch selfEngine = new SelfSearch();

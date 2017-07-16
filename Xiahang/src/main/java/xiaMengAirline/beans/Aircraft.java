@@ -12,6 +12,7 @@ import javax.xml.ws.RespectBindingFeature;
 import org.openqa.selenium.firefox.UnableToCreateProfileException;
 
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
@@ -156,7 +157,7 @@ public class Aircraft implements Cloneable{
 		return (aNew);
 	}
 	
-	public void adjustment  () throws CloneNotSupportedException, ParseException {
+	public void adjustment  () throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
 		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
 			selfAdjustEngine.adjustAircraft(this);
@@ -276,8 +277,35 @@ public class Aircraft implements Cloneable{
 		return false;
 	}
 	
-	//must secure the flight can departure at departureTime
-	public void adjustFlightTime (int startPosition) throws ParseException, AirportNotAcceptArrivalTime {
+	/**
+	   * The aircraft's adjustFlightTime method adjusts its all flights' departure time and arrival time,
+	   * until the end of flight chain or aborted due to airport issues.
+	   * This method will check airport's available time, the method will automatically adjust departure time to fit airport,
+	   * but the method will not adjust arrival time.
+	   * For normal flights,
+	   * This method takes the departure time of the specified flight, and then use its planned information calculate its arrival time.
+	   * For joined flights (when change destination of first flight),
+	   * This method first search the flightDuration table, if not found, then use planned information of joined flights
+	   * For other extra empty flight,
+	   * This method searches the flightDuration.
+	   * This method must secure the given flight can departure as its departureTime
+	   * @param startPosition, specify starts from which flight. The first flight is 0.
+	   * @return Nothing.
+	   * @exception ParseException - date format is not valid
+	   * @see ParseException
+	   * @exception AirportNotAcceptArrivalTime - the destination airport does not accept suggested arrival time.
+	   * 	This exception contains two objects, 
+	   * 	flight (Flight), where the problem flight is at the flight chain
+	   * 	@see Flight
+	   * 	availableTime (FlightTime), suggested arr/dep by airport 
+	   * 	@see FlightTime
+	   * @exception FlightDurationNotFound - the flight duration is not found, means flight not allowed.
+	   * 	This exception contains two objects,
+	   * 	theFlight (Flight), flight is not allowed
+	   * 	searchKey (String), the failed search key for the lookup
+	   */
+	
+	public void adjustFlightTime (int startPosition) throws ParseException, AirportNotAcceptArrivalTime, FlightDurationNotFound {
 		Flight currentFlight = null;
 		Flight nextFlight = null;
 		for (int i=startPosition; i < flightChain.size(); i++) {
@@ -309,6 +337,7 @@ public class Aircraft implements Cloneable{
 			currentFlight = nextFlight;
 			
 			Date newArrival = currentFlight.calcuateNextArrivalTime();
+		
 			if (newArrival.compareTo(currentFlight.getArrivalTime()) !=0 )
 				currentFlight.setArrivalTime(newArrival);
 		}

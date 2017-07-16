@@ -41,8 +41,8 @@ public class InitData {
 	
 	public static AirPortList airportList = new AirPortList();
 	
-	/** joint flight -- key: flight id, value : next flight id (if no then 0)*/
-	public static Map<Integer, Integer> jointFlightMap = new HashMap<Integer, Integer>();
+	/** joint flight -- key: flight id, value : next flight (if no then null)*/
+	public static Map<Integer, Flight> jointFlightMap = new HashMap<Integer, Flight>();
 	
 	/** fist flight*/
 	public static Map<String, Flight> firstFlightMap = new HashMap<String, Flight>();
@@ -54,7 +54,7 @@ public class InitData {
 	public static int plannedMaxFligthId = 0;
 
 	
-	public static void initData(String initDatafile, String fightTimeFile) {
+	public static void initData(String initDatafile) {
 				
 		try {
 			
@@ -131,8 +131,8 @@ public class InitData {
 					
 					Flight lastFlight = flightScheduleNumber.put(aKey, aFlight);
 					if (lastFlight !=null) {
-						jointFlightMap.put(lastFlight.getFlightId(),aFlight.getFlightId());
-						jointFlightMap.put(aFlight.getFlightId(),0);
+						jointFlightMap.put(lastFlight.getFlightId(),aFlight.clone());
+						jointFlightMap.put(aFlight.getFlightId(),null);
 					}
 					
 				}

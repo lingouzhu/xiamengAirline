@@ -4,6 +4,7 @@ import java.math.*;
 import java.text.ParseException;
 import java.util.*;
 
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.*;
 import xiaMengAirline.util.InitData;
 
@@ -20,7 +21,7 @@ public class SelfSearch {
 		return aNewSolution;
 	}
 	
-	public Aircraft adjustAircraft (Aircraft originalAir) throws CloneNotSupportedException, ParseException {
+	public Aircraft adjustAircraft (Aircraft originalAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
 		//when construct new plan for aircraft, no need clone?
 		List<Integer> canceledFlightIDs = new ArrayList<Integer>();
 		Aircraft thisAc = originalAir.clone();
@@ -151,7 +152,7 @@ public class SelfSearch {
 	}
 	
 	// remove the extra time margin 
-	public Aircraft shrinkFlightChain(Aircraft originalAir, int startIndex){
+	public Aircraft shrinkFlightChain(Aircraft originalAir, int startIndex) throws FlightDurationNotFound{
 		List<Flight> flights = originalAir.getFlightChain();
 		for (int i = startIndex; i < flights.size(); i++){
 			Flight thisFlight = flights.get(i);
@@ -177,7 +178,7 @@ public class SelfSearch {
 	}
 	
 	// create new flight
-	public Flight createNewFlight(Flight replaceFlight, int flightPosition, Aircraft aircraft) throws ParseException{
+	public Flight createNewFlight(Flight replaceFlight, int flightPosition, Aircraft aircraft) throws ParseException, FlightDurationNotFound{
 		AirPort newDestAirport = getNextAvaliableAirport(aircraft.getFlightChain(), flightPosition, aircraft);
 		if (newDestAirport != null){
 			Flight newFlight = new Flight();

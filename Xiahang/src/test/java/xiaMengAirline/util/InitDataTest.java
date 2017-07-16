@@ -26,7 +26,7 @@ public class InitDataTest {
 		// Step1, Load all data & initialize
 		String initDatafile = "XiahangData20170705_1.xlsx";
 		String fightTimeFile = "C://Users//esunnen//Desktop//飞行时间表.csv";
-		InitData.initData(initDatafile, fightTimeFile);
+		InitData.initData(initDatafile);
 		Aircraft air50 = InitData.originalSolution.getAircraft("50", "2", false);
 		
 		//check air
@@ -49,10 +49,10 @@ public class InitDataTest {
 		//joined flight
 		Aircraft air122 = InitData.originalSolution.getAircraft("122", "2", false);
 		Flight f1918 = air122.getFlightByFlightId(1918);
-		int anotherF = InitData.jointFlightMap.get(f1918.getFlightId());
+		int anotherF = InitData.jointFlightMap.get(f1918.getFlightId()).getFlightId();
 		assertEquals(1920, anotherF);
 		Flight f1920 = air122.getFlightByFlightId(1920);
-		anotherF = InitData.jointFlightMap.get(f1920.getFlightId());
+		anotherF = InitData.jointFlightMap.get(f1920.getFlightId()).getFlightId();
 		assertEquals(0, anotherF);
 		
 		Aircraft air109 = InitData.originalSolution.getAircraft("109", "2", false);
