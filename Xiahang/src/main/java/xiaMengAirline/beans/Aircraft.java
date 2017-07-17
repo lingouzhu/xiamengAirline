@@ -8,264 +8,308 @@ import java.util.HashMap;
 import java.util.List;
 
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
+import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
 
-public class Aircraft implements Cloneable{
+public class Aircraft implements Cloneable {
+	final static private int MAXIMUM_EARLIER_TIME = 6; // HOUR
 	private String id;
 	private String type;
-	private List<Flight> flightChain = new ArrayList<Flight>() ;
+	private List<Flight> flightChain = new ArrayList<Flight>();
 	private boolean isCancel;
 	private Aircraft cancelAircrafted = null;
-	private List<Flight> dropOutList = new ArrayList<Flight> ();
+	private List<Flight> dropOutList = new ArrayList<Flight>();
 
 	public String getId() {
 		return id;
 	}
+
 	public void setId(String id) {
 		this.id = id;
 	}
+
 	public String getType() {
 		return type;
 	}
+
 	public void setType(String type) {
 		this.type = type;
 	}
+
 	public List<Flight> getFlightChain() {
 		return flightChain;
 	}
+
 	public Flight getFlight(int position) {
 		if (position >= 0)
 			return this.flightChain.get(position);
-		else	
+		else
 			return null;
-				
+
 	}
+
 	public Flight getFlightByFlightId(int aFlightId) {
-		for (Flight aFlight:flightChain) {
+		for (Flight aFlight : flightChain) {
 			if (aFlight.getFlightId() == aFlightId)
 				return aFlight;
 		}
 		return null;
-				
+
 	}
+
 	public List<Flight> getFlightByScheduleId(int aScheduleId) {
-		List<Flight> retFlights = new ArrayList<Flight> ();
-		for (Flight aFlight:flightChain) {
+		List<Flight> retFlights = new ArrayList<Flight>();
+		for (Flight aFlight : flightChain) {
 			if (aFlight.getSchdNo() == aScheduleId) {
 				retFlights.add(aFlight);
 			}
-				
+
 		}
 		return retFlights;
-				
+
 	}
+
 	public void setFlightChain(List<Flight> flightChain) {
 		this.flightChain = flightChain;
 	}
-	public void addFlight (Flight aFlight) {
+
+	public void addFlight(Flight aFlight) {
 		aFlight.setAssignedAir(this);
 		flightChain.add(aFlight);
 	}
-	public boolean hasFlight (Flight aFlight) {
+
+	public boolean hasFlight(Flight aFlight) {
 		return flightChain.contains(aFlight);
 	}
-	
+
 	/**
-	   * The aircraft's insertFlight method inserts a flight into aircraft's flight chain.
-	   * The flight must be fresh new and no referred by others.
-	   * @author Leonard
-	   * @param aFlight, a new flight, either fresh new created or cloned.
-	   * @param position, specify the location of current flight chain. Flight will be inserted before this position
-	   * @return none
-	   */
-	public void insertFlight (Flight aFlight, int position) {
-		aFlight.setPlannedAir(null);
+	 * The aircraft's insertFlight method inserts a flight into aircraft's
+	 * flight chain. The flight must be fresh new and no referred by others.
+	 * 
+	 * @author Leonard
+	 * @param aFlight,
+	 *            a new flight, either fresh new created or cloned.
+	 * @param position,
+	 *            specify the location of current flight chain. Flight will be
+	 *            inserted before this position
+	 * @return none
+	 * @throws CloneNotSupportedException 
+	 */
+	public void insertFlight(Flight aFlight, int position) throws CloneNotSupportedException {
+		Aircraft aAir = this.clone();
+		aAir.clear();
+		aFlight.setPlannedAir(aAir);
 		aFlight.setAssignedAir(this);
-		aFlight.setPlannedFlight(null);
+		aFlight.setPlannedFlight(aFlight.clone());
 		flightChain.add(position, aFlight);
 	}
-	
+
 	/**
-	   * The aircraft's insertFlightChain method inserts a list of flight into aircraft's flight chain,
-	   * @author Leonard
-	   * @param sourceAircraft, specify where the list of flight comes from.
-	   * @param addFlights, specify a list of flight indexes of the sourceAircraft, to be inserted.
-	   * @param position, specify the location of current flight chain. Flight will be inserted before this position
-	   * @return none
-	   */
-	public void insertFlightChain (Aircraft sourceAircraft, List<Integer> addFlights, int position) {
-		List<Flight> newFlights = new ArrayList<Flight> (); 
-		for (int anAdd:addFlights) {
+	 * The aircraft's insertFlightChain method inserts a list of flight into
+	 * aircraft's flight chain,
+	 * 
+	 * @author Leonard
+	 * @param sourceAircraft,
+	 *            specify where the list of flight comes from.
+	 * @param addFlights,
+	 *            specify a list of flight indexes of the sourceAircraft, to be
+	 *            inserted.
+	 * @param position,
+	 *            specify the location of current flight chain. Flight will be
+	 *            inserted before this position
+	 * @return none
+	 */
+	public void insertFlightChain(Aircraft sourceAircraft, List<Integer> addFlights, int position) {
+		List<Flight> newFlights = new ArrayList<Flight>();
+		for (int anAdd : addFlights) {
 			sourceAircraft.getFlight(anAdd).setAssignedAir(this);
 			newFlights.add(sourceAircraft.getFlight(anAdd));
 		}
-		this.flightChain.addAll(position,newFlights );
+		this.flightChain.addAll(position, newFlights);
 	}
+
 	/**
-	   * The aircraft's insertFlightChain method inserts a list of flight into aircraft's flight chain,
-	   * @author Leonard
-	   * @param sourceAircraft, specify where the list of flight comes from.
-	   * @param startFlight, specify the first flight of source aircraft, which will be inserted.
-	   * @param endFlight, specify the last flight of source aircraft, which will be inserted.
-	   * @param insertFlight, specify the location of current flight chain
-	   * @param isBefore, is inserted before the insertFlight or after
-	   * @return none
-	   */
-	public void insertFlightChain (Aircraft sourceAircraft, Flight startFlight, Flight endFlight, Flight insertFlight, boolean isBefore) {
-		List<Flight> newFlights = new ArrayList<Flight> (); 
+	 * The aircraft's insertFlightChain method inserts a list of flight into
+	 * aircraft's flight chain,
+	 * 
+	 * @author Leonard
+	 * @param sourceAircraft,
+	 *            specify where the list of flight comes from.
+	 * @param startFlight,
+	 *            specify the first flight of source aircraft, which will be
+	 *            inserted.
+	 * @param endFlight,
+	 *            specify the last flight of source aircraft, which will be
+	 *            inserted.
+	 * @param insertFlight,
+	 *            specify the location of current flight chain
+	 * @param isBefore,
+	 *            is inserted before the insertFlight or after
+	 * @return none
+	 */
+	public void insertFlightChain(Aircraft sourceAircraft, Flight startFlight, Flight endFlight, Flight insertFlight,
+			boolean isBefore) {
+		List<Flight> newFlights = new ArrayList<Flight>();
 		int addFlightStartPosition = sourceAircraft.getFlightChain().indexOf(startFlight);
 		int addFlightEndPosition = sourceAircraft.getFlightChain().indexOf(endFlight);
 		int insertFlightPosition = this.flightChain.indexOf(insertFlight);
-		for (int i=addFlightStartPosition;i<=addFlightEndPosition;i++) {
+		for (int i = addFlightStartPosition; i <= addFlightEndPosition; i++) {
 			sourceAircraft.getFlight(i).setAssignedAir(this);
 			newFlights.add(sourceAircraft.getFlight(i));
 		}
 		if (insertFlight != null) {
 			if (isBefore)
-				this.flightChain.addAll(insertFlightPosition,newFlights );
+				this.flightChain.addAll(insertFlightPosition, newFlights);
 			else
-				this.flightChain.addAll(insertFlightPosition+1,newFlights );			
-		} else 
-			this.flightChain.addAll(newFlights );
+				this.flightChain.addAll(insertFlightPosition + 1, newFlights);
+		} else
+			this.flightChain.addAll(newFlights);
 
 	}
-	
-	
+
 	/**
-	   * The aircraft's removeFlightChain method removes list of flights,
-	   * @author Leonard
-	   * @param deleteFlights, specify the list of flights, to be removed
-	   * @return none
-	   */
-	public void removeFlightChain (List<Integer> deleteFlights)  {
-		List<Flight> removeList = new ArrayList<Flight> ();
-		for (Integer i:deleteFlights) 
+	 * The aircraft's removeFlightChain method removes list of flights,
+	 * 
+	 * @author Leonard
+	 * @param deleteFlights,
+	 *            specify the list of flights, to be removed
+	 * @return none
+	 */
+	public void removeFlightChain(List<Integer> deleteFlights) {
+		List<Flight> removeList = new ArrayList<Flight>();
+		for (Integer i : deleteFlights)
 			removeList.add(this.flightChain.get(i));
 
 		this.flightChain.removeAll(removeList);
 	}
+
 	/**
-	   * The aircraft's removeFlightChain method removes list of flights,
-	   * @author Leonard
-	   * @param startFlight, specify the start flight, to be removed.
-	   * @param endFlight, specify the end flight, to be removed.
-	   * @return none
-	   */
-	public void removeFlightChain (Flight startFlight, Flight endFlight)  {
-		List<Flight> removeList = new ArrayList<Flight> ();
+	 * The aircraft's removeFlightChain method removes list of flights,
+	 * 
+	 * @author Leonard
+	 * @param startFlight,
+	 *            specify the start flight, to be removed.
+	 * @param endFlight,
+	 *            specify the end flight, to be removed.
+	 * @return none
+	 */
+	public void removeFlightChain(Flight startFlight, Flight endFlight) {
+		List<Flight> removeList = new ArrayList<Flight>();
 		int removeSFlighttartPosition = this.flightChain.indexOf(startFlight);
 		int removeFlightEndPosition = this.flightChain.indexOf(endFlight);
-		
-		for (int i=removeSFlighttartPosition; i <= removeFlightEndPosition; i++)
+
+		for (int i = removeSFlighttartPosition; i <= removeFlightEndPosition; i++)
 			removeList.add(this.flightChain.get(i));
-		
+
 		this.flightChain.removeAll(removeList);
 	}
-	
-	public List<AirPort>  getAirports() {
-		ArrayList<AirPort> retAirPortList = new ArrayList<AirPort> ();
+
+	public List<AirPort> getAirports() {
+		ArrayList<AirPort> retAirPortList = new ArrayList<AirPort>();
 		for (Flight aFlight : flightChain) {
 			retAirPortList.add(aFlight.getSourceAirPort());
 		}
 		if (!flightChain.isEmpty()) {
-			//add last destination
-			retAirPortList.add(flightChain.get(flightChain.size()-1).getDesintationAirport());
+			// add last destination
+			retAirPortList.add(flightChain.get(flightChain.size() - 1).getDesintationAirport());
 		}
 		return (retAirPortList);
-		
+
 	}
-	
-	public AirPort getAirport (int position, boolean isSource) {
+
+	public AirPort getAirport(int position, boolean isSource) {
 		if (isSource)
 			return (flightChain.get(position).getSourceAirPort());
 		else
 			return (flightChain.get(position).getDesintationAirport());
 	}
+
 	public boolean isCancel() {
 		return isCancel;
 	}
+
 	public void setCancel(boolean isCancel) {
 		this.isCancel = isCancel;
 	}
-	
-	public Aircraft clone() throws CloneNotSupportedException{
+
+	public Aircraft clone() throws CloneNotSupportedException {
 		Aircraft aNew = (Aircraft) super.clone();
-		List<Flight> newFlightChain = new ArrayList<Flight> ();
-		for (Flight aFlight:flightChain) {
+		List<Flight> newFlightChain = new ArrayList<Flight>();
+		for (Flight aFlight : flightChain) {
 			newFlightChain.add(aFlight.clone());
 		}
 		aNew.setFlightChain(newFlightChain);
 		return (aNew);
 	}
-	
-	public void adjustment  () throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
+
+	public void adjustment() throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
 		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
 			selfAdjustEngine.adjustAircraft(this);
 		}
-		
+
 	}
 
-//	public Aircraft getCancelAircrafted() {
-//		return cancelAircrafted;
-//	}
-//	public void setCancelAircrafted(Aircraft cancelAircrafted) {
-//		this.cancelAircrafted = cancelAircrafted;
-//	}
+	// public Aircraft getCancelAircrafted() {
+	// return cancelAircrafted;
+	// }
+	// public void setCancelAircrafted(Aircraft cancelAircrafted) {
+	// this.cancelAircrafted = cancelAircrafted;
+	// }
 	public Aircraft getCancelledAircraft() {
 		Aircraft retCancelled = cancelAircrafted;
 		if (retCancelled == null) {
 			retCancelled = new Aircraft();
 			retCancelled.setCancel(true);
-			retCancelled.setFlightChain(new ArrayList<Flight> ());
+			retCancelled.setFlightChain(new ArrayList<Flight>());
 			retCancelled.setId(this.id);
 			retCancelled.setType(this.type);
 			this.cancelAircrafted = retCancelled;
 		}
 		return retCancelled;
 	}
-	
+
 	public void clear() {
 		flightChain.clear();
 	}
-	
-	public HashMap<Flight, List<Flight>> getCircuitFlights () {
-		HashMap<Flight, List<Flight>> retCircuitList = new HashMap<Flight, List<Flight>> ();
-		
-		for (Flight aFlight:flightChain) {
-			ArrayList<Flight> matchedList = new ArrayList<Flight> ();
+
+	public HashMap<Flight, List<Flight>> getCircuitFlights() {
+		HashMap<Flight, List<Flight>> retCircuitList = new HashMap<Flight, List<Flight>>();
+
+		for (Flight aFlight : flightChain) {
+			ArrayList<Flight> matchedList = new ArrayList<Flight>();
 			int currentPos = flightChain.indexOf(aFlight);
 			String currentSourceAirport = aFlight.getSourceAirPort().getId();
-			for (int j=currentPos+1;j < flightChain.size();j++) {
+			for (int j = currentPos + 1; j < flightChain.size(); j++) {
 				String nextDestAirport = flightChain.get(j).getDesintationAirport().getId();
 				if (currentSourceAirport.equals(nextDestAirport)) {
 					matchedList.add(flightChain.get(j));
 				}
 			}
-			
-			if (!matchedList.isEmpty()) 
+
+			if (!matchedList.isEmpty())
 				retCircuitList.put(aFlight, matchedList);
 		}
-		
+
 		return (retCircuitList);
-		
+
 	}
-	
-	public HashMap<Flight, List<MatchedFlight>> getMatchedFlights (Aircraft air2) {
-		HashMap<Flight, List<MatchedFlight>> retMatchedList = new HashMap<Flight, List<MatchedFlight>> ();
-		
-		for (Flight aFlight:flightChain) {
+
+	public HashMap<Flight, List<MatchedFlight>> getMatchedFlights(Aircraft air2) {
+		HashMap<Flight, List<MatchedFlight>> retMatchedList = new HashMap<Flight, List<MatchedFlight>>();
+
+		for (Flight aFlight : flightChain) {
 			String sourceAirPortAir1 = aFlight.getSourceAirPort().getId();
-			for (Flight bFlight:air2.getFlightChain()) {
+			for (Flight bFlight : air2.getFlightChain()) {
 				String sourceAirPortAir2 = bFlight.getSourceAirPort().getId();
 				if (sourceAirPortAir1.equals(sourceAirPortAir2)) {
 					List<MatchedFlight> matchedList = new ArrayList<MatchedFlight>();
-					for (int i=flightChain.indexOf(aFlight);i < flightChain.size();i++) {
+					for (int i = flightChain.indexOf(aFlight); i < flightChain.size(); i++) {
 						String airPortA = getFlight(i).getDesintationAirport().getId();
-						for (int j=air2.getFlightChain().indexOf(bFlight);j < air2.getFlightChain().size();j++) {
+						for (int j = air2.getFlightChain().indexOf(bFlight); j < air2.getFlightChain().size(); j++) {
 							String airPortB = air2.getFlight(j).getDesintationAirport().getId();
 							if (airPortA.equals(airPortB)) {
 								MatchedFlight aMatched = new MatchedFlight();
@@ -280,7 +324,8 @@ public class Aircraft implements Cloneable{
 					if (!matchedList.isEmpty()) {
 						retMatchedList.put(aFlight, matchedList);
 					} else {
-						//means source airport overlapped but no destination overlapped
+						// means source airport overlapped but no destination
+						// overlapped
 						;
 					}
 				}
@@ -288,131 +333,178 @@ public class Aircraft implements Cloneable{
 		}
 		return retMatchedList;
 	}
-	
-	public void sortFlights () {
+
+	public void sortFlights() {
 		Utils.sort(flightChain, "departureTime", true);
 	}
-	
-	public boolean validate () {
-		
-		if (isCancel) return true;
-		
+
+	public boolean validate() {
+
+		if (isCancel)
+			return true;
+
 		List<Flight> flightChain = getFlightChain();
-		
+
 		for (int i = 0; i < flightChain.size(); i++) {
 			Flight flight = flightChain.get(i);
-			
+
 			String startPort = flight.getSourceAirPort().getId();
-			String endPort =  flight.getDesintationAirport().getId();
-			String airID =  getId();
-			
+			String endPort = flight.getDesintationAirport().getId();
+			String airID = getId();
+
 			if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
 				return true;
 			}
 			if (i != 0) {
 				Flight preFlight = flightChain.get(i - 1);
-				
+
 				if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
 					return true;
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
-	   * The aircraft's adjustFlightTime method adjusts its all flights' departure time and arrival time,
-	   * until the end of flight chain or aborted due to airport issues.
-	   * This method will check airport's available time, the method will automatically adjust departure time to fit airport,
-	   * but the method will not adjust arrival time.
-	   * For normal flights,
-	   * This method takes the departure time of the specified flight, and then use its planned information calculate its arrival time.
-	   * For joined flights (when change destination of first flight),
-	   * This method first search the flightDuration table, if not found, then use planned information of joined flights
-	   * For other extra empty flight,
-	   * This method searches the flightDuration.
-	   * This method must secure the given flight can departure as its departureTime
-	   * @author Leonard
-	   * @param startPosition, specify starts from which flight. The first flight is 0.
-	   * @return Nothing.
-	   * @exception ParseException - date format is not valid
-	   * @see ParseException
-	   * @exception AirportNotAcceptArrivalTime - the destination airport does not accept suggested arrival time.
-	   * 	This exception contains two objects, 
-	   * 	flight (Flight), where the problem flight is at the flight chain
-	   * 	@see Flight
-	   * 	availableTime (FlightTime), suggested arr/dep by airport, if caused by typhoon 
-	   * 	@see FlightTime
-	   * @exception FlightDurationNotFound - the flight duration is not found, means flight not allowed.
-	   * 	This exception contains two objects,
-	   * 	theFlight (Flight), flight is not allowed
-	   * 	searchKey (String), the failed search key for the lookup
-	   */
-	
-	public void adjustFlightTime (int startPosition) throws ParseException, AirportNotAcceptArrivalTime, FlightDurationNotFound {
+	 * The aircraft's adjustFlightTime method adjusts its all flights' departure
+	 * time and arrival time, until the end of flight chain or aborted due to
+	 * airport issues. This method will check airport's available time, the
+	 * method will automatically adjust departure time to fit airport, but the
+	 * method will not adjust arrival time. For normal flights, This method
+	 * takes the departure time of the specified flight, and then use its
+	 * planned information calculate its arrival time. For joined flights (when
+	 * change destination of first flight), This method first search the
+	 * flightDuration table, if not found, then use planned information of
+	 * joined flights For other extra empty flight, This method searches the
+	 * flightDuration. This method must secure the given flight can departure as
+	 * its departureTime
+	 * 
+	 * @author Leonard
+	 * @param startPosition,
+	 *            specify starts from which flight. The first flight is 0.
+	 * @return Nothing.
+	 * @exception ParseException
+	 *                - date format is not valid
+	 * @see ParseException
+	 * @exception AirportNotAcceptArrivalTime
+	 *                - the destination airport does not accept suggested
+	 *                arrival time. This exception contains two objects, flight
+	 *                (Flight), where the problem flight is at the flight chain
+	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
+	 *      caused by typhoon
+	 * @see FlightTime
+	 * @exception FlightDurationNotFound
+	 *                - the flight duration is not found, means flight not
+	 *                allowed. This exception contains two objects, theFlight
+	 *                (Flight), flight is not allowed searchKey (String), the
+	 *                failed search key for the lookup
+	 * @throws AirportNotAcceptDepartureTime
+	 *             - the airport does not accept suggested departure time.
+	 *             - the source airport does not accept suggested
+	 *                departure time. This exception contains two objects, flight
+	 *                (Flight), where the problem flight is at the flight chain
+	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
+	 *      caused by typhoon
+	 * @see FlightTime           
+	 */
+
+	public void adjustFlightTime(int startPosition)
+			throws ParseException, AirportNotAcceptArrivalTime, FlightDurationNotFound, AirportNotAcceptDepartureTime {
 		Flight currentFlight = null;
 		Flight nextFlight = null;
-		for (int i=startPosition; i < flightChain.size(); i++) {
+		for (int i = startPosition; i < flightChain.size(); i++) {
 			nextFlight = flightChain.get(i);
-			 
+
 			if (i > startPosition) {
-				Calendar cl = Calendar. getInstance();
-			    cl.setTime(currentFlight.getArrivalTime());
-			    int plannedGroundingTime = nextFlight.getGroundingTime(currentFlight);
-			    cl.add(Calendar.MINUTE, plannedGroundingTime);
-			    FlightTime aScheduledTime = new FlightTime();
-			    aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
-			    if (cl.getTime().before(nextFlight.getDepartureTime()))
-			    	aScheduledTime.setDepartureTime(nextFlight.getDepartureTime());
-			    else
-			    	aScheduledTime.setDepartureTime(cl.getTime());
-			    FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime, plannedGroundingTime );
-			    if (newFlightTime!=null) {
-			    	if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
-			    		throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
-			    	} else {
-				    	nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
-			    	}
-			    } else {
-			    	nextFlight.setDepartureTime(aScheduledTime.getDepartureTime());
-			    }
+				Calendar cl = Calendar.getInstance();
+				cl.setTime(currentFlight.getArrivalTime());
+				int plannedGroundingTime = nextFlight.getGroundingTime(currentFlight);
+				cl.add(Calendar.MINUTE, plannedGroundingTime);
+				FlightTime aScheduledTime = new FlightTime();
+				aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
+				if (cl.getTime().before(nextFlight.getDepartureTime()))
+					aScheduledTime.setDepartureTime(nextFlight.getDepartureTime());
+				else
+					aScheduledTime.setDepartureTime(cl.getTime());
+				FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
+						plannedGroundingTime);
+				if (newFlightTime != null) {
+					if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
+						throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
+					} else {
+						// check if departure time allowed
+						if (newFlightTime.getDepartureTime().before(nextFlight.getDepartureTime())) {
+							// must ensure it is typhoon & not international
+							// flight
+							if (newFlightTime.isIsTyphoon() && !nextFlight.isInternationalFlight()) {
+								// check if more than 6 hours earlier
+								cl.setTime(newFlightTime.getDepartureTime());
+								cl.add(Calendar.HOUR, MAXIMUM_EARLIER_TIME);
+								if (cl.getTime().before(nextFlight.getPlannedFlight().getDepartureTime())) {
+									throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime);
+									
+								} else {
+									nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+								}
+							} else
+								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime);
+						} else {
+							if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0)
+							nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+						}
+					}
+				} else {
+					if (nextFlight.getDepartureTime().compareTo(aScheduledTime.getDepartureTime()) != 0)
+						nextFlight.setDepartureTime(aScheduledTime.getDepartureTime());
+				}
 			}
-			
+
 			currentFlight = nextFlight;
-			
+
 			Date newArrival = currentFlight.calcuateNextArrivalTime();
-		
-			if (newArrival.compareTo(currentFlight.getArrivalTime()) !=0 )
+
+			if (newArrival.compareTo(currentFlight.getArrivalTime()) != 0)
 				currentFlight.setArrivalTime(newArrival);
 		}
-		
+
 	}
+
 	public Aircraft getCancelAircrafted() {
 		return cancelAircrafted;
 	}
+
 	public void setCancelAircrafted(Aircraft cancelAircrafted) {
 		this.cancelAircrafted = cancelAircrafted;
 	}
+
 	public List<Flight> getDropOutList() {
 		return dropOutList;
 	}
+
 	public void setDropOutList(List<Flight> dropOutList) {
 		this.dropOutList = dropOutList;
 	}
+
 	/**
-	   * The aircraft's moveToDropout method drops a regular flight into dropOutList,
-	   * @author Leonard
-	   * @param flight, specify to-be-removed flight, the flight must be part of aircraft's regular flight.
-	   * @return true - if the flight has been successfully moved. false - flight is not belong to this aircraft.
-	   */
-	public boolean moveToDropOut (Flight aFlight) {
+	 * The aircraft's moveToDropout method drops a regular flight into
+	 * dropOutList,
+	 * 
+	 * @author Leonard
+	 * @param flight,
+	 *            specify to-be-removed flight, the flight must be part of
+	 *            aircraft's regular flight.
+	 * @return true - if the flight has been successfully moved. false - flight
+	 *         is not belong to this aircraft.
+	 */
+	public boolean moveToDropOut(Flight aFlight) {
 		if (flightChain.contains(aFlight)) {
 			dropOutList.add(aFlight);
 			flightChain.remove(aFlight);
 			return true;
-		} else 
+		} else
 			return false;
 	}
-	
+
 }

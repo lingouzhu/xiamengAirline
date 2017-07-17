@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
+import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
@@ -368,7 +369,7 @@ public class AirPortTest {
 	}
 
 	@Test
-	public void testRequestAirport() throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
+	public void testRequestAirport() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAcceptDepartureTime {
 		AirPortClose portCloseBean = new AirPortClose();
 		String airPortId = "49";
 		AirPort aAirport = InitData.airportList.getAirport(airPortId);
