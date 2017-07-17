@@ -421,11 +421,13 @@ public class AirPortTest {
 		aTime.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 22:00:00"));
 
 		System.out.println(Utils.timeFormatToString2(aTime.getArrivalTime()));
+		
 
 		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
 
 		assertEquals("07/05/2017 17:00:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("07/05/2017 17:50:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
+		assertEquals(true, rightTime.isIsTyphoon());
 
 		// arrival close to airport open, dep > grounding time
 		aTime = new FlightTime();
@@ -502,6 +504,7 @@ public class AirPortTest {
 
 		assertEquals("26/05/2017 06:10:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("26/05/2017 07:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
+		assertEquals(false, rightTime.isIsTyphoon());
 
 		// arrival in normal close period, dep in range, enough gap
 		aTime = new FlightTime();

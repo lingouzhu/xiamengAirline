@@ -52,8 +52,7 @@ public class InitDataTest {
 		int anotherF = InitData.jointFlightMap.get(f1918.getFlightId()).getFlightId();
 		assertEquals(1920, anotherF);
 		Flight f1920 = air122.getFlightByFlightId(1920);
-		anotherF = InitData.jointFlightMap.get(f1920.getFlightId()).getFlightId();
-		assertEquals(0, anotherF);
+		assertEquals(null, InitData.jointFlightMap.get(f1920.getFlightId()));
 		
 		Aircraft air109 = InitData.originalSolution.getAircraft("109", "2", false);
 		Flight f325 = air109.getFlightByFlightId(325);
