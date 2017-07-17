@@ -8,12 +8,14 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
+import xiaMengAirline.util.Utils;
 
 public class StartUp {
 
 	final public static long iterLength = 10000000L;
 	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
 		
+		long startTime=System.currentTimeMillis();
 		//Step1, Load all data & initialize
 		String initDatafile = "XiahangData20170705_1.xlsx";
 		//String fightTimeFile = "C://Users//esunnen//Desktop//飞行时间表.csv";
@@ -44,19 +46,14 @@ public class StartUp {
 		}
 		
 		//Step5, calcuate cost
-		aBetterSolution.refreshCost();
+		aBetterSolution.refreshCost(true);
+		// execute time
+		long endTime=System.currentTimeMillis();
+		long mins = (endTime - startTime)/(1000* 60);
 		
 		//Step6, generate output
-		aBetterSolution.generateOutput();
-			
-			
+		aBetterSolution.generateOutput(String.valueOf(mins));
 		
-		
-		
-		
-		
-		
-
 	}
 
 }

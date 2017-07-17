@@ -83,6 +83,17 @@ public class Utils {
 		return result;
     }
 	
+	public static String timeFormatter2(Date date) {  
+		String result = "";
+		
+		if (date != null) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+			result = formatter.format(date);
+			
+		}
+		return result;
+    }
+	
 	
 	public static Date timeStr2date(String str) {  
 		Date date = null;
@@ -136,9 +147,9 @@ public class Utils {
 		long diff = date1.getTime() - date2.getTime();
 		long days = diff / (1000 * 60 * 60 * 24);  
 		
-		long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60);
+		long mins = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60);
 		
-		return new BigDecimal(hours);
+		return new BigDecimal(mins);
     }
 	
 	public static Date addMinutes (Date aDate, int minutes) {

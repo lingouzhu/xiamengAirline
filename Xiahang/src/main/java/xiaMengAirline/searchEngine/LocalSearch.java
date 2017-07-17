@@ -23,12 +23,12 @@ public class LocalSearch {
 		XiaMengAirlineSolution aNewLocalSolution = new XiaMengAirlineSolution();
 		aNewLocalSolution.replaceOrAddNewAircraft(newAir1);
 		aNewLocalSolution.replaceOrAddNewAircraft(newAir2);
-		aNewLocalSolution.refreshCost();
+		aNewLocalSolution.refreshCost(false);
 		
 		XiaMengAirlineSolution aOldLocalSolution = new XiaMengAirlineSolution();
 		aOldLocalSolution.replaceOrAddNewAircraft(oldAir1);
 		aOldLocalSolution.replaceOrAddNewAircraft(oldAir2);
-		aNewLocalSolution.refreshCost();
+		aNewLocalSolution.refreshCost(false);
 		
 		
 		return aNewLocalSolution.getCost().subtract(aOldLocalSolution.getCost());

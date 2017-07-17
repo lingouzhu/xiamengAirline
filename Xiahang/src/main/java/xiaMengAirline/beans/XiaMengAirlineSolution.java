@@ -1,5 +1,6 @@
 package xiaMengAirline.beans;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7,12 +8,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import xiaMengAirline.util.CSVUtils;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
 
 public class XiaMengAirlineSolution implements Cloneable{
 	private BigDecimal cost = new BigDecimal("0");
 	private HashMap<String, Aircraft> schedule = new  HashMap<String, Aircraft>();
+	
+	private List<String> outputList = new ArrayList<String>();
+	
 	public BigDecimal getCost() {
 		return cost;
 	}
@@ -47,11 +52,11 @@ public class XiaMengAirlineSolution implements Cloneable{
 
 	}
 	
-	public void refreshCost () {
+	public void refreshCost (boolean refreshOut) {
 		this.cost = new BigDecimal("0");
 		
-		List<Flight> joint1FlightList = new ArrayList<Flight>();
-		List<Flight> joint2CancelFlightList = new ArrayList<Flight>();
+		outputList = new ArrayList<String>();
+		
 		
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		for (Aircraft aAir:airList) {
@@ -60,9 +65,15 @@ public class XiaMengAirlineSolution implements Cloneable{
 
 					if (newFlight.getFlightId() > InitData.plannedMaxFligthId) {
 						cost.add(new BigDecimal("5000"));
+						if (refreshOut) {
+							outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "1"));
+						}
 					} else {
+						boolean isChanged = false;
+						boolean isStretch = false;
 						if (!newFlight.getPlannedAir().getType().equals(aAir.getType())) {
 							cost.add(new BigDecimal("1000").multiply(newFlight.getImpCoe()));
+							isChanged = true;
 						}
 						
 						if (!newFlight.getDepartureTime().equals(newFlight.getPlannedFlight().getDepartureTime())) {
@@ -73,21 +84,34 @@ public class XiaMengAirlineSolution implements Cloneable{
 							} else {
 								cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
 							}
+							isChanged = true;
 						}
 						
 						if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null) {
+							if (!newFlight.getDesintationAirport().getId().equals((newFlight.getPlannedFlight().getDesintationAirport().getId()))) {
+								Flight nextFlight = InitData.jointFlightMap.get(newFlight.getFlightId());
+								
+								cost.add(new BigDecimal("750").multiply(newFlight.getImpCoe()));
+								cost.add(new BigDecimal("750").multiply(nextFlight.getImpCoe()));
+								isStretch = true;
+								if (refreshOut) {
+									outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "1", "0"));
+									outputList.add(CSVUtils.flight2Output(nextFlight, aAir.getId(), "1", "1", "0"));
+								}
+								
+							}
 							
-							joint1FlightList.add(newFlight);
 						}
 						
+						if (isChanged && !isStretch) {
+							if (refreshOut) {
+								outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "0"));
+							}
+						}
 					}
 					
 				}	
 				
-				for (Flight joint2Flight : aAir.getDropOutList()) {
-					joint2CancelFlightList.add(joint2Flight);
-					
-				}
 			} else {
 				for (Flight cancelFlight : aAir.getFlightChain()) {
 					if (cancelFlight.getFlightId() > InitData.plannedMaxFligthId) {
@@ -95,22 +119,25 @@ public class XiaMengAirlineSolution implements Cloneable{
 					}
 					
 					cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
+					if (refreshOut) {
+						outputList.add(CSVUtils.flight2Output(cancelFlight, aAir.getId(), "1", "0", "0"));
+					}
 					
 				}
 			}
 			
 		}
 		// joint flight 
-		for (Flight cancelFlight : joint2CancelFlightList) {
-			for (Flight flight : joint1FlightList) {
-				if (InitData.jointFlightMap.get(flight.getFlightId()).getFlightId() == cancelFlight.getFlightId()) {
-					
-					cost.add(new BigDecimal("750").multiply(flight.getImpCoe()));
-					cost.add(new BigDecimal("750").multiply(cancelFlight.getImpCoe()));
-					
-				}
-			}
-		}
+//		for (Flight cancelFlight : joint2CancelFlightList) {
+//			for (Flight flight : joint1FlightList) {
+//				if (InitData.jointFlightMap.get(flight.getFlightId()).getFlightId() == cancelFlight.getFlightId()) {
+//					
+//					cost.add(new BigDecimal("750").multiply(flight.getImpCoe()));
+//					cost.add(new BigDecimal("750").multiply(cancelFlight.getImpCoe()));
+//					
+//				}
+//			}
+//		}
 	}
 	public void refreshCost (BigDecimal detla) {
 		this.cost.add(detla);
@@ -323,8 +350,8 @@ public class XiaMengAirlineSolution implements Cloneable{
 		return true;
 	}
 	
-	public void generateOutput () {
-		
+	public void generateOutput(String minutes) {
+		CSVUtils.exportCsv(new File("数据森林" + "_" + cost.toString() + "_" +  minutes), outputList);
 	}
 
 }
