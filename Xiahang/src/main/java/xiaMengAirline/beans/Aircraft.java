@@ -452,8 +452,8 @@ public class Aircraft implements Cloneable {
 					if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
 						throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
 					} else {
-						// check if departure time allowed
-						if (newFlightTime.getDepartureTime().before(nextFlight.getDepartureTime())) {
+						// check if departure time earlier
+						if (newFlightTime.getDepartureTime().before(nextFlight.getPlannedFlight().getDepartureTime())) {
 							// must ensure it is typhoon & not international
 							// flight
 							if (newFlightTime.isIsTyphoon() && !nextFlight.isInternationalFlight()) {
@@ -470,7 +470,7 @@ public class Aircraft implements Cloneable {
 								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime);
 						} else {
 							if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0)
-							nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+								nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
 						}
 					}
 				} else {
