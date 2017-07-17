@@ -1,5 +1,6 @@
 package xiaMengAirline.beans;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -353,18 +354,35 @@ public class Aircraft implements Cloneable {
 			String airID = getId();
 
 			if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
-				return true;
+				return false;
 			}
 			if (i != 0) {
 				Flight preFlight = flightChain.get(i - 1);
 
 				if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
-					return true;
+					return false;
 				}
+			
+				if (Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).compareTo(new BigDecimal("50")) < 0
+						&& (preFlight.getFlightId() > InitData.plannedMaxFligthId || flight.getFlightId() > InitData.plannedMaxFligthId 
+								|| Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).
+						compareTo(Utils.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(), preFlight.getPlannedFlight().getArrivalTime())) != 0
+						|| !flight.getPlannedAir().getId().equals(preFlight.getPlannedAir().getId()))) {
+					return false;
+				}
+				
+				if (InitData.jointFlightMap.get(preFlight.getFlightId()) != null) {
+					if (preFlight.getDesintationAirport().getId().equals((preFlight.getPlannedFlight().getDesintationAirport().getId()))
+							&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight.getFlightId()) {
+						return false;
+					}
+				}
+			
 			}
 		}
+		
+		return true;
 
-		return false;
 	}
 
 	/**

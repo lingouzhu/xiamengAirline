@@ -75,25 +75,26 @@ public class XiaMengAirlineSolution implements Cloneable{
 							}
 						}
 						
-						if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null && InitData.jointFlightMap.get(newFlight.getFlightId()).getFlightId() != 0) {
+						if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null) {
 							
 							joint1FlightList.add(newFlight);
 						}
 						
 					}
 					
-				}				
+				}	
+				
+				for (Flight joint2Flight : aAir.getDropOutList()) {
+					joint2CancelFlightList.add(joint2Flight);
+					
+				}
 			} else {
 				for (Flight cancelFlight : aAir.getFlightChain()) {
 					if (cancelFlight.getFlightId() > InitData.plannedMaxFligthId) {
 						continue;
 					}
-					if (InitData.jointFlightMap.get(cancelFlight.getFlightId()) != null && InitData.jointFlightMap.get(cancelFlight.getFlightId()).getFlightId() == 0) {
-						joint2CancelFlightList.add(cancelFlight);
-					} else {
-						cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
-					}
 					
+					cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
 					
 				}
 			}
@@ -101,20 +102,13 @@ public class XiaMengAirlineSolution implements Cloneable{
 		}
 		// joint flight 
 		for (Flight cancelFlight : joint2CancelFlightList) {
-			boolean jointFlight = false;
 			for (Flight flight : joint1FlightList) {
-				if (InitData.jointFlightMap.get(flight.getFlightId()).getFlightId() == cancelFlight.getFlightId()
-						&& flight.getDesintationAirport().getId() == cancelFlight.getDesintationAirport().getId()) {
+				if (InitData.jointFlightMap.get(flight.getFlightId()).getFlightId() == cancelFlight.getFlightId()) {
 					
 					cost.add(new BigDecimal("750").multiply(flight.getImpCoe()));
 					cost.add(new BigDecimal("750").multiply(cancelFlight.getImpCoe()));
 					
-					jointFlight = true;
 				}
-			}
-			
-			if (!jointFlight) {
-				cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
 			}
 		}
 	}
@@ -162,22 +156,39 @@ public class XiaMengAirlineSolution implements Cloneable{
 					String endPort =  flight.getDesintationAirport().getId();
 					String airID =  aAir.getId();
 					
-					if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
-						return true;
+//					if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
+//						return false;
+//					}
+					// 5.0 departure time check
+					if (flight.getFlightId() <= InitData.plannedMaxFligthId) {
+						if (flight.isInternationalFlight()) {
+							if (Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("36")) > 0
+									|| flight.getDepartureTime().after(flight.getPlannedFlight().getDepartureTime())) {
+								System.out.println("5.0 error departure time: flightID" + flight.getFlightId());
+								return false;
+							}
+						} else {
+							if (Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("24")) > 0
+									|| Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("-6")) <  0) {
+								System.out.println("5.0 error departure time: flightID" + flight.getFlightId());
+								return false;
+							}
+						}
 					}
+					
 					// 5.1 joint flight
 					if (i != 0) {
 						Flight preFlight = flightChain.get(i - 1);
 						
 						if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
 							System.out.println("5.1 error flight connection: flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
-							return true;
+							return false;
 						}
 					}
 					// 5.2 air limit
 					if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
 						System.out.println("5.2 error air limit: flightID" + flight.getFlightId());
-						return true;
+						return false;
 					}
 					// 5.3  start air port regular close
 					List<RegularAirPortClose> regularStartCloseSchedule = flight.getSourceAirPort().getRegularCloseSchedule();
@@ -198,7 +209,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 						if (flight.getDepartureTime().after(aCloseDate)
 								&& flight.getDepartureTime().before(aOpenDate)) {
 							System.out.println("5.3 error start airport regular closed: flightID" + flight.getFlightId());
-							return true;
+							return false;
 						}
 					
 					}	
@@ -221,7 +232,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 						if (flight.getArrivalTime().after(aCloseDate)
 								&& flight.getArrivalTime().before(aOpenDate)) {
 							System.out.println("5.3 error end airport regular closed: flightID" + flight.getFlightId());
-							return true;
+							return false;
 						}
 					
 					}	
@@ -231,17 +242,22 @@ public class XiaMengAirlineSolution implements Cloneable{
 						Flight preFlight = flightChain.get(i - 1);
 						
 						if (Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).compareTo(new BigDecimal("50")) < 0
-								&& Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).
+								&& (preFlight.getFlightId() > InitData.plannedMaxFligthId || flight.getFlightId() > InitData.plannedMaxFligthId 
+										|| Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).
 								compareTo(Utils.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(), preFlight.getPlannedFlight().getArrivalTime())) != 0
-								) {
+								|| !flight.getPlannedAir().getId().equals(preFlight.getPlannedAir().getId()))) {
 							System.out.println("5.4 error time between: flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
-							return true;
+							return false;
 						}
 						
 						// 5.5 joint flight
-//						if ((InitData.jointFlightMap.get(preFlight.getFlightId()) != null && InitData.jointFlightMap.get(preFlight.getFlightId()) != 0)) {
-//							
-//						}
+						if (InitData.jointFlightMap.get(preFlight.getFlightId()) != null) {
+							if (preFlight.getDesintationAirport().getId().equals((preFlight.getPlannedFlight().getDesintationAirport().getId()))
+									&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight.getFlightId()) {
+								System.out.println("5.5 error joint flight : flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
+								return false;
+							}
+						}
 					}
 					
 					
@@ -251,7 +267,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 						if (flight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
 								&& flight.getDepartureTime().compareTo(aClose.getEndTime()) < 0 && !aClose.isAllowForTakeoff()) {
 							System.out.println("5.6 error start airport typhoon closed: flightID" + flight.getFlightId());
-							return true;
+							return false;
 						}
 						
 					}
@@ -262,18 +278,18 @@ public class XiaMengAirlineSolution implements Cloneable{
 						if (flight.getArrivalTime().compareTo(aClose.getStartTime()) > 0
 								&& flight.getArrivalTime().compareTo(aClose.getEndTime()) < 0 && !aClose.isAllowForLanding()) {
 							System.out.println("5.6 error end airport typhoon closed: flightID" + flight.getFlightId());
-							return true;
+							return false;
 						}
 						
 						if (flight.getArrivalTime().compareTo(aClose.getStartTime()) < 0) {
 							if (i >= flightChain.size()) {
 								System.out.println("5.6 error air parking : flightID" + flight.getFlightId());
-								return true;
+								return false;
 							}
 							Flight nextFlight = flightChain.get(i + 1);
 							if (nextFlight.getDepartureTime().compareTo(aClose.getStartTime()) > 0 && aClose.getAllocatedParking() == 0) {
 								System.out.println("5.6 error air parking: flightID" + flight.getFlightId());
-								return true;
+								return false;
 							}
 						}
 						
@@ -283,7 +299,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 					if (i == 0) {
 						if (!flight.getSourceAirPort().getId().equals(InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
 							System.out.println("5.7 error wrong start airpot: flightID" + flight.getFlightId());
-							return true;
+							return false;
 						}
 						
 					}
@@ -291,14 +307,12 @@ public class XiaMengAirlineSolution implements Cloneable{
 					if (i == flightChain.size() - 1) {
 						if (!flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
 							System.out.println("5.7 error wrong end airpot: flightID" + flight.getFlightId());
-							return true;
+							return false;
 						}
 						
 					}
 					
-					
 				}
-				
 				
 				
 			}
