@@ -8,15 +8,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
+import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
 
 public class Aircraft implements Cloneable {
+	private static final Logger logger = Logger.getLogger(Aircraft.class);
 	final static private int MAXIMUM_EARLIER_TIME = 6; // HOUR
+	final static private int DOMESTIC_MAXIMUM_DELAY_TIME = 24; // HOUR
+	final static private int INTERNATIONAL_MAXIMUM_DELAY_TIME = 36; // HOUR
 	private String id;
 	private String type;
 	private List<Flight> flightChain = new ArrayList<Flight>();
@@ -423,13 +429,14 @@ public class Aircraft implements Cloneable {
 	 *             - the source airport does not accept suggested
 	 *                departure time. This exception contains two objects, flight
 	 *                (Flight), where the problem flight is at the flight chain
+	 * @throws AirportNotAvailable 
 	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
 	 *      caused by typhoon
 	 * @see FlightTime           
 	 */
 
 	public void adjustFlightTime(int startPosition)
-			throws ParseException, AirportNotAcceptArrivalTime, FlightDurationNotFound, AirportNotAcceptDepartureTime {
+			throws ParseException, AirportNotAcceptArrivalTime, FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable {
 		Flight currentFlight = null;
 		Flight nextFlight = null;
 		for (int i = startPosition; i < flightChain.size(); i++) {
@@ -452,8 +459,8 @@ public class Aircraft implements Cloneable {
 					if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
 						throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
 					} else {
-						// check if departure time allowed
-						if (newFlightTime.getDepartureTime().before(nextFlight.getDepartureTime())) {
+						// check if departure time earlier
+						if (newFlightTime.getDepartureTime().before(nextFlight.getPlannedFlight().getDepartureTime())) {
 							// must ensure it is typhoon & not international
 							// flight
 							if (newFlightTime.isIsTyphoon() && !nextFlight.isInternationalFlight()) {
@@ -469,8 +476,28 @@ public class Aircraft implements Cloneable {
 							} else
 								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime);
 						} else {
-							if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0)
-							nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+							if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
+								//if departure time delayed
+								if (newFlightTime.isIsTyphoon()) {
+									//if aircraft can arrive but cannot departure, typhoon not allows parking!
+									throw new AirportNotAvailable(currentFlight, newFlightTime);
+								} else {
+									//if delay too much
+									cl.setTime(currentFlight.getArrivalTime());
+									if (currentFlight.isInternationalFlight()) {
+										cl.add(Calendar.MINUTE, INTERNATIONAL_MAXIMUM_DELAY_TIME);
+									} else {
+										cl.add(Calendar.MINUTE, DOMESTIC_MAXIMUM_DELAY_TIME);
+									}
+									if (cl.getTime().before(newFlightTime.getDepartureTime())) {
+										throw new AirportNotAvailable(currentFlight, newFlightTime);
+									} else {
+										//it shall be normal airport close, so not delay too much
+										nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+									}
+								}
+							}
+								
 						}
 					}
 				} else {
@@ -525,6 +552,7 @@ public class Aircraft implements Cloneable {
 			return false;
 	}
 	
+
 	// get flight index by flight id
 	public int getFlightIndexByFlightId(int aFlightId){
 		for (int i = 0; i < flightChain.size(); i++) {
