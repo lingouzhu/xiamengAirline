@@ -2,9 +2,22 @@ package xiaMengAirline.beans;
 
 import java.util.Date;
 
+
+/**
+ * The FlightTime class specify suggested flight arrival / departure time,
+ * @author Leonard
+ */
 public class FlightTime {
+	/** Represents suggested arrival time.
+	*/
 	private Date arrivalTime;
+	/** Represents suggested departure time.
+	*/
 	private Date departureTime;
+	/** Represents if the reschedule is caused by typhoon.
+	*/
+	private boolean IsTyphoon = false;
+	
 	public Date getArrivalTime() {
 		return arrivalTime;
 	}
@@ -16,6 +29,12 @@ public class FlightTime {
 	}
 	public void setDepartureTime(Date departureTime) {
 		this.departureTime = departureTime;
+	}
+	public boolean isIsTyphoon() {
+		return IsTyphoon;
+	}
+	public void setIsTyphoon(boolean isTyphoon) {
+		IsTyphoon = isTyphoon;
 	}
 	
 	

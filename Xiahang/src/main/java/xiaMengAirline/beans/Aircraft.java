@@ -7,10 +7,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.xml.ws.RespectBindingFeature;
-
-import org.openqa.selenium.firefox.UnableToCreateProfileException;
-
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.searchEngine.SelfSearch;
@@ -23,6 +19,7 @@ public class Aircraft implements Cloneable{
 	private List<Flight> flightChain = new ArrayList<Flight>() ;
 	private boolean isCancel;
 	private Aircraft cancelAircrafted = null;
+	private List<Flight> dropOutList = new ArrayList<Flight> ();
 
 	public String getId() {
 		return id;
@@ -76,6 +73,29 @@ public class Aircraft implements Cloneable{
 		return flightChain.contains(aFlight);
 	}
 	
+	/**
+	   * The aircraft's insertFlight method inserts a flight into aircraft's flight chain.
+	   * The flight must be fresh new and no referred by others.
+	   * @author Leonard
+	   * @param aFlight, a new flight, either fresh new created or cloned.
+	   * @param position, specify the location of current flight chain. Flight will be inserted before this position
+	   * @return none
+	   */
+	public void insertFlight (Flight aFlight, int position) {
+		aFlight.setPlannedAir(null);
+		aFlight.setAssignedAir(this);
+		aFlight.setPlannedFlight(null);
+		flightChain.add(position, aFlight);
+	}
+	
+	/**
+	   * The aircraft's insertFlightChain method inserts a list of flight into aircraft's flight chain,
+	   * @author Leonard
+	   * @param sourceAircraft, specify where the list of flight comes from.
+	   * @param addFlights, specify a list of flight indexes of the sourceAircraft, to be inserted.
+	   * @param position, specify the location of current flight chain. Flight will be inserted before this position
+	   * @return none
+	   */
 	public void insertFlightChain (Aircraft sourceAircraft, List<Integer> addFlights, int position) {
 		List<Flight> newFlights = new ArrayList<Flight> (); 
 		for (int anAdd:addFlights) {
@@ -84,6 +104,16 @@ public class Aircraft implements Cloneable{
 		}
 		this.flightChain.addAll(position,newFlights );
 	}
+	/**
+	   * The aircraft's insertFlightChain method inserts a list of flight into aircraft's flight chain,
+	   * @author Leonard
+	   * @param sourceAircraft, specify where the list of flight comes from.
+	   * @param startFlight, specify the first flight of source aircraft, which will be inserted.
+	   * @param endFlight, specify the last flight of source aircraft, which will be inserted.
+	   * @param insertFlight, specify the location of current flight chain
+	   * @param isBefore, is inserted before the insertFlight or after
+	   * @return none
+	   */
 	public void insertFlightChain (Aircraft sourceAircraft, Flight startFlight, Flight endFlight, Flight insertFlight, boolean isBefore) {
 		List<Flight> newFlights = new ArrayList<Flight> (); 
 		int addFlightStartPosition = sourceAircraft.getFlightChain().indexOf(startFlight);
@@ -102,7 +132,14 @@ public class Aircraft implements Cloneable{
 			this.flightChain.addAll(newFlights );
 
 	}
-
+	
+	
+	/**
+	   * The aircraft's removeFlightChain method removes list of flights,
+	   * @author Leonard
+	   * @param deleteFlights, specify the list of flights, to be removed
+	   * @return none
+	   */
 	public void removeFlightChain (List<Integer> deleteFlights)  {
 		List<Flight> removeList = new ArrayList<Flight> ();
 		for (Integer i:deleteFlights) 
@@ -110,6 +147,13 @@ public class Aircraft implements Cloneable{
 
 		this.flightChain.removeAll(removeList);
 	}
+	/**
+	   * The aircraft's removeFlightChain method removes list of flights,
+	   * @author Leonard
+	   * @param startFlight, specify the start flight, to be removed.
+	   * @param endFlight, specify the end flight, to be removed.
+	   * @return none
+	   */
 	public void removeFlightChain (Flight startFlight, Flight endFlight)  {
 		List<Flight> removeList = new ArrayList<Flight> ();
 		int removeSFlighttartPosition = this.flightChain.indexOf(startFlight);
@@ -289,6 +333,7 @@ public class Aircraft implements Cloneable{
 	   * For other extra empty flight,
 	   * This method searches the flightDuration.
 	   * This method must secure the given flight can departure as its departureTime
+	   * @author Leonard
 	   * @param startPosition, specify starts from which flight. The first flight is 0.
 	   * @return Nothing.
 	   * @exception ParseException - date format is not valid
@@ -297,7 +342,7 @@ public class Aircraft implements Cloneable{
 	   * 	This exception contains two objects, 
 	   * 	flight (Flight), where the problem flight is at the flight chain
 	   * 	@see Flight
-	   * 	availableTime (FlightTime), suggested arr/dep by airport 
+	   * 	availableTime (FlightTime), suggested arr/dep by airport, if caused by typhoon 
 	   * 	@see FlightTime
 	   * @exception FlightDurationNotFound - the flight duration is not found, means flight not allowed.
 	   * 	This exception contains two objects,
@@ -342,6 +387,32 @@ public class Aircraft implements Cloneable{
 				currentFlight.setArrivalTime(newArrival);
 		}
 		
+	}
+	public Aircraft getCancelAircrafted() {
+		return cancelAircrafted;
+	}
+	public void setCancelAircrafted(Aircraft cancelAircrafted) {
+		this.cancelAircrafted = cancelAircrafted;
+	}
+	public List<Flight> getDropOutList() {
+		return dropOutList;
+	}
+	public void setDropOutList(List<Flight> dropOutList) {
+		this.dropOutList = dropOutList;
+	}
+	/**
+	   * The aircraft's moveToDropout method drops a regular flight into dropOutList,
+	   * @author Leonard
+	   * @param flight, specify to-be-removed flight, the flight must be part of aircraft's regular flight.
+	   * @return true - if the flight has been successfully moved. false - flight is not belong to this aircraft.
+	   */
+	public boolean moveToDropOut (Flight aFlight) {
+		if (flightChain.contains(aFlight)) {
+			dropOutList.add(aFlight);
+			flightChain.remove(aFlight);
+			return true;
+		} else 
+			return false;
 	}
 	
 }

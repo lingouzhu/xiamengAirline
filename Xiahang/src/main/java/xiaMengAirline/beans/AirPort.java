@@ -75,6 +75,9 @@ public class AirPort {
 					
 				}
 			}
+			
+			if (retFlightTime !=null)
+				retFlightTime.setIsTyphoon(true);
 
 		}
 		if (retFlightTime == null) {
