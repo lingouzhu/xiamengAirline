@@ -3,6 +3,7 @@ package xiaMengAirline;
 
 import java.text.ParseException;
 
+import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.searchEngine.LocalSearch;
@@ -13,7 +14,7 @@ import xiaMengAirline.util.Utils;
 public class StartUp {
 
 	final public static long iterLength = 10000000L;
-	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
+	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		
 		long startTime=System.currentTimeMillis();
 		//Step1, Load all data & initialize

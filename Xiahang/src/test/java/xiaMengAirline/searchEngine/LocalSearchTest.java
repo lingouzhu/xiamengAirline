@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
@@ -34,7 +35,7 @@ public class LocalSearchTest {
 	}
 
 	@Test
-	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
+	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		Aircraft air1 = new Aircraft();
 		List<Flight> flightChain = new ArrayList<Flight>();
 		flightChain.add(createFlight(101, "ORF", "EWR"));

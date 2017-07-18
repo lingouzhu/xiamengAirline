@@ -30,12 +30,12 @@ public class AirPortTest {
 		int time = 120;
 
 		InitData.fightDurationMap.put(airType + "_" + startPort + "_" + endPort, time);
-		
+
 		Flight f1 = createFlight(102, "EWR", "STL");
 		f1.setFlightId(102);
 		f1.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 18:30:00"));
 		f1.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 22:30:00"));
-		Flight f2= createFlight(103, "STL", "CLE");
+		Flight f2 = createFlight(103, "STL", "CLE");
 		f2.setFlightId(103);
 		f2.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 23:00:00"));
 		f2.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 23:30:00"));
@@ -370,7 +370,8 @@ public class AirPortTest {
 	}
 
 	@Test
-	public void testRequestAirport() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable {
+	public void testRequestAirport() throws CloneNotSupportedException, ParseException, FlightDurationNotFound,
+			AirportNotAcceptDepartureTime, AirportNotAvailable {
 		AirPortClose portCloseBean = new AirPortClose();
 		String airPortId = "49";
 		AirPort aAirport = InitData.airportList.getAirport(airPortId);
@@ -423,7 +424,6 @@ public class AirPortTest {
 		aTime.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 22:00:00"));
 
 		System.out.println(Utils.timeFormatToString2(aTime.getArrivalTime()));
-		
 
 		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
 
@@ -661,7 +661,8 @@ public class AirPortTest {
 					+ Utils.timeFormatToString2(e.getAvailableTime().getDepartureTime()));
 			assertEquals(102, e.getaFlight().getSchdNo());
 			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.addMinutes(Utils.stringFormatToTime2("07/05/2017 17:00:00"), 50), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.addMinutes(Utils.stringFormatToTime2("07/05/2017 17:00:00"), 50),
+					e.getAvailableTime().getDepartureTime());
 
 		}
 
@@ -682,6 +683,74 @@ public class AirPortTest {
 		f103 = createFlight(103, "49", "CLE");
 		f103.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 16:30:00"));
 		f103.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 05:00:00"));
+		flightChain.add(f103);
+
+		f104 = createFlight(104, "CLE", "BDL");
+		f104.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 06:50:00"));
+		f104.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 17:00:00"));
+		flightChain.add(f104);
+
+		f105 = createFlight(105, "BDL", "CLE");
+		f105.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 18:30:00"));
+		f105.setArrivalTime(Utils.stringFormatToTime2("07/056/2017 22:10:00"));
+		flightChain.add(f105);
+
+		air1.setFlightChain(flightChain);
+		for (Flight aFlight : flightChain) {
+			aFlight.setAssignedAir(air1);
+			aFlight.setPlannedFlight(aFlight.clone());
+		}
+
+		try {
+			air1.adjustFlightTime(0);
+			assertEquals(Utils.stringFormatToTime2("06/05/2017 16:00:00"), f103.getDepartureTime());
+			System.out.println("f101 Actual Depart:" + Utils.timeFormatToString2(f101.getDepartureTime()) + " port: "
+					+ f101.getSourceAirPort().getId());
+			System.out.println("f101 Actual Arr:" + Utils.timeFormatToString2(f101.getArrivalTime()) + " port: "
+					+ f101.getDesintationAirport().getId());
+
+			System.out.println("f102 Actual Depart:" + Utils.timeFormatToString2(f102.getDepartureTime()) + " port: "
+					+ f102.getSourceAirPort().getId());
+			System.out.println("f102 Actual Arr:" + Utils.timeFormatToString2(f102.getArrivalTime()) + " port: "
+					+ f102.getDesintationAirport().getId());
+
+			System.out.println("f103 Actual Depart:" + Utils.timeFormatToString2(f103.getDepartureTime()) + " port: "
+					+ f103.getSourceAirPort().getId());
+			System.out.println("f103 Actual Arr:" + Utils.timeFormatToString2(f103.getArrivalTime()) + " port: "
+					+ f103.getDesintationAirport().getId());
+
+			System.out.println("f104 Actual Depart:" + Utils.timeFormatToString2(f104.getDepartureTime()) + " port: "
+					+ f104.getSourceAirPort().getId());
+			System.out.println("f104 Actual Arr:" + Utils.timeFormatToString2(f104.getArrivalTime()) + " port: "
+					+ f104.getDesintationAirport().getId());
+
+			System.out.println("f104 Actual Depart:" + Utils.timeFormatToString2(f105.getDepartureTime()) + " port: "
+					+ f105.getSourceAirPort().getId());
+			System.out.println("f104 Actual Arr:" + Utils.timeFormatToString2(f105.getArrivalTime()) + " port: "
+					+ f105.getDesintationAirport().getId());
+		} catch (AirportNotAcceptArrivalTime e) {
+			fail("Airport 49 issue shall be arranged");
+
+		}
+
+		// departure fall in airport event area, delay too long
+		System.out.println("departure fall in airport event area");
+		flightChain = new ArrayList<Flight>();
+		f101 = createFlight(101, "ORF", "EWR");
+
+		f101.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 00:00:00"));
+		f101.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 08:30:00"));
+		flightChain.add(f101);
+
+		f102 = createFlight(102, "EWR", "49");
+		f102.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 11:30:00"));
+		f102.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:45:00"));
+		flightChain.add(f102);
+
+		f103 = createFlight(103, "49", "CLE");
+		f103.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 16:01:00"));
+		f103.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 05:00:00"));
+		f103.setInternationalFlight(false);
 		flightChain.add(f103);
 
 		f104 = createFlight(104, "CLE", "BDL");
@@ -760,14 +829,13 @@ public class AirPortTest {
 					+ f105.getSourceAirPort().getId());
 			System.out.println("f104 Actual Arr:" + Utils.timeFormatToString2(f105.getArrivalTime()) + " port: "
 					+ f105.getDesintationAirport().getId());
-			
+
 		} catch (AirportNotAcceptArrivalTime e) {
 			fail("Airport 49 issue shall be arranged");
 
 		}
-		
-		
-		//short grounding time
+
+		// short grounding time
 		flightChain = new ArrayList<Flight>();
 		f101 = createFlight(101, "ORF", "EWR");
 		flightChain.add(f101);
@@ -814,7 +882,7 @@ public class AirPortTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		f102.setFlightId(102);
 		f102.setDepartureTime(Utils.stringFormatToTime2("26/06/2017 06:20:00"));
 		f102.setArrivalTime(Utils.stringFormatToTime2("26/06/2017 14:00:00"));
@@ -823,7 +891,6 @@ public class AirPortTest {
 		air1.setType("2");
 		f102.calcuateNextArrivalTime();
 		assertEquals(Utils.stringFormatToTime2("26/06/2017 14:30:00"), f102.calcuateNextArrivalTime());
-
 
 	}
 

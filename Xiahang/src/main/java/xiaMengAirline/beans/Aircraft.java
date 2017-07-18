@@ -252,10 +252,10 @@ public class Aircraft implements Cloneable {
 		return (aNew);
 	}
 
-	public void adjustment() throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
+	public void adjustment() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
-			selfAdjustEngine.adjustAircraft(this);
+			selfAdjustEngine.adjustAircraft(this,0);
 		}
 
 	}

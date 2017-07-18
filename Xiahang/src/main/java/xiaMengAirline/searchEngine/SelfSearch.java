@@ -22,7 +22,7 @@ public class SelfSearch {
 		return aNewSolution;
 	}
 	
-	public Aircraft adjustAircraft (Aircraft originalAir, int startIndex) throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
+	public Aircraft adjustAircraft (Aircraft originalAir, int startIndex) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		Aircraft thisAc = originalAir.clone();
 		HashMap<Integer, Aircraft> forkList = new HashMap<Integer, Aircraft>();
 		boolean isFinish = false;
