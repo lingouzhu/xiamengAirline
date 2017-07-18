@@ -468,6 +468,9 @@ public class Aircraft implements Cloneable {
 								cl.setTime(newFlightTime.getDepartureTime());
 								cl.add(Calendar.HOUR, MAXIMUM_EARLIER_TIME);
 								if (cl.getTime().before(nextFlight.getPlannedFlight().getDepartureTime())) {
+									logger.warn("This flight earlier too much - " + nextFlight.getFlightId() 
+									+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
+									+ " wanted dep: " + newFlightTime.getDepartureTime());
 									throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime, "Departure Too Earlier");
 									
 								} else {
