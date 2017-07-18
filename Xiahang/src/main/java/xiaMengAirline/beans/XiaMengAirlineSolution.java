@@ -103,7 +103,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 							
 						}
 						
-						if (isChanged && !isStretch) {
+						if (refreshOut && !isStretch) {
 							if (refreshOut) {
 								outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "0"));
 							}

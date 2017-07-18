@@ -129,33 +129,6 @@ public class CostTest {
 
 	@Test
 	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException {
-//		Aircraft air1 = new Aircraft();
-//		List<Flight> flightChain = new ArrayList<Flight>();
-//		flightChain.add(createFlight(101, "ORF", "EWR"));
-//		flightChain.add(createFlight(102, "EWR", "STL"));
-//		flightChain.add(createFlight(103, "STL", "CLE"));
-//		flightChain.add(createFlight(104, "CLE", "BDL"));
-//		flightChain.add(createFlight(105, "BDL", "CLE"));
-//		air1.setFlightChain(flightChain);
-//		air1.setId("1");
-//
-//		Aircraft air2 = new Aircraft();
-//		List<Flight> flightChain2 = new ArrayList<Flight>();
-//		flightChain2.add(createFlight(201, "CLE", "ATL"));
-//		flightChain2.add(createFlight(202, "ATL", "EWR"));
-//		flightChain2.add(createFlight(203, "EWR", "BWI"));
-//		flightChain2.add(createFlight(204, "BWI", "CLE"));
-//		flightChain2.add(createFlight(205, "CLE", "MDW"));
-//		air2.setFlightChain(flightChain2);
-//		air2.setId("2");
-//		
-//		LocalSearch searchEngine = new LocalSearch();
-//		
-//		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
-//		aSolution.replaceOrAddNewAircraft(air1);
-//		aSolution.replaceOrAddNewAircraft(air2);
-//		
-//		searchEngine.constructNewSolution(aSolution);
 		
 		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
 		aSolution.replaceOrAddNewAircraft(air1);
