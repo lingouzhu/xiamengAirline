@@ -26,7 +26,7 @@ public class Aircraft implements Cloneable {
 	private String id;
 	private String type;
 	private List<Flight> flightChain = new ArrayList<Flight>();
-	private boolean isCancel;
+	private boolean isCancel = false;
 	private Aircraft cancelAircrafted = null;
 	private List<Flight> dropOutList = new ArrayList<Flight>();
 

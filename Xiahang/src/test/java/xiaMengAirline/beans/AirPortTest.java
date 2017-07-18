@@ -1,12 +1,14 @@
 package xiaMengAirline.beans;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.rmi.CORBA.Util;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,8 +19,6 @@ import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
-
-import static org.junit.Assert.*;
 
 public class AirPortTest {
 
@@ -41,39 +41,103 @@ public class AirPortTest {
 		f2.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 23:30:00"));
 		InitData.jointFlightMap.put(102, f2);
 		InitData.jointFlightMap.put(103, null);
-
-	}
-
-	@Test
-	public void testGetMatchedAirports() throws CloneNotSupportedException {
+		
 		Aircraft air1 = new Aircraft();
 		List<Flight> flightChain = new ArrayList<Flight>();
-		flightChain.add(createFlight(101, "ORF", "EWR"));
-		flightChain.add(createFlight(102, "EWR", "STL"));
-		flightChain.add(createFlight(103, "STL", "CLE"));
-		flightChain.add(createFlight(104, "CLE", "BDL"));
-		flightChain.add(createFlight(105, "BDL", "CLE"));
+		Flight f101 = createFlight(101, "ORF", "EWR");
+		flightChain.add(f101);
+		Flight f102 = createFlight(102, "EWR", "STL");
+		flightChain.add(f102);
+		Flight f103 = createFlight(103, "STL", "CLE");
+		flightChain.add(f103);
+		Flight f104 = createFlight(104, "CLE", "BDL");
+		flightChain.add(f104);
+		Flight f105 = createFlight(105, "BDL", "CLE");
+		flightChain.add(f105);
 		air1.setFlightChain(flightChain);
 		air1.setId("1");
+		air1.setType("1");
+		f101.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f101.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f102.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f102.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f103.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f103.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f104.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f104.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f105.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f105.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f101.setImpCoe(new BigDecimal(1.5));
+		f102.setImpCoe(new BigDecimal(1.5));
+		f103.setImpCoe(new BigDecimal(1.5));
+		f104.setImpCoe(new BigDecimal(1.5));
+		f105.setImpCoe(new BigDecimal(1.5));
+		f101.setFlightId(101);
+		f102.setFlightId(102);
+		f103.setFlightId(103);
+		f104.setFlightId(104);
+		f105.setFlightId(105);
 
 		for (Flight aFlight : flightChain) {
 			aFlight.setAssignedAir(air1);
+			aFlight.setPlannedFlight(aFlight);
+			aFlight.setPlannedAir(air1);
 		}
 
 		Aircraft air2 = new Aircraft();
 		List<Flight> flightChain2 = new ArrayList<Flight>();
-		flightChain2.add(createFlight(201, "CLE", "ATL"));
-		flightChain2.add(createFlight(202, "ATL", "EWR"));
-		flightChain2.add(createFlight(203, "EWR", "BWI"));
-		flightChain2.add(createFlight(204, "BWI", "CLE"));
-		flightChain2.add(createFlight(205, "CLE", "MDW"));
+		Flight f201 =createFlight(201, "CLE", "ATL");
+		flightChain2.add(f201);
+		Flight f202 = createFlight(202, "ATL", "EWR");
+		flightChain2.add(f202);
+		Flight f203 = createFlight(203, "EWR", "BWI");
+		flightChain2.add(f203);
+		Flight f204 = createFlight(204, "BWI", "CLE");
+		flightChain2.add(f204);
+		Flight f205 = createFlight(205, "CLE", "MDW");
+		flightChain2.add(f205);
 		air2.setFlightChain(flightChain2);
 		air2.setId("2");
+		air2.setType("2");
+		f201.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f201.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f202.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f202.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f203.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f203.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f204.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f204.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f205.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+		f205.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		f201.setImpCoe(new BigDecimal(1.5));
+		f202.setImpCoe(new BigDecimal(1.5));
+		f203.setImpCoe(new BigDecimal(1.5));
+		f204.setImpCoe(new BigDecimal(1.5));
+		f205.setImpCoe(new BigDecimal(1.5));
+		f201.setFlightId(201);
+		f202.setFlightId(202);
+		f203.setFlightId(203);
+		f204.setFlightId(204);
+		f205.setFlightId(205);
+		
 
 		for (Flight aFlight : flightChain2) {
 			aFlight.setAssignedAir(air2);
+			aFlight.setPlannedFlight(aFlight);
+			aFlight.setPlannedAir(air2);
 		}
 
+		InitData.originalSolution.addAircraft(air1);
+		InitData.originalSolution.addAircraft(air2);
+		InitData.maxFligthId = 205;
+		InitData.plannedMaxFligthId = 205;
+
+	}
+
+	@Test
+	public void testGetMatchedAirports() throws CloneNotSupportedException, ParseException {
+		Aircraft air1 = InitData.originalSolution.getAircraft("1", "1", false).clone();
+		Aircraft air2 = InitData.originalSolution.getAircraft("2", "1", false).clone();
 		HashMap<Flight, List<MatchedFlight>> matchedFlights = air1.getMatchedFlights(air2);
 
 		// air1 Flight 104 shall match
@@ -141,6 +205,9 @@ public class AirPortTest {
 		assertEquals(air2FlightList, air2FlightListAct);
 
 		System.out.println("testGetMatchedAirports - start");
+		
+		
+
 		for (Map.Entry<Flight, List<MatchedFlight>> entry : matchedFlights.entrySet()) {
 			Flight key = entry.getKey();
 			List<MatchedFlight> value = entry.getValue();
@@ -167,15 +234,38 @@ public class AirPortTest {
 				List<Flight> updateList1 = newAircraft1.getFlightChain();
 				System.out.println("After exchange ...");
 				for (Flight aF : updateList1) {
-					System.out.println("Air 1 " + aF.getSchdNo());
+					System.out.println("Air 1 flight Id" + aF.getFlightId());
+					//System.out.println("Air 1 sch no" + aF.getSchdNo());
 				}
 				List<Flight> updateList2 = newAircraft2.getFlightChain();
 				for (Flight aF : updateList2) {
-					System.out.println("Air 2 " + aF.getSchdNo());
+					System.out.println("Air 2 flight Id" + aF.getFlightId());
+					//System.out.println("Air 2 sch no" + aF.getSchdNo());
 				}
+				
+				//test cost
+				//if air type
+				XiaMengAirlineSolution aNewSol = new XiaMengAirlineSolution();
+				
+				//if diff air type
+				System.out.println("After exchange cost 2...");
+				if (key.getFlightId() == 104) {
+					aNewSol = new XiaMengAirlineSolution();
+					newAircraft1.setType("1");
+					newAircraft2.setType("2");
+					aNewSol.addAircraft(newAircraft1);
+					aNewSol.addAircraft(newAircraft2);
+					aNewSol.refreshCost(true);
+					aNewSol.generateOutput("1");
+					assertEquals(9000, (int) Math.round(aNewSol.getCost().doubleValue()));
+					System.out.println("After exchange cost 2 completed...");					
+				}
+
 
 			}
 		}
+		
+		
 
 		System.out.println("testGetMatchedAirports - end");
 	}
