@@ -733,8 +733,8 @@ public class AirPortTest {
 
 		}
 
-		// departure fall in airport event area, delay too long
-		System.out.println("departure fall in airport event area");
+		// departure fall in airport event area, delay too earlier
+		System.out.println("departure fall in airport event area, delay too earlier");
 		flightChain = new ArrayList<Flight>();
 		f101 = createFlight(101, "ORF", "EWR");
 
@@ -748,8 +748,8 @@ public class AirPortTest {
 		flightChain.add(f102);
 
 		f103 = createFlight(103, "49", "CLE");
-		f103.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 16:01:00"));
-		f103.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 05:00:00"));
+		f103.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 16:01:00"));
+		f103.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 18:00:00"));
 		f103.setInternationalFlight(false);
 		flightChain.add(f103);
 
@@ -771,34 +771,171 @@ public class AirPortTest {
 
 		try {
 			air1.adjustFlightTime(0);
-			assertEquals(Utils.stringFormatToTime2("06/05/2017 16:00:00"), f103.getDepartureTime());
-			System.out.println("f101 Actual Depart:" + Utils.timeFormatToString2(f101.getDepartureTime()) + " port: "
-					+ f101.getSourceAirPort().getId());
-			System.out.println("f101 Actual Arr:" + Utils.timeFormatToString2(f101.getArrivalTime()) + " port: "
-					+ f101.getDesintationAirport().getId());
-
-			System.out.println("f102 Actual Depart:" + Utils.timeFormatToString2(f102.getDepartureTime()) + " port: "
-					+ f102.getSourceAirPort().getId());
-			System.out.println("f102 Actual Arr:" + Utils.timeFormatToString2(f102.getArrivalTime()) + " port: "
-					+ f102.getDesintationAirport().getId());
-
-			System.out.println("f103 Actual Depart:" + Utils.timeFormatToString2(f103.getDepartureTime()) + " port: "
-					+ f103.getSourceAirPort().getId());
-			System.out.println("f103 Actual Arr:" + Utils.timeFormatToString2(f103.getArrivalTime()) + " port: "
-					+ f103.getDesintationAirport().getId());
-
-			System.out.println("f104 Actual Depart:" + Utils.timeFormatToString2(f104.getDepartureTime()) + " port: "
-					+ f104.getSourceAirPort().getId());
-			System.out.println("f104 Actual Arr:" + Utils.timeFormatToString2(f104.getArrivalTime()) + " port: "
-					+ f104.getDesintationAirport().getId());
-
-			System.out.println("f104 Actual Depart:" + Utils.timeFormatToString2(f105.getDepartureTime()) + " port: "
-					+ f105.getSourceAirPort().getId());
-			System.out.println("f104 Actual Arr:" + Utils.timeFormatToString2(f105.getArrivalTime()) + " port: "
-					+ f105.getDesintationAirport().getId());
 		} catch (AirportNotAcceptArrivalTime e) {
 			fail("Airport 49 issue shall be arranged");
 
+		} catch (AirportNotAcceptDepartureTime e) {
+			System.out.println("Airport unable to allocate " + e.getaFlight().getSchdNo());
+			System.out.println("Airport suggested arrival time "
+					+ Utils.timeFormatToString2(e.getAvailableTime().getArrivalTime()));
+			System.out.println("Airport suggested departure time "
+					+ Utils.timeFormatToString2(e.getAvailableTime().getDepartureTime()));
+			assertEquals(103, e.getaFlight().getSchdNo());
+			assertEquals(Utils.stringFormatToTime2("06/05/2017 13:45:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("06/05/2017 16:00:00"), e.getAvailableTime().getDepartureTime());
+
+		}
+
+		// departure fall in airport event area, international flight
+		System.out.println("departure fall in airport event area, international flight");
+		flightChain = new ArrayList<Flight>();
+		f101 = createFlight(101, "ORF", "EWR");
+
+		f101.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 00:00:00"));
+		f101.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 08:30:00"));
+		flightChain.add(f101);
+
+		f102 = createFlight(102, "EWR", "49");
+		f102.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 11:30:00"));
+		f102.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:45:00"));
+		flightChain.add(f102);
+
+		f103 = createFlight(103, "49", "CLE");
+		f103.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 16:01:00"));
+		f103.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 18:00:00"));
+		f103.setInternationalFlight(true);
+		flightChain.add(f103);
+
+		f104 = createFlight(104, "CLE", "BDL");
+		f104.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 06:50:00"));
+		f104.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 17:00:00"));
+		flightChain.add(f104);
+
+		f105 = createFlight(105, "BDL", "CLE");
+		f105.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 18:30:00"));
+		f105.setArrivalTime(Utils.stringFormatToTime2("07/056/2017 22:10:00"));
+		flightChain.add(f105);
+
+		air1.setFlightChain(flightChain);
+		for (Flight aFlight : flightChain) {
+			aFlight.setAssignedAir(air1);
+			aFlight.setPlannedFlight(aFlight.clone());
+		}
+
+		try {
+			air1.adjustFlightTime(0);
+		} catch (AirportNotAcceptArrivalTime e) {
+			fail("Airport 49 issue shall be arranged");
+
+		} catch (AirportNotAcceptDepartureTime e) {
+			System.out.println("Airport unable to allocate " + e.getaFlight().getSchdNo());
+			assertEquals(103, e.getaFlight().getSchdNo());
+			assertEquals("Departure Earlier Not Allowed For International", e.getCasue());
+
+		}
+
+		// departure fall in airport regular area, departure delay too long
+		System.out.println("departure fall in airport event area, departure delay");
+		flightChain = new ArrayList<Flight>();
+		f101 = createFlight(101, "ORF", "EWR");
+
+		f101.setDepartureTime(Utils.stringFormatToTime2("15/05/2017 00:00:00"));
+		f101.setArrivalTime(Utils.stringFormatToTime2("15/05/2017 08:30:00"));
+		flightChain.add(f101);
+
+		f102 = createFlight(102, "EWR", "49");
+		f102.setDepartureTime(Utils.stringFormatToTime2("15/05/2017 11:30:00"));
+		f102.setArrivalTime(Utils.stringFormatToTime2("16/05/2017 00:00:00"));
+		flightChain.add(f102);
+
+		f103 = createFlight(103, "49", "CLE");
+		f103.setDepartureTime(Utils.stringFormatToTime2("17/05/2017 01:01:00"));
+		f103.setArrivalTime(Utils.stringFormatToTime2("17/05/2017 18:00:00"));
+		f103.setInternationalFlight(false);
+		flightChain.add(f103);
+
+		f104 = createFlight(104, "CLE", "BDL");
+		f104.setDepartureTime(Utils.stringFormatToTime2("18/05/2017 06:50:00"));
+		f104.setArrivalTime(Utils.stringFormatToTime2("18/05/2017 17:00:00"));
+		flightChain.add(f104);
+
+		f105 = createFlight(105, "BDL", "CLE");
+		f105.setDepartureTime(Utils.stringFormatToTime2("18/05/2017 18:30:00"));
+		f105.setArrivalTime(Utils.stringFormatToTime2("18/056/2017 22:10:00"));
+		flightChain.add(f105);
+
+		air1.setFlightChain(flightChain);
+		for (Flight aFlight : flightChain) {
+			aFlight.setAssignedAir(air1);
+			aFlight.setPlannedFlight(aFlight.clone());
+		}
+		f103.getPlannedFlight().setDepartureTime(Utils.stringFormatToTime2("16/05/2017 06:00:00"));
+		assertEquals(Utils.stringFormatToTime2("16/05/2017 06:00:00"), f103.getPlannedFlight().getDepartureTime());
+
+		try {
+			air1.adjustFlightTime(0);
+			assertEquals(Utils.stringFormatToTime2("16/05/2017 06:10:00"), f103.getDepartureTime());
+		} catch (AirportNotAcceptArrivalTime e) {
+			fail("Airport 49 issue shall be arranged");
+
+		} catch (AirportNotAcceptDepartureTime e) {
+			fail("Airport 49 issue shall be arranged");
+
+		} catch (AirportNotAvailable e) {
+			System.out.println("Airport unable to allocate " + e.getaFlight().getSchdNo());
+			assertEquals(102, e.getaFlight().getSchdNo());
+			assertEquals(Utils.stringFormatToTime2("17/05/2017 06:10:00"), e.getAvailableTime().getDepartureTime());
+		}
+
+		// departure fall in airport regular area, departure delay acceptable
+		System.out.println("departure fall in airport event area, departure delay");
+		flightChain = new ArrayList<Flight>();
+		f101 = createFlight(101, "ORF", "EWR");
+
+		f101.setDepartureTime(Utils.stringFormatToTime2("16/05/2017 00:00:00"));
+		f101.setArrivalTime(Utils.stringFormatToTime2("16/05/2017 08:30:00"));
+		flightChain.add(f101);
+
+		f102 = createFlight(102, "EWR", "49");
+		f102.setDepartureTime(Utils.stringFormatToTime2("16/05/2017 11:30:00"));
+		f102.setArrivalTime(Utils.stringFormatToTime2("17/05/2017 00:00:00"));
+		flightChain.add(f102);
+
+		f103 = createFlight(103, "49", "CLE");
+		f103.setDepartureTime(Utils.stringFormatToTime2("17/05/2017 01:01:00"));
+		f103.setArrivalTime(Utils.stringFormatToTime2("17/05/2017 18:01:00"));
+		f103.setInternationalFlight(false);
+		flightChain.add(f103);
+		
+		f104 = createFlight(104, "CLE", "BDL");
+		f104.setDepartureTime(Utils.stringFormatToTime2("18/05/2017 06:50:00"));
+		f104.setArrivalTime(Utils.stringFormatToTime2("18/05/2017 17:00:00"));
+		flightChain.add(f104);
+
+		f105 = createFlight(105, "BDL", "CLE");
+		f105.setDepartureTime(Utils.stringFormatToTime2("18/05/2017 18:30:00"));
+		f105.setArrivalTime(Utils.stringFormatToTime2("18/05/2017 22:10:00"));
+		flightChain.add(f105);
+
+		air1.setFlightChain(flightChain);
+		for (Flight aFlight : flightChain) {
+			aFlight.setAssignedAir(air1);
+			aFlight.setPlannedFlight(aFlight.clone());
+		}
+	
+
+		try {
+			air1.adjustFlightTime(0);
+			assertEquals(Utils.stringFormatToTime2("17/05/2017 06:10:00"), f103.getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("17/05/2017 23:10:00"), f103.getArrivalTime());
+		} catch (AirportNotAcceptArrivalTime e) {
+			fail("Airport 49 issue shall be arranged");
+
+		} catch (AirportNotAcceptDepartureTime e) {
+			fail("Airport 49 issue shall be arranged");
+
+		} catch (AirportNotAvailable e) {
+			fail("Airport 49 issue shall be arranged");
 		}
 
 		// change flight destination for port 49

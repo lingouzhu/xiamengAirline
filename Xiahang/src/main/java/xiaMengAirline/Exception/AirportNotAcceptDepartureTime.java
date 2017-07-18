@@ -6,6 +6,7 @@ import xiaMengAirline.beans.FlightTime;
 public class AirportNotAcceptDepartureTime extends Exception {
 	private Flight aFlight;
 	private FlightTime availableTime;
+	private String casue;
 	public Flight getaFlight() {
 		return aFlight;
 	}
@@ -18,10 +19,17 @@ public class AirportNotAcceptDepartureTime extends Exception {
 	public void setAvailableTime(FlightTime availableTime) {
 		this.availableTime = availableTime;
 	}
-	public AirportNotAcceptDepartureTime(Flight aFlight, FlightTime availableTime) {
+	public AirportNotAcceptDepartureTime(Flight aFlight, FlightTime availableTime, String cause) {
 		super();
 		this.aFlight = aFlight;
 		this.availableTime = availableTime;
+		this.casue = cause;
+	}
+	public String getCasue() {
+		return casue;
+	}
+	public void setCasue(String casue) {
+		this.casue = casue;
 	}
 	
 	

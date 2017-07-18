@@ -449,8 +449,8 @@ public class Aircraft implements Cloneable {
 				cl.add(Calendar.MINUTE, plannedGroundingTime);
 				FlightTime aScheduledTime = new FlightTime();
 				aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
-				if (cl.getTime().before(nextFlight.getDepartureTime()))
-					aScheduledTime.setDepartureTime(nextFlight.getDepartureTime());
+				if (cl.getTime().before(nextFlight.getPlannedFlight().getDepartureTime()))
+					aScheduledTime.setDepartureTime(nextFlight.getPlannedFlight().getDepartureTime());
 				else
 					aScheduledTime.setDepartureTime(cl.getTime());
 				FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
@@ -468,28 +468,32 @@ public class Aircraft implements Cloneable {
 								cl.setTime(newFlightTime.getDepartureTime());
 								cl.add(Calendar.HOUR, MAXIMUM_EARLIER_TIME);
 								if (cl.getTime().before(nextFlight.getPlannedFlight().getDepartureTime())) {
-									throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime);
+									throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime, "Departure Too Earlier");
 									
 								} else {
 									nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
 								}
 							} else
-								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime);
+								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime ,"Departure Earlier Not Allowed For International");
 						} else {
-							if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
-								//if departure time delayed
+							if (nextFlight.getPlannedFlight().getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
+								//if departure time delayed, this only happens normal close
+								//because typhoon has 2 hours for take-off
 								if (newFlightTime.isIsTyphoon()) {
 									//if aircraft can arrive but cannot departure, typhoon not allows parking!
 									throw new AirportNotAvailable(currentFlight, newFlightTime);
 								} else {
 									//if delay too much
-									cl.setTime(currentFlight.getArrivalTime());
+									cl.setTime(nextFlight.getPlannedFlight().getDepartureTime());
 									if (currentFlight.isInternationalFlight()) {
-										cl.add(Calendar.MINUTE, INTERNATIONAL_MAXIMUM_DELAY_TIME);
+										cl.add(Calendar.HOUR, INTERNATIONAL_MAXIMUM_DELAY_TIME);
 									} else {
-										cl.add(Calendar.MINUTE, DOMESTIC_MAXIMUM_DELAY_TIME);
+										cl.add(Calendar.HOUR, DOMESTIC_MAXIMUM_DELAY_TIME);
 									}
 									if (cl.getTime().before(newFlightTime.getDepartureTime())) {
+										logger.warn("This flight delays too long - " + nextFlight.getFlightId() 
+										+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
+										+ " wanted dep: " + newFlightTime.getDepartureTime());
 										throw new AirportNotAvailable(currentFlight, newFlightTime);
 									} else {
 										//it shall be normal airport close, so not delay too much
@@ -501,8 +505,7 @@ public class Aircraft implements Cloneable {
 						}
 					}
 				} else {
-					if (nextFlight.getDepartureTime().compareTo(aScheduledTime.getDepartureTime()) != 0)
-						nextFlight.setDepartureTime(aScheduledTime.getDepartureTime());
+					nextFlight.setDepartureTime(aScheduledTime.getDepartureTime());
 				}
 			}
 
@@ -510,8 +513,7 @@ public class Aircraft implements Cloneable {
 
 			Date newArrival = currentFlight.calcuateNextArrivalTime();
 
-			if (newArrival.compareTo(currentFlight.getArrivalTime()) != 0)
-				currentFlight.setArrivalTime(newArrival);
+			currentFlight.setArrivalTime(newArrival);
 		}
 
 	}
