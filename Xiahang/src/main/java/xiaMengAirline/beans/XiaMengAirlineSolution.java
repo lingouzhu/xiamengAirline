@@ -64,7 +64,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 				for (Flight newFlight : aAir.getFlightChain()) {
 
 					if (newFlight.getFlightId() > InitData.plannedMaxFligthId) {
-						cost.add(new BigDecimal("5000"));
+						cost = cost.add(new BigDecimal("5000"));
 						if (refreshOut) {
 							outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "1"));
 						}
@@ -72,7 +72,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 						boolean isChanged = false;
 						boolean isStretch = false;
 						if (!newFlight.getPlannedAir().getType().equals(aAir.getType())) {
-							cost.add(new BigDecimal("1000").multiply(newFlight.getImpCoe()));
+							cost = cost.add(new BigDecimal("1000").multiply(newFlight.getImpCoe()));
 							isChanged = true;
 						}
 						
@@ -80,9 +80,9 @@ public class XiaMengAirlineSolution implements Cloneable{
 							BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(), newFlight.getPlannedFlight().getDepartureTime());
 							
 							if (hourDiff.signum() == -1){
-								cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
+								cost = cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
 							} else {
-								cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
+								cost = cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
 							}
 							isChanged = true;
 						}
@@ -91,8 +91,8 @@ public class XiaMengAirlineSolution implements Cloneable{
 							if (!newFlight.getDesintationAirport().getId().equals((newFlight.getPlannedFlight().getDesintationAirport().getId()))) {
 								Flight nextFlight = InitData.jointFlightMap.get(newFlight.getFlightId());
 								
-								cost.add(new BigDecimal("750").multiply(newFlight.getImpCoe()));
-								cost.add(new BigDecimal("750").multiply(nextFlight.getImpCoe()));
+								cost = cost.add(new BigDecimal("750").multiply(newFlight.getImpCoe()));
+								cost = cost.add(new BigDecimal("750").multiply(nextFlight.getImpCoe()));
 								isStretch = true;
 								if (refreshOut) {
 									outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "1", "0"));
@@ -118,7 +118,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 						continue;
 					}
 					
-					cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
+					cost = cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
 					if (refreshOut) {
 						outputList.add(CSVUtils.flight2Output(cancelFlight, aAir.getId(), "1", "0", "0"));
 					}
