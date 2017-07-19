@@ -127,8 +127,8 @@ public class AirPortTest {
 			aFlight.setPlannedAir(air2);
 		}
 
-		InitData.originalSolution.addAircraft(air1);
-		InitData.originalSolution.addAircraft(air2);
+		InitData.originalSolution.replaceOrAddNewAircraft(air1);
+		InitData.originalSolution.replaceOrAddNewAircraft(air2);
 		InitData.maxFligthId = 205;
 		InitData.plannedMaxFligthId = 205;
 
@@ -136,8 +136,8 @@ public class AirPortTest {
 
 	@Test
 	public void testGetMatchedAirports() throws CloneNotSupportedException, ParseException {
-		Aircraft air1 = InitData.originalSolution.getAircraft("1", "1", false).clone();
-		Aircraft air2 = InitData.originalSolution.getAircraft("2", "1", false).clone();
+		Aircraft air1 = InitData.originalSolution.getAircraft("1", "1", false,false).clone();
+		Aircraft air2 = InitData.originalSolution.getAircraft("2", "1", false,false).clone();
 		HashMap<Flight, List<MatchedFlight>> matchedFlights = air1.getMatchedFlights(air2);
 
 		// air1 Flight 104 shall match
@@ -253,8 +253,8 @@ public class AirPortTest {
 					aNewSol = new XiaMengAirlineSolution();
 					newAircraft1.setType("1");
 					newAircraft2.setType("2");
-					aNewSol.addAircraft(newAircraft1);
-					aNewSol.addAircraft(newAircraft2);
+					aNewSol.replaceOrAddNewAircraft(newAircraft1);
+					aNewSol.replaceOrAddNewAircraft(newAircraft2);
 					aNewSol.refreshCost(true);
 					aNewSol.generateOutput("1");
 					assertEquals(9000, (int) Math.round(aNewSol.getCost().doubleValue()));

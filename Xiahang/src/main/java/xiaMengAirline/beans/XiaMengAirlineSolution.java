@@ -36,20 +36,19 @@ public class XiaMengAirlineSolution implements Cloneable{
 	}
 	public void replaceOrAddNewAircraft (Aircraft aNewAircraft) {
 		
-		if (schedule.containsKey(aNewAircraft.getId())) {
+		String aKey = aNewAircraft.getId();
+		if (aNewAircraft.isCancel())
+			aKey += "_CANCEL";
+		else
+			aKey += "_NORMAL";
+		if (schedule.containsKey(aKey)) {
 			Aircraft current = schedule.get(aNewAircraft.getId());
-			schedule.put(aNewAircraft.getId(), aNewAircraft);
+			schedule.put(aKey, aNewAircraft);
 			current.clear();
 		} else
-			schedule.put(aNewAircraft.getId(), aNewAircraft);
+			schedule.put(aKey, aNewAircraft);
 		
 		
-	}
-	public void addAircraft (Aircraft aNewAircraft) {
-		if (!schedule.containsKey(aNewAircraft.getId())) {
-			schedule.put(aNewAircraft.getId(), aNewAircraft);
-		}
-
 	}
 	
 	public void refreshCost (boolean refreshOut) {
@@ -148,14 +147,21 @@ public class XiaMengAirlineSolution implements Cloneable{
 			aAir.clear();
 	}
 	
-	public Aircraft getAircraft (String id, String type, boolean autoGenerate) {
-		if (schedule.containsKey(id)) {
-			return (schedule.get(id));
+	public Aircraft getAircraft (String id, String type, boolean isCancel, boolean autoGenerate) {
+		String aKey = id;
+		if (isCancel)
+			aKey += "_CANCEL";
+		else
+			aKey += "_NORMAL";
+		if (schedule.containsKey(aKey)) {
+			return (schedule.get(aKey));
 		} else {
 			if (autoGenerate) {
 				Aircraft aAir = new Aircraft();
 				aAir.setId(id);
 				aAir.setType(type);
+				aAir.setCancel(isCancel);
+				schedule.put(aKey, aAir);
 				return aAir;
 			} else
 				return null;

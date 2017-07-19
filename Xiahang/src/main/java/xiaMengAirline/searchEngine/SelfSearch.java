@@ -382,7 +382,7 @@ public class SelfSearch {
 	// compare cost
 	public double getCost(Aircraft ac){
 		XiaMengAirlineSolution solution = new XiaMengAirlineSolution();
-		solution.addAircraft(ac);
+		solution.replaceOrAddNewAircraft(ac);
 		solution.refreshCost(false); 
 		return solution.getCost().doubleValue();
 	}

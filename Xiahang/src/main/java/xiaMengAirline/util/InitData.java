@@ -95,7 +95,7 @@ public class InitData {
 				String airId = String.valueOf((int)row.getCell(8).getNumericCellValue());
 				String airType = String.valueOf((int)row.getCell(9).getNumericCellValue());
 				
-				Aircraft aAir = originalSolution.getAircraft(airId, airType, true);
+				Aircraft aAir = originalSolution.getAircraft(airId, airType, false, true);
 				
 				//aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()));
 				aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
@@ -105,7 +105,7 @@ public class InitData {
 				aFlight.setPlannedAir(aPlannedAir);
 				aFlight.setPlannedFlight(aFlight.clone());
 				aAir.addFlight(aFlight);
-				originalSolution.addAircraft(aAir);
+				//originalSolution.replaceOrAddNewAircraft(aAir);
 				
 				
 	        }

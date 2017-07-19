@@ -1,5 +1,6 @@
 package xiaMengAirline.searchEngine;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.util.InitData;
+import xiaMengAirline.util.Utils;
 
 public class LocalSearchTest {
 
@@ -45,8 +47,14 @@ public class LocalSearchTest {
 		flightChain.add(createFlight(105, "BDL", "CLE"));
 		air1.setFlightChain(flightChain);
 		air1.setId("1");
+		air1.setType("1");
 		for (Flight aFlight:flightChain) {
+			aFlight.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+			aFlight.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+			aFlight.setImpCoe(new BigDecimal(1.5));
 			aFlight.setAssignedAir(air1);
+			aFlight.setPlannedFlight(aFlight);
+			aFlight.setPlannedAir(air1);
 		}
 
 		Aircraft air2 = new Aircraft();
@@ -58,8 +66,14 @@ public class LocalSearchTest {
 		flightChain2.add(createFlight(205, "CLE", "MDW"));
 		air2.setFlightChain(flightChain2);
 		air2.setId("2");
+		air2.setType("2");
 		for (Flight aFlight:flightChain2) {
+			aFlight.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
+			aFlight.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+			aFlight.setImpCoe(new BigDecimal(1.5));
 			aFlight.setAssignedAir(air2);
+			aFlight.setPlannedFlight(aFlight);
+			aFlight.setPlannedAir(air2);
 		}
 		
 		LocalSearch searchEngine = new LocalSearch();
