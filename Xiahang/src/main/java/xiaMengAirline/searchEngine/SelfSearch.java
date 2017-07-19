@@ -4,12 +4,13 @@ import java.math.*;
 import java.text.ParseException;
 import java.util.*;
 import java.util.Map.Entry;
-
+import org.apache.log4j.Logger;
 import xiaMengAirline.Exception.*;
 import xiaMengAirline.beans.*;
 import xiaMengAirline.util.InitData;
 
 public class SelfSearch {
+	private static final Logger logger = Logger.getLogger(InitData.class);
 	private final int domesticMaxDelay = 24;
 	private final int internationalMaxDelay = 36;
 	private final int minGroundTime = 50;
@@ -32,12 +33,15 @@ public class SelfSearch {
 		
 		//delete new flights in cancel flight list
 		List<Integer> cancelFlightList = new ArrayList<Integer>();
-		for (int i = 0; i < thisAc.getCancelAircrafted().getFlightChain().size(); i++){
-			if (thisAc.getCancelAircrafted().getFlightChain().get(i).getFlightId() > InitData.plannedMaxFligthId){
-				cancelFlightList.add(i);
+		if (thisAc.getCancelAircrafted() != null && thisAc.getCancelAircrafted().getFlightChain() != null){
+
+			for (int i = 0; i < thisAc.getCancelAircrafted().getFlightChain().size(); i++){
+				if (thisAc.getCancelAircrafted().getFlightChain().get(i).getFlightId() > InitData.plannedMaxFligthId){
+					cancelFlightList.add(i);
+				}
 			}
+			thisAc.getCancelAircrafted().removeFlightChain(cancelFlightList);
 		}
-		thisAc.getCancelAircrafted().removeFlightChain(cancelFlightList);
 		
 		// loop until all flight sorted
 		Aircraft aircraft = thisAc.clone();
@@ -68,9 +72,13 @@ public class SelfSearch {
 					thisFlight.setArrivalTime(avaliableTime.getArrivalTime());
 					thisFlight.setDepartureTime(addMinutes(thisFlight.getArrivalTime(), (int)getMinuteDifference(getPlannedDeparture(thisFlight), getPlannedArrival(thisFlight))));
 					flights.get(flightIndex + 1).setDepartureTime(avaliableTime.getDepartureTime());
+					startIndex = flightIndex;
 				}else{
 					try {
 						aircraft = cancelFlight(aircraft, flightIndex);
+						if (aircraft == null){
+							return null;
+						}
 					} catch (Exception e){
 						return null;
 					}
@@ -92,6 +100,9 @@ public class SelfSearch {
 				
 				try {
 					aircraft = cancelFlight(aircraft, flightIndex);
+					if (aircraft == null){
+						return null;
+					}
 				} catch (Exception e){
 					return null;
 				}
@@ -101,6 +112,9 @@ public class SelfSearch {
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
 				try {
 					aircraft = cancelFlight(aircraft, flightIndex);
+					if (aircraft == null){
+						return null;
+					}
 				} catch (Exception e){
 					return null;
 				}
@@ -119,7 +133,6 @@ public class SelfSearch {
 				infinitLoopCnt++;
 			}
 		}
-		
 		double thisCost = getCost(aircraft);
 		
 		Iterator<Entry<Integer, Aircraft>> it = forkList.entrySet().iterator();
@@ -135,6 +148,10 @@ public class SelfSearch {
 	        }
 	    }
 		return aircraft;
+	}
+	
+	public void print (String str){
+		System.out.println(str);
 	}
 	
 	// cancel a flight
@@ -240,7 +257,6 @@ public class SelfSearch {
 		for (int i = currentFlightIndex + 1; i < flightChain.size(); i++){
 			Flight nextFlight = flightChain.get(i);
 			AirPort destAirport = nextFlight.getSourceAirPort();
-			
 			// international flight is not eligible
 			if (isInternational(thisFlight.getSourceAirPort().getId(), destAirport.getId())){
 				continue;
@@ -249,7 +265,6 @@ public class SelfSearch {
 			if (!isEligibalAircraft(ac, thisFlight.getSourceAirPort(), destAirport)){
 				continue;
 			}
-			
 			long flightTime = getFlightTime(thisFlight.getSourceAirPort().getId(), destAirport.getId(), ac);
 			if (flightTime > 0){
 				thisFlight.setArrivalTime(addMinutes(thisFlight.getDepartureTime(), flightTime));
@@ -293,20 +308,22 @@ public class SelfSearch {
 		}
 		
 		// unable to find next flight destination
+		print("New flight unable to find next available airport, flightID" + flightChain.get(currentFlightIndex).getFlightId());
+		logger.info("New flight unable to find next available airport, flightID" + flightChain.get(currentFlightIndex).getFlightId());
 		return null;
 	}
 	
 	// tell if a flight is international between two airport
 	public boolean isInternational(String airport1, String airport2){
 		if (InitData.domesticAirportList.contains(airport1) && InitData.domesticAirportList.contains(airport2)){
-			return true;
+			return false;
 		}
-		return false;
+		return true;
 	}
 	
 	public boolean isEligibalAircraft(Aircraft aircraft, AirPort sourceAir, AirPort destAir){
 		String searchKey = aircraft.getId() + "_" + sourceAir.getId() + "_" + destAir.getId();
-		return InitData.airLimitationList.contains(searchKey) ? true : false;
+		return InitData.airLimitationList.contains(searchKey) ? false : true;
 	}
 	
 	// get flight time between two airports
@@ -343,13 +360,11 @@ public class SelfSearch {
 	
 	// get time difference between time1 and time2, time1 > time2 is positive otherwise negative
 	public double getHourDifference(Date time1, Date time2){
-		BigDecimal diff = new BigDecimal(time1.getTime() - time2.getTime()).setScale(4, RoundingMode.HALF_UP);
-		return diff.divide(new BigDecimal((1000 * 60 * 60))).doubleValue();
+		return (time1.getTime() - time2.getTime()) / (1000 * 60 * 60);
 	}
 	
 	public double getMinuteDifference(Date time1, Date time2){
-		BigDecimal diff = new BigDecimal(time1.getTime() - time2.getTime()).setScale(4, RoundingMode.HALF_UP);
-		return diff.divide(new BigDecimal((1000 * 60))).doubleValue();
+		return (time1.getTime() - time2.getTime()) / (1000 * 60);
 	}
 	
 	// get original arrival time
