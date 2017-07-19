@@ -43,7 +43,8 @@ public class SelfSearch {
 				FlightTime avaliableTime = anaat.getAvailableTime();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
 				
-				if (avaliableTime.isIsTyphoon() && isJointFlight(thisFlight) && getJointFlight(thisFlight) != null){
+				if (avaliableTime.isIsTyphoon() && isJointFlight(thisFlight) && getJointFlight(thisFlight) != null
+						&& !thisFlight.isInternationalFlight() && !getJointFlight(thisFlight).isInternationalFlight()){
 					Aircraft forkAir = aircraft.clone();
 					Flight firstFlight = forkAir.getFlightChain().get(flightIndex);
 					Flight secondFlight = forkAir.getFlightChain().get(flightIndex + 1); 
@@ -68,7 +69,8 @@ public class SelfSearch {
 			} catch (AirportNotAcceptDepartureTime anadt){
 				Flight thisFlight = anadt.getaFlight();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
-				if (isJointFlight(thisFlight) && getJointFlight(thisFlight) == null){
+				if (isJointFlight(thisFlight) && getJointFlight(thisFlight) == null
+						&& !thisFlight.isInternationalFlight() && !flights.get(flightIndex - 1).isInternationalFlight()){
 					Aircraft forkAir = aircraft.clone();
 					Flight firstFlight = forkAir.getFlightChain().get(flightIndex - 1);
 					Flight secondFlight = forkAir.getFlightChain().get(flightIndex); 
@@ -365,7 +367,9 @@ public class SelfSearch {
 	
 	// get next flight id
 	public int getNextFlightId(){
-		return 9999;
+		int maxFlightId = InitData.maxFligthId;
+		InitData.maxFligthId = maxFlightId + 1;
+		return maxFlightId + 1;
 	}
 	
 	// get last flight index
