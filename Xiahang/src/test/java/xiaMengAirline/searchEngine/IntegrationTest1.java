@@ -18,7 +18,7 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
 
-public class CostTest {
+public class IntegrationTest1 {
 
 	
 	Aircraft air1 = new Aircraft();
@@ -70,37 +70,32 @@ public class CostTest {
 	public void setUp() throws Exception {
 		
 		InitData.plannedMaxFligthId = 1000;
-		Flight fligt1 = createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"), 
-				Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01"));
-		
-		Flight fligt2 = createFlight(103, "003", "004", "004", Utils.timeStr2date("2017-01-01 18:00:00"), 
-				Utils.timeStr2date("2017-01-01 18:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01"));
-		
-		InitData.jointFlightMap.put(fligt1.getFlightId(), fligt2);
-		InitData.jointFlightMap.put(fligt2.getFlightId(), null);
-		
-		// delay 1 hour 100
+//		Flight fligt1 = createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"), 
+//				Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01"));
+//		
+//		Flight fligt2 = createFlight(103, "003", "004", "004", Utils.timeStr2date("2017-01-01 18:00:00"), 
+//				Utils.timeStr2date("2017-01-01 18:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01"));
+//		
+//		InitData.jointFlightMap.put(fligt1.getFlightId(), fligt2);
+//		InitData.jointFlightMap.put(fligt2.getFlightId(), null);
+//		
+		// delay 1 hour
 		List<Flight> flightChain = new ArrayList<Flight>();
 		flightChain.add(createFlight(101, "001", "002", "002", Utils.timeStr2date("2017-01-01 10:00:00"), 
 				Utils.timeStr2date("2017-01-01 9:00:00"), "1" , new BigDecimal("1"), 201, Utils.dateStr2date("2017-01-01")));
-		// joint 1500
-		flightChain.add(createFlight(102, "002", "004", "003", Utils.timeStr2date("2017-01-01 10:00:00"), 
+		// joint
+		flightChain.add(createFlight(10001, "002", "004", "003", Utils.timeStr2date("2017-01-01 10:00:00"), 
 				Utils.timeStr2date("2017-01-01 10:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
 		
 
-		// cancel
-//		flightChain.add(createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"), 
-//				Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
-//		// cancel
-//		flightChain.add(createFlight(103, "003", "004", "004", Utils.timeStr2date("2017-01-01 18:00:00"), 
-//				Utils.timeStr2date("2017-01-01 18:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
-		// change air type 1000
-		flightChain.add(createFlight(104, "004", "005", "005", Utils.timeStr2date("2017-01-01 10:00:00"), 
-				Utils.timeStr2date("2017-01-02 10:00:00"), "2" , new BigDecimal("1"), 204, Utils.dateStr2date("2017-01-02")));
-		// move up 150
-		flightChain.add(createFlight(105, "005", "006", "006", Utils.timeStr2date("2017-01-01 14:00:00"), 
-				Utils.timeStr2date("2017-01-02 15:00:00"), "1" , new BigDecimal("1"), 205, Utils.dateStr2date("2017-01-02")));
 		
+		// change air type
+//		flightChain.add(createFlight(104, "004", "005", "005", Utils.timeStr2date("2017-01-01 10:00:00"), 
+//				Utils.timeStr2date("2017-01-02 10:00:00"), "2" , new BigDecimal("1"), 204, Utils.dateStr2date("2017-01-02")));
+//		
+//		flightChain.add(createFlight(105, "005", "006", "006", Utils.timeStr2date("2017-01-01 15:00:00"), 
+//				Utils.timeStr2date("2017-01-02 15:00:00"), "1" , new BigDecimal("1"), 205, Utils.dateStr2date("2017-01-02")));
+//		
 //		flightChain.add(createFlight(106, "006", "007", "007", Utils.timeStr2date("2017-01-01 19:00:00"), 
 //				Utils.timeStr2date("2017-01-02 19:00:00"), "1" , new BigDecimal("1"), 206, Utils.dateStr2date("2017-01-02")));
 //		
@@ -119,13 +114,19 @@ public class CostTest {
 		air1.setType("1");
 		
 		List<Flight> flightChain2 = new ArrayList<Flight>();
-		// 1000
-		flightChain2.add(createFlight(201, "001", "002", "002", Utils.timeStr2date("2017-01-01 10:00:00"), 
-				Utils.timeStr2date("2017-01-01 9:00:00"), "1" , new BigDecimal("1"), 201, Utils.dateStr2date("2017-01-01")));
 		
+		// cancel
+		flightChain2.add(createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"), 
+				Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
+		// cancel
+		flightChain2.add(createFlight(103, "003", "004", "004", Utils.timeStr2date("2017-01-01 18:00:00"), 
+				Utils.timeStr2date("2017-01-01 18:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
+		
+//		flightChain2.add(createFlight(201, "001", "002", "002", Utils.timeStr2date("2017-01-01 10:00:00"), 
+//				Utils.timeStr2date("2017-01-01 9:00:00"), "1" , new BigDecimal("1"), 201, Utils.dateStr2date("2017-01-01")));
 		air2.setFlightChain(flightChain2);
 		air2.setCancel(true);
-		air1.setId("1");
+		air2.setId("1");
 		air2.setType("1");
 	}
 
@@ -135,12 +136,14 @@ public class CostTest {
 		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
 		aSolution.replaceOrAddNewAircraft(air1);
 		aSolution.replaceOrAddNewAircraft(air2);
-		// 3750
+		
+		
+		
 		aSolution.refreshCost(true);
 		
+		System.out.println(aSolution.getCost().toString());
 		
-		aSolution.generateOutput("2");
-		
+//		aSolution.generateOutput("2");
 		LocalSearch searchEngine = new LocalSearch();
 		
 		try {
@@ -152,6 +155,7 @@ public class CostTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		
 		System.out.println(aSolution.getCost().toString());
 		
