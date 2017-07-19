@@ -338,7 +338,8 @@ public class XiaMengAirlineSolution implements Cloneable{
 					}
 					
 					if (i == flightChain.size() - 1) {
-						if (!flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
+						if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
+								|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
 							System.out.println("5.7 error wrong end airpot: flightID" + flight.getFlightId());
 							return false;
 						}
