@@ -82,11 +82,11 @@ public class LocalSearch {
 									logger.info("Method 1 After exchange ...");
 									List<Flight> updateList1 = newAircraft1.getFlightChain();
 									for (Flight aF : updateList1) {
-										logger.info("Air 1 " + aF.getSchdNo());
+										logger.info("Air  " + newAircraft1.getId() + " flight "  +aF.getFlightId());
 									}
 									List<Flight> updateList2 = cancelledAir.getFlightChain();
 									for (Flight aF : updateList2) {
-										logger.info("Air 1 cancelled " + aF.getSchdNo());
+										logger.info("Air cancelled " + newAircraft1.getId() + " flight "  + aF.getSchdNo());
 									}
 									logger.info("Method 1 Complete exchange ...");
 									
@@ -190,11 +190,11 @@ public class LocalSearch {
 								logger.info("Method 3 After exchange ...");
 								List<Flight> updateList1 = newAircraft1.getFlightChain();
 								for (Flight aF : updateList1) {
-									logger.info("Air 1 " + aF.getSchdNo());
+									logger.info("Air  " + newAircraft1.getId() + " flight "  + aF.getFlightId());
 								}
 								List<Flight> updateList2 = newAircraft2.getFlightChain();
 								for (Flight aF : updateList2) {
-									logger.info("Air 2  " + aF.getSchdNo());
+									logger.info("Air  " + newAircraft2.getId() + " flight "  + aF.getFlightId());
 								}
 								logger.info("Method 3 Complete exchange ...");
 
