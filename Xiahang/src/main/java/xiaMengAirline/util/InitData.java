@@ -139,20 +139,13 @@ public class InitData {
 					}
 					
 					if (!aFlight.isInternationalFlight()) {
-						String aValue;
 						String sourceAirport = aFlight.getSourceAirPort().getId();
 						String destAirport = aFlight.getDesintationAirport().getId();
-						aValue = destAirport;
-						aValue += "_";
-						aValue += sourceAirport;
-						if (!domesticAirportList.contains(aValue)) {
-							domesticAirportList.add(aValue);
+						if (!domesticAirportList.contains(sourceAirport)) {
+							domesticAirportList.add(sourceAirport);
 						}
-						aValue = sourceAirport;
-						aValue += "_";
-						aValue += destAirport;
-						if (!domesticAirportList.contains(aValue)) {
-							domesticAirportList.add(aValue);
+						if (!domesticAirportList.contains(destAirport)) {
+							domesticAirportList.add(destAirport);
 						}
 					}
 					
