@@ -29,9 +29,19 @@ public class SelfSearch {
 	public Aircraft adjustAircraft (Aircraft originalAir, int startIndex) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		Aircraft thisAc = originalAir.clone();
 		HashMap<Integer, Aircraft> forkList = new HashMap<Integer, Aircraft>();
-		boolean isFinish = false;
-
+		
+		//delete new flights in cancel flight list
+		List<Integer> cancelFlightList = new ArrayList<Integer>();
+		for (int i = 0; i < thisAc.getCancelAircrafted().getFlightChain().size(); i++){
+			if (thisAc.getCancelAircrafted().getFlightChain().get(i).getFlightId() > InitData.plannedMaxFligthId){
+				cancelFlightList.add(i);
+			}
+		}
+		thisAc.getCancelAircrafted().removeFlightChain(cancelFlightList);
+		
+		// loop until all flight sorted
 		Aircraft aircraft = thisAc.clone();
+		boolean isFinish = false;
 		int infinitLoopCnt = 0;
 		while (!isFinish){
 			List<Flight> flights = aircraft.getFlightChain();
@@ -140,7 +150,9 @@ public class SelfSearch {
 			int cancelFlightEndIndex = entry.getKey();
 			newFlight = entry.getValue();List<Integer> removeFlightIndeces = new ArrayList<Integer>();
 			for (int cancelIndex = flightIndex; cancelIndex < cancelFlightEndIndex + 1; cancelIndex++){
-				aircraft.getCancelledAircraft().addFlight(flights.get(cancelIndex));
+				if (flights.get(cancelIndex).getFlightId() <= InitData.plannedMaxFligthId){
+					aircraft.getCancelledAircraft().addFlight(flights.get(cancelIndex));
+				}
 				removeFlightIndeces.add(cancelIndex);
 			}
 			aircraft.removeFlightChain(removeFlightIndeces);
@@ -286,6 +298,9 @@ public class SelfSearch {
 	
 	// tell if a flight is international between two airport
 	public boolean isInternational(String airport1, String airport2){
+		if (InitData.domesticAirportList.contains(airport1) && InitData.domesticAirportList.contains(airport2)){
+			return true;
+		}
 		return false;
 	}
 	
