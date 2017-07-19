@@ -42,7 +42,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 		else
 			aKey += "_NORMAL";
 		if (schedule.containsKey(aKey)) {
-			Aircraft current = schedule.get(aNewAircraft.getId());
+			Aircraft current = schedule.get(aKey);
 			schedule.put(aKey, aNewAircraft);
 			current.clear();
 		} else

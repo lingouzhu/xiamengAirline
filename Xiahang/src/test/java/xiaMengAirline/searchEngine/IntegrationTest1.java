@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
@@ -141,13 +142,19 @@ public class IntegrationTest1 {
 		
 		aSolution.refreshCost(true);
 		
-		System.out.println(aSolution.getCost().toString());
+		assertEquals(7100, aSolution.getCost().intValue());
 		
 //		aSolution.generateOutput("2");
 		LocalSearch searchEngine = new LocalSearch();
 		
+		XiaMengAirlineSolution aBetterSolution = null;
 		try {
-			searchEngine.constructNewSolution(aSolution);
+			aBetterSolution  = searchEngine.constructNewSolution(aSolution);
+			aBetterSolution.refreshCost(true);
+			aBetterSolution.generateOutput("2");
+			assertEquals(100, aBetterSolution.getCost().intValue());
+			
+			
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -156,11 +163,8 @@ public class IntegrationTest1 {
 			e.printStackTrace();
 		}
 		
-		aSolution.refreshCost(true);
 		
-		aSolution.generateOutput("2");
 		
-		System.out.println(aSolution.getCost().toString());
 		
 	}
 
