@@ -79,11 +79,11 @@ public class IntegrationTest1 {
 //		InitData.jointFlightMap.put(fligt1.getFlightId(), fligt2);
 //		InitData.jointFlightMap.put(fligt2.getFlightId(), null);
 //		
-		// delay 1 hour
+		// delay 1 hour 100 
 		List<Flight> flightChain = new ArrayList<Flight>();
 		flightChain.add(createFlight(101, "001", "002", "002", Utils.timeStr2date("2017-01-01 10:00:00"), 
 				Utils.timeStr2date("2017-01-01 9:00:00"), "1" , new BigDecimal("1"), 201, Utils.dateStr2date("2017-01-01")));
-		// joint
+		// joint 5000
 		flightChain.add(createFlight(10001, "002", "004", "003", Utils.timeStr2date("2017-01-01 10:00:00"), 
 				Utils.timeStr2date("2017-01-01 10:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
 		
@@ -115,10 +115,10 @@ public class IntegrationTest1 {
 		
 		List<Flight> flightChain2 = new ArrayList<Flight>();
 		
-		// cancel
+		// cancel 1000
 		flightChain2.add(createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"), 
 				Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
-		// cancel
+		// cancel 1000
 		flightChain2.add(createFlight(103, "003", "004", "004", Utils.timeStr2date("2017-01-01 18:00:00"), 
 				Utils.timeStr2date("2017-01-01 18:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
 		
@@ -156,6 +156,9 @@ public class IntegrationTest1 {
 			e.printStackTrace();
 		}
 		
+		aSolution.refreshCost(true);
+		
+		aSolution.generateOutput("2");
 		
 		System.out.println(aSolution.getCost().toString());
 		
