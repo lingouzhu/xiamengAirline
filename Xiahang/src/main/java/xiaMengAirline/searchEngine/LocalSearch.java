@@ -190,11 +190,11 @@ public class LocalSearch {
 								logger.info("Method 3 After exchange ...");
 								List<Flight> updateList1 = newAircraft1.getFlightChain();
 								for (Flight aF : updateList1) {
-									logger.info("Air  " + newAircraft1.getId() + " flight "  + aF.getFlightId());
+									logger.info("Air  " + newAircraft1.getId() + "isCancel " + newAircraft1.isCancel() +  " flight "  + aF.getFlightId());
 								}
 								List<Flight> updateList2 = newAircraft2.getFlightChain();
 								for (Flight aF : updateList2) {
-									logger.info("Air  " + newAircraft2.getId() + " flight "  + aF.getFlightId());
+									logger.info("Air  " + newAircraft2.getId() + "isCancel " + newAircraft1.isCancel() + " flight "  + aF.getFlightId());
 								}
 								logger.info("Method 3 Complete exchange ...");
 
