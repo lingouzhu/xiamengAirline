@@ -96,7 +96,7 @@ public class Aircraft implements Cloneable {
 	 * The aircraft's insertFlight method inserts a flight into aircraft's
 	 * flight chain. The flight must be fresh new and no referred by others.
 	 * 
-	 * @author Leonard
+	 * @author Data Forest
 	 * @param aFlight,
 	 *            a new flight, either fresh new created or cloned.
 	 * @param position,
@@ -118,7 +118,7 @@ public class Aircraft implements Cloneable {
 	 * The aircraft's insertFlightChain method inserts a list of flight into
 	 * aircraft's flight chain,
 	 * 
-	 * @author Leonard
+	 * @author Data Forest
 	 * @param sourceAircraft,
 	 *            specify where the list of flight comes from.
 	 * @param addFlights,
@@ -142,7 +142,7 @@ public class Aircraft implements Cloneable {
 	 * The aircraft's insertFlightChain method inserts a list of flight into
 	 * aircraft's flight chain,
 	 * 
-	 * @author Leonard
+	 * @author Data Forest
 	 * @param sourceAircraft,
 	 *            specify where the list of flight comes from.
 	 * @param startFlight,
@@ -180,7 +180,7 @@ public class Aircraft implements Cloneable {
 	/**
 	 * The aircraft's removeFlightChain method removes list of flights,
 	 * 
-	 * @author Leonard
+	 * @author Data Forest
 	 * @param deleteFlights,
 	 *            specify the list of flights, to be removed
 	 * @return none
@@ -196,7 +196,7 @@ public class Aircraft implements Cloneable {
 	/**
 	 * The aircraft's removeFlightChain method removes list of flights,
 	 * 
-	 * @author Leonard
+	 * @author Data Forest
 	 * @param startFlight,
 	 *            specify the start flight, to be removed.
 	 * @param endFlight,
@@ -405,7 +405,7 @@ public class Aircraft implements Cloneable {
 	 * flightDuration. This method must secure the given flight can departure as
 	 * its departureTime
 	 * 
-	 * @author Leonard
+	 * @author Data Forest
 	 * @param startPosition,
 	 *            specify starts from which flight. The first flight is 0.
 	 * @return Nothing.
@@ -541,7 +541,7 @@ public class Aircraft implements Cloneable {
 	 * The aircraft's moveToDropout method drops a regular flight into
 	 * dropOutList,
 	 * 
-	 * @author Leonard
+	 * @author Data Forest
 	 * @param flight,
 	 *            specify to-be-removed flight, the flight must be part of
 	 *            aircraft's regular flight.

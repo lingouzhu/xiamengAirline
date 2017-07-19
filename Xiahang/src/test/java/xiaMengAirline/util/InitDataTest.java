@@ -94,6 +94,17 @@ public class InitDataTest {
 		aKey += "_50";
 		aKey += "_5";
 		assertEquals(95, InitData.fightDurationMap.get(aKey).intValue());
+		
+		//domestic airport
+		aKey = "50_48";
+		assertEquals(true,InitData.domesticAirportList.contains(aKey));
+		
+		aKey = "48_50";
+		assertEquals(true,InitData.domesticAirportList.contains(aKey));
+		
+		aKey = "36_4";
+		assertEquals(false,InitData.domesticAirportList.contains(aKey));
+		
 	}
 
 }

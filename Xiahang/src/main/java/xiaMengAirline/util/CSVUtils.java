@@ -15,8 +15,7 @@ import xiaMengAirline.beans.Flight;
 /**   
  * CSV操作(导出和导入)
  *
- * @author 林计钦
- * @version 1.0 Jan 27, 2014 4:30:58 PM   
+ * @author Data Forest
  */
 public class CSVUtils {
     

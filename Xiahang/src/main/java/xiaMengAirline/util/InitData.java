@@ -50,6 +50,9 @@ public class InitData {
 	/** last flight*/
 	public static Map<String, Flight> lastFlightMap = new HashMap<String, Flight>();
 	
+	/** domestic airports list -- airport1_airport2 (dont care of order of airport1/2, both stored  **/
+	public static List<String> domesticAirportList = new ArrayList<String> (); 
+	
 	public static int maxFligthId = 0;
 	public static int plannedMaxFligthId = 0;
 
@@ -133,6 +136,24 @@ public class InitData {
 					if (lastFlight !=null) {
 						jointFlightMap.put(lastFlight.getFlightId(),aFlight.clone());
 						jointFlightMap.put(aFlight.getFlightId(),null);
+					}
+					
+					if (!aFlight.isInternationalFlight()) {
+						String aValue;
+						String sourceAirport = aFlight.getSourceAirPort().getId();
+						String destAirport = aFlight.getDesintationAirport().getId();
+						aValue = destAirport;
+						aValue += "_";
+						aValue += sourceAirport;
+						if (!domesticAirportList.contains(aValue)) {
+							domesticAirportList.add(aValue);
+						}
+						aValue = sourceAirport;
+						aValue += "_";
+						aValue += destAirport;
+						if (!domesticAirportList.contains(aValue)) {
+							domesticAirportList.add(aValue);
+						}
 					}
 					
 				}
