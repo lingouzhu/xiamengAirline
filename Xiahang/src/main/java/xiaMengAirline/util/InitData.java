@@ -50,7 +50,7 @@ public class InitData {
 	/** last flight*/
 	public static Map<String, Flight> lastFlightMap = new HashMap<String, Flight>();
 	
-	/** domestic airports list -- airport1_airport2 (dont care of order of airport1/2, both stored  **/
+	/** domestic airports list **/
 	public static List<String> domesticAirportList = new ArrayList<String> (); 
 	
 	public static int maxFligthId = 0;

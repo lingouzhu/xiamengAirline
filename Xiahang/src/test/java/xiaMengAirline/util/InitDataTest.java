@@ -96,14 +96,9 @@ public class InitDataTest {
 		assertEquals(95, InitData.fightDurationMap.get(aKey).intValue());
 		
 		//domestic airport
-		aKey = "50_48";
-		assertEquals(true,InitData.domesticAirportList.contains(aKey));
+		assertEquals(true,InitData.domesticAirportList.contains("50") && InitData.domesticAirportList.contains("48"));
 		
-		aKey = "48_50";
-		assertEquals(true,InitData.domesticAirportList.contains(aKey));
-		
-		aKey = "36_4";
-		assertEquals(false,InitData.domesticAirportList.contains(aKey));
+		assertEquals(false,InitData.domesticAirportList.contains("36") && InitData.domesticAirportList.contains("4"));
 		
 	}
 
