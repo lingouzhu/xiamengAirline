@@ -47,6 +47,7 @@ public class StartUp {
 		}
 		
 		//Step5, calcuate cost
+		aBetterSolution.reConstruct();
 		aBetterSolution.refreshCost(true);
 		// execute time
 		long endTime=System.currentTimeMillis();

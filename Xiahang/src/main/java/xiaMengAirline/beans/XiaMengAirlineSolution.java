@@ -2,12 +2,15 @@ package xiaMengAirline.beans;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import xiaMengAirline.Exception.AirportNotAvailable;
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.util.CSVUtils;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
@@ -62,7 +65,6 @@ public class XiaMengAirlineSolution implements Cloneable{
 		
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		for (Aircraft aAir:airList) {
-			aAir.setUpdated(false); //reset update for each refresh cost
 			if (!aAir.isCancel()) {
 				for (Flight newFlight : aAir.getFlightChain()) {
 
@@ -144,20 +146,8 @@ public class XiaMengAirlineSolution implements Cloneable{
 	}
 	public void refreshCost (BigDecimal detla) {
 		this.cost.add(detla);
-		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
-		for (Aircraft aAir:airList) {
-			aAir.setUpdated(false); //reset update for each refresh cost
-		}
 	}
 	
-	public void calcuateCostFromSchedule () {
-		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
-		for (Aircraft aAir:airList) {
-			this.cost.add(aAir.getCost());
-			aAir.setUpdated(false); //reset update
-		}
-		
-	}
 	
 
 	public void clear () {
@@ -377,6 +367,24 @@ public class XiaMengAirlineSolution implements Cloneable{
 	
 	public void generateOutput(String minutes) {
 		CSVUtils.exportCsv(new File("数据森林" + "_" + cost.toString() + "_" +  minutes), outputList);
+	}
+	
+	public boolean adjust () {
+		//To-do, add adjustment solution
+		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
+		try {
+		for (Aircraft aAir:airList) {
+			aAir.adjustment();
+			refreshCost(false); //check cost
+		}
+		} catch (Exception ex) {
+			return false;
+		}
+		return true; //return false, if unable to build valid solution
+	}
+	
+	public void reConstruct () {
+		
 	}
 
 }

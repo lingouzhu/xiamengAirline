@@ -7,7 +7,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -30,8 +29,6 @@ public class Aircraft implements Cloneable {
 	private boolean isCancel = false;
 	private Aircraft cancelAircrafted = null;
 	private List<Flight> dropOutList = new ArrayList<Flight>();
-	private BigDecimal cost = new BigDecimal(0);
-	private HashMap<Flight, Flight> alternativeFlights = new HashMap<Flight, Flight>();
 	private boolean isUpdated = false;
 
 	public String getId() {
@@ -294,7 +291,6 @@ public class Aircraft implements Cloneable {
 	public void clear() {
 		flightChain.clear();
 		dropOutList.clear();
-		alternativeFlights.clear();
 	}
 
 	public HashMap<Flight, List<Flight>> getCircuitFlights() {
@@ -592,87 +588,6 @@ public class Aircraft implements Cloneable {
 		return -1;
 	}
 
-	public BigDecimal getCost() {
-		return cost;
-	}
-
-	public void setCost(BigDecimal cost) {
-		this.cost = cost;
-	}
-
-	public HashMap<Flight, Flight> getAlternativeFlights() {
-		return alternativeFlights;
-	}
-
-	public void setAlternativeFlights(HashMap<Flight, Flight> alternativeFlights) {
-		this.alternativeFlights = alternativeFlights;
-	}
-
-	public boolean addAlternativeFlight(Flight sourceFlight, Flight alternativeFlight) {
-		// check if source flight is part of the aircraft
-		// also ensure the alternative not yet existed
-		if (!flightChain.contains(sourceFlight) || alternativeFlights.containsKey(sourceFlight))
-			return false;
-
-		// store alternative flight
-		alternativeFlights.put(sourceFlight, alternativeFlight);
-		return true;
-	}
-
-	public boolean removeAlternativeFlight(Flight sourceFlight) {
-		if (!alternativeFlights.containsKey(sourceFlight))
-			return false;
-		else {
-			alternativeFlights.remove(sourceFlight);
-			return true;
-		}
-
-	}
-
-	public Set<Flight> getSourceAlternativeFlights() {
-		return alternativeFlights.keySet();
-	}
-
-	public Flight getAlternativeFlight(Flight sourceFlight) {
-		return alternativeFlights.get(sourceFlight);
-	}
-
-	public boolean moveAlternativeFlightToPrimary() {
-		List<Flight> sourceFlights = new ArrayList<Flight> ();
-		sourceFlights.addAll(getSourceAlternativeFlights());
-		for (Flight aSourceF : sourceFlights) {
-			if (!flightChain.contains(aSourceF))
-				return false;
-		}
-
-		for (Flight aSourceF : sourceFlights) {
-			Flight altF = alternativeFlights.get(aSourceF);
-			if (!flightChain.contains(altF)) {
-				flightChain.add(flightChain.indexOf(aSourceF), altF);
-			}
-			flightChain.remove(aSourceF);
-		}
-		return true;
-	}
-	
-	public boolean buildAlternativeFlights (Flight alternativeFlight, List<Flight> normalFlights) {
-		if (!flightChain.contains(alternativeFlight))
-			return false;
-		for (Flight aF:normalFlights) {
-			if (flightChain.contains(aF))
-				return false;
-		}
-			
-		
-		flightChain.addAll(flightChain.indexOf(alternativeFlight), normalFlights);
-		Flight altF = flightChain.remove(flightChain.indexOf(alternativeFlight));
-		
-		for (Flight aNormal:normalFlights) {
-			addAlternativeFlight(aNormal, altF);
-		}
-		
-		return true;
-	}
 
 	public boolean isUpdated() {
 		return isUpdated;
