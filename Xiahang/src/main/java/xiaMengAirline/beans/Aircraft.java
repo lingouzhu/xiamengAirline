@@ -32,6 +32,7 @@ public class Aircraft implements Cloneable {
 	private List<Flight> dropOutList = new ArrayList<Flight>();
 	private BigDecimal cost = new BigDecimal(0);
 	private HashMap<Flight, Flight> alternativeFlights = new HashMap<Flight, Flight>();
+	private boolean isUpdated = false;
 
 	public String getId() {
 		return id;
@@ -285,6 +286,8 @@ public class Aircraft implements Cloneable {
 
 	public void clear() {
 		flightChain.clear();
+		dropOutList.clear();
+		alternativeFlights.clear();
 	}
 
 	public HashMap<Flight, List<Flight>> getCircuitFlights() {
@@ -662,6 +665,14 @@ public class Aircraft implements Cloneable {
 		}
 		
 		return true;
+	}
+
+	public boolean isUpdated() {
+		return isUpdated;
+	}
+
+	public void setUpdated(boolean isUpdated) {
+		this.isUpdated = isUpdated;
 	}
 	
 

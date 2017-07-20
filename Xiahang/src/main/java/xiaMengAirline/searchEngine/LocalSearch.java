@@ -19,10 +19,10 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 public class LocalSearch {
 
 	private static final Logger logger = Logger.getLogger(LocalSearch.class);
-	
-	
-	private boolean adjust(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
-		
+
+	private boolean adjust(Aircraft newAir1, Aircraft newAir2, Aircraft oldAir1, Aircraft oldAir2)
+			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
+
 		if (newAir1.validate() && newAir2.validate()) {
 			newAir1.adjustment();
 			newAir2.adjustment();
@@ -34,7 +34,7 @@ public class LocalSearch {
 	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
 			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
-		List<Aircraft> aircrafts = new ArrayList<Aircraft> ( bestSolution.getSchedule().values());
+		List<Aircraft> aircrafts = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
 		int r = aircrafts.size();
 		for (int i = 0; i < r - 1; i++) {
 			Aircraft aircraft1 = aircrafts.get(i);
@@ -42,7 +42,8 @@ public class LocalSearch {
 			for (int j = i + 1; j < r; j++) {
 				Aircraft aircraft2 = aircrafts.get(j);
 				int n = aircraft2.getFlightChain().size();
-				if (!aircraft1.isCancel() || !aircraft2.isCancel()) {
+				if ((!aircraft1.isCancel() || !aircraft2.isCancel())
+						&& (aircraft1.isUpdated() || aircraft2.isUpdated())) {
 					HashMap<Flight, List<Flight>> circuitFlightsAir1 = aircraft1.getCircuitFlights();
 					HashMap<Flight, List<Flight>> circuitFlightsAir2 = aircraft2.getCircuitFlights();
 					HashMap<Flight, List<MatchedFlight>> matchedFlights = aircraft1.getMatchedFlights(aircraft2);
@@ -56,9 +57,10 @@ public class LocalSearch {
 								for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
 									Aircraft newAircraft1 = aircraft1.clone();
 									Aircraft cancelledAir = newAircraft1.getCancelledAircraft();
-									
+
 									Flight sFlight = newAircraft1.getFlight(uu);
-									Flight dFlight = newAircraft1.getFlight(aircraft1.getFlightChain().indexOf(destFlight));
+									Flight dFlight = newAircraft1
+											.getFlight(aircraft1.getFlightChain().indexOf(destFlight));
 
 									cancelledAir.insertFlightChain(aircraft1, flightAir1, destFlight,
 											cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
@@ -67,28 +69,31 @@ public class LocalSearch {
 									logger.info("Method 1 After exchange ...");
 									List<Flight> updateList1 = newAircraft1.getFlightChain();
 									for (Flight aF : updateList1) {
-										logger.info("Air  " + newAircraft1.getId() + " flight "  +aF.getFlightId());
+										logger.info("Air  " + newAircraft1.getId() + " flight " + aF.getFlightId());
 									}
 									List<Flight> updateList2 = cancelledAir.getFlightChain();
 									for (Flight aF : updateList2) {
-										logger.info("Air cancelled " + newAircraft1.getId() + " flight "  + aF.getSchdNo());
+										logger.info(
+												"Air cancelled " + newAircraft1.getId() + " flight " + aF.getSchdNo());
 									}
 									logger.info("Method 1 Complete exchange ...");
-									
-									
+
 									// only update solution when new change
 									// goes better
 									if (newAircraft1.validate()) {
 										newAircraft1.adjustment();
 
 										BigDecimal deltaCost = newAircraft1.getCost().subtract(aircraft1.getCost());
-										
+
 										if (deltaCost.longValue() < 0) {
 											XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 											aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 											aNewSolution.replaceOrAddNewAircraft(cancelledAir);
 											aNewSolution.refreshCost(deltaCost);
 											neighboursResult.addSolution(aNewSolution);
+										} else {
+											cancelledAir.clear();
+											newAircraft1.clear();
 										}
 
 									}
@@ -107,9 +112,10 @@ public class LocalSearch {
 								for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
 									Aircraft newAircraft2 = aircraft2.clone();
 									Aircraft cancelledAir = newAircraft2.getCancelledAircraft();
-									
+
 									Flight sFlight = newAircraft2.getFlight(xx);
-									Flight dFlight = newAircraft2.getFlight(aircraft2.getFlightChain().indexOf(destFlight));
+									Flight dFlight = newAircraft2
+											.getFlight(aircraft2.getFlightChain().indexOf(destFlight));
 
 									cancelledAir.insertFlightChain(aircraft2, flightAir2, destFlight,
 											cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
@@ -125,8 +131,7 @@ public class LocalSearch {
 										logger.info("Air 2 cancelled " + aF.getSchdNo());
 									}
 									logger.info("Method 2 Complete exchange ...");
-									
-									
+
 									// only update solution when new change
 									// goes better
 									if (newAircraft2.validate()) {
@@ -140,6 +145,9 @@ public class LocalSearch {
 											aNewSolution.replaceOrAddNewAircraft(cancelledAir);
 											aNewSolution.refreshCost(deltaCost);
 											neighboursResult.addSolution(aNewSolution);
+										} else {
+											cancelledAir.clear();
+											newAircraft2.clear();
 										}
 
 									}
@@ -151,7 +159,8 @@ public class LocalSearch {
 
 					for (int u = 0; u <= m - 1; u++) {
 						// if aircraft1/aircraft2 flights same source and
-						// same destination, do exchange overlapped part - Method 3
+						// same destination, do exchange overlapped part -
+						// Method 3
 						if (matchedFlights.containsKey(aircraft1.getFlight(u))) {
 							List<MatchedFlight> matchedList = matchedFlights.get(aircraft1.getFlight(u));
 							for (MatchedFlight aMatched : matchedList) {
@@ -161,40 +170,45 @@ public class LocalSearch {
 								Flight air1DestFlight = newAircraft1.getFlight(aMatched.getAir1DestFlight());
 								Flight air2SourceFlight = newAircraft2.getFlight(aMatched.getAir2SourceFlight());
 								Flight air2DestFlight = newAircraft2.getFlight(aMatched.getAir2DestFlight());
-								
-								
-								newAircraft1.insertFlightChain(aircraft2, aircraft2.getFlight(aMatched.getAir2SourceFlight()),
-										 aircraft2.getFlight(aMatched.getAir2DestFlight()), 
-										 air1DestFlight, false);
-								newAircraft2.insertFlightChain(aircraft1, aircraft1.getFlight(aMatched.getAir1SourceFlight()),
-										aircraft1.getFlight(aMatched.getAir1DestFlight()), 
-										air2DestFlight, false);
-								newAircraft1.removeFlightChain(air1SourceFlight,air1DestFlight);
-								newAircraft2.removeFlightChain(air2SourceFlight,air2DestFlight);
-								
+
+								newAircraft1.insertFlightChain(aircraft2,
+										aircraft2.getFlight(aMatched.getAir2SourceFlight()),
+										aircraft2.getFlight(aMatched.getAir2DestFlight()), air1DestFlight, false);
+								newAircraft2.insertFlightChain(aircraft1,
+										aircraft1.getFlight(aMatched.getAir1SourceFlight()),
+										aircraft1.getFlight(aMatched.getAir1DestFlight()), air2DestFlight, false);
+								newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
+								newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
+
 								logger.info("Method 3 After exchange ...");
 								List<Flight> updateList1 = newAircraft1.getFlightChain();
 								for (Flight aF : updateList1) {
-									logger.info("Air  " + newAircraft1.getId() + "isCancel " + newAircraft1.isCancel() +  " flight "  + aF.getFlightId());
+									logger.info("Air  " + newAircraft1.getId() + "isCancel " + newAircraft1.isCancel()
+											+ " flight " + aF.getFlightId());
 								}
 								List<Flight> updateList2 = newAircraft2.getFlightChain();
 								for (Flight aF : updateList2) {
-									logger.info("Air  " + newAircraft2.getId() + "isCancel " + newAircraft2.isCancel() + " flight "  + aF.getFlightId());
+									logger.info("Air  " + newAircraft2.getId() + "isCancel " + newAircraft2.isCancel()
+											+ " flight " + aF.getFlightId());
 								}
 								logger.info("Method 3 Complete exchange ...");
 
 								// only update solution when new change
 								// goes better
 								if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
-									
-									BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost()).subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
-									
+
+									BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost())
+											.subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
+
 									if (deltaCost.longValue() < 0) {
 										XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 										aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 										aNewSolution.replaceOrAddNewAircraft(newAircraft2);
 										aNewSolution.refreshCost(deltaCost);
-										neighboursResult.addSolution(aNewSolution);										
+										neighboursResult.addSolution(aNewSolution);
+									} else {
+										newAircraft1.clear();
+										newAircraft2.clear();
 									}
 
 								}
@@ -212,13 +226,14 @@ public class LocalSearch {
 										Aircraft newAircraft1 = aircraft1.clone();
 										Aircraft newAircraft2 = aircraft2.clone();
 										Flight air1SourceFlight = newAircraft1.getFlight(u);
-										Flight air1DestFlight = newAircraft1.getFlight(aircraft1.getFlightChain().indexOf(destFlight));
+										Flight air1DestFlight = newAircraft1
+												.getFlight(aircraft1.getFlightChain().indexOf(destFlight));
 										Flight air2Flight = newAircraft2.getFlight(x);
 
-										newAircraft2.insertFlightChain(aircraft1, flightAir1, destFlight,
-												air2Flight, true);
+										newAircraft2.insertFlightChain(aircraft1, flightAir1, destFlight, air2Flight,
+												true);
 										newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
-										
+
 										logger.info("Method 4 After exchange ...");
 										List<Flight> updateList1 = newAircraft1.getFlightChain();
 										for (Flight aF : updateList1) {
@@ -233,15 +248,19 @@ public class LocalSearch {
 										// only update solution when new change
 										// goes better
 										if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
-											
-											BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost()).subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
-											
+
+											BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost())
+													.subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
+
 											if (deltaCost.longValue() < 0) {
 												XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 												aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 												aNewSolution.replaceOrAddNewAircraft(newAircraft2);
 												aNewSolution.refreshCost(deltaCost);
-												neighboursResult.addSolution(aNewSolution);												
+												neighboursResult.addSolution(aNewSolution);
+											} else {
+												newAircraft1.clear();
+												newAircraft2.clear();
 											}
 
 										}
@@ -259,13 +278,14 @@ public class LocalSearch {
 										Aircraft newAircraft1 = aircraft1.clone();
 										Aircraft newAircraft2 = aircraft2.clone();
 										Flight air2SourceFlight = newAircraft2.getFlight(x);
-										Flight air2DestFlight = newAircraft2.getFlight(aircraft2.getFlightChain().indexOf(destFlight));
+										Flight air2DestFlight = newAircraft2
+												.getFlight(aircraft2.getFlightChain().indexOf(destFlight));
 										Flight air1Flight = newAircraft1.getFlight(u);
 
-										newAircraft1.insertFlightChain(aircraft2, flightAir2, destFlight,
-												air1Flight, true);
+										newAircraft1.insertFlightChain(aircraft2, flightAir2, destFlight, air1Flight,
+												true);
 										newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
-										
+
 										logger.info("Method 5 After exchange ...");
 										List<Flight> updateList1 = newAircraft1.getFlightChain();
 										for (Flight aF : updateList1) {
@@ -280,14 +300,18 @@ public class LocalSearch {
 										// only update solution when new change
 										// goes better
 										if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
-											BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost()).subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
-											
+											BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost())
+													.subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
+
 											if (deltaCost.longValue() < 0) {
 												XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 												aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 												aNewSolution.replaceOrAddNewAircraft(newAircraft2);
 												aNewSolution.refreshCost(deltaCost);
-												neighboursResult.addSolution(aNewSolution);												
+												neighboursResult.addSolution(aNewSolution);
+											} else {
+												newAircraft1.clear();
+												newAircraft2.clear();
 											}
 										}
 
@@ -304,22 +328,23 @@ public class LocalSearch {
 								if (aFlight.getSourceAirPort().getId().equals(bFlight.getSourceAirPort().getId())) {
 									Aircraft newAircraft1 = aircraft1.clone();
 									Aircraft newAircraft2 = aircraft2.clone();
-									
-									
+
 									Flight air1Flight = newAircraft1.getFlight(u);
 									Flight air2Flight = newAircraft2.getFlight(x);
-									Flight air1DestFlight = newAircraft1.getFlight(newAircraft1.getFlightChain().size() - 1);
-									Flight air2DestFlight = newAircraft2.getFlight(newAircraft2.getFlightChain().size() - 1);
-									
+									Flight air1DestFlight = newAircraft1
+											.getFlight(newAircraft1.getFlightChain().size() - 1);
+									Flight air2DestFlight = newAircraft2
+											.getFlight(newAircraft2.getFlightChain().size() - 1);
+
 									newAircraft1.insertFlightChain(aircraft2, bFlight,
-											aircraft2.getFlight(aircraft2.getFlightChain().size() - 1), air1Flight, true);
+											aircraft2.getFlight(aircraft2.getFlightChain().size() - 1), air1Flight,
+											true);
 									newAircraft2.insertFlightChain(aircraft1, aFlight,
-											aircraft1.getFlight(aircraft1.getFlightChain().size() - 1), air2Flight, true);
-									newAircraft1.removeFlightChain(air1Flight,
-											air1DestFlight);
-									newAircraft2.removeFlightChain(air2Flight,
-											air2DestFlight);
-									
+											aircraft1.getFlight(aircraft1.getFlightChain().size() - 1), air2Flight,
+											true);
+									newAircraft1.removeFlightChain(air1Flight, air1DestFlight);
+									newAircraft2.removeFlightChain(air2Flight, air2DestFlight);
+
 									logger.info("Method 6 After exchange ...");
 									List<Flight> updateList1 = newAircraft1.getFlightChain();
 									for (Flight aF : updateList1) {
@@ -334,14 +359,18 @@ public class LocalSearch {
 									// only update solution when new change
 									// goes better
 									if (adjust(newAircraft1, newAircraft2, aircraft1, aircraft2)) {
-										BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost()).subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
-										
+										BigDecimal deltaCost = newAircraft1.getCost().add(newAircraft2.getCost())
+												.subtract(aircraft1.getCost()).subtract(aircraft2.getCost());
+
 										if (deltaCost.longValue() < 0) {
 											XiaMengAirlineSolution aNewSolution = bestSolution.clone();
 											aNewSolution.replaceOrAddNewAircraft(newAircraft1);
 											aNewSolution.replaceOrAddNewAircraft(newAircraft2);
 											aNewSolution.refreshCost(deltaCost);
-											neighboursResult.addSolution(aNewSolution);											
+											neighboursResult.addSolution(aNewSolution);
+										} else {
+											newAircraft1.clear();
+											newAircraft2.clear();
 										}
 
 									}

@@ -37,6 +37,9 @@ public class XiaMengAirlineSolution implements Cloneable{
 	public void replaceOrAddNewAircraft (Aircraft aNewAircraft) {
 		
 		String aKey = aNewAircraft.getId();
+		
+		aNewAircraft.setUpdated(true);
+		
 		if (aNewAircraft.isCancel())
 			aKey += "_CANCEL";
 		else
@@ -59,6 +62,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 		
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		for (Aircraft aAir:airList) {
+			aAir.setUpdated(false); //reset update for each refresh cost
 			if (!aAir.isCancel()) {
 				for (Flight newFlight : aAir.getFlightChain()) {
 
@@ -140,12 +144,17 @@ public class XiaMengAirlineSolution implements Cloneable{
 	}
 	public void refreshCost (BigDecimal detla) {
 		this.cost.add(detla);
+		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
+		for (Aircraft aAir:airList) {
+			aAir.setUpdated(false); //reset update for each refresh cost
+		}
 	}
 	
 	public void calcuateCostFromSchedule () {
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		for (Aircraft aAir:airList) {
 			this.cost.add(aAir.getCost());
+			aAir.setUpdated(false); //reset update
 		}
 		
 	}
