@@ -103,7 +103,7 @@ public class LocalSearch {
 									airList.add(cancelledAir);
 
 									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									airOldList.add(aircraft1);
+									airOldList.add(aircraft1.getAlternativeAircraft());
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
@@ -159,7 +159,7 @@ public class LocalSearch {
 									airList.add(cancelledAir);
 
 									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									airOldList.add(aircraft2);
+									airOldList.add(aircraft2.getAlternativeAircraft());
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
@@ -222,8 +222,8 @@ public class LocalSearch {
 								airList.add(newAircraft2);
 
 								ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-								airOldList.add(aircraft1);
-								airOldList.add(aircraft2);
+								airOldList.add(aircraft1.getAlternativeAircraft());
+								airOldList.add(aircraft2.getAlternativeAircraft());
 
 								XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 								XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
@@ -330,8 +330,8 @@ public class LocalSearch {
 										airList.add(newAircraft2);
 
 										ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-										airOldList.add(aircraft1);
-										airOldList.add(aircraft2);
+										airOldList.add(aircraft1.getAlternativeAircraft());
+										airOldList.add(aircraft2.getAlternativeAircraft());
 
 										XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 										XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
@@ -393,8 +393,8 @@ public class LocalSearch {
 									airList.add(newAircraft2);
 
 									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									airOldList.add(aircraft1);
-									airOldList.add(aircraft2);
+									airOldList.add(aircraft1.getAlternativeAircraft());
+									airOldList.add(aircraft2.getAlternativeAircraft());
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);

@@ -30,6 +30,7 @@ public class Aircraft implements Cloneable {
 	private Aircraft cancelAircrafted = null;
 	private List<Flight> dropOutList = new ArrayList<Flight>();
 	private boolean isUpdated = false;
+	private Aircraft alternativeAircraft = null; //alternative aircraft must be cloned, and assigned to one & only one its parent aircraft
 
 	public String getId() {
 		return id;
@@ -291,6 +292,7 @@ public class Aircraft implements Cloneable {
 	public void clear() {
 		flightChain.clear();
 		dropOutList.clear();
+		alternativeAircraft.clear();
 	}
 
 	public HashMap<Flight, List<Flight>> getCircuitFlights() {
@@ -595,6 +597,14 @@ public class Aircraft implements Cloneable {
 
 	public void setUpdated(boolean isUpdated) {
 		this.isUpdated = isUpdated;
+	}
+
+	public Aircraft getAlternativeAircraft() {
+		return alternativeAircraft;
+	}
+
+	public void setAlternativeAircraft(Aircraft alternativeAircraft) {
+		this.alternativeAircraft = alternativeAircraft;
 	}
 	
 
