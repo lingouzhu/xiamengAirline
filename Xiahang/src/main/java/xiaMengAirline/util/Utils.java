@@ -87,7 +87,7 @@ public class Utils {
 		String result = "";
 		
 		if (date != null) {
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			result = formatter.format(date);
 			
 		}
