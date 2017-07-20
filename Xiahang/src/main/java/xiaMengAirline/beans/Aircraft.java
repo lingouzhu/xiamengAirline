@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -29,6 +30,8 @@ public class Aircraft implements Cloneable {
 	private boolean isCancel = false;
 	private Aircraft cancelAircrafted = null;
 	private List<Flight> dropOutList = new ArrayList<Flight>();
+	private BigDecimal cost = new BigDecimal(0);
+	private HashMap<Flight, Flight> alternativeFlights = new HashMap<Flight, Flight>();
 
 	public String getId() {
 		return id;
@@ -103,7 +106,7 @@ public class Aircraft implements Cloneable {
 	 *            specify the location of current flight chain. Flight will be
 	 *            inserted before this position
 	 * @return none
-	 * @throws CloneNotSupportedException 
+	 * @throws CloneNotSupportedException
 	 */
 	public void insertFlight(Flight aFlight, int position) throws CloneNotSupportedException {
 		Aircraft aAir = this.clone();
@@ -252,10 +255,11 @@ public class Aircraft implements Cloneable {
 		return (aNew);
 	}
 
-	public void adjustment() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
+	public void adjustment()
+			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
-			selfAdjustEngine.adjustAircraft(this,0);
+			selfAdjustEngine.adjustAircraft(this, 0);
 		}
 
 	}
@@ -368,25 +372,31 @@ public class Aircraft implements Cloneable {
 				if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
 					return false;
 				}
-			
-				if (Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).compareTo(new BigDecimal("50")) < 0
-						&& (preFlight.getFlightId() > InitData.plannedMaxFligthId || flight.getFlightId() > InitData.plannedMaxFligthId 
-								|| Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).
-						compareTo(Utils.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(), preFlight.getPlannedFlight().getArrivalTime())) != 0
-						|| !flight.getPlannedAir().getId().equals(preFlight.getPlannedAir().getId()))) {
+
+				if (Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime())
+						.compareTo(new BigDecimal("50")) < 0
+						&& (preFlight.getFlightId() > InitData.plannedMaxFligthId
+								|| flight.getFlightId() > InitData.plannedMaxFligthId
+								|| Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime())
+										.compareTo(
+												Utils.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(),
+														preFlight.getPlannedFlight().getArrivalTime())) != 0
+								|| !flight.getPlannedAir().getId().equals(preFlight.getPlannedAir().getId()))) {
 					return false;
 				}
-				
+
 				if (InitData.jointFlightMap.get(preFlight.getFlightId()) != null) {
-					if (preFlight.getDesintationAirport().getId().equals((preFlight.getPlannedFlight().getDesintationAirport().getId()))
-							&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight.getFlightId()) {
+					if (preFlight.getDesintationAirport().getId()
+							.equals((preFlight.getPlannedFlight().getDesintationAirport().getId()))
+							&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight
+									.getFlightId()) {
 						return false;
 					}
 				}
-			
+
 			}
 		}
-		
+
 		return true;
 
 	}
@@ -425,18 +435,18 @@ public class Aircraft implements Cloneable {
 	 *                (Flight), flight is not allowed searchKey (String), the
 	 *                failed search key for the lookup
 	 * @throws AirportNotAcceptDepartureTime
-	 *             - the airport does not accept suggested departure time.
-	 *             - the source airport does not accept suggested
-	 *                departure time. This exception contains two objects, flight
-	 *                (Flight), where the problem flight is at the flight chain
-	 * @throws AirportNotAvailable 
+	 *             - the airport does not accept suggested departure time. - the
+	 *             source airport does not accept suggested departure time. This
+	 *             exception contains two objects, flight (Flight), where the
+	 *             problem flight is at the flight chain
+	 * @throws AirportNotAvailable
 	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
 	 *      caused by typhoon
-	 * @see FlightTime           
+	 * @see FlightTime
 	 */
 
-	public void adjustFlightTime(int startPosition)
-			throws ParseException, AirportNotAcceptArrivalTime, FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable {
+	public void adjustFlightTime(int startPosition) throws ParseException, AirportNotAcceptArrivalTime,
+			FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable {
 		Flight currentFlight = null;
 		Flight nextFlight = null;
 		for (int i = startPosition; i < flightChain.size(); i++) {
@@ -468,25 +478,30 @@ public class Aircraft implements Cloneable {
 								cl.setTime(newFlightTime.getDepartureTime());
 								cl.add(Calendar.HOUR, MAXIMUM_EARLIER_TIME);
 								if (cl.getTime().before(nextFlight.getPlannedFlight().getDepartureTime())) {
-									logger.warn("This flight earlier too much - " + nextFlight.getFlightId() 
-									+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
-									+ " wanted dep: " + newFlightTime.getDepartureTime());
-									throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime, "Departure Too Earlier");
-									
+									logger.warn("This flight earlier too much - " + nextFlight.getFlightId()
+											+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
+											+ " wanted dep: " + newFlightTime.getDepartureTime());
+									throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime,
+											"Departure Too Earlier");
+
 								} else {
 									nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
 								}
 							} else
-								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime ,"Departure Earlier Not Allowed For International");
+								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime,
+										"Departure Earlier Not Allowed For International");
 						} else {
-							if (nextFlight.getPlannedFlight().getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
-								//if departure time delayed, this only happens normal close
-								//because typhoon has 2 hours for take-off
+							if (nextFlight.getPlannedFlight().getDepartureTime()
+									.compareTo(newFlightTime.getDepartureTime()) != 0) {
+								// if departure time delayed, this only happens
+								// normal close
+								// because typhoon has 2 hours for take-off
 								if (newFlightTime.isIsTyphoon()) {
-									//if aircraft can arrive but cannot departure, typhoon not allows parking!
+									// if aircraft can arrive but cannot
+									// departure, typhoon not allows parking!
 									throw new AirportNotAvailable(currentFlight, newFlightTime);
 								} else {
-									//if delay too much
+									// if delay too much
 									cl.setTime(nextFlight.getPlannedFlight().getDepartureTime());
 									if (currentFlight.isInternationalFlight()) {
 										cl.add(Calendar.HOUR, INTERNATIONAL_MAXIMUM_DELAY_TIME);
@@ -494,17 +509,18 @@ public class Aircraft implements Cloneable {
 										cl.add(Calendar.HOUR, DOMESTIC_MAXIMUM_DELAY_TIME);
 									}
 									if (cl.getTime().before(newFlightTime.getDepartureTime())) {
-										logger.warn("This flight delays too long - " + nextFlight.getFlightId() 
-										+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
-										+ " wanted dep: " + newFlightTime.getDepartureTime());
+										logger.warn("This flight delays too long - " + nextFlight.getFlightId()
+												+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
+												+ " wanted dep: " + newFlightTime.getDepartureTime());
 										throw new AirportNotAvailable(currentFlight, newFlightTime);
 									} else {
-										//it shall be normal airport close, so not delay too much
+										// it shall be normal airport close, so
+										// not delay too much
 										nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
 									}
 								}
 							}
-								
+
 						}
 					}
 				} else {
@@ -556,15 +572,96 @@ public class Aircraft implements Cloneable {
 		} else
 			return false;
 	}
-	
 
 	// get flight index by flight id
-	public int getFlightIndexByFlightId(int aFlightId){
+	public int getFlightIndexByFlightId(int aFlightId) {
 		for (int i = 0; i < flightChain.size(); i++) {
 			if (flightChain.get(i).getFlightId() == aFlightId)
 				return i;
 		}
 		return -1;
+	}
+
+	public BigDecimal getCost() {
+		return cost;
+	}
+
+	public void setCost(BigDecimal cost) {
+		this.cost = cost;
+	}
+
+	public HashMap<Flight, Flight> getAlternativeFlights() {
+		return alternativeFlights;
+	}
+
+	public void setAlternativeFlights(HashMap<Flight, Flight> alternativeFlights) {
+		this.alternativeFlights = alternativeFlights;
+	}
+
+	public boolean addAlternativeFlight(Flight sourceFlight, Flight alternativeFlight) {
+		// check if source flight is part of the aircraft
+		// also ensure the alternative not yet existed
+		if (!flightChain.contains(sourceFlight) || alternativeFlights.containsKey(sourceFlight))
+			return false;
+
+		// store alternative flight
+		alternativeFlights.put(sourceFlight, alternativeFlight);
+		return true;
+	}
+
+	public boolean removeAlternativeFlight(Flight sourceFlight) {
+		if (!alternativeFlights.containsKey(sourceFlight))
+			return false;
+		else {
+			alternativeFlights.remove(sourceFlight);
+			return true;
+		}
+
+	}
+
+	public Set<Flight> getSourceAlternativeFlights() {
+		return alternativeFlights.keySet();
+	}
+
+	public Flight getAlternativeFlight(Flight sourceFlight) {
+		return alternativeFlights.get(sourceFlight);
+	}
+
+	public boolean moveAlternativeFlightToPrimary() {
+		List<Flight> sourceFlights = new ArrayList<Flight> ();
+		sourceFlights.addAll(getSourceAlternativeFlights());
+		for (Flight aSourceF : sourceFlights) {
+			if (!flightChain.contains(aSourceF))
+				return false;
+		}
+
+		for (Flight aSourceF : sourceFlights) {
+			Flight altF = alternativeFlights.get(aSourceF);
+			if (!flightChain.contains(altF)) {
+				flightChain.add(flightChain.indexOf(aSourceF), altF);
+			}
+			flightChain.remove(aSourceF);
+		}
+		return true;
+	}
+	
+	public boolean buildAlternativeFlights (Flight alternativeFlight, List<Flight> normalFlights) {
+		if (!flightChain.contains(alternativeFlight))
+			return false;
+		for (Flight aF:normalFlights) {
+			if (flightChain.contains(aF))
+				return false;
+		}
+			
+		
+		flightChain.addAll(flightChain.indexOf(alternativeFlight), normalFlights);
+		Flight altF = flightChain.remove(flightChain.indexOf(alternativeFlight));
+		
+		for (Flight aNormal:normalFlights) {
+			addAlternativeFlight(aNormal, altF);
+		}
+		
+		return true;
 	}
 	
 

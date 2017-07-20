@@ -141,6 +141,15 @@ public class XiaMengAirlineSolution implements Cloneable{
 	public void refreshCost (BigDecimal detla) {
 		this.cost.add(detla);
 	}
+	
+	public void calcuateCostFromSchedule () {
+		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
+		for (Aircraft aAir:airList) {
+			this.cost.add(aAir.getCost());
+		}
+		
+	}
+	
 
 	public void clear () {
 		for (Aircraft aAir:schedule.values()) 
