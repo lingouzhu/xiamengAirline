@@ -253,6 +253,13 @@ public class Aircraft implements Cloneable {
 			newFlightChain.add(aFlight.clone());
 		}
 		aNew.setFlightChain(newFlightChain);
+		
+		List<Flight> newDropList = new ArrayList<Flight>();
+		for (Flight aFlight:dropOutList) {
+			newDropList.add(aFlight);
+		}
+		aNew.setDropOutList(newDropList);
+		
 		return (aNew);
 	}
 
