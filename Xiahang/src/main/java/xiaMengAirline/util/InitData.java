@@ -92,8 +92,8 @@ public class InitData {
 				aAirport = airportList.getAirport(String.valueOf((int)row.getCell(5).getNumericCellValue()));
 				aFlight.setDesintationAirport(aAirport);
 				
-				aFlight.setArrivalTime(row.getCell(6).getDateCellValue());
-				aFlight.setDepartureTime(row.getCell(7).getDateCellValue());
+				aFlight.setDepartureTime(row.getCell(6).getDateCellValue());
+				aFlight.setArrivalTime(row.getCell(7).getDateCellValue());
 				
 				String airId = String.valueOf((int)row.getCell(8).getNumericCellValue());
 				String airType = String.valueOf((int)row.getCell(9).getNumericCellValue());
