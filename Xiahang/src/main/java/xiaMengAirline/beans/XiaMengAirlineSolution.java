@@ -384,6 +384,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 		XiaMengAirlineSolution aNewSol = reConstruct();
 		aNewSol.refreshCost(false);
 		cost = aNewSol.getCost();
+		aNewSol.clear();
 		return true; //return false, if unable to build valid solution
 	}
 	

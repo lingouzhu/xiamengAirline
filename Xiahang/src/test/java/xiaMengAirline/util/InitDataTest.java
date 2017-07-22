@@ -244,6 +244,7 @@ public class InitDataTest {
 		
 		//initialOutput.generateOutput("1");
 		
+		
 	}
 
 }

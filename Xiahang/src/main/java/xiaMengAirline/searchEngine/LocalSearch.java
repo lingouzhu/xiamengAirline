@@ -30,7 +30,7 @@ public class LocalSearch {
 
 	}
 
-	private BigDecimal adjust(XiaMengAirlineSolution newSolution) {
+	private BigDecimal adjust(XiaMengAirlineSolution newSolution) throws CloneNotSupportedException {
 		List<Aircraft> airList = new ArrayList<Aircraft>(newSolution.getSchedule().values());
 
 		for (Aircraft aAir : airList) {
@@ -45,7 +45,7 @@ public class LocalSearch {
 
 	}
 
-	private BigDecimal calculateDeltaCost(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) {
+	private BigDecimal calculateDeltaCost(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) throws CloneNotSupportedException {
 		oldSolution.refreshCost(false);
 		return (adjust(newSolution).subtract(oldSolution.getCost()));
 	}
