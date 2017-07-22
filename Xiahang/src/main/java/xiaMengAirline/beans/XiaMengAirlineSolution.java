@@ -384,7 +384,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 		return true; //return false, if unable to build valid solution
 	}
 	
-	public void reConstruct () throws CloneNotSupportedException {
+	public XiaMengAirlineSolution reConstruct () throws CloneNotSupportedException {
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
 		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
 		for (Aircraft aircraft : schedule.values()){
@@ -415,7 +415,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 		costSolution.setSchedule(newSchedule);
 		costSolution.refreshCost(false);
 		cost = costSolution.getCost();
-		System.out.println(cost);
+		return costSolution;
 		
 	}
 

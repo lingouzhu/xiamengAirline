@@ -12,7 +12,7 @@ import xiaMengAirline.util.InitData;
 
 public class StartUp {
 
-	final public static long iterLength = 10000000L;
+	final public static long iterLength = 1L;
 	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		
 		long startTime=System.currentTimeMillis();
@@ -27,14 +27,16 @@ public class StartUp {
 		//Step2, construct initial solution & validate it
 		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
 		//initOutput is optional, to setup a baseline
-		XiaMengAirlineSolution initialOutput = initialSolution.clone();
-		initialOutput.reConstruct();
+		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		
-		if (!initialOutput.validate(false)) {
-			System.out.println("Fail to build inital solution! ");
-			return;
-		}
+		System.out.println("Initial solution cost " + initialOutput.getCost());
 		
+		
+//		if (!initialOutput.validate(false)) {
+//			System.out.println("Fail to build inital solution! ");
+//			return;
+//		}
+//		
 		//Step3, loop through to search optimized solutions
 		XiaMengAirlineSolution aBetterSolution = initialSolution;
 		for (int i = 0; i < iterLength;i++) {
@@ -43,20 +45,20 @@ public class StartUp {
 		}
 		
 		//Step4, ensure solution is valid
-		aBetterSolution.reConstruct();
-		if (!aBetterSolution.validate(false)) {
+		XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct();
+		if (!aBetterOutput.validate(false)) {
 			System.out.println("Fail to build final solution! ");
 			return;
 		}
 		
 		//Step5, calcuate cost
-		aBetterSolution.refreshCost(true);
+		aBetterOutput.refreshCost(true);
 		// execute time
 		long endTime=System.currentTimeMillis();
 		long mins = (endTime - startTime)/(1000* 60);
 		
 		//Step6, generate output
-		aBetterSolution.generateOutput(String.valueOf(mins));
+		aBetterOutput.generateOutput(String.valueOf(mins));
 		
 	}
 

@@ -18,6 +18,8 @@ import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.RegularAirPortClose;
+import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.searchEngine.SelfSearch;
 
 public class InitDataTest {
 
@@ -215,6 +217,18 @@ public class InitDataTest {
 		} catch (AirportNotAvailable e) {
 			fail("shall not fail");
 		}
+	}
+	
+	@Test
+	public void testInitSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
+		SelfSearch selfEngine = new SelfSearch();
+		
+		//Step2, construct initial solution & validate it
+		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
+		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
+		initialOutput.refreshCost(true);
+		initialOutput.generateOutput("1");
+		
 	}
 
 }
