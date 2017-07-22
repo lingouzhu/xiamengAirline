@@ -425,7 +425,7 @@ public class Aircraft implements Cloneable {
 	 * @author Data Forest
 	 * @param startPosition,
 	 *            specify starts from which flight. The first flight is 0.
-	 * @return Nothing.
+	 * @return boolean, if adjusted.
 	 * @exception ParseException
 	 *                - date format is not valid
 	 * @see ParseException
@@ -452,8 +452,9 @@ public class Aircraft implements Cloneable {
 	 * @see FlightTime
 	 */
 
-	public void adjustFlightTime(int startPosition) throws ParseException, AirportNotAcceptArrivalTime,
+	public boolean adjustFlightTime(int startPosition) throws ParseException, AirportNotAcceptArrivalTime,
 			FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable {
+		boolean isChanged = false;
 		Flight currentFlight = null;
 		Flight nextFlight = null;
 		for (int i = startPosition; i < flightChain.size(); i++) {
@@ -492,7 +493,10 @@ public class Aircraft implements Cloneable {
 											"Departure Too Earlier");
 
 								} else {
-									nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+									if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
+										nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+										isChanged = true;
+									}
 								}
 							} else
 								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime,
@@ -523,7 +527,10 @@ public class Aircraft implements Cloneable {
 									} else {
 										// it shall be normal airport close, so
 										// not delay too much
-										nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+										if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
+											nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
+											isChanged = true;
+										}
 									}
 								}
 							}
@@ -531,7 +538,10 @@ public class Aircraft implements Cloneable {
 						}
 					}
 				} else {
-					nextFlight.setDepartureTime(aScheduledTime.getDepartureTime());
+					if (nextFlight.getDepartureTime().compareTo(aScheduledTime.getDepartureTime()) != 0) {
+						nextFlight.setDepartureTime(aScheduledTime.getDepartureTime());
+						isChanged = true;
+					}
 				}
 			}
 
@@ -539,8 +549,13 @@ public class Aircraft implements Cloneable {
 
 			Date newArrival = currentFlight.calcuateNextArrivalTime();
 
-			currentFlight.setArrivalTime(newArrival);
+			if (currentFlight.getArrivalTime().compareTo(newArrival) != 0) {
+				currentFlight.setArrivalTime(newArrival);
+				isChanged = true;
+			}
+				
 		}
+		return isChanged;
 
 	}
 
