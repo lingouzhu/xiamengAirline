@@ -369,7 +369,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 		CSVUtils.exportCsv(new File("数据森林" + "_" + cost.toString() + "_" +  minutes), outputList);
 	}
 	
-	public boolean adjust () {
+	public boolean adjust () throws CloneNotSupportedException {
 		//To-do, add adjustment solution
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		try {
@@ -381,6 +381,9 @@ public class XiaMengAirlineSolution implements Cloneable{
 		} catch (Exception ex) {
 			return false;
 		}
+		XiaMengAirlineSolution aNewSol = reConstruct();
+		aNewSol.refreshCost(false);
+		cost = aNewSol.getCost();
 		return true; //return false, if unable to build valid solution
 	}
 	
@@ -390,17 +393,17 @@ public class XiaMengAirlineSolution implements Cloneable{
 			if (!aircraft.isCancel()){
 				List<Flight> cancelFlights = new ArrayList<Flight>();
 				if (aircraft.getAlternativeAircraft() != null){
-					costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft());
+					costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
 					if (aircraft.getAlternativeAircraft().getCancelAircrafted() != null){
 						for (Flight cancelFlight : aircraft.getAlternativeAircraft().getCancelAircrafted().getFlightChain()){
-							cancelFlights.add(cancelFlight);
+							cancelFlights.add(cancelFlight.clone());
 						}
 					}
 				} else {
-					costSolution.replaceOrAddNewAircraft(aircraft);
+					costSolution.replaceOrAddNewAircraft(aircraft.clone());
 					if (aircraft.getCancelAircrafted() != null){
 						for (Flight cancelFlight : aircraft.getCancelAircrafted().getFlightChain()){
-							cancelFlights.add(cancelFlight);
+							cancelFlights.add(cancelFlight.clone());
 						}
 					}
 					
