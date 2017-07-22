@@ -90,7 +90,7 @@ public class Flight implements Cloneable {
 	}
 	
 	public Date calcuateNextArrivalTime () throws FlightDurationNotFound {
-		if (plannedFlight == null || (!plannedFlight.getDesintationAirport().getId().equals(desintationAirport.getId()))) {
+		if (plannedFlight == null || (plannedFlight != null && !plannedFlight.getDesintationAirport().getId().equals(desintationAirport.getId()))) {
 			//find out flight time
 			String searchKey = assignedAir.getType();
 			searchKey += "_";
