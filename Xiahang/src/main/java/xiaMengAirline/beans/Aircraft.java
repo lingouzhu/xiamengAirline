@@ -292,8 +292,6 @@ public class Aircraft implements Cloneable {
 	public void clear() {
 		flightChain.clear();
 		dropOutList.clear();
-		if (alternativeAircraft!=null)
-			alternativeAircraft.clear();
 	}
 
 	public HashMap<Flight, List<Flight>> getCircuitFlights() {

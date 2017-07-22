@@ -9,7 +9,6 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
-import xiaMengAirline.util.Utils;
 
 public class StartUp {
 
@@ -19,7 +18,6 @@ public class StartUp {
 		long startTime=System.currentTimeMillis();
 		//Step1, Load all data & initialize
 		String initDatafile = "XiahangData20170705_1.xlsx";
-		//String fightTimeFile = "C://Users//esunnen//Desktop//飞行时间表.csv";
 		
 		InitData.initData(initDatafile);
 		
@@ -27,27 +25,31 @@ public class StartUp {
 		SelfSearch selfEngine = new SelfSearch();
 		
 		//Step2, construct initial solution & validate it
-		XiaMengAirlineSolution initalSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
+		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
+		//initOutput is optional, to setup a baseline
+		XiaMengAirlineSolution initialOutput = initialSolution.clone();
+		initialOutput.reConstruct();
 		
-		if (!initalSolution.validate(false)) {
+		if (!initialOutput.validate(false)) {
 			System.out.println("Fail to build inital solution! ");
 			return;
 		}
 		
 		//Step3, loop through to search optimized solutions
-		XiaMengAirlineSolution aBetterSolution = initalSolution;
+		XiaMengAirlineSolution aBetterSolution = initialSolution;
 		for (int i = 0; i < iterLength;i++) {
 			aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
+			System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
 		}
 		
 		//Step4, ensure solution is valid
+		aBetterSolution.reConstruct();
 		if (!aBetterSolution.validate(false)) {
 			System.out.println("Fail to build final solution! ");
 			return;
 		}
 		
 		//Step5, calcuate cost
-		aBetterSolution.reConstruct();
 		aBetterSolution.refreshCost(true);
 		// execute time
 		long endTime=System.currentTimeMillis();
