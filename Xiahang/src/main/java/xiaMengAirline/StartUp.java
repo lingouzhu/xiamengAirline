@@ -28,6 +28,7 @@ public class StartUp {
 		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
 		//initOutput is optional, to setup a baseline
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
+		initialOutput.refreshCost(false);
 		
 		System.out.println("Initial solution cost " + initialOutput.getCost());
 		

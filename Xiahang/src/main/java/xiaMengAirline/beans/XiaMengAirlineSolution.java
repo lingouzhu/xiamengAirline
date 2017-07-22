@@ -386,19 +386,18 @@ public class XiaMengAirlineSolution implements Cloneable{
 	
 	public XiaMengAirlineSolution reConstruct () throws CloneNotSupportedException {
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
-		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
 		for (Aircraft aircraft : schedule.values()){
 			if (!aircraft.isCancel()){
 				List<Flight> cancelFlights = new ArrayList<Flight>();
 				if (aircraft.getAlternativeAircraft() != null){
-					newSchedule.put(aircraft.getAlternativeAircraft().getId(), aircraft.getAlternativeAircraft());
+					costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft());
 					if (aircraft.getAlternativeAircraft().getCancelAircrafted() != null){
 						for (Flight cancelFlight : aircraft.getAlternativeAircraft().getCancelAircrafted().getFlightChain()){
 							cancelFlights.add(cancelFlight);
 						}
 					}
 				} else {
-					newSchedule.put(aircraft.getId(), aircraft);
+					costSolution.replaceOrAddNewAircraft(aircraft);
 					if (aircraft.getCancelAircrafted() != null){
 						for (Flight cancelFlight : aircraft.getCancelAircrafted().getFlightChain()){
 							cancelFlights.add(cancelFlight);
@@ -406,15 +405,12 @@ public class XiaMengAirlineSolution implements Cloneable{
 					}
 					
 				}
-				Aircraft newAir = aircraft.clone();
-				newAir.setCancel(true);
+				
+				Aircraft newAir = aircraft.getCancelledAircraft();
 				newAir.setFlightChain(cancelFlights);
-				newSchedule.put(Integer.toString(Integer.parseInt(newAir.getId()) + 10000), newAir);
+				costSolution.replaceOrAddNewAircraft(newAir);
 			}
 		}
-		costSolution.setSchedule(newSchedule);
-		costSolution.refreshCost(false);
-		cost = costSolution.getCost();
 		return costSolution;
 		
 	}

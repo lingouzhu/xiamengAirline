@@ -227,7 +227,22 @@ public class InitDataTest {
 		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		initialOutput.refreshCost(true);
-		initialOutput.generateOutput("1");
+		assertEquals(1441235, initialOutput.getCost().longValue());
+		Aircraft air94 = initialOutput.getAircraft("94", "2", false, false);
+		Aircraft air94C = initialOutput.getAircraft("94", "2", true, false);
+		Flight f1156 = air94C.getFlightByFlightId(1156);
+		assertEquals("72", f1156.getSourceAirPort().getId());
+		assertEquals("49", f1156.getDesintationAirport().getId());
+		assertEquals(Utils.stringFormatToTime2("06/05/2017 11:35:00"), f1156.getDepartureTime());
+		assertEquals(Utils.stringFormatToTime2("06/05/2017 14:20:00"), f1156.getArrivalTime());
+		Flight f2375 = air94.getFlightByFlightId(2375);
+		assertEquals("72", f2375.getSourceAirPort().getId());
+		assertEquals("49", f2375.getDesintationAirport().getId());
+		assertEquals(Utils.stringFormatToTime2("06/05/2017 11:15:00"), f2375.getDepartureTime());
+		assertEquals(Utils.stringFormatToTime2("06/05/2017 13:50:00"), f2375.getArrivalTime());
+		
+		
+		//initialOutput.generateOutput("1");
 		
 	}
 
