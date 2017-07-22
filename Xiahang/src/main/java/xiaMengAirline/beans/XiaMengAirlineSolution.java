@@ -373,17 +373,49 @@ public class XiaMengAirlineSolution implements Cloneable{
 		//To-do, add adjustment solution
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		try {
-		for (Aircraft aAir:airList) {
-			aAir.adjustment();
-			refreshCost(false); //check cost
-		}
+			for (Aircraft aAir:airList) {
+				if (!aAir.isCancel()){
+					aAir.adjustment();
+				}
+			}
 		} catch (Exception ex) {
 			return false;
 		}
 		return true; //return false, if unable to build valid solution
 	}
 	
-	public void reConstruct () {
+	public void reConstruct () throws CloneNotSupportedException {
+		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
+		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
+		for (Aircraft aircraft : schedule.values()){
+			if (!aircraft.isCancel()){
+				List<Flight> cancelFlights = new ArrayList<Flight>();
+				if (aircraft.getAlternativeAircraft() != null){
+					newSchedule.put(aircraft.getAlternativeAircraft().getId(), aircraft.getAlternativeAircraft());
+					if (aircraft.getAlternativeAircraft().getCancelAircrafted() != null){
+						for (Flight cancelFlight : aircraft.getAlternativeAircraft().getCancelAircrafted().getFlightChain()){
+							cancelFlights.add(cancelFlight);
+						}
+					}
+				} else {
+					newSchedule.put(aircraft.getId(), aircraft);
+					if (aircraft.getCancelAircrafted() != null){
+						for (Flight cancelFlight : aircraft.getCancelAircrafted().getFlightChain()){
+							cancelFlights.add(cancelFlight);
+						}
+					}
+					
+				}
+				Aircraft newAir = aircraft.clone();
+				newAir.setCancel(true);
+				newAir.setFlightChain(cancelFlights);
+				newSchedule.put(Integer.toString(Integer.parseInt(newAir.getId()) + 10000), newAir);
+			}
+		}
+		costSolution.setSchedule(newSchedule);
+		costSolution.refreshCost(false);
+		cost = costSolution.getCost();
+		System.out.println(cost);
 		
 	}
 
