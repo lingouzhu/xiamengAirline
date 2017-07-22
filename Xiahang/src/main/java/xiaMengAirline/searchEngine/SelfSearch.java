@@ -21,10 +21,15 @@ public class SelfSearch {
 			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
 		//when construct initial solution, clone a new copy
 		XiaMengAirlineSolution aNewSolution = originalSolution.clone();
+		XiaMengAirlineSolution rtnSolution = new XiaMengAirlineSolution();
 		for (Aircraft aircraft : aNewSolution.getSchedule().values()){
 			aircraft = adjustAircraft(aircraft, 0);
+			if (aircraft != null){
+				rtnSolution.replaceOrAddNewAircraft(aircraft);
+			}
 		}
-		return aNewSolution;
+		
+		return rtnSolution;
 	}
 	
 	public Aircraft adjustAircraft (Aircraft originalAir, int startIndex) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
@@ -52,6 +57,9 @@ public class SelfSearch {
 			try{
 				aircraft.adjustFlightTime(startIndex);
 				isFinish = true;
+				if (startIndex == 0){
+					originalAir.setAlternativeAircraft(null);
+				}
 			} catch (AirportNotAcceptArrivalTime anaat){
 				Flight thisFlight = anaat.getaFlight();
 				FlightTime avaliableTime = anaat.getAvailableTime();
@@ -77,9 +85,12 @@ public class SelfSearch {
 					try {
 						aircraft = cancelFlight(aircraft, flightIndex);
 						if (aircraft == null){
+							print("Invalid aircraft: AicraftId " + thisAc.getId());
 							return null;
 						}
 					} catch (Exception e){
+						e.printStackTrace();
+						print("Invalid aircraft: AicraftId " + thisAc.getId());
 						return null;
 					}
 					startIndex = flightIndex;
@@ -101,9 +112,12 @@ public class SelfSearch {
 				try {
 					aircraft = cancelFlight(aircraft, flightIndex);
 					if (aircraft == null){
+						print("Invalid aircraft: AicraftId " + thisAc.getId());
 						return null;
 					}
 				} catch (Exception e){
+					e.printStackTrace();
+					print("Invalid aircraft: AicraftId " + thisAc.getId());
 					return null;
 				}
 				startIndex = flightIndex;
@@ -113,14 +127,18 @@ public class SelfSearch {
 				try {
 					aircraft = cancelFlight(aircraft, flightIndex);
 					if (aircraft == null){
+						print("Invalid aircraft: AicraftId " + thisAc.getId());
 						return null;
 					}
 				} catch (Exception e){
+					e.printStackTrace();
+					print("Invalid aircraft: AicraftId " + thisAc.getId());
 					return null;
 				}
 				startIndex = flightIndex;
 			} catch (Exception e){
 				// invalid
+				e.printStackTrace();
 				return null;
 			}
 
@@ -133,7 +151,7 @@ public class SelfSearch {
 				infinitLoopCnt++;
 			}
 		}
-		double thisCost = getCost(aircraft);
+		double thisCost = getAircraftCost(aircraft);
 		
 		Iterator<Entry<Integer, Aircraft>> it = forkList.entrySet().iterator();
 	    while (it.hasNext()) {
@@ -141,13 +159,16 @@ public class SelfSearch {
 	        int nextStartIndex = pair.getKey();
 	        Aircraft nextForkAc = pair.getValue();
 	        Aircraft newReturnAc = adjustAircraft(nextForkAc, nextStartIndex);
-	        double itCost = getCost(newReturnAc);
+	        double itCost = getAircraftCost(newReturnAc);
 	        if (thisCost > itCost){
 	        	aircraft = newReturnAc;
 	        	thisCost = itCost;
 	        }
 	    }
-		return aircraft;
+	    if (startIndex == 0){
+			originalAir.setAlternativeAircraft(aircraft);
+		}
+	    return aircraft;
 	}
 	
 	public void print (String str){
@@ -155,7 +176,7 @@ public class SelfSearch {
 	}
 	
 	// cancel a flight
-	public Aircraft cancelFlight(Aircraft aircraft, int flightIndex) throws FlightDurationNotFound, CloneNotSupportedException{
+	public Aircraft cancelFlight(Aircraft aircraft, int flightIndex) throws FlightDurationNotFound, CloneNotSupportedException, ParseException{
 		List<Flight> flights = aircraft.getFlightChain();
 		Flight thisFlight = flights.get(flightIndex);
 		Flight newFlight = new Flight();
@@ -165,7 +186,12 @@ public class SelfSearch {
 		if (indexFlightPair != null){
 			Map.Entry<Integer,Flight> entry=indexFlightPair.entrySet().iterator().next();
 			int cancelFlightEndIndex = entry.getKey();
-			newFlight = entry.getValue();List<Integer> removeFlightIndeces = new ArrayList<Integer>();
+			newFlight = entry.getValue();
+			List<Integer> removeFlightIndeces = new ArrayList<Integer>();
+			if (aircraft.getCancelledAircraft() == null){
+				aircraft.setCancelAircrafted(aircraft.clone());
+				aircraft.getCancelledAircraft().setFlightChain(new ArrayList<Flight>());
+			}
 			for (int cancelIndex = flightIndex; cancelIndex < cancelFlightEndIndex + 1; cancelIndex++){
 				if (flights.get(cancelIndex).getFlightId() <= InitData.plannedMaxFligthId){
 					aircraft.getCancelledAircraft().addFlight(flights.get(cancelIndex));
@@ -173,7 +199,7 @@ public class SelfSearch {
 				removeFlightIndeces.add(cancelIndex);
 			}
 			aircraft.removeFlightChain(removeFlightIndeces);
-			if (!thisFlight.getSourceAirPort().getId().equals(newFlight.getSourceAirPort().getId())){
+			if (!newFlight.getSourceAirPort().getId().equals(newFlight.getDesintationAirport().getId())){
 				aircraft.addFlight(newFlight);
 			}
 			aircraft.sortFlights();
@@ -194,32 +220,6 @@ public class SelfSearch {
 		}
 	}
 	
-	// remove the extra time margin 
-	public Aircraft shrinkFlightChain(Aircraft originalAir, int startIndex) throws FlightDurationNotFound{
-		List<Flight> flights = originalAir.getFlightChain();
-		for (int i = startIndex; i < flights.size(); i++){
-			Flight thisFlight = flights.get(i);
-			if (i == 0){
-				if (isLaterThan(getPlannedArrival(thisFlight),thisFlight.getDepartureTime())) {
-					return null;
-				}else if (isEarlierThan(getPlannedArrival(thisFlight),thisFlight.getDepartureTime())){
-					thisFlight.setDepartureTime(getPlannedArrival(thisFlight));
-					thisFlight.setArrivalTime(thisFlight.calcuateNextArrivalTime());
-				}
-			} else{
-				Flight lastFlight = flights.get(i-1);
-				Date lastArrival = lastFlight.getArrivalTime();
-				Date thisDeparture = isLaterThan(addMinutes(lastArrival, minGroundTime), getPlannedDeparture(thisFlight)) ?
-						addMinutes(lastArrival, minGroundTime) : getPlannedDeparture(thisFlight);
-				thisFlight.setDepartureTime(thisDeparture);
-				Date thisArrival = thisFlight.calcuateNextArrivalTime();
-				thisFlight.setArrivalTime(thisArrival);
-			}
-		}
-		originalAir.setFlightChain(flights);
-		return originalAir;
-	}
-	
 	// get joint flight
 	public Flight getJointFlight(Flight flight){
 		return InitData.jointFlightMap.get(flight.getFlightId());
@@ -230,19 +230,14 @@ public class SelfSearch {
 	}
 	
 	// create new flight
-	public HashMap<Integer, Flight> createNewFlight(Flight prototypeFlight, int flightPosition, Aircraft aircraft) throws FlightDurationNotFound, CloneNotSupportedException{
-		HashMap<Integer, AirPort> newDestAirport = getNextAvaliableAirport(aircraft.getFlightChain(), flightPosition, aircraft, prototypeFlight);
-		if (newDestAirport != null){
-			Map.Entry<Integer,AirPort> entry=newDestAirport.entrySet().iterator().next();
+	public HashMap<Integer, Flight> createNewFlight(Flight prototypeFlight, int flightPosition, Aircraft aircraft) throws FlightDurationNotFound, CloneNotSupportedException, ParseException{
+		HashMap<Integer, Flight> newIndexAndFlight = createEligibalFlight(aircraft.getFlightChain(), flightPosition, aircraft, prototypeFlight);
+		if (newIndexAndFlight != null){
+			Map.Entry<Integer,Flight> entry=newIndexAndFlight.entrySet().iterator().next();
 			int destIndex = entry.getKey();
-			AirPort destAirport =entry.getValue();
-			Flight newFlight = new Flight();
+			Flight newFlight = entry.getValue();
 			newFlight.setFlightId(getNextFlightId());
-			newFlight.setSourceAirPort(prototypeFlight.getSourceAirPort());
-			newFlight.setDesintationAirport(destAirport);
 			newFlight.setAssignedAir(aircraft);
-			newFlight.setDepartureTime(prototypeFlight.getDepartureTime());
-			newFlight.setArrivalTime(newFlight.calcuateNextArrivalTime());
 			
 			HashMap<Integer, Flight> indexAndFlight = new HashMap<Integer, Flight>();
 			indexAndFlight.put(destIndex, newFlight);
@@ -252,11 +247,30 @@ public class SelfSearch {
 	}
 	
 	// get next normal airport
-	public HashMap<Integer, AirPort> getNextAvaliableAirport(List<Flight> flightChain, int currentFlightIndex, Aircraft ac, Flight newFlight) throws CloneNotSupportedException{
+	public HashMap<Integer, Flight> createEligibalFlight(List<Flight> flightChain, int currentFlightIndex, Aircraft ac, Flight newFlight) throws CloneNotSupportedException, ParseException{
 		Flight thisFlight = newFlight;
 		for (int i = currentFlightIndex + 1; i < flightChain.size(); i++){
 			Flight nextFlight = flightChain.get(i);
 			AirPort destAirport = nextFlight.getSourceAirPort();
+			// if new flight is a chain cancel
+			if (thisFlight.getSourceAirPort().getId().equals(destAirport.getId())){
+				thisFlight.setDesintationAirport(destAirport);
+				Flight lastFlight = flightChain.get(currentFlightIndex - 1);
+				FlightTime tempFlightTime = new FlightTime();
+				tempFlightTime.setArrivalTime(lastFlight.getArrivalTime());
+				tempFlightTime.setDepartureTime(nextFlight.getDepartureTime());
+				if (nextFlight.getSourceAirPort().requestAirport(tempFlightTime, minGroundTime) == null){
+					tempFlightTime.setArrivalTime(nextFlight.getArrivalTime());
+					tempFlightTime.setDepartureTime(flightChain.get(i + 1).getDepartureTime());
+					if (nextFlight.getDesintationAirport().requestAirport(tempFlightTime, minGroundTime) == null){
+						HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
+						destIndexAndNewFight.put(i - 1, thisFlight);
+						return destIndexAndNewFight;
+					}
+				}
+				continue;
+			}
+			
 			// international flight is not eligible
 			if (isInternational(thisFlight.getSourceAirPort().getId(), destAirport.getId())){
 				continue;
@@ -269,7 +283,7 @@ public class SelfSearch {
 			if (flightTime > 0){
 				thisFlight.setArrivalTime(addMinutes(thisFlight.getDepartureTime(), flightTime));
 				thisFlight.setDesintationAirport(destAirport);
-				thisFlight.setPlannedFlight(thisFlight);
+				thisFlight.setPlannedFlight(thisFlight.clone());
 				
 				List<Flight> newFlightChain = new ArrayList<Flight>();
 				newFlightChain.add(thisFlight);
@@ -278,26 +292,17 @@ public class SelfSearch {
 				newAircraft.setFlightChain(newFlightChain);
 				try {
 					newAircraft.adjustFlightTime(0);
+					HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
+					destIndexAndNewFight.put(i - 1, thisFlight);
+					return destIndexAndNewFight;
 				} catch (AirportNotAcceptArrivalTime anaat){
-					if (isEligibalDelay(getPlannedDeparture(nextFlight), anaat.getAvailableTime().getDepartureTime(), nextFlight.isInternationalFlight())){
-						double delayTime = getMinuteDifference(anaat.getAvailableTime().getDepartureTime(), getPlannedDeparture(nextFlight));
-						if (delayTime * flightDelayCost > flightCancelCost){
-							// need adjustment
-							HashMap<Integer, AirPort> destIndexAndAiport = new HashMap<Integer, AirPort>();
-							destIndexAndAiport.put(i, destAirport);
-							return destIndexAndAiport;
-						} else {
-							Date newDepartureTime = addMinutes(anaat.getAvailableTime().getArrivalTime(), (int)getMinuteDifference(getPlannedDeparture(thisFlight), getPlannedArrival(thisFlight)));
-							for (AirPortClose aClose : destAirport.getCloseSchedule()){
-								if (newDepartureTime.compareTo(aClose.getStartTime()) > 0
-										&& newDepartureTime.compareTo(aClose.getEndTime()) < 0){
-									continue;
-								}
-							}
-							HashMap<Integer, AirPort> destIndexAndAiport = new HashMap<Integer, AirPort>();
-							destIndexAndAiport.put(i, destAirport);
-							return destIndexAndAiport;
-						}
+					FlightTime avaliableTime = anaat.getAvailableTime();
+					if (avaliableTime.getDepartureTime().compareTo(nextFlight.getDepartureTime()) == 0){
+						thisFlight.setArrivalTime(avaliableTime.getArrivalTime());
+						thisFlight.setDepartureTime(addMinutes(thisFlight.getArrivalTime(), -flightTime));
+						HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
+						destIndexAndNewFight.put(i - 1, thisFlight);
+						return destIndexAndNewFight;
 					}else{
 						continue;
 					}
@@ -334,11 +339,13 @@ public class SelfSearch {
 		searchKey += "_";
 		searchKey += airport2Id;
 		
-		long flightTime = InitData.fightDurationMap.get(searchKey);
-		if (flightTime > 0){
+		if (InitData.fightDurationMap.containsKey(searchKey)){
+			long flightTime = InitData.fightDurationMap.get(searchKey);
 			return flightTime;
+		}else{
+			return 0;
 		}
-		return 0;
+		
 	}
 	
 	// add minutes to date
@@ -413,11 +420,25 @@ public class SelfSearch {
 		return 0;
 	}
 	
-	// compare cost
-	public double getCost(Aircraft ac){
+	// get aircraft cost for local comparison
+	public double getAircraftCost(Aircraft ac){
 		XiaMengAirlineSolution solution = new XiaMengAirlineSolution();
 		solution.replaceOrAddNewAircraft(ac);
+		if (ac.getCancelAircrafted() != null){
+			solution.replaceOrAddNewAircraft(ac.getCancelAircrafted());
+		}
 		solution.refreshCost(false); 
 		return solution.getCost().doubleValue();
+	}
+	
+	// get aircraft cost for local comparison
+	public BigDecimal getAircraftCostSolutionLv(Aircraft ac){
+		XiaMengAirlineSolution solution = new XiaMengAirlineSolution();
+		solution.replaceOrAddNewAircraft(ac);
+		if (ac.getCancelAircrafted() != null){
+			solution.replaceOrAddNewAircraft(ac.getCancelAircrafted());
+		}
+		solution.refreshCost(false); 
+		return solution.getCost();
 	}
 }
