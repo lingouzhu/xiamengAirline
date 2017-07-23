@@ -28,13 +28,14 @@ public class InitDataTest {
 
 	@Before
 	public void setUp() throws Exception {
+		// Step1, Load all data & initialize
+		String initDatafile = "XiahangData20170705_1.xlsx";
+		InitData.initData(initDatafile);
 	}
 
 	@Test
 	public void testInitData() throws ParseException {
-		// Step1, Load all data & initialize
-		String initDatafile = "XiahangData20170705_1.xlsx";
-		InitData.initData(initDatafile);
+
 		Aircraft air50 = InitData.originalSolution.getAircraft("50", "2", false,false);
 		
 		
@@ -267,7 +268,7 @@ public class InitDataTest {
 		Flight f1274 = air133.getFlightByFlightId(1274);
 		for (Flight destFlight : circuitFlightsAir1.get(f1274)) {
 			Aircraft newAircraft1 = air133.clone();
-			Aircraft cancelledAir = newAircraft1.getCancelledAircraft();
+			Aircraft cancelledAir = sol133.getAircraft(air133.getId(), air133.getType(), true, true).clone();
 
 			Flight sFlight = newAircraft1.getFlight(0);
 			Flight dFlight = newAircraft1

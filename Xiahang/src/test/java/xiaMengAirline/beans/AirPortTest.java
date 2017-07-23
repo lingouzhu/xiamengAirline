@@ -285,6 +285,7 @@ public class AirPortTest {
 
 	@Test
 	public void testGetCircuitAirports() throws CloneNotSupportedException {
+		XiaMengAirlineSolution aSol = new XiaMengAirlineSolution();
 		Aircraft air1 = new Aircraft();
 		List<Flight> flightChain = new ArrayList<Flight>();
 		flightChain.add(createFlight(101, "ORF", "EWR"));
@@ -312,6 +313,9 @@ public class AirPortTest {
 		for (Flight aFlight : flightChain2) {
 			aFlight.setAssignedAir(air2);
 		}
+		
+		aSol.replaceOrAddNewAircraft(air1);
+		aSol.replaceOrAddNewAircraft(air2);
 
 		HashMap<Flight, List<Flight>> circuitFlightsAir1 = air1.getCircuitFlights();
 		HashMap<Flight, List<Flight>> circuitFlightsAir2 = air2.getCircuitFlights();
@@ -321,7 +325,7 @@ public class AirPortTest {
 
 		// test cancel
 		Aircraft newAirt1 = air1.clone();
-		Aircraft cancelledtAir = newAirt1.getCancelledAircraft();
+		Aircraft cancelledtAir = aSol.getAircraft(air1.getId(), air1.getType(), true, true).clone();
 		Flight sourcetFlight = newAirt1.getFlight(air1.getFlightChain().indexOf(f104));
 		Flight desttFlight = newAirt1.getFlight(air1.getFlightChain().indexOf(f105));
 
@@ -359,7 +363,6 @@ public class AirPortTest {
 		assertEquals(air2FlightList, air2FlightListAct);
 		assertEquals(false, testF102.getAssignedAir().isCancel());
 		assertEquals(true, testF105.getAssignedAir().isCancel());
-		assertEquals(cancelledtAir, newAirt1.getCancelledAircraft());
 
 		for (Map.Entry<Flight, List<Flight>> entry : circuitFlightsAir1.entrySet()) {
 			Flight key = entry.getKey();
@@ -368,7 +371,7 @@ public class AirPortTest {
 			for (Flight aFlight : value) {
 				System.out.println("Air1 " + key.getSchdNo() + " => " + aFlight.getSchdNo());
 				Aircraft newAir1 = air1.clone();
-				Aircraft cancelledAir = newAir1.getCancelledAircraft();
+				Aircraft cancelledAir = aSol.getAircraft(air1.getId(), air1.getType(), true, true).clone();
 				Flight sourceFlight = newAir1.getFlight(air1.getFlightChain().indexOf(key));
 				Flight destFlight = newAir1.getFlight(air1.getFlightChain().indexOf(aFlight));
 

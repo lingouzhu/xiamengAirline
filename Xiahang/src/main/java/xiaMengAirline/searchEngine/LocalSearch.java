@@ -76,7 +76,7 @@ public class LocalSearch {
 							if (circuitFlightsAir1.containsKey(flightAir1)) {
 								for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
 									Aircraft newAircraft1 = aircraft1.clone();
-									Aircraft cancelledAir = newAircraft1.getCancelledAircraft();
+									Aircraft cancelledAir = bestSolution.getAircraft(aircraft1.getId(), aircraft1.getType(), true, true).clone();
 
 									Flight sFlight = newAircraft1.getFlight(uu);
 									Flight dFlight = newAircraft1
@@ -136,7 +136,7 @@ public class LocalSearch {
 							if (circuitFlightsAir2.containsKey(flightAir2)) {
 								for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
 									Aircraft newAircraft2 = aircraft2.clone();
-									Aircraft cancelledAir = newAircraft2.getCancelledAircraft();
+									Aircraft cancelledAir = bestSolution.getAircraft(aircraft2.getId(), aircraft2.getType(), true, true).clone();
 
 									Flight sFlight = newAircraft2.getFlight(xx);
 									Flight dFlight = newAircraft2

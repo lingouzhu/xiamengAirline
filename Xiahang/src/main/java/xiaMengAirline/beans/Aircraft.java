@@ -27,7 +27,6 @@ public class Aircraft implements Cloneable {
 	private String type;
 	private List<Flight> flightChain = new ArrayList<Flight>();
 	private boolean isCancel = false;
-	private Aircraft cancelAircrafted = null;
 	private List<Flight> dropOutList = new ArrayList<Flight>();
 	private boolean isUpdated = false;
 	private Aircraft alternativeAircraft = null; //alternative aircraft must be a cloned air, and assigned to one & only one its parent aircraft
@@ -276,18 +275,6 @@ public class Aircraft implements Cloneable {
 	// public void setCancelAircrafted(Aircraft cancelAircrafted) {
 	// this.cancelAircrafted = cancelAircrafted;
 	// }
-	public Aircraft getCancelledAircraft() {
-		Aircraft retCancelled = cancelAircrafted;
-		if (retCancelled == null) {
-			retCancelled = new Aircraft();
-			retCancelled.setCancel(true);
-			retCancelled.setFlightChain(new ArrayList<Flight>());
-			retCancelled.setId(this.id);
-			retCancelled.setType(this.type);
-			this.cancelAircrafted = retCancelled;
-		}
-		return retCancelled;
-	}
 
 	public void clear() {
 		flightChain.clear();
@@ -559,13 +546,6 @@ public class Aircraft implements Cloneable {
 
 	}
 
-	public Aircraft getCancelAircrafted() {
-		return cancelAircrafted;
-	}
-
-	public void setCancelAircrafted(Aircraft cancelAircrafted) {
-		this.cancelAircrafted = cancelAircrafted;
-	}
 
 	public List<Flight> getDropOutList() {
 		return dropOutList;
