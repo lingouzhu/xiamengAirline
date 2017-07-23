@@ -94,7 +94,7 @@ public class LocalSearch {
 									List<Flight> updateList2 = cancelledAir.getFlightChain();
 									for (Flight aF : updateList2) {
 										logger.info(
-												"Air cancelled " + newAircraft1.getId() + " flight " + aF.getSchdNo());
+												"Air cancelled " + newAircraft1.getId() + " flight " + aF.getFlightId());
 									}
 									logger.info("Method 1 Complete exchange ...");
 
@@ -149,11 +149,11 @@ public class LocalSearch {
 									logger.info("Method 2 After exchange ...");
 									List<Flight> updateList1 = newAircraft2.getFlightChain();
 									for (Flight aF : updateList1) {
-										logger.info("Air 2 " + aF.getSchdNo());
+										logger.info("Air 2 " + aF.getFlightId());
 									}
 									List<Flight> updateList2 = cancelledAir.getFlightChain();
 									for (Flight aF : updateList2) {
-										logger.info("Air 2 cancelled " + aF.getSchdNo());
+										logger.info("Air 2 cancelled " + aF.getFlightId());
 									}
 									logger.info("Method 2 Complete exchange ...");
 
@@ -275,11 +275,11 @@ public class LocalSearch {
 										logger.info("Method 4 After exchange ...");
 										List<Flight> updateList1 = newAircraft1.getFlightChain();
 										for (Flight aF : updateList1) {
-											logger.info("Air 1 " + aF.getSchdNo());
+											logger.info("Air 1 " + aF.getFlightId());
 										}
 										List<Flight> updateList2 = newAircraft2.getFlightChain();
 										for (Flight aF : updateList2) {
-											logger.info("Air 2  " + aF.getSchdNo());
+											logger.info("Air 2  " + aF.getFlightId());
 										}
 										logger.info("Method 4 Complete exchange ...");
 
@@ -329,11 +329,11 @@ public class LocalSearch {
 										logger.info("Method 5 After exchange ...");
 										List<Flight> updateList1 = newAircraft1.getFlightChain();
 										for (Flight aF : updateList1) {
-											logger.info("Air 1 " + aF.getSchdNo());
+											logger.info("Air 1 " + aF.getFlightId());
 										}
 										List<Flight> updateList2 = newAircraft2.getFlightChain();
 										for (Flight aF : updateList2) {
-											logger.info("Air 2  " + aF.getSchdNo());
+											logger.info("Air 2  " + aF.getFlightId());
 										}
 										logger.info("Method 5 Complete exchange ...");
 
@@ -398,11 +398,11 @@ public class LocalSearch {
 									logger.info("Method 6 After exchange ...");
 									List<Flight> updateList1 = newAircraft1.getFlightChain();
 									for (Flight aF : updateList1) {
-										logger.info("Air 1 " + aF.getSchdNo());
+										logger.info("Air 1 " + aF.getFlightId());
 									}
 									List<Flight> updateList2 = newAircraft2.getFlightChain();
 									for (Flight aF : updateList2) {
-										logger.info("Air 2  " + aF.getSchdNo());
+										logger.info("Air 2  " + aF.getFlightId());
 									}
 									logger.info("Method 6 Complete exchange ...");
 

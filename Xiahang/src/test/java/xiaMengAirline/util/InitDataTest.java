@@ -4,7 +4,9 @@ import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 
 public class InitDataTest {
@@ -244,6 +247,55 @@ public class InitDataTest {
 		
 		//initialOutput.generateOutput("1");
 		
+		LocalSearch localEngine = new LocalSearch();
+		XiaMengAirlineSolution sol133 = new XiaMengAirlineSolution();
+		Aircraft air133 = initialSolution.getAircraft("133", "2", false, false);
+		sol133.replaceOrAddNewAircraft(air133);
+		sol133.replaceOrAddNewAircraft(air94);
+		
+		HashMap<Flight, List<Flight>> circuitFlightsAir1 = air133.getCircuitFlights();
+		
+		for (Map.Entry<Flight, List<Flight>> entry : circuitFlightsAir1.entrySet()) {
+			Flight key = entry.getKey();
+			List<Flight> value = entry.getValue();
+			
+			for (Flight aFlight : value) {
+				System.out.println("Flight " + key.getFlightId() + " => " + aFlight.getFlightId());
+			}
+		}
+		
+		Flight f1274 = air133.getFlightByFlightId(1274);
+		for (Flight destFlight : circuitFlightsAir1.get(f1274)) {
+			Aircraft newAircraft1 = air133.clone();
+			Aircraft cancelledAir = newAircraft1.getCancelledAircraft();
+
+			Flight sFlight = newAircraft1.getFlight(0);
+			Flight dFlight = newAircraft1
+					.getFlight(air133.getFlightChain().indexOf(destFlight));
+
+			cancelledAir.insertFlightChain(air133, f1274, destFlight,
+					cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
+			newAircraft1.removeFlightChain(sFlight, dFlight);
+			System.out.println("Move " );
+			for (int i=0;i <= air133.getFlightChain().indexOf(destFlight);i++) {
+				System.out.println(air133.getFlight(i).getFlightId());
+			}
+			System.out.println("Move End" );
+
+			List<Flight> updateList1 = newAircraft1.getFlightChain();
+			for (Flight aF : updateList1) {
+				System.out.println("Air  " + newAircraft1.getId() + " flight " + aF.getFlightId());
+			}
+			List<Flight> updateList2 = cancelledAir.getFlightChain();
+			for (Flight aF : updateList2) {
+				System.out.println(
+						"Air cancelled " + newAircraft1.getId() + " flight " + aF.getFlightId());
+			}
+		}
+		
+		//XiaMengAirlineSolution aBetterSolution = localEngine.constructNewSolution(sol133);
+		
+		//XiaMengAirlineSolution aBetterSolution = localEngine.constructNewSolution(initialSolution);
 		
 	}
 
