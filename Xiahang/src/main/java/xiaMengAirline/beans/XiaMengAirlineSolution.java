@@ -2,15 +2,12 @@ package xiaMengAirline.beans;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-import xiaMengAirline.Exception.AirportNotAvailable;
-import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.util.CSVUtils;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
@@ -392,27 +389,18 @@ public class XiaMengAirlineSolution implements Cloneable{
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
 		for (Aircraft aircraft : schedule.values()){
 			if (!aircraft.isCancel()){
-				List<Flight> cancelFlights = new ArrayList<Flight>();
 				if (aircraft.getAlternativeAircraft() != null){
 					costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
-					if (aircraft.getAlternativeAircraft().getCancelAircrafted() != null){
-						for (Flight cancelFlight : aircraft.getAlternativeAircraft().getCancelAircrafted().getFlightChain()){
-							cancelFlights.add(cancelFlight.clone());
-						}
-					}
 				} else {
 					costSolution.replaceOrAddNewAircraft(aircraft.clone());
-					if (aircraft.getCancelAircrafted() != null){
-						for (Flight cancelFlight : aircraft.getCancelAircrafted().getFlightChain()){
-							cancelFlights.add(cancelFlight.clone());
-						}
-					}
-					
 				}
-				
-				Aircraft newAir = aircraft.getCancelledAircraft();
-				newAir.setFlightChain(cancelFlights);
-				costSolution.replaceOrAddNewAircraft(newAir);
+			} else {
+				Aircraft cancelAir = aircraft.clone();
+				if (aircraft.getAlternativeAircraft() != null){
+					Aircraft altCancelAir = aircraft.getAlternativeAircraft().clone();
+					cancelAir.getFlightChain().addAll(altCancelAir.getFlightChain());
+				}
+				costSolution.replaceOrAddNewAircraft(cancelAir);
 			}
 		}
 		return costSolution;
