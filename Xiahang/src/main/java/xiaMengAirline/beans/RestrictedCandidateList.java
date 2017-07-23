@@ -90,5 +90,12 @@ public class RestrictedCandidateList {
 			return null;
 
 	}
+	
+	public boolean hasSolution () {
+		if (!bestSolutionList.isEmpty())
+			return true;
+		else
+			return false;
+	}
 
 }

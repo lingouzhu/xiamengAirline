@@ -37,6 +37,10 @@ public class SelfSearch {
 		for (Aircraft aircraft : airList){
 			adjustAircraft(aircraft, 0);
 		}
+		XiaMengAirlineSolution aNewSol = mySolution.reConstruct();
+		aNewSol.refreshCost(false);
+		mySolution.setCost(aNewSol.getCost());
+		aNewSol.clear();
 		
 		return mySolution;
 	}
