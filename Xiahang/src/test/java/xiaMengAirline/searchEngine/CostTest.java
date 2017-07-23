@@ -9,8 +9,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.Exception.AirportNotAvailable;
-import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
@@ -143,15 +141,7 @@ public class CostTest {
 		
 		LocalSearch searchEngine = new LocalSearch();
 		
-		try {
-			searchEngine.constructNewSolution(aSolution);
-		} catch (FlightDurationNotFound e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (AirportNotAvailable e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		searchEngine.constructNewSolution(aSolution);
 		
 		System.out.println(aSolution.getCost().toString());
 		

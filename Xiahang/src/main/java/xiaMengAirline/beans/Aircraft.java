@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
 import xiaMengAirline.Exception.AirportNotAvailable;
@@ -21,8 +22,8 @@ import xiaMengAirline.util.Utils;
 public class Aircraft implements Cloneable {
 	private static final Logger logger = Logger.getLogger(Aircraft.class);
 	final static private int MAXIMUM_EARLIER_TIME = 6; // HOUR
-	final static private int DOMESTIC_MAXIMUM_DELAY_TIME = 24; // HOUR
-	final static private int INTERNATIONAL_MAXIMUM_DELAY_TIME = 36; // HOUR
+	final static public int DOMESTIC_MAXIMUM_DELAY_TIME = 24; // HOUR
+	final static public int INTERNATIONAL_MAXIMUM_DELAY_TIME = 36; // HOUR
 	private String id;
 	private String type;
 	private List<Flight> flightChain = new ArrayList<Flight>();
@@ -260,9 +261,9 @@ public class Aircraft implements Cloneable {
 		return (aNew);
 	}
 
-	public void adjustment()
-			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
-		SelfSearch selfAdjustEngine = new SelfSearch();
+	public void adjustment(XiaMengAirlineSolution mySolution)
+			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
+		SelfSearch selfAdjustEngine = new SelfSearch(mySolution);
 		if (!isCancel) {
 			selfAdjustEngine.adjustAircraft(this, 0);
 		}

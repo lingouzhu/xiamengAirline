@@ -1,15 +1,13 @@
 package xiaMengAirline.searchEngine;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.Exception.AirportNotAvailable;
-import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
@@ -45,183 +43,277 @@ public class LocalSearch {
 
 	}
 
-	private BigDecimal calculateDeltaCost(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) throws CloneNotSupportedException {
+	private BigDecimal calculateDeltaCost(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution)
+			throws CloneNotSupportedException {
 		oldSolution.refreshCost(false);
 		return (adjust(newSolution).subtract(oldSolution.getCost()));
 	}
 
 	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
-			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
-		RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
-		List<Aircraft> aircrafts = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
-		int r = aircrafts.size();
-		for (int i = 0; i < r - 1; i++) {
-			Aircraft aircraft1 = aircrafts.get(i);
-			int m = aircraft1.getFlightChain().size();
-			for (int j = i + 1; j < r; j++) {
-				Aircraft aircraft2 = aircrafts.get(j);
-				int n = aircraft2.getFlightChain().size();
-				if (!aircraft1.isCancel() || !aircraft2.isCancel()
-						|| aircraft1.getAlternativeAircraft()!=null || aircraft2.getAlternativeAircraft()!=null
-						|| aircraft1.isUpdated() || aircraft2.isUpdated()) {
-					HashMap<Flight, List<Flight>> circuitFlightsAir1 = aircraft1.getCircuitFlights();
-					HashMap<Flight, List<Flight>> circuitFlightsAir2 = aircraft2.getCircuitFlights();
-					HashMap<Flight, List<MatchedFlight>> matchedFlights = aircraft1.getMatchedFlights(aircraft2);
+			throws CloneNotSupportedException {
+		Random rndNumbers = new Random(1234);
+		List<Aircraft> checkList = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
 
-					for (int uu = 0; uu <= m - 1; uu++) {
-						// if aircraft1 flights is circuit, place it into
-						// cancellation route - method 1
-						if (!aircraft1.isCancel()) {
-							Flight flightAir1 = aircraft1.getFlight(uu);
-							if (circuitFlightsAir1.containsKey(flightAir1)) {
-								for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
-									Aircraft newAircraft1 = aircraft1.clone();
-									Aircraft cancelledAir = bestSolution.getAircraft(aircraft1.getId(), aircraft1.getType(), true, true).clone();
+		while (checkList.size() > 1) {
+			RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
+			// randomly select first air
+			Aircraft air1 = checkList.remove(rndNumbers.nextInt(checkList.size()));
+			// randomly select 2nd air
+			Aircraft air2 = checkList.remove(rndNumbers.nextInt(checkList.size()));
 
-									Flight sFlight = newAircraft1.getFlight(uu);
-									Flight dFlight = newAircraft1
-											.getFlight(aircraft1.getFlightChain().indexOf(destFlight));
+			if ((air1.isCancel() && air2.isCancel())
+					&& (air1.getAlternativeAircraft() == null && air2.getAlternativeAircraft() == null)
+					&& (!air1.isUpdated() && !air2.isUpdated())) {
+				// if just last 2 aircrafts
+				if (checkList.size() == 0) {
+					logger.warn("Unable to find more valid aircrafts for exchange!");
+					break;
+				} else {
+					// if more than 2
+					boolean isFound = false;
+					List<Aircraft> notUseList = new ArrayList<Aircraft>();
+					while (checkList.size() > 0 || isFound) {
+						notUseList.add(air2);
+						air2 = checkList.remove(rndNumbers.nextInt(checkList.size()));
+						if ((air1.isCancel() && air2.isCancel())
+								&& (air1.getAlternativeAircraft() == null && air2.getAlternativeAircraft() == null)
+								&& (!air1.isUpdated() && !air2.isUpdated())) {
+							;
+						} else {
+							isFound = true;
+							//add back not use list
+							checkList.addAll(notUseList);
+						}
 
-									cancelledAir.insertFlightChain(aircraft1, flightAir1, destFlight,
-											cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
-									newAircraft1.removeFlightChain(sFlight, dFlight);
+					}
+					if (!isFound) {
+						logger.warn("Unable to find more valid aircrafts for exchange!");
+						break;
+					}
+						
+				}
+			}
 
-									logger.info("Method 1 After exchange ...");
-									List<Flight> updateList1 = newAircraft1.getFlightChain();
-									for (Flight aF : updateList1) {
-										logger.info("Air  " + newAircraft1.getId() + " flight " + aF.getFlightId());
-									}
-									List<Flight> updateList2 = cancelledAir.getFlightChain();
-									for (Flight aF : updateList2) {
-										logger.info(
-												"Air cancelled " + newAircraft1.getId() + " flight " + aF.getFlightId());
-									}
-									logger.info("Method 1 Complete exchange ...");
+			// start
+			HashMap<Flight, List<Flight>> circuitFlightsAir1 = air1.getCircuitFlights();
+			HashMap<Flight, List<Flight>> circuitFlightsAir2 = air2.getCircuitFlights();
+			HashMap<Flight, List<MatchedFlight>> matchedFlights = air1.getMatchedFlights(air2);
 
-									// only update solution when new change
-									// goes better
-									ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
-									airList.add(newAircraft1);
-									airList.add(cancelledAir);
+			int m = air1.getFlightChain().size();
+			int n = air2.getFlightChain().size();
 
-									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									if (aircraft1.getAlternativeAircraft()!=null)
-										airOldList.add(aircraft1.getAlternativeAircraft());
-									else
-										airOldList.add(aircraft1);
+			// Method 1
+			if (!air1.isCancel()) {
+				for (int uu = 0; uu <= m - 1; uu++) {
+					Flight flightAir1 = air1.getFlight(uu);
+					if (circuitFlightsAir1.containsKey(flightAir1)) {
+						for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
+							Aircraft newAircraft1 = air1.clone();
+							Aircraft cancelledAir = bestSolution.getAircraft(air1.getId(), air1.getType(), true, true)
+									.clone();
 
-									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
-									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+							Flight sFlight = newAircraft1.getFlight(uu);
+							Flight dFlight = newAircraft1.getFlight(air1.getFlightChain().indexOf(destFlight));
 
-									BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+							cancelledAir.insertFlightChain(air1, flightAir1, destFlight,
+									cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
+							newAircraft1.removeFlightChain(sFlight, dFlight);
 
-									if (deltaCost.longValue() < 0) {
-										XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-										aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
-										aBetterSolution.refreshCost(deltaCost);
-										neighboursResult.addSolution(aBetterSolution);
-									}
-
-								}
+							logger.info("Method 1 After exchange ...");
+							List<Flight> updateList1 = newAircraft1.getFlightChain();
+							for (Flight aF : updateList1) {
+								logger.info("Air  " + newAircraft1.getId() + " flight " + aF.getFlightId());
 							}
+							List<Flight> updateList2 = cancelledAir.getFlightChain();
+							for (Flight aF : updateList2) {
+								logger.info("Air cancelled " + newAircraft1.getId() + " flight " + aF.getFlightId());
+							}
+							logger.info("Method 1 Complete exchange ...");
+
+							// only update solution when new change
+							// goes better
+							ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
+							airList.add(newAircraft1);
+							airList.add(cancelledAir);
+
+							ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
+							if (air1.getAlternativeAircraft() != null)
+								airOldList.add(air1.getAlternativeAircraft());
+							else
+								airOldList.add(air1);
+
+							XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
+							XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+
+							BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+
+							if (deltaCost.longValue() < 0) {
+								XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+								aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+								aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
+								aBetterSolution.refreshCost(deltaCost);
+								neighboursResult.addSolution(aBetterSolution);
+							}
+
 						}
 					}
 
-					for (int xx = 0; xx <= n - 1; xx++) {
-						// if aircraft2 flights is circuit, place it into
-						// cancellation route - Method 2
-						if (!aircraft2.isCancel()) {
-							Flight flightAir2 = aircraft2.getFlight(xx);
-							if (circuitFlightsAir2.containsKey(flightAir2)) {
-								for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
-									Aircraft newAircraft2 = aircraft2.clone();
-									Aircraft cancelledAir = bestSolution.getAircraft(aircraft2.getId(), aircraft2.getType(), true, true).clone();
+				}
+			}
 
-									Flight sFlight = newAircraft2.getFlight(xx);
-									Flight dFlight = newAircraft2
-											.getFlight(aircraft2.getFlightChain().indexOf(destFlight));
+			// Method 2
+			if (!air2.isCancel()) {
+				for (int xx = 0; xx <= n - 1; xx++) {
+					// if aircraft2 flights is circuit, place it into
+					// cancellation route - Method 2
+					Flight flightAir2 = air2.getFlight(xx);
+					if (circuitFlightsAir2.containsKey(flightAir2)) {
+						for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
+							Aircraft newAircraft2 = air2.clone();
+							Aircraft cancelledAir = bestSolution.getAircraft(air2.getId(), air2.getType(), true, true)
+									.clone();
 
-									cancelledAir.insertFlightChain(aircraft2, flightAir2, destFlight,
-											cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
-									newAircraft2.removeFlightChain(sFlight, dFlight);
+							Flight sFlight = newAircraft2.getFlight(xx);
+							Flight dFlight = newAircraft2.getFlight(air2.getFlightChain().indexOf(destFlight));
 
-									logger.info("Method 2 After exchange ...");
-									List<Flight> updateList1 = newAircraft2.getFlightChain();
-									for (Flight aF : updateList1) {
-										logger.info("Air 2 " + aF.getFlightId());
-									}
-									List<Flight> updateList2 = cancelledAir.getFlightChain();
-									for (Flight aF : updateList2) {
-										logger.info("Air 2 cancelled " + aF.getFlightId());
-									}
-									logger.info("Method 2 Complete exchange ...");
+							cancelledAir.insertFlightChain(air2, flightAir2, destFlight,
+									cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
+							newAircraft2.removeFlightChain(sFlight, dFlight);
 
-									// only update solution when new change
-									// goes better
-									ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
-									airList.add(newAircraft2);
-									airList.add(cancelledAir);
-
-									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									if (aircraft2.getAlternativeAircraft()!=null)
-										airOldList.add(aircraft2.getAlternativeAircraft());
-									else
-										airOldList.add(aircraft2);
-
-									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
-									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
-
-									BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-
-									if (deltaCost.longValue() < 0) {
-										XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-										aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
-										aBetterSolution.refreshCost(deltaCost);
-										neighboursResult.addSolution(aBetterSolution);
-									}
-
-								}
+							logger.info("Method 2 After exchange ...");
+							List<Flight> updateList1 = newAircraft2.getFlightChain();
+							for (Flight aF : updateList1) {
+								logger.info("Air 2 " + aF.getFlightId());
 							}
+							List<Flight> updateList2 = cancelledAir.getFlightChain();
+							for (Flight aF : updateList2) {
+								logger.info("Air 2 cancelled " + aF.getFlightId());
+							}
+							logger.info("Method 2 Complete exchange ...");
+
+							// only update solution when new change
+							// goes better
+							ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
+							airList.add(newAircraft2);
+							airList.add(cancelledAir);
+
+							ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
+							if (air2.getAlternativeAircraft() != null)
+								airOldList.add(air2.getAlternativeAircraft());
+							else
+								airOldList.add(air2);
+
+							XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
+							XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+
+							BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+
+							if (deltaCost.longValue() < 0) {
+								XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+								aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+								aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
+								aBetterSolution.refreshCost(deltaCost);
+								neighboursResult.addSolution(aBetterSolution);
+							}
+
 						}
 					}
+				}
 
-					for (int u = 0; u <= m - 1; u++) {
-						// if aircraft1/aircraft2 flights same source and
-						// same destination, do exchange overlapped part -
-						// Method 3
-						if (matchedFlights.containsKey(aircraft1.getFlight(u))) {
-							List<MatchedFlight> matchedList = matchedFlights.get(aircraft1.getFlight(u));
-							for (MatchedFlight aMatched : matchedList) {
-								Aircraft newAircraft1 = aircraft1.clone();
-								Aircraft newAircraft2 = aircraft2.clone();
-								Flight air1SourceFlight = newAircraft1.getFlight(aMatched.getAir1SourceFlight());
-								Flight air1DestFlight = newAircraft1.getFlight(aMatched.getAir1DestFlight());
-								Flight air2SourceFlight = newAircraft2.getFlight(aMatched.getAir2SourceFlight());
-								Flight air2DestFlight = newAircraft2.getFlight(aMatched.getAir2DestFlight());
+			}
 
-								newAircraft1.insertFlightChain(aircraft2,
-										aircraft2.getFlight(aMatched.getAir2SourceFlight()),
-										aircraft2.getFlight(aMatched.getAir2DestFlight()), air1DestFlight, false);
-								newAircraft2.insertFlightChain(aircraft1,
-										aircraft1.getFlight(aMatched.getAir1SourceFlight()),
-										aircraft1.getFlight(aMatched.getAir1DestFlight()), air2DestFlight, false);
+			for (int u = 0; u <= m - 1; u++) {
+				// if aircraft1/aircraft2 flights same source and
+				// same destination, do exchange overlapped part -
+				// Method 3
+				if (matchedFlights.containsKey(air1.getFlight(u))) {
+					List<MatchedFlight> matchedList = matchedFlights.get(air1.getFlight(u));
+					for (MatchedFlight aMatched : matchedList) {
+						Aircraft newAircraft1 = air1.clone();
+						Aircraft newAircraft2 = air2.clone();
+						Flight air1SourceFlight = newAircraft1.getFlight(aMatched.getAir1SourceFlight());
+						Flight air1DestFlight = newAircraft1.getFlight(aMatched.getAir1DestFlight());
+						Flight air2SourceFlight = newAircraft2.getFlight(aMatched.getAir2SourceFlight());
+						Flight air2DestFlight = newAircraft2.getFlight(aMatched.getAir2DestFlight());
+
+						newAircraft1.insertFlightChain(air2, air2.getFlight(aMatched.getAir2SourceFlight()),
+								air2.getFlight(aMatched.getAir2DestFlight()), air1DestFlight, false);
+						newAircraft2.insertFlightChain(air1, air1.getFlight(aMatched.getAir1SourceFlight()),
+								air1.getFlight(aMatched.getAir1DestFlight()), air2DestFlight, false);
+						newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
+						newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
+
+						logger.info("Method 3 After exchange ...");
+						List<Flight> updateList1 = newAircraft1.getFlightChain();
+						for (Flight aF : updateList1) {
+							logger.info("Air  " + newAircraft1.getId() + "isCancel " + newAircraft1.isCancel()
+									+ " flight " + aF.getFlightId());
+						}
+						List<Flight> updateList2 = newAircraft2.getFlightChain();
+						for (Flight aF : updateList2) {
+							logger.info("Air  " + newAircraft2.getId() + "isCancel " + newAircraft2.isCancel()
+									+ " flight " + aF.getFlightId());
+						}
+						logger.info("Method 3 Complete exchange ...");
+
+						// only update solution when new change
+						// goes better
+						ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
+						airList.add(newAircraft1);
+						airList.add(newAircraft2);
+
+						ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
+						if (air1.getAlternativeAircraft() != null)
+							airOldList.add(air1.getAlternativeAircraft());
+						else
+							airOldList.add(air1);
+						if (air2.getAlternativeAircraft() != null)
+							airOldList.add(air2.getAlternativeAircraft());
+						else
+							airOldList.add(air2);
+
+						XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
+						XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+
+						BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+						if (deltaCost.longValue() < 0) {
+							XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+							aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+							aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+							aBetterSolution.refreshCost(deltaCost);
+							neighboursResult.addSolution(aBetterSolution);
+						}
+
+					}
+				}
+
+				// if aircraft1 flights is circuit, insert circuit
+				// in front of flight x of aircraft2 - Method 4
+				if (!air2.isCancel()) {
+					Flight flightAir1 = air1.getFlight(u);
+					if (circuitFlightsAir1.containsKey(flightAir1)) {
+						for (int x = 0; x <= n - 1; x++) {
+							for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
+								Aircraft newAircraft1 = air1.clone();
+								Aircraft newAircraft2 = air2.clone();
+								Flight air1SourceFlight = newAircraft1.getFlight(u);
+								Flight air1DestFlight = newAircraft1
+										.getFlight(air1.getFlightChain().indexOf(destFlight));
+								Flight air2Flight = newAircraft2.getFlight(x);
+
+								newAircraft2.insertFlightChain(air1, flightAir1, destFlight, air2Flight, true);
 								newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
-								newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
 
-								logger.info("Method 3 After exchange ...");
+								logger.info("Method 4 After exchange ...");
 								List<Flight> updateList1 = newAircraft1.getFlightChain();
 								for (Flight aF : updateList1) {
-									logger.info("Air  " + newAircraft1.getId() + "isCancel " + newAircraft1.isCancel()
-											+ " flight " + aF.getFlightId());
+									logger.info("Air 1 " + aF.getFlightId());
 								}
 								List<Flight> updateList2 = newAircraft2.getFlightChain();
 								for (Flight aF : updateList2) {
-									logger.info("Air  " + newAircraft2.getId() + "isCancel " + newAircraft2.isCancel()
-											+ " flight " + aF.getFlightId());
+									logger.info("Air 2  " + aF.getFlightId());
 								}
-								logger.info("Method 3 Complete exchange ...");
+								logger.info("Method 4 Complete exchange ...");
 
 								// only update solution when new change
 								// goes better
@@ -230,14 +322,15 @@ public class LocalSearch {
 								airList.add(newAircraft2);
 
 								ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-								if (aircraft1.getAlternativeAircraft()!=null)
-									airOldList.add(aircraft1.getAlternativeAircraft());
+
+								if (air1.getAlternativeAircraft() != null)
+									airOldList.add(air1.getAlternativeAircraft());
 								else
-									airOldList.add(aircraft1);
-								if (aircraft2.getAlternativeAircraft()!=null)
-									airOldList.add(aircraft2.getAlternativeAircraft());
+									airOldList.add(air1);
+								if (air2.getAlternativeAircraft() != null)
+									airOldList.add(air2.getAlternativeAircraft());
 								else
-									airOldList.add(aircraft2);
+									airOldList.add(air2);
 
 								XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 								XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
@@ -253,206 +346,146 @@ public class LocalSearch {
 
 							}
 						}
+					}
 
-						for (int x = 0; x <= n - 1; x++) {
-							// if aircraft1 flights is circuit, insert circuit
-							// in front of flight x of aircraft2 - Method 4
-							if (!aircraft2.isCancel()) {
-								Flight flightAir1 = aircraft1.getFlight(u);
-								if (circuitFlightsAir1.containsKey(flightAir1)) {
-									for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
-										Aircraft newAircraft1 = aircraft1.clone();
-										Aircraft newAircraft2 = aircraft2.clone();
-										Flight air1SourceFlight = newAircraft1.getFlight(u);
-										Flight air1DestFlight = newAircraft1
-												.getFlight(aircraft1.getFlightChain().indexOf(destFlight));
-										Flight air2Flight = newAircraft2.getFlight(x);
+				}
 
-										newAircraft2.insertFlightChain(aircraft1, flightAir1, destFlight, air2Flight,
-												true);
-										newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
+				// if aircraft2 flights is circuit, insert circuit
+				// in front of flight u - method 5
+				if (!air1.isCancel()) {
+					for (int x = 0; x <= n - 1; x++) {
+						Flight flightAir2 = air2.getFlight(x);
+						if (circuitFlightsAir2.containsKey(flightAir2)) {
+							for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
+								Aircraft newAircraft1 = air1.clone();
+								Aircraft newAircraft2 = air2.clone();
+								Flight air2SourceFlight = newAircraft2.getFlight(x);
+								Flight air2DestFlight = newAircraft2
+										.getFlight(air2.getFlightChain().indexOf(destFlight));
+								Flight air1Flight = newAircraft1.getFlight(u);
 
-										logger.info("Method 4 After exchange ...");
-										List<Flight> updateList1 = newAircraft1.getFlightChain();
-										for (Flight aF : updateList1) {
-											logger.info("Air 1 " + aF.getFlightId());
-										}
-										List<Flight> updateList2 = newAircraft2.getFlightChain();
-										for (Flight aF : updateList2) {
-											logger.info("Air 2  " + aF.getFlightId());
-										}
-										logger.info("Method 4 Complete exchange ...");
+								newAircraft1.insertFlightChain(air2, flightAir2, destFlight, air1Flight, true);
+								newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
 
-										// only update solution when new change
-										// goes better
-										ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
-										airList.add(newAircraft1);
-										airList.add(newAircraft2);
-
-										ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-										airOldList.add(aircraft1);
-										airOldList.add(aircraft2);
-
-										XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
-										XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
-
-										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-										if (deltaCost.longValue() < 0) {
-											XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-											aBetterSolution.refreshCost(deltaCost);
-											neighboursResult.addSolution(aBetterSolution);
-										}
-
-									}
-
+								logger.info("Method 5 After exchange ...");
+								List<Flight> updateList1 = newAircraft1.getFlightChain();
+								for (Flight aF : updateList1) {
+									logger.info("Air 1 " + aF.getFlightId());
 								}
-							}
-							// if aircraft2 flights is circuit, insert circuit
-							// in front of flight u - method 5
-							if (!aircraft1.isCancel()) {
-								Flight flightAir2 = aircraft2.getFlight(x);
-								if (circuitFlightsAir2.containsKey(flightAir2)) {
-									for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
-										Aircraft newAircraft1 = aircraft1.clone();
-										Aircraft newAircraft2 = aircraft2.clone();
-										Flight air2SourceFlight = newAircraft2.getFlight(x);
-										Flight air2DestFlight = newAircraft2
-												.getFlight(aircraft2.getFlightChain().indexOf(destFlight));
-										Flight air1Flight = newAircraft1.getFlight(u);
-
-										newAircraft1.insertFlightChain(aircraft2, flightAir2, destFlight, air1Flight,
-												true);
-										newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
-
-										logger.info("Method 5 After exchange ...");
-										List<Flight> updateList1 = newAircraft1.getFlightChain();
-										for (Flight aF : updateList1) {
-											logger.info("Air 1 " + aF.getFlightId());
-										}
-										List<Flight> updateList2 = newAircraft2.getFlightChain();
-										for (Flight aF : updateList2) {
-											logger.info("Air 2  " + aF.getFlightId());
-										}
-										logger.info("Method 5 Complete exchange ...");
-
-										// only update solution when new change
-										// goes better
-										ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
-										airList.add(newAircraft1);
-										airList.add(newAircraft2);
-
-										ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-										if (aircraft1.getAlternativeAircraft()!=null)
-											airOldList.add(aircraft1.getAlternativeAircraft());
-										else
-											airOldList.add(aircraft1);
-										if (aircraft2.getAlternativeAircraft()!=null)
-											airOldList.add(aircraft2.getAlternativeAircraft());
-										else
-											airOldList.add(aircraft2);
-
-										XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
-										XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
-
-										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-
-										if (deltaCost.longValue() < 0) {
-											XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-											aBetterSolution.refreshCost(deltaCost);
-											neighboursResult.addSolution(aBetterSolution);
-										}
-									}
-
+								List<Flight> updateList2 = newAircraft2.getFlightChain();
+								for (Flight aF : updateList2) {
+									logger.info("Air 2  " + aF.getFlightId());
 								}
-							}
+								logger.info("Method 5 Complete exchange ...");
 
-							// if aircraft1/2 have the same source, do exchange
-							// to end - method 6
-							if (!aircraft1.isCancel() && !aircraft2.isCancel()) {
-								Flight aFlight = aircraft1.getFlight(u);
-								Flight bFlight = aircraft2.getFlight(x);
-								if (aFlight.getSourceAirPort().getId().equals(bFlight.getSourceAirPort().getId())) {
-									Aircraft newAircraft1 = aircraft1.clone();
-									Aircraft newAircraft2 = aircraft2.clone();
+								// only update solution when new change
+								// goes better
+								ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
+								airList.add(newAircraft1);
+								airList.add(newAircraft2);
 
-									Flight air1Flight = newAircraft1.getFlight(u);
-									Flight air2Flight = newAircraft2.getFlight(x);
-									Flight air1DestFlight = newAircraft1
-											.getFlight(newAircraft1.getFlightChain().size() - 1);
-									Flight air2DestFlight = newAircraft2
-											.getFlight(newAircraft2.getFlightChain().size() - 1);
+								ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
+								if (air1.getAlternativeAircraft() != null)
+									airOldList.add(air1.getAlternativeAircraft());
+								else
+									airOldList.add(air1);
+								if (air2.getAlternativeAircraft() != null)
+									airOldList.add(air2.getAlternativeAircraft());
+								else
+									airOldList.add(air2);
 
-									newAircraft1.insertFlightChain(aircraft2, bFlight,
-											aircraft2.getFlight(aircraft2.getFlightChain().size() - 1), air1Flight,
-											true);
-									newAircraft2.insertFlightChain(aircraft1, aFlight,
-											aircraft1.getFlight(aircraft1.getFlightChain().size() - 1), air2Flight,
-											true);
-									newAircraft1.removeFlightChain(air1Flight, air1DestFlight);
-									newAircraft2.removeFlightChain(air2Flight, air2DestFlight);
+								XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
+								XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
 
-									logger.info("Method 6 After exchange ...");
-									List<Flight> updateList1 = newAircraft1.getFlightChain();
-									for (Flight aF : updateList1) {
-										logger.info("Air 1 " + aF.getFlightId());
-									}
-									List<Flight> updateList2 = newAircraft2.getFlightChain();
-									for (Flight aF : updateList2) {
-										logger.info("Air 2  " + aF.getFlightId());
-									}
-									logger.info("Method 6 Complete exchange ...");
+								BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
-									// only update solution when new change
-									// goes better
-									ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
-									airList.add(newAircraft1);
-									airList.add(newAircraft2);
-
-									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									if (aircraft1.getAlternativeAircraft()!=null)
-										airOldList.add(aircraft1.getAlternativeAircraft());
-									else
-										airOldList.add(aircraft1);
-									if (aircraft2.getAlternativeAircraft()!=null)
-										airOldList.add(aircraft2.getAlternativeAircraft());
-									else
-										airOldList.add(aircraft2);
-
-									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
-									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
-
-									BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-
-									if (deltaCost.longValue() < 0) {
-										XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-										aBetterSolution.refreshCost(deltaCost);
-										neighboursResult.addSolution(aBetterSolution);
-									}
-
+								if (deltaCost.longValue() < 0) {
+									XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+									aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+									aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+									aBetterSolution.refreshCost(deltaCost);
+									neighboursResult.addSolution(aBetterSolution);
 								}
-
 							}
 
 						}
+					}
 
+				}
+
+				// if aircraft1/2 have the same source, do exchange
+				// to end - method 6
+				if (!air1.isCancel() && !air2.isCancel()) {
+					for (int x = 0; x <= n - 1; x++) {
+						Flight aFlight = air1.getFlight(u);
+						Flight bFlight = air2.getFlight(x);
+						if (aFlight.getSourceAirPort().getId().equals(bFlight.getSourceAirPort().getId())) {
+							Aircraft newAircraft1 = air1.clone();
+							Aircraft newAircraft2 = air2.clone();
+
+							Flight air1Flight = newAircraft1.getFlight(u);
+							Flight air2Flight = newAircraft2.getFlight(x);
+							Flight air1DestFlight = newAircraft1.getFlight(newAircraft1.getFlightChain().size() - 1);
+							Flight air2DestFlight = newAircraft2.getFlight(newAircraft2.getFlightChain().size() - 1);
+
+							newAircraft1.insertFlightChain(air2, bFlight,
+									air2.getFlight(air2.getFlightChain().size() - 1), air1Flight, true);
+							newAircraft2.insertFlightChain(air1, aFlight,
+									air1.getFlight(air1.getFlightChain().size() - 1), air2Flight, true);
+							newAircraft1.removeFlightChain(air1Flight, air1DestFlight);
+							newAircraft2.removeFlightChain(air2Flight, air2DestFlight);
+
+							logger.info("Method 6 After exchange ...");
+							List<Flight> updateList1 = newAircraft1.getFlightChain();
+							for (Flight aF : updateList1) {
+								logger.info("Air 1 " + aF.getFlightId());
+							}
+							List<Flight> updateList2 = newAircraft2.getFlightChain();
+							for (Flight aF : updateList2) {
+								logger.info("Air 2  " + aF.getFlightId());
+							}
+							logger.info("Method 6 Complete exchange ...");
+
+							// only update solution when new change
+							// goes better
+							ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
+							airList.add(newAircraft1);
+							airList.add(newAircraft2);
+
+							ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
+							if (air1.getAlternativeAircraft() != null)
+								airOldList.add(air1.getAlternativeAircraft());
+							else
+								airOldList.add(air1);
+							if (air2.getAlternativeAircraft() != null)
+								airOldList.add(air2.getAlternativeAircraft());
+							else
+								airOldList.add(air2);
+
+							XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
+							XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+
+							BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+
+							if (deltaCost.longValue() < 0) {
+								XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+								aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+								aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+								aBetterSolution.refreshCost(deltaCost);
+								neighboursResult.addSolution(aBetterSolution);
+							}
+
+						}
 					}
 
 				}
 
 			}
+			bestSolution = neighboursResult.selectASoluiton();
+			neighboursResult.clear();
 		}
-		XiaMengAirlineSolution updatedbestSolution = neighboursResult.selectASoluiton();
-		neighboursResult.clear();
-		if (updatedbestSolution != null) {
-			return updatedbestSolution;
-		} else
-			return bestSolution;
+
+		return bestSolution;
 
 	}
 }

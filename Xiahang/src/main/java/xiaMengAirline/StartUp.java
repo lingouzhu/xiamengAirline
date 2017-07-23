@@ -3,6 +3,7 @@ package xiaMengAirline;
 
 import java.text.ParseException;
 
+import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
@@ -13,7 +14,7 @@ import xiaMengAirline.util.InitData;
 public class StartUp {
 
 	final public static long iterLength = 1L;
-	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
+	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
 		
 		long startTime=System.currentTimeMillis();
 		//Step1, Load all data & initialize
@@ -22,10 +23,10 @@ public class StartUp {
 		InitData.initData(initDatafile);
 		
 		LocalSearch localEngine = new LocalSearch();
-		SelfSearch selfEngine = new SelfSearch();
+		SelfSearch selfEngine = new SelfSearch(InitData.originalSolution.clone());
 		
 		//Step2, construct initial solution & validate it
-		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
+		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
 		//initOutput is optional, to setup a baseline
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		initialOutput.refreshCost(false);

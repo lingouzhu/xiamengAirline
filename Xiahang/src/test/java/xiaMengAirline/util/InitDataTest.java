@@ -1,16 +1,17 @@
 package xiaMengAirline.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
 import xiaMengAirline.Exception.AirportNotAvailable;
@@ -21,7 +22,6 @@ import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 
 public class InitDataTest {
@@ -29,14 +29,16 @@ public class InitDataTest {
 	@Before
 	public void setUp() throws Exception {
 		// Step1, Load all data & initialize
-		String initDatafile = "XiahangData20170705_1.xlsx";
+		File file=new File(".");
+	    System.out.println("Current Working Directory: " + file.getAbsolutePath());
+		String initDatafile = "XiahangData.xlsx";
 		InitData.initData(initDatafile);
 	}
 
 	@Test
-	public void testInitData() throws ParseException {
+	public void testInitData() throws ParseException, CloneNotSupportedException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
 
-		Aircraft air50 = InitData.originalSolution.getAircraft("50", "2", false,false);
+		Aircraft air50 = InitData.originalSolution.getAircraft("50", "2", false,false).clone();
 		
 		
 		//check air
@@ -57,14 +59,14 @@ public class InitDataTest {
 		assertEquals("72", f15.getDesintationAirport().getId());
 		
 		//joined flight
-		Aircraft air122 = InitData.originalSolution.getAircraft("122", "2", false,false);
+		Aircraft air122 = InitData.originalSolution.getAircraft("122", "2", false,false).clone();
 		Flight f1918 = air122.getFlightByFlightId(1918);
 		int anotherF = InitData.jointFlightMap.get(f1918.getFlightId()).getFlightId();
 		assertEquals(1920, anotherF);
 		Flight f1920 = air122.getFlightByFlightId(1920);
 		assertEquals(null, InitData.jointFlightMap.get(f1920.getFlightId()));
 		
-		Aircraft air109 = InitData.originalSolution.getAircraft("109", "2", false,false);
+		Aircraft air109 = InitData.originalSolution.getAircraft("109", "2", false,false).clone();
 		Flight f325 = air109.getFlightByFlightId(325);
 		assertEquals(null, InitData.jointFlightMap.get(f325.getFlightId()));
 		
@@ -111,7 +113,7 @@ public class InitDataTest {
 		
 		assertEquals(false,InitData.domesticAirportList.contains("36") && InitData.domesticAirportList.contains("4"));
 		
-		Aircraft air116 = InitData.originalSolution.getAircraft("116", "2", false, false);
+		Aircraft air116 = InitData.originalSolution.getAircraft("116", "2", false, false).clone();
 		try {
 			air116.adjustFlightTime(0);
 		} catch (AirportNotAcceptArrivalTime e) {
@@ -134,7 +136,7 @@ public class InitDataTest {
 		}
 		
 		
-		Aircraft air93 = InitData.originalSolution.getAircraft("93", "2", false, false);
+		Aircraft air93 = InitData.originalSolution.getAircraft("93", "2", false, false).clone();
 		try {
 			air93.adjustFlightTime(0);
 		} catch (AirportNotAcceptArrivalTime e) {
@@ -156,7 +158,7 @@ public class InitDataTest {
 			fail("shall not fail");
 		}
 		
-		Aircraft air5 = InitData.originalSolution.getAircraft("5", "2", false, false);
+		Aircraft air5 = InitData.originalSolution.getAircraft("5", "2", false, false).clone();
 		try {
 			air5.adjustFlightTime(0);
 		} catch (AirportNotAcceptArrivalTime e) {
@@ -178,7 +180,7 @@ public class InitDataTest {
 			fail("shall not fail");
 		}
 		
-		Aircraft air12 = InitData.originalSolution.getAircraft("12", "2", false, false);
+		Aircraft air12 = InitData.originalSolution.getAircraft("12", "2", false, false).clone();
 		try {
 			air12.adjustFlightTime(0);
 		} catch (AirportNotAcceptArrivalTime e) {
@@ -200,7 +202,7 @@ public class InitDataTest {
 			fail("shall not fail");
 		}
 		
-		Aircraft air16 = InitData.originalSolution.getAircraft("16", "2", false, false);
+		Aircraft air16 = InitData.originalSolution.getAircraft("16", "2", false, false).clone();
 		try {
 			air16.adjustFlightTime(0);
 		} catch (AirportNotAcceptArrivalTime e) {
@@ -221,17 +223,51 @@ public class InitDataTest {
 		} catch (AirportNotAvailable e) {
 			fail("shall not fail");
 		}
-	}
-	
-	@Test
-	public void testInitSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
-		SelfSearch selfEngine = new SelfSearch();
+		
+		Aircraft air105 = InitData.originalSolution.getAircraft("105", "2", false, false).clone();
+		XiaMengAirlineSolution aTest = new XiaMengAirlineSolution();
+		aTest.replaceOrAddNewAircraft(air105);
+		
+		
+		try {
+			air105.adjustFlightTime(0);
+		} catch (AirportNotAcceptArrivalTime e) {
+			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+					+ " To " + e.getaFlight().getDesintationAirport().getId()
+					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
+		} catch (FlightDurationNotFound e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AirportNotAcceptDepartureTime e) {
+			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+					+ " To " + e.getaFlight().getDesintationAirport().getId()
+					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
+			System.out.println(e.getCasue());
+			fail("shall not fail");
+		} catch (AirportNotAvailable e) {
+			fail("shall not fail");
+		}
+		
+		SelfSearch selfEngine = new SelfSearch(aTest);
+		XiaMengAirlineSolution sol105 = selfEngine.constructInitialSolution();
+		XiaMengAirlineSolution initial105 = sol105.reConstruct();
+		initial105.refreshCost(true);
+		assertEquals(15175, initial105.getCost().longValue());
+		
+		
+		
+		
+		selfEngine = new SelfSearch(InitData.originalSolution.clone());
+		
+		
 		
 		//Step2, construct initial solution & validate it
-		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution);
+		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		initialOutput.refreshCost(true);
-		assertEquals(1441235, initialOutput.getCost().longValue());
+		assertEquals(1444294, initialOutput.getCost().longValue());
 		Aircraft air94 = initialOutput.getAircraft("94", "2", false, false);
 		Aircraft air94C = initialOutput.getAircraft("94", "2", true, false);
 		Flight f1156 = air94C.getFlightByFlightId(1156);
@@ -244,60 +280,60 @@ public class InitDataTest {
 		assertEquals("49", f2375.getDesintationAirport().getId());
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 11:15:00"), f2375.getDepartureTime());
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 13:50:00"), f2375.getArrivalTime());
-		
-		
-		//initialOutput.generateOutput("1");
-		
-		LocalSearch localEngine = new LocalSearch();
-		XiaMengAirlineSolution sol133 = new XiaMengAirlineSolution();
-		Aircraft air133 = initialSolution.getAircraft("133", "2", false, false);
-		sol133.replaceOrAddNewAircraft(air133);
-		sol133.replaceOrAddNewAircraft(air94);
-		
-		HashMap<Flight, List<Flight>> circuitFlightsAir1 = air133.getCircuitFlights();
-		
-		for (Map.Entry<Flight, List<Flight>> entry : circuitFlightsAir1.entrySet()) {
-			Flight key = entry.getKey();
-			List<Flight> value = entry.getValue();
-			
-			for (Flight aFlight : value) {
-				System.out.println("Flight " + key.getFlightId() + " => " + aFlight.getFlightId());
-			}
-		}
-		
-		Flight f1274 = air133.getFlightByFlightId(1274);
-		for (Flight destFlight : circuitFlightsAir1.get(f1274)) {
-			Aircraft newAircraft1 = air133.clone();
-			Aircraft cancelledAir = sol133.getAircraft(air133.getId(), air133.getType(), true, true).clone();
-
-			Flight sFlight = newAircraft1.getFlight(0);
-			Flight dFlight = newAircraft1
-					.getFlight(air133.getFlightChain().indexOf(destFlight));
-
-			cancelledAir.insertFlightChain(air133, f1274, destFlight,
-					cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
-			newAircraft1.removeFlightChain(sFlight, dFlight);
-			System.out.println("Move " );
-			for (int i=0;i <= air133.getFlightChain().indexOf(destFlight);i++) {
-				System.out.println(air133.getFlight(i).getFlightId());
-			}
-			System.out.println("Move End" );
-
-			List<Flight> updateList1 = newAircraft1.getFlightChain();
-			for (Flight aF : updateList1) {
-				System.out.println("Air  " + newAircraft1.getId() + " flight " + aF.getFlightId());
-			}
-			List<Flight> updateList2 = cancelledAir.getFlightChain();
-			for (Flight aF : updateList2) {
-				System.out.println(
-						"Air cancelled " + newAircraft1.getId() + " flight " + aF.getFlightId());
-			}
-		}
+//		
+//		
+//		//initialOutput.generateOutput("1");
+//		
+//		LocalSearch localEngine = new LocalSearch();
+//		XiaMengAirlineSolution sol133 = new XiaMengAirlineSolution();
+//		Aircraft air133 = initialSolution.getAircraft("133", "2", false, false);
+//		sol133.replaceOrAddNewAircraft(air133);
+//		sol133.replaceOrAddNewAircraft(air94);
+//		
+//		HashMap<Flight, List<Flight>> circuitFlightsAir1 = air133.getCircuitFlights();
+//		
+//		for (Map.Entry<Flight, List<Flight>> entry : circuitFlightsAir1.entrySet()) {
+//			Flight key = entry.getKey();
+//			List<Flight> value = entry.getValue();
+//			
+//			for (Flight aFlight : value) {
+//				System.out.println("Flight " + key.getFlightId() + " => " + aFlight.getFlightId());
+//			}
+//		}
+//		
+//		Flight f1274 = air133.getFlightByFlightId(1274);
+//		for (Flight destFlight : circuitFlightsAir1.get(f1274)) {
+//			Aircraft newAircraft1 = air133.clone();
+//			Aircraft cancelledAir = sol133.getAircraft(air133.getId(), air133.getType(), true, true).clone();
+//
+//			Flight sFlight = newAircraft1.getFlight(0);
+//			Flight dFlight = newAircraft1
+//					.getFlight(air133.getFlightChain().indexOf(destFlight));
+//
+//			cancelledAir.insertFlightChain(air133, f1274, destFlight,
+//					cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
+//			newAircraft1.removeFlightChain(sFlight, dFlight);
+//			System.out.println("Move " );
+//			for (int i=0;i <= air133.getFlightChain().indexOf(destFlight);i++) {
+//				System.out.println(air133.getFlight(i).getFlightId());
+//			}
+//			System.out.println("Move End" );
+//
+//			List<Flight> updateList1 = newAircraft1.getFlightChain();
+//			for (Flight aF : updateList1) {
+//				System.out.println("Air  " + newAircraft1.getId() + " flight " + aF.getFlightId());
+//			}
+//			List<Flight> updateList2 = cancelledAir.getFlightChain();
+//			for (Flight aF : updateList2) {
+//				System.out.println(
+//						"Air cancelled " + newAircraft1.getId() + " flight " + aF.getFlightId());
+//			}
+//		}
 		
 		//XiaMengAirlineSolution aBetterSolution = localEngine.constructNewSolution(sol133);
 		
 		//XiaMengAirlineSolution aBetterSolution = localEngine.constructNewSolution(initialSolution);
-		
 	}
+	
 
 }

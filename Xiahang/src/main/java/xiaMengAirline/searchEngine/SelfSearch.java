@@ -1,55 +1,55 @@
 package xiaMengAirline.searchEngine;
 
-import java.math.*;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+
 import org.apache.log4j.Logger;
-import xiaMengAirline.Exception.*;
-import xiaMengAirline.beans.*;
+
+import xiaMengAirline.Exception.AircraftNotAdjustable;
+import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
+import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
+import xiaMengAirline.Exception.AirportNotAvailable;
+import xiaMengAirline.Exception.FlightDurationNotFound;
+import xiaMengAirline.beans.AirPort;
+import xiaMengAirline.beans.Aircraft;
+import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.FlightTime;
+import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.util.InitData;
 
 public class SelfSearch {
-	private static final Logger logger = Logger.getLogger(InitData.class);
-	private final int domesticMaxDelay = 24;
-	private final int internationalMaxDelay = 36;
-	private final int minGroundTime = 50;
-	private final int flightCancelCost = 1000;
-	private final int flightDelayCost = 100;
+	private static final Logger logger = Logger.getLogger(SelfSearch.class);
+	private final int minGroundTime = 50; //plz ensure remove this!
+	private XiaMengAirlineSolution mySolution = null;
 	
-	public XiaMengAirlineSolution constructInitialSolution(XiaMengAirlineSolution originalSolution)
-			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
+	public XiaMengAirlineSolution constructInitialSolution()
+			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
 		//when construct initial solution, clone a new copy
-		XiaMengAirlineSolution aNewSolution = originalSolution.clone();
-		XiaMengAirlineSolution rtnSolution = new XiaMengAirlineSolution();
-		for (Aircraft aircraft : aNewSolution.getSchedule().values()){
-			aircraft = adjustAircraft(aircraft, 0);
-			if (aircraft != null){
-				rtnSolution.replaceOrAddNewAircraft(aircraft);
-			}
+
+		List<Aircraft> airList = new ArrayList<Aircraft> (mySolution.getSchedule().values());
+		for (Aircraft aircraft : airList){
+			adjustAircraft(aircraft, 0);
 		}
 		
-		return rtnSolution;
+		return mySolution;
 	}
 	
-	public Aircraft adjustAircraft (Aircraft originalAir, int startIndex) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
+	public Aircraft adjustAircraft (Aircraft originalAir, int startIndex) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
 		Aircraft thisAc = originalAir.clone();
+		//original cancel air
+		Aircraft thisAcCancel = mySolution.getAircraft(thisAc.getId(), thisAc.getType(), true, true);
 		HashMap<Integer, Aircraft> forkList = new HashMap<Integer, Aircraft>();
-		
-		//delete new flights in cancel flight list
-		List<Integer> cancelFlightList = new ArrayList<Integer>();
-		if (thisAc.getCancelAircrafted() != null && thisAc.getCancelAircrafted().getFlightChain() != null){
-
-			for (int i = 0; i < thisAc.getCancelAircrafted().getFlightChain().size(); i++){
-				if (thisAc.getCancelAircrafted().getFlightChain().get(i).getFlightId() > InitData.plannedMaxFligthId){
-					cancelFlightList.add(i);
-				}
-			}
-			thisAc.getCancelAircrafted().removeFlightChain(cancelFlightList);
-		}
 		
 		// loop until all flight sorted
 		Aircraft aircraft = thisAc.clone();
+		Aircraft aircraftCancel = thisAcCancel.clone();
 		boolean isFinish = false;
 		int infinitLoopCnt = 0;
 		while (!isFinish){
@@ -59,6 +59,7 @@ public class SelfSearch {
 				isFinish = true;
 				if (startIndex == 0){
 					originalAir.setAlternativeAircraft(null);
+					thisAcCancel.setAlternativeAircraft(null);
 				}
 			} catch (AirportNotAcceptArrivalTime anaat){
 				Flight thisFlight = anaat.getaFlight();
@@ -83,15 +84,15 @@ public class SelfSearch {
 					startIndex = flightIndex;
 				}else{
 					try {
-						aircraft = cancelFlight(aircraft, flightIndex);
+						aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
 						if (aircraft == null){
 							print("Invalid aircraft: AicraftId " + thisAc.getId());
-							return null;
+							throw new AircraftNotAdjustable(aircraft);
 						}
 					} catch (Exception e){
 						e.printStackTrace();
 						print("Invalid aircraft: AicraftId " + thisAc.getId());
-						return null;
+						throw new AircraftNotAdjustable(aircraft);
 					}
 					startIndex = flightIndex;
 				}
@@ -110,48 +111,48 @@ public class SelfSearch {
 				}
 				
 				try {
-					aircraft = cancelFlight(aircraft, flightIndex);
+					aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
 					if (aircraft == null){
 						print("Invalid aircraft: AicraftId " + thisAc.getId());
-						return null;
+						throw new AircraftNotAdjustable(aircraft);
 					}
 				} catch (Exception e){
 					e.printStackTrace();
 					print("Invalid aircraft: AicraftId " + thisAc.getId());
-					return null;
+					throw new AircraftNotAdjustable(aircraft);
 				}
 				startIndex = flightIndex;
 			} catch (AirportNotAvailable ana){
 				Flight thisFlight = ana.getaFlight();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
 				try {
-					aircraft = cancelFlight(aircraft, flightIndex);
+					aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
 					if (aircraft == null){
 						print("Invalid aircraft: AicraftId " + thisAc.getId());
-						return null;
+						throw new AircraftNotAdjustable(aircraft);
 					}
 				} catch (Exception e){
 					e.printStackTrace();
 					print("Invalid aircraft: AicraftId " + thisAc.getId());
-					return null;
+					throw new AircraftNotAdjustable(aircraft);
 				}
 				startIndex = flightIndex;
 			} catch (Exception e){
 				// invalid
 				e.printStackTrace();
-				return null;
+				throw new AircraftNotAdjustable(aircraft);
 			}
 
 			if (infinitLoopCnt > 1){
 				// last flight cannot be adjusted, invalid flight chain
-				return null;
+				throw new AircraftNotAdjustable(aircraft);
 			}
 			
 			if (startIndex == flights.size() - 1){
 				infinitLoopCnt++;
 			}
 		}
-		double thisCost = getAircraftCost(aircraft);
+		double thisCost = getAircraftCost(aircraft, aircraftCancel);
 		
 		Iterator<Entry<Integer, Aircraft>> it = forkList.entrySet().iterator();
 	    while (it.hasNext()) {
@@ -159,24 +160,30 @@ public class SelfSearch {
 	        int nextStartIndex = pair.getKey();
 	        Aircraft nextForkAc = pair.getValue();
 	        Aircraft newReturnAc = adjustAircraft(nextForkAc, nextStartIndex);
-	        double itCost = getAircraftCost(newReturnAc);
+	        double itCost = getAircraftCost(newReturnAc, aircraftCancel);
 	        if (thisCost > itCost){
 	        	aircraft = newReturnAc;
 	        	thisCost = itCost;
 	        }
 	    }
-	    if (startIndex == 0){
+	    if (startIndex != 0){
 			originalAir.setAlternativeAircraft(aircraft);
+			thisAcCancel.setAlternativeAircraft(aircraftCancel);
 		}
 	    return aircraft;
 	}
 	
+	public SelfSearch(XiaMengAirlineSolution mySolution) {
+		super();
+		this.mySolution = mySolution;
+	}
+
 	public void print (String str){
-		System.out.println(str);
+		logger.info(str);
 	}
 	
 	// cancel a flight
-	public Aircraft cancelFlight(Aircraft aircraft, int flightIndex) throws FlightDurationNotFound, CloneNotSupportedException, ParseException{
+	public Aircraft cancelFlight(Aircraft aircraft, Aircraft aircraftCancel, int flightIndex) throws FlightDurationNotFound, CloneNotSupportedException, ParseException{
 		List<Flight> flights = aircraft.getFlightChain();
 		Flight thisFlight = flights.get(flightIndex);
 		Flight newFlight = new Flight();
@@ -188,13 +195,10 @@ public class SelfSearch {
 			int cancelFlightEndIndex = entry.getKey();
 			newFlight = entry.getValue();
 			List<Integer> removeFlightIndeces = new ArrayList<Integer>();
-			if (aircraft.getCancelledAircraft() == null){
-				aircraft.setCancelAircrafted(aircraft.clone());
-				aircraft.getCancelledAircraft().setFlightChain(new ArrayList<Flight>());
-			}
+
 			for (int cancelIndex = flightIndex; cancelIndex < cancelFlightEndIndex + 1; cancelIndex++){
 				if (flights.get(cancelIndex).getFlightId() <= InitData.plannedMaxFligthId){
-					aircraft.getCancelledAircraft().addFlight(flights.get(cancelIndex));
+					aircraftCancel.addFlight(flights.get(cancelIndex));
 				}
 				removeFlightIndeces.add(cancelIndex);
 			}
@@ -358,7 +362,7 @@ public class SelfSearch {
 	
 	// flight is eligible for delay
 	public boolean isEligibalDelay(Date planTime, Date adjustTime, boolean isInternational){
-		if (getHourDifference(adjustTime, planTime) > (isInternational ? internationalMaxDelay : domesticMaxDelay)){
+		if (getHourDifference(adjustTime, planTime) > (isInternational ? Aircraft.INTERNATIONAL_MAXIMUM_DELAY_TIME : Aircraft.DOMESTIC_MAXIMUM_DELAY_TIME)){
 			return false;
 		}
 		
@@ -421,24 +425,17 @@ public class SelfSearch {
 	}
 	
 	// get aircraft cost for local comparison
-	public double getAircraftCost(Aircraft ac){
+	public double getAircraftCost(Aircraft ac, Aircraft acCancel){
 		XiaMengAirlineSolution solution = new XiaMengAirlineSolution();
 		solution.replaceOrAddNewAircraft(ac);
-		if (ac.getCancelAircrafted() != null){
-			solution.replaceOrAddNewAircraft(ac.getCancelAircrafted());
-		}
+		solution.replaceOrAddNewAircraft(acCancel);
 		solution.refreshCost(false); 
 		return solution.getCost().doubleValue();
 	}
 	
-	// get aircraft cost for local comparison
-	public BigDecimal getAircraftCostSolutionLv(Aircraft ac){
-		XiaMengAirlineSolution solution = new XiaMengAirlineSolution();
-		solution.replaceOrAddNewAircraft(ac);
-		if (ac.getCancelAircrafted() != null){
-			solution.replaceOrAddNewAircraft(ac.getCancelAircrafted());
-		}
-		solution.refreshCost(false); 
-		return solution.getCost();
+
+	public XiaMengAirlineSolution getMySolution() {
+		return mySolution;
 	}
+
 }

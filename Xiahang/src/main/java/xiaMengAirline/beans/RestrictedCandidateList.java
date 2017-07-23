@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 
 public class RestrictedCandidateList {
@@ -37,10 +38,11 @@ public class RestrictedCandidateList {
 					List<XiaMengAirlineSolution> aSolutionList = bestSolutionList.get(aNewSolution.getCost());
 					aSolutionList.add(aNewSolution);
 					// randomly select one
-					int lowest = 0;
-					int highest = aSolutionList.size() - 1;
-					int selected = lowest + (int) (Math.random() * ((highest - lowest) + 1));
-					aSolutionList.remove(selected).clear();
+					Random rndNumbers = new Random(1234); 
+//					int lowest = 0;
+//					int highest = aSolutionList.size() - 1;
+//					int selected = lowest + (int) (Math.random() * ((highest - lowest) + 1));
+					aSolutionList.remove(rndNumbers.nextInt(aSolutionList.size())).clear();
 				} else {
 					// when a new lower score
 					List<XiaMengAirlineSolution> aSolutionList = new ArrayList<XiaMengAirlineSolution> ();
