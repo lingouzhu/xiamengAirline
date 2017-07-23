@@ -45,6 +45,7 @@ public class LocalSearch {
 
 	private BigDecimal calculateDeltaCost(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution)
 			throws CloneNotSupportedException {
+		oldSolution.reConstruct();
 		oldSolution.refreshCost(false);
 		return (adjust(newSolution).subtract(oldSolution.getCost()));
 	}
@@ -148,6 +149,7 @@ public class LocalSearch {
 							BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
 							if (deltaCost.longValue() < 0) {
+								logger.info("Better Solution exists! Method 1 : " + deltaCost);
 								XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
 								aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 								aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
@@ -209,6 +211,7 @@ public class LocalSearch {
 							BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
 							if (deltaCost.longValue() < 0) {
+								logger.info("Better Solution exists! Method 2 : " + deltaCost);
 								XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
 								aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 								aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
@@ -277,6 +280,7 @@ public class LocalSearch {
 
 						BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 						if (deltaCost.longValue() < 0) {
+							logger.info("Better Solution exists! Method 3 : " + deltaCost);
 							XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
 							aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 							aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -337,6 +341,7 @@ public class LocalSearch {
 
 								BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 								if (deltaCost.longValue() < 0) {
+									logger.info("Better Solution exists! Method 4 : " + deltaCost);
 									XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
 									aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 									aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -400,6 +405,7 @@ public class LocalSearch {
 								BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
 								if (deltaCost.longValue() < 0) {
+									logger.info("Better Solution exists! Method 5 : " + deltaCost);
 									XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
 									aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 									aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -468,6 +474,7 @@ public class LocalSearch {
 							BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
 							if (deltaCost.longValue() < 0) {
+								logger.info("Better Solution exists! Method 6 : " + deltaCost);
 								XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
 								aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 								aBetterSolution.replaceOrAddNewAircraft(newAircraft2);

@@ -48,7 +48,9 @@ public class RestrictedCandidateList {
 					List<XiaMengAirlineSolution> aSolutionList = new ArrayList<XiaMengAirlineSolution> ();
 					aSolutionList.add(aNewSolution);
 					bestSolutionList.put(aNewSolution.getCost(), aSolutionList);
-					bestSolutionList.remove(bestSolutionList.lastEntry()).clear();
+					List<XiaMengAirlineSolution> dropSolutions = bestSolutionList.remove(bestSolutionList.lastEntry().getKey());
+					for (XiaMengAirlineSolution aSol:dropSolutions)
+						aSol.clear();
 					if (aNewSolution.getCost().compareTo(bestScore) == -1) 
 						bestScore = aNewSolution.getCost();
 					lowestScore = bestSolutionList.lastEntry().getKey();

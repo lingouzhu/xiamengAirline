@@ -148,7 +148,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 	}
 
 	public void refreshCost(BigDecimal detla) {
-		this.cost.add(detla);
+		this.cost = this.cost.add(detla);
 	}
 
 	public void clear() {
