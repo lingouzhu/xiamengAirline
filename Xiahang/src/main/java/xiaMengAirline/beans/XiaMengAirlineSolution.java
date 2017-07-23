@@ -420,11 +420,21 @@ public class XiaMengAirlineSolution implements Cloneable {
 	public XiaMengAirlineSolution reConstruct() throws CloneNotSupportedException {
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
 		for (Aircraft aircraft : schedule.values()) {
-			if (aircraft.getAlternativeAircraft() != null) {
-				costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
+			if (!aircraft.isCancel()) {
+				if (aircraft.getAlternativeAircraft() != null) {
+					costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
+				} else {
+					costSolution.replaceOrAddNewAircraft(aircraft.clone());
+				}				
 			} else {
-				costSolution.replaceOrAddNewAircraft(aircraft.clone());
+				Aircraft airCancel = aircraft.clone();
+				if (aircraft.getAlternativeAircraft() != null) {
+					Aircraft airAltCancel = airCancel.getAlternativeAircraft().clone();
+					airCancel.getFlightChain().addAll(airAltCancel.getFlightChain());
+				}
+				costSolution.replaceOrAddNewAircraft(airCancel);
 			}
+
 		}
 		return costSolution;
 
