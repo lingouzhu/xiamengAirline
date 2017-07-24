@@ -90,9 +90,7 @@ public class SelfSearch {
 				Flight thisFlight = anaat.getaFlight();
 				FlightTime avaliableTime = anaat.getAvailableTime();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
-				if (thisFlight.getFlightId() == 505) {
-					System.out.println(avaliableTime.getArrivalTime());
-				}
+				
 				
 				if (avaliableTime.isIsTyphoon() && isJointFlight(thisFlight) && getJointFlight(thisFlight) != null
 						&& !thisFlight.isInternationalFlight() && !getJointFlight(thisFlight).isInternationalFlight()){
@@ -106,11 +104,29 @@ public class SelfSearch {
 				}
 				
 				if (isEligibalDelay(getPlannedArrival(thisFlight), avaliableTime.getArrivalTime(), thisFlight.isInternationalFlight())){
-					thisFlight.setArrivalTime(avaliableTime.getArrivalTime());
-					thisFlight.setDepartureTime(addMinutes(thisFlight.getArrivalTime(), (int)getMinuteDifference(getPlannedDeparture(thisFlight), getPlannedArrival(thisFlight))));
-					if (flightIndex < flights.size() - 1) {
-						flights.get(flightIndex + 1).setDepartureTime(avaliableTime.getDepartureTime());
+					Date tempDeparture = addMinutes(avaliableTime.getArrivalTime(), (int)getMinuteDifference(getPlannedDeparture(thisFlight), getPlannedArrival(thisFlight)));
+					Date adjustedDeparture = getValidDeparture(tempDeparture, thisFlight.getSourceAirPort());
+
+					if (isEligibalDelay(getPlannedDeparture(thisFlight), adjustedDeparture, thisFlight.isInternationalFlight())) {
+						thisFlight.setDepartureTime(adjustedDeparture);
+						thisFlight.calcuateNextArrivalTime();
+						if (flightIndex < flights.size() - 1) {
+							flights.get(flightIndex + 1).setDepartureTime(addMinutes(avaliableTime.getDepartureTime(), minGroundTime));
+						}
+					} else {
+						try {
+							aircraft = cancelFlight(aircraft, flightIndex);
+							if (aircraft == null){
+								print("Invalid aircraft: AicraftId " + thisAc.getId());
+								return null;
+							}
+						} catch (Exception e){
+							e.printStackTrace();
+							print("Invalid aircraft: AicraftId " + thisAc.getId());
+							return null;
+						}
 					}
+					
 					
 					startIndex = flightIndex;
 				}else{
@@ -471,5 +487,37 @@ public class SelfSearch {
 		}
 		solution.refreshCost(false); 
 		return solution.getCost();
+	}
+	
+	public Date getValidDeparture(Date departureTime, AirPort airport) throws ParseException {
+		for (AirPortClose aClose : airport.getCloseSchedule()) {
+			if (!aClose.isAllowForTakeoff()) {
+				if (departureTime.compareTo(aClose.getStartTime()) > 0
+						&& departureTime.compareTo(aClose.getEndTime()) < 0) {
+					System.out.println(333);
+					return aClose.getEndTime();
+				}
+			}
+		}
+		for (RegularAirPortClose aClose : airport.getRegularCloseSchedule()) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			String aDateC = formatter.format(departureTime);
+			String aDateO = aDateC;
+			aDateC += " ";
+			aDateC += aClose.getCloseTime();
+			aDateO += " ";
+			aDateO += aClose.getOpenTime();
+			
+			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			
+			Date aCloseDate = formatter2.parse(aDateC);
+			Date aOpenDate = formatter2.parse(aDateO);
+			
+			if (departureTime.after(aCloseDate)
+					&& departureTime.before(aOpenDate)) {
+				return aOpenDate;
+			}
+		} 
+		return departureTime;
 	}
 }
