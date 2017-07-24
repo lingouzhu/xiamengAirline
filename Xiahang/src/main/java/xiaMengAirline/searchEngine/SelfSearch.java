@@ -64,6 +64,9 @@ public class SelfSearch {
 				Flight thisFlight = anaat.getaFlight();
 				FlightTime avaliableTime = anaat.getAvailableTime();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
+				if (thisFlight.getFlightId() == 505) {
+					System.out.println(avaliableTime.getArrivalTime());
+				}
 				
 				if (avaliableTime.isIsTyphoon() && isJointFlight(thisFlight) && getJointFlight(thisFlight) != null
 						&& !thisFlight.isInternationalFlight() && !getJointFlight(thisFlight).isInternationalFlight()){
@@ -203,9 +206,8 @@ public class SelfSearch {
 			}
 			aircraft.removeFlightChain(removeFlightIndeces);
 			if (!newFlight.getSourceAirPort().getId().equals(newFlight.getDesintationAirport().getId())){
-				aircraft.addFlight(newFlight);
+				aircraft.addFlight(flightIndex, newFlight);
 			}
-			aircraft.sortFlights();
 			return aircraft;
 		}
 		return null;
@@ -281,6 +283,9 @@ public class SelfSearch {
 			// aircraft constraint
 			if (!isEligibalAircraft(ac, thisFlight.getSourceAirPort(), destAirport)){
 				continue;
+			}
+			if (flightChain.get(currentFlightIndex).getFlightId() == 556) {
+				System.out.println("321");
 			}
 			long flightTime = getFlightTime(thisFlight.getSourceAirPort().getId(), destAirport.getId(), ac);
 			if (flightTime > 0){
