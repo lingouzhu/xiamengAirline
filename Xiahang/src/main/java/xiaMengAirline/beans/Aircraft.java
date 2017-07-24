@@ -543,6 +543,20 @@ public class Aircraft implements Cloneable {
 			}
 				
 		}
+		
+		//check if last flight can arrive destination?
+		FlightTime aScheduledTime = new FlightTime();
+		aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
+		aScheduledTime.setDepartureTime(null);
+
+		FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
+				AirPort.GroundingTime);
+		
+		if (newFlightTime != null) {
+			if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
+				throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
+			} 
+		} 		
 		return isChanged;
 
 	}

@@ -40,13 +40,18 @@ public class AirPort {
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aClose.getEndTime());
 					cl.add(Calendar.MINUTE, groundingTime);
-					if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
-						retFlightTime.setDepartureTime(cl.getTime());
-					else
-						retFlightTime.setDepartureTime(requestTime.getDepartureTime());
+					if (requestTime.getDepartureTime()!=null) {
+						if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
+							retFlightTime.setDepartureTime(cl.getTime());
+						else
+							retFlightTime.setDepartureTime(requestTime.getDepartureTime());						
+					} else {
+						retFlightTime.setDepartureTime(null);	
+					}
+
 				} 
 			} 
-			if (requestTime.getDepartureTime().compareTo(aClose.getStartTime()) > 0
+			if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
 				if (retFlightTime == null) {
 					if (!aClose.isAllowForTakeoff()) {
@@ -69,7 +74,7 @@ public class AirPort {
 			}
 			//adjust departure time to closer its planned time
 			if (retFlightTime != null) {
-				if (requestTime.getDepartureTime().after(aClose.getStartTime())
+				if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().after(aClose.getStartTime())
 						&& retFlightTime.getDepartureTime().before(aClose.getStartTime())) {
 					retFlightTime.setDepartureTime(aClose.getStartTime());
 					
@@ -102,14 +107,17 @@ public class AirPort {
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aOpenDate);
 					cl.add(Calendar.MINUTE, groundingTime);
-					if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
-						retFlightTime.setDepartureTime(cl.getTime());
-					else
-						retFlightTime.setDepartureTime(requestTime.getDepartureTime());
+					if (requestTime.getDepartureTime()!=null) {
+						if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
+							retFlightTime.setDepartureTime(cl.getTime());
+						else
+							retFlightTime.setDepartureTime(requestTime.getDepartureTime());						
+					}
+
 				}
 				
 				if (retFlightTime == null) {
-					if (requestTime.getDepartureTime().after(aCloseDate)
+					if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().after(aCloseDate)
 							&& requestTime.getDepartureTime().before(aOpenDate)) {
 						retFlightTime = new FlightTime();
 						retFlightTime.setArrivalTime(requestTime.getArrivalTime());
