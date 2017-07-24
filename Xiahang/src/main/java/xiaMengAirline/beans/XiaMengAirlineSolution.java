@@ -62,6 +62,13 @@ public class XiaMengAirlineSolution implements Cloneable{
 		
 		outputList = new ArrayList<String>();
 		
+		BigDecimal cancel = new BigDecimal("0");
+		int empty = 0;
+		int change = 0;
+		BigDecimal delay = new BigDecimal("0");
+		BigDecimal ahead = new BigDecimal("0");
+		BigDecimal connect = new BigDecimal("0");
+		
 		
 		List<Aircraft> airList = new ArrayList<Aircraft> ( schedule.values());
 		for (Aircraft aAir:airList) {
@@ -70,6 +77,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 
 					if (newFlight.getFlightId() > InitData.plannedMaxFligthId) {
 						cost = cost.add(new BigDecimal("5000"));
+						empty++;
 						if (refreshOut) {
 							outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "1"));
 						}
@@ -79,14 +87,21 @@ public class XiaMengAirlineSolution implements Cloneable{
 						if (!newFlight.getPlannedAir().getType().equals(aAir.getType())) {
 							cost = cost.add(new BigDecimal("1000").multiply(newFlight.getImpCoe()));
 							isChanged = true;
+							change++;
 						}
 						
 						if (!newFlight.getDepartureTime().equals(newFlight.getPlannedFlight().getDepartureTime())) {
 							BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(), newFlight.getPlannedFlight().getDepartureTime());
 							
 							if (hourDiff.signum() == -1){
+								System.out.println(newFlight.getDepartureTime());
+								System.out.println(newFlight.getPlannedFlight().getDepartureTime());
+								System.out.println(hourDiff);
+								
+								ahead = ahead.add(hourDiff.abs().multiply(newFlight.getImpCoe()));
 								cost = cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
 							} else {
+								delay = delay.add(hourDiff.abs().multiply(newFlight.getImpCoe()));
 								cost = cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
 							}
 							isChanged = true;
@@ -98,6 +113,8 @@ public class XiaMengAirlineSolution implements Cloneable{
 								
 								cost = cost.add(new BigDecimal("750").multiply(newFlight.getImpCoe()));
 								cost = cost.add(new BigDecimal("750").multiply(nextFlight.getImpCoe()));
+								connect = connect.add(newFlight.getImpCoe());
+								connect = connect.add(nextFlight.getImpCoe());
 								isStretch = true;
 								if (refreshOut) {
 									outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "1", "0"));
@@ -118,20 +135,30 @@ public class XiaMengAirlineSolution implements Cloneable{
 				}	
 				
 			} else {
+				
 				for (Flight cancelFlight : aAir.getFlightChain()) {
 					if (cancelFlight.getFlightId() > InitData.plannedMaxFligthId) {
 						continue;
 					}
-					
+					cancel = cancel.add(cancelFlight.getImpCoe());
 					cost = cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
 					if (refreshOut) {
 						outputList.add(CSVUtils.flight2Output(cancelFlight, aAir.getId(), "1", "0", "0"));
 					}
 					
 				}
+				
 			}
 			
+			
+			
 		}
+		System.out.println("empty:" + empty);
+		System.out.println("change:" + change);
+		System.out.println("cancel:" + cancel.toString());
+		System.out.println("delay:" + delay.toString());
+		System.out.println("ahead:" + ahead.toString());
+		System.out.println("connect:" + connect.toString());
 		// joint flight 
 //		for (Flight cancelFlight : joint2CancelFlightList) {
 //			for (Flight flight : joint1FlightList) {
@@ -186,178 +213,195 @@ public class XiaMengAirlineSolution implements Cloneable{
 	public boolean validate (boolean isCheckLianChengOnly) {
 		List<Aircraft> schedule = new ArrayList<Aircraft> ( getSchedule().values());
 		try {
-			for (Aircraft aAir:schedule) {
-				
-				List<Flight> flightChain = aAir.getFlightChain();
-				
-				for (int i = 0; i < flightChain.size(); i++) {
-					Flight flight = flightChain.get(i);
-					
-					String startPort = flight.getSourceAirPort().getId();
-					String endPort =  flight.getDesintationAirport().getId();
-					String airID =  aAir.getId();
-					
-//					if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
-//						return false;
-//					}
-					// 5.0 departure time check
-					if (flight.getFlightId() <= InitData.plannedMaxFligthId) {
-						if (flight.isInternationalFlight()) {
-							if (Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("36")) > 0
-									|| flight.getDepartureTime().after(flight.getPlannedFlight().getDepartureTime())) {
-								System.out.println("5.0 error departure time: flightID" + flight.getFlightId());
+				for (Aircraft aAir:schedule) {
+					if (!aAir.isCancel()) {
+						List<Flight> flightChain = aAir.getFlightChain();
+						
+						for (int i = 0; i < flightChain.size(); i++) {
+							Flight flight = flightChain.get(i);
+							
+							String startPort = flight.getSourceAirPort().getId();
+							String endPort =  flight.getDesintationAirport().getId();
+							String airID =  aAir.getId();
+							
+		//					if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
+		//						return false;
+		//					}
+							// 5.0 departure time check
+							if (flight.getFlightId() <= InitData.plannedMaxFligthId) {
+								if (flight.isInternationalFlight()) {
+									if (Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("36")) > 0
+											|| flight.getDepartureTime().before(flight.getPlannedFlight().getDepartureTime())) {
+										System.out.println("5.0 error departure time: flightID" + flight.getFlightId());
+										return false;
+									}
+								} else {
+									if (Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("24")) > 0
+											|| Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("-6")) <  0) {
+										System.out.println("5.0 error departure time: flightID" + flight.getFlightId());
+										return false;
+									}
+								}
+							}
+							
+							// 5.1 joint flight
+							if (i != 0) {
+								Flight preFlight = flightChain.get(i - 1);
+								
+								if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
+									System.out.println("5.1 error flight connection: flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
+									return false;
+								}
+							}
+							// 5.2 air limit
+							if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
+								System.out.println("5.2 error air limit: flightID" + flight.getFlightId());
 								return false;
 							}
-						} else {
-							if (Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("24")) > 0
-									|| Utils.hoursBetweenTime(flight.getDepartureTime(), flight.getPlannedFlight().getDepartureTime()).compareTo(new BigDecimal("-6")) <  0) {
-								System.out.println("5.0 error departure time: flightID" + flight.getFlightId());
-								return false;
+							// 5.3  start air port regular close
+							List<RegularAirPortClose> regularStartCloseSchedule = flight.getSourceAirPort().getRegularCloseSchedule();
+							for (RegularAirPortClose aClose : regularStartCloseSchedule) {
+								SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+								String aDateC = formatter.format(flight.getSchdDate());
+								String aDateO = aDateC;
+								aDateC += " ";
+								aDateC += aClose.getCloseTime();
+								aDateO += " ";
+								aDateO += aClose.getOpenTime();
+								
+								SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+								
+								Date aCloseDate = formatter2.parse(aDateC);
+								Date aOpenDate = formatter2.parse(aDateO);
+								
+								if (flight.getDepartureTime().after(aCloseDate)
+										&& flight.getDepartureTime().before(aOpenDate)) {
+									System.out.println("5.3 error start airport regular closed: flightID" + flight.getFlightId());
+									return false;
+								}
+							
+							}	
+							// 5.3  end air port regular close
+							List<RegularAirPortClose> regularEndCloseSchedule = flight.getDesintationAirport().getRegularCloseSchedule();
+							for (RegularAirPortClose aClose : regularEndCloseSchedule) {
+								SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+								String aDateC = formatter.format(flight.getSchdDate());
+								String aDateO = aDateC;
+								aDateC += " ";
+								aDateC += aClose.getCloseTime();
+								aDateO += " ";
+								aDateO += aClose.getOpenTime();
+								
+								SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+								
+								Date aCloseDate = formatter2.parse(aDateC);
+								Date aOpenDate = formatter2.parse(aDateO);
+								
+								if (flight.getArrivalTime().after(aCloseDate)
+										&& flight.getArrivalTime().before(aOpenDate)) {
+									System.out.println("5.3 error end airport regular closed: flightID" + flight.getFlightId());
+									return false;
+								}
+							
+							}	
+							// 5.4 check betwween time
+							if (i != 0) {
+								// 5.4 check betwween time
+								Flight preFlight = flightChain.get(i - 1);
+								
+								if (Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).compareTo(new BigDecimal("50")) < 0
+										&& (preFlight.getFlightId() > InitData.plannedMaxFligthId || flight.getFlightId() > InitData.plannedMaxFligthId 
+												|| Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).
+										compareTo(Utils.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(), preFlight.getPlannedFlight().getArrivalTime())) != 0
+										|| !flight.getPlannedAir().getId().equals(preFlight.getPlannedAir().getId()))) {
+									
+//									System.out.println(preFlight.getArrivalTime());
+//									System.out.println(flight.getDepartureTime());
+									
+									System.out.println("5.4 error time between: flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
+									return false;
+								}
+								
+								// 5.5 joint flight
+								if (InitData.jointFlightMap.get(preFlight.getFlightId()) != null) {
+									if (preFlight.getDesintationAirport().getId().equals((preFlight.getPlannedFlight().getDesintationAirport().getId()))
+											&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight.getFlightId()) {
+										System.out.println("5.5 error joint flight : flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
+										return false;
+									}
+								}
 							}
-						}
-					}
-					
-					// 5.1 joint flight
-					if (i != 0) {
-						Flight preFlight = flightChain.get(i - 1);
-						
-						if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
-							System.out.println("5.1 error flight connection: flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
-							return false;
-						}
-					}
-					// 5.2 air limit
-					if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
-						System.out.println("5.2 error air limit: flightID" + flight.getFlightId());
-						return false;
-					}
-					// 5.3  start air port regular close
-					List<RegularAirPortClose> regularStartCloseSchedule = flight.getSourceAirPort().getRegularCloseSchedule();
-					for (RegularAirPortClose aClose : regularStartCloseSchedule) {
-						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-						String aDateC = formatter.format(flight.getSchdDate());
-						String aDateO = aDateC;
-						aDateC += " ";
-						aDateC += aClose.getCloseTime();
-						aDateO += " ";
-						aDateO += aClose.getOpenTime();
-						
-						SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-						
-						Date aCloseDate = formatter2.parse(aDateC);
-						Date aOpenDate = formatter2.parse(aDateO);
-						
-						if (flight.getDepartureTime().after(aCloseDate)
-								&& flight.getDepartureTime().before(aOpenDate)) {
-							System.out.println("5.3 error start airport regular closed: flightID" + flight.getFlightId());
-							return false;
-						}
-					
-					}	
-					// 5.3  end air port regular close
-					List<RegularAirPortClose> regularEndCloseSchedule = flight.getDesintationAirport().getRegularCloseSchedule();
-					for (RegularAirPortClose aClose : regularEndCloseSchedule) {
-						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-						String aDateC = formatter.format(flight.getSchdDate());
-						String aDateO = aDateC;
-						aDateC += " ";
-						aDateC += aClose.getCloseTime();
-						aDateO += " ";
-						aDateO += aClose.getOpenTime();
-						
-						SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-						
-						Date aCloseDate = formatter2.parse(aDateC);
-						Date aOpenDate = formatter2.parse(aDateO);
-						
-						if (flight.getArrivalTime().after(aCloseDate)
-								&& flight.getArrivalTime().before(aOpenDate)) {
-							System.out.println("5.3 error end airport regular closed: flightID" + flight.getFlightId());
-							return false;
-						}
-					
-					}	
-					// 5.4 check betwween time
-					if (i != 0) {
-						// 5.4 check betwween time
-						Flight preFlight = flightChain.get(i - 1);
-						
-						if (Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).compareTo(new BigDecimal("50")) < 0
-								&& (preFlight.getFlightId() > InitData.plannedMaxFligthId || flight.getFlightId() > InitData.plannedMaxFligthId 
-										|| Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime()).
-								compareTo(Utils.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(), preFlight.getPlannedFlight().getArrivalTime())) != 0
-								|| !flight.getPlannedAir().getId().equals(preFlight.getPlannedAir().getId()))) {
-							System.out.println("5.4 error time between: flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
-							return false;
-						}
-						
-						// 5.5 joint flight
-						if (InitData.jointFlightMap.get(preFlight.getFlightId()) != null) {
-							if (preFlight.getDesintationAirport().getId().equals((preFlight.getPlannedFlight().getDesintationAirport().getId()))
-									&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight.getFlightId()) {
-								System.out.println("5.5 error joint flight : flightID1" + preFlight.getFlightId() + "flightID2" + flight.getFlightId());
-								return false;
+							
+							
+							//  5.6  start air port typhoon close
+							List<AirPortClose> typhoonStartCloseSchedule = flight.getSourceAirPort().getCloseSchedule();
+							for (AirPortClose aClose : typhoonStartCloseSchedule) {
+								if (flight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
+										&& flight.getDepartureTime().compareTo(aClose.getEndTime()) < 0 && !aClose.isAllowForTakeoff()) {
+									System.out.println("5.6 error start airport typhoon closed: flightID" + flight.getFlightId());
+									return false;
+								}
+								
 							}
-						}
-					}
-					
-					
-					//  5.6  start air port typhoon close
-					List<AirPortClose> typhoonStartCloseSchedule = flight.getSourceAirPort().getCloseSchedule();
-					for (AirPortClose aClose : typhoonStartCloseSchedule) {
-						if (flight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
-								&& flight.getDepartureTime().compareTo(aClose.getEndTime()) < 0 && !aClose.isAllowForTakeoff()) {
-							System.out.println("5.6 error start airport typhoon closed: flightID" + flight.getFlightId());
-							return false;
-						}
-						
-					}
-					
-					//  5.6  start air port typhoon close
-					List<AirPortClose> typhoonEndCloseSchedule = flight.getDesintationAirport().getCloseSchedule();
-					for (AirPortClose aClose : typhoonEndCloseSchedule) {
-						if (flight.getArrivalTime().compareTo(aClose.getStartTime()) > 0
-								&& flight.getArrivalTime().compareTo(aClose.getEndTime()) < 0 && !aClose.isAllowForLanding()) {
-							System.out.println("5.6 error end airport typhoon closed: flightID" + flight.getFlightId());
-							return false;
-						}
-						
-						if (flight.getArrivalTime().compareTo(aClose.getStartTime()) < 0) {
-							if (i >= flightChain.size()) {
-								System.out.println("5.6 error air parking : flightID" + flight.getFlightId());
-								return false;
+							
+							//  5.6  start air port typhoon close
+							List<AirPortClose> typhoonEndCloseSchedule = flight.getDesintationAirport().getCloseSchedule();
+							for (AirPortClose aClose : typhoonEndCloseSchedule) {
+//								System.out.println("5.6 error start airport typhoon closed: start time:" + aClose.getStartTime());
+//								System.out.println("5.6 error start airport typhoon closed: end time:" + aClose.getEndTime());
+//								System.out.println("5.6 error start airport typhoon closed: isAllowForTakeoff:" + aClose.isAllowForTakeoff());
+//								System.out.println("5.6 error start airport typhoon closed: isAllowForLanding:" + aClose.isAllowForLanding());
+								if (flight.getArrivalTime().compareTo(aClose.getStartTime()) > 0
+										&& flight.getArrivalTime().compareTo(aClose.getEndTime()) < 0 && !aClose.isAllowForLanding()) {
+									
+									System.out.println("5.6 error end airport typhoon closed: flightID" + flight.getFlightId());
+									return false;
+								}
+								
+								if (flight.getArrivalTime().compareTo(aClose.getStartTime()) < 0) {
+									if (i >= flightChain.size()) {
+										System.out.println("5.6 error air parking : flightID" + flight.getFlightId());
+										return false;
+									}
+									Flight nextFlight = flightChain.get(i + 1);
+									System.out.println("5.6 error air parking: " + aClose.getStartTime());
+									System.out.println("5.6 error air parking: " + aClose.getAllocatedParking());
+									if (nextFlight.getDepartureTime().compareTo(aClose.getStartTime()) > 0 && !aClose.isAllowForTakeoff()) {
+										System.out.println("5.6 error air parking: " + nextFlight.getDepartureTime());
+										System.out.println("5.6 error air parking: " + aClose.getStartTime());
+										System.out.println("5.6 error air parking: " + aClose.getAllocatedParking());
+										
+										System.out.println("5.6 error air parking: flightID" + flight.getFlightId());
+										return false;
+									}
+								}
+								
 							}
-							Flight nextFlight = flightChain.get(i + 1);
-							if (nextFlight.getDepartureTime().compareTo(aClose.getStartTime()) > 0 && aClose.getAllocatedParking() == 0) {
-								System.out.println("5.6 error air parking: flightID" + flight.getFlightId());
-								return false;
+							
+							//  5.7  border limited
+							if (i == 0) {
+								if (!flight.getSourceAirPort().getId().equals(InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
+									System.out.println("5.7 error wrong start airpot: flightID" + flight.getFlightId());
+									return false;
+								}
+								
 							}
+							
+							if (i == flightChain.size() - 1) {
+								if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
+										|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
+									System.out.println("5.7 error wrong end airpot: flightID" + flight.getFlightId());
+									return false;
+								}
+								
+							}
+							
 						}
 						
-					}
-					
-					//  5.7  border limited
-					if (i == 0) {
-						if (!flight.getSourceAirPort().getId().equals(InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
-							System.out.println("5.7 error wrong start airpot: flightID" + flight.getFlightId());
-							return false;
-						}
 						
-					}
 					
-					if (i == flightChain.size() - 1) {
-						if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
-								|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
-							System.out.println("5.7 error wrong end airpot: flightID" + flight.getFlightId());
-							return false;
-						}
-						
 					}
-					
 				}
-				
-				
-			}
 		} catch (Exception e) {
 			e.getStackTrace();
 		}
@@ -366,7 +410,7 @@ public class XiaMengAirlineSolution implements Cloneable{
 	}
 	
 	public void generateOutput(String minutes) {
-		CSVUtils.exportCsv(new File("数据森林" + "_" + cost.toString() + "_" +  minutes), outputList);
+		CSVUtils.exportCsv(new File("数据森林" + "_" + cost.toString() + "_" +  minutes + ".csv"), outputList);
 	}
 	
 	public boolean adjust () throws CloneNotSupportedException {
