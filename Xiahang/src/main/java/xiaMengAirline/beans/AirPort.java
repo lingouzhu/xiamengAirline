@@ -9,8 +9,8 @@ import java.util.List;
 
 public class AirPort {
 	private String id;
-	private List<AirPortClose> closeSchedule = new ArrayList<AirPortClose>();
-	private List<RegularAirPortClose> regularCloseSchedule = new ArrayList<RegularAirPortClose>();
+	private List<AirPortClose> closeSchedule = new ArrayList<AirPortClose> ();
+	private List<RegularAirPortClose> regularCloseSchedule = new ArrayList<RegularAirPortClose> ();
 	final public static int GroundingTime = 50;
 
 	public String getId() {
@@ -31,30 +31,32 @@ public class AirPort {
 		for (AirPortClose aClose : closeSchedule) {
 			if (requestTime.getArrivalTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getArrivalTime().compareTo(aClose.getEndTime()) < 0) {
-				if ((aClose.getAllocatedParking() == 0) || (!aClose.isAllowForLanding())) {
+				if ((aClose.getAllocatedParking() == 0)  
+						|| (!aClose.isAllowForLanding())
+						){
 					if (retFlightTime == null)
 						retFlightTime = new FlightTime();
 					retFlightTime.setArrivalTime(aClose.getEndTime());
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aClose.getEndTime());
 					cl.add(Calendar.MINUTE, groundingTime);
-					if (requestTime.getDepartureTime() != null) {
+					if (requestTime.getDepartureTime()!=null) {
 						if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
 							retFlightTime.setDepartureTime(cl.getTime());
 						else
-							retFlightTime.setDepartureTime(requestTime.getDepartureTime());
+							retFlightTime.setDepartureTime(requestTime.getDepartureTime());						
 					} else {
-						retFlightTime.setDepartureTime(null);
+						retFlightTime.setDepartureTime(null);	
 					}
-				}
-			}
-			if (requestTime.getDepartureTime() != null
-					&& requestTime.getDepartureTime().compareTo(aClose.getStartTime()) > 0
+
+				} 
+			} 
+			if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
 				if (retFlightTime == null) {
 					if (!aClose.isAllowForTakeoff()) {
 						retFlightTime = new FlightTime();
-						// check if enough grounding time
+						//check if enough grounding time
 						Calendar cl = Calendar.getInstance();
 						cl.setTime(requestTime.getArrivalTime());
 						cl.add(Calendar.MINUTE, groundingTime);
@@ -66,21 +68,20 @@ public class AirPort {
 							cl.setTime(aClose.getEndTime());
 							cl.add(Calendar.MINUTE, groundingTime);
 							retFlightTime.setDepartureTime(cl.getTime());
-						}
+						}						
 					}
 				}
 			}
-			// adjust departure time to closer its planned time
+			//adjust departure time to closer its planned time
 			if (retFlightTime != null) {
-				if (requestTime.getDepartureTime() != null
-						&& requestTime.getDepartureTime().after(aClose.getStartTime())
+				if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().after(aClose.getStartTime())
 						&& retFlightTime.getDepartureTime().before(aClose.getStartTime())) {
 					retFlightTime.setDepartureTime(aClose.getStartTime());
-
+					
 				}
 			}
-
-			if (retFlightTime != null)
+			
+			if (retFlightTime !=null)
 				retFlightTime.setIsTyphoon(true);
 
 		}
@@ -93,47 +94,58 @@ public class AirPort {
 				aDateC += aClose.getCloseTime();
 				aDateO += " ";
 				aDateO += aClose.getOpenTime();
-
+				
 				SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
+				
 				Date aCloseDate = formatter2.parse(aDateC);
 				Date aOpenDate = formatter2.parse(aDateO);
-
-				if (requestTime.getArrivalTime().after(aCloseDate) && requestTime.getArrivalTime().before(aOpenDate)) {
+				
+				if (requestTime.getArrivalTime().after(aCloseDate)
+						&& requestTime.getArrivalTime().before(aOpenDate)) {
 					retFlightTime = new FlightTime();
 					retFlightTime.setArrivalTime(aOpenDate);
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aOpenDate);
 					cl.add(Calendar.MINUTE, groundingTime);
-					if (requestTime.getDepartureTime() != null) {
+					if (requestTime.getDepartureTime()!=null) {
 						if (cl.getTime().compareTo(requestTime.getDepartureTime()) > 0)
 							retFlightTime.setDepartureTime(cl.getTime());
 						else
-							retFlightTime.setDepartureTime(requestTime.getDepartureTime());
+							retFlightTime.setDepartureTime(requestTime.getDepartureTime());						
 					}
 
 				}
-
-				if (retFlightTime == null) {
-					if (requestTime.getDepartureTime() != null && requestTime.getDepartureTime().after(aCloseDate)
-							&& requestTime.getDepartureTime().before(aOpenDate)) {
+				
+				if (retFlightTime == null && requestTime.getDepartureTime()!=null) {
+					String dDateC = formatter.format(requestTime.getDepartureTime());
+					String dDateO = dDateC;
+					dDateC += " ";
+					dDateC += aClose.getCloseTime();
+					dDateO += " ";
+					dDateO += aClose.getOpenTime();
+					
+					Date dCloseDate = formatter2.parse(dDateC);
+					Date dOpenDate = formatter2.parse(dDateO);
+					
+					if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().after(dCloseDate)
+							&& requestTime.getDepartureTime().before(dOpenDate)) {
 						retFlightTime = new FlightTime();
 						retFlightTime.setArrivalTime(requestTime.getArrivalTime());
 						Calendar cl = Calendar.getInstance();
 						cl.setTime(requestTime.getArrivalTime());
 						cl.add(Calendar.MINUTE, groundingTime);
-						if (cl.getTime().before(aOpenDate)) {
-							retFlightTime.setDepartureTime(aOpenDate);
+						if (cl.getTime().before(dOpenDate)) {
+							retFlightTime.setDepartureTime(dOpenDate);
 						} else {
 							retFlightTime.setDepartureTime(cl.getTime());
 						}
-
-					}
+						
+					}					
 				}
 			}
 
 		}
-
+		
 		return retFlightTime;
 	}
 
