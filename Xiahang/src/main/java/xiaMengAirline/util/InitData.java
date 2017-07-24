@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.log4j.Logger;
 import org.apache.poi.ss.usermodel.Row;
@@ -55,6 +56,9 @@ public class InitData {
 	
 	public static int maxFligthId = 0;
 	public static int plannedMaxFligthId = 0;
+	
+	public static Random rndNumbers = new Random();
+	public static Random rndRcl = new Random();
 
 	
 	public static void initData(String initDatafile) {
