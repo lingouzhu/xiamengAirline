@@ -308,12 +308,27 @@ public class SelfSearch {
 				tempFlightTime.setDepartureTime(nextFlight.getDepartureTime());
 				if (nextFlight.getSourceAirPort().requestAirport(tempFlightTime, minGroundTime) == null){
 					tempFlightTime.setArrivalTime(nextFlight.getArrivalTime());
-					tempFlightTime.setDepartureTime(flightChain.get(i + 1).getDepartureTime());
-					if (nextFlight.getDesintationAirport().requestAirport(tempFlightTime, minGroundTime) == null){
+					if (i < flightChain.size() - 2){
+						tempFlightTime.setDepartureTime(flightChain.get(i + 1).getDepartureTime());
+						if (nextFlight.getDesintationAirport().requestAirport(tempFlightTime, minGroundTime) == null){
+							if (!isValidParking(thisFlight.getArrivalTime(), nextFlight.getDepartureTime(), thisFlight.getDesintationAirport())){
+								continue;
+							}
+							HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
+							destIndexAndNewFight.put(i - 1, thisFlight);
+							return destIndexAndNewFight;
+						}else{
+							continue;
+						}
+					} else {
+						if (!isValidParking(thisFlight.getArrivalTime(), nextFlight.getDepartureTime(), thisFlight.getDesintationAirport())){
+							continue;
+						}
 						HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
 						destIndexAndNewFight.put(i - 1, thisFlight);
 						return destIndexAndNewFight;
 					}
+					
 				}
 				continue;
 			}
@@ -326,6 +341,7 @@ public class SelfSearch {
 			if (!isEligibalAircraft(ac, thisFlight.getSourceAirPort(), destAirport)){
 				continue;
 			}
+
 			long flightTime = getFlightTime(thisFlight.getSourceAirPort().getId(), destAirport.getId(), ac);
 			if (flightTime > 0){
 				thisFlight.setArrivalTime(addMinutes(thisFlight.getDepartureTime(), flightTime));
@@ -340,12 +356,18 @@ public class SelfSearch {
 					newAircraft.adjustFlightTime(0);
 					HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
 					destIndexAndNewFight.put(i - 1, thisFlight);
+					if (!isValidParking(thisFlight.getArrivalTime(), nextFlight.getDepartureTime(), thisFlight.getDesintationAirport())){
+						continue;
+					}
 					return destIndexAndNewFight;
 				} catch (AirportNotAcceptArrivalTime anaat){
 					FlightTime avaliableTime = anaat.getAvailableTime();
 					if (getHourDifference(avaliableTime.getArrivalTime(), getPlannedArrival(thisFlight)) < 24){
 						//Date adjustedDeparture = getValidDeparture(tempDeparture, thisFlight.getSourceAirPort());
-
+						
+						if (!isValidParking(avaliableTime.getArrivalTime(), avaliableTime.getDepartureTime(), thisFlight.getDesintationAirport())){
+							continue;
+						}
 						thisFlight.setArrivalTime(avaliableTime.getArrivalTime());
 						thisFlight.setDepartureTime(addMinutes(thisFlight.getArrivalTime(), -flightTime));
 						HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
@@ -520,5 +542,15 @@ public class SelfSearch {
 			}
 		} 
 		return departureTime;
+	}
+	
+	public boolean isValidParking(Date arrivalTime, Date departureTime, AirPort airport){
+		for (AirPortClose aClose : airport.getCloseSchedule()) {
+			if (arrivalTime.compareTo(aClose.getStartTime()) <= 0
+					&& departureTime.compareTo(aClose.getEndTime()) >= 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
