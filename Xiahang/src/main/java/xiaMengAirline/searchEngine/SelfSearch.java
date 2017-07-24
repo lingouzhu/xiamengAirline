@@ -79,7 +79,10 @@ public class SelfSearch {
 				if (isEligibalDelay(getPlannedArrival(thisFlight), avaliableTime.getArrivalTime(), thisFlight.isInternationalFlight())){
 					thisFlight.setArrivalTime(avaliableTime.getArrivalTime());
 					thisFlight.setDepartureTime(addMinutes(thisFlight.getArrivalTime(), (int)getMinuteDifference(getPlannedDeparture(thisFlight), getPlannedArrival(thisFlight))));
-					flights.get(flightIndex + 1).setDepartureTime(avaliableTime.getDepartureTime());
+					if (flightIndex < flights.size() - 1) {
+						flights.get(flightIndex + 1).setDepartureTime(avaliableTime.getDepartureTime());
+					}
+					
 					startIndex = flightIndex;
 				}else{
 					try {
@@ -297,7 +300,7 @@ public class SelfSearch {
 					return destIndexAndNewFight;
 				} catch (AirportNotAcceptArrivalTime anaat){
 					FlightTime avaliableTime = anaat.getAvailableTime();
-					if (avaliableTime.getDepartureTime().compareTo(nextFlight.getDepartureTime()) == 0){
+					if (avaliableTime.getDepartureTime() == null || avaliableTime.getDepartureTime().compareTo(nextFlight.getDepartureTime()) == 0){
 						thisFlight.setArrivalTime(avaliableTime.getArrivalTime());
 						thisFlight.setDepartureTime(addMinutes(thisFlight.getArrivalTime(), -flightTime));
 						HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
