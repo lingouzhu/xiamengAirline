@@ -1,7 +1,9 @@
 package xiaMengAirline.searchEngine;
 
 import java.math.*;
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import org.apache.log4j.Logger;
@@ -52,6 +54,30 @@ public class SelfSearch {
 		Aircraft aircraft = thisAc.clone();
 		boolean isFinish = false;
 		int infinitLoopCnt = 0;
+		if (startIndex == 0) {
+			Flight firstFlight = aircraft.getFlightChain().get(0);
+			FlightTime firstFlightTime = new FlightTime();
+			
+			DateFormat df = new SimpleDateFormat("dd/MM/yyyy"); 
+			Date startDate = df.parse("01/01/1970");
+			firstFlightTime.setArrivalTime(startDate);
+			firstFlightTime.setDepartureTime(firstFlight.getDepartureTime());
+			
+			FlightTime newfirstFlightTime = firstFlight.getSourceAirPort().requestAirport(firstFlightTime, minGroundTime);
+			if (newfirstFlightTime != null && newfirstFlightTime.getDepartureTime() != null) {
+				if (getHourDifference(firstFlight.getDepartureTime(), newfirstFlightTime.getDepartureTime()) > 6) {
+					for (AirPortClose aClose : firstFlight.getSourceAirPort().getCloseSchedule()) {
+						if (firstFlight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
+								&& firstFlight.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
+							firstFlight.setDepartureTime(aClose.getEndTime());
+						}
+					}
+				}else {
+					firstFlight.setDepartureTime(newfirstFlightTime.getDepartureTime());
+				}
+			}
+			
+		}
 		while (!isFinish){
 			List<Flight> flights = aircraft.getFlightChain();
 			try{
@@ -283,9 +309,6 @@ public class SelfSearch {
 			// aircraft constraint
 			if (!isEligibalAircraft(ac, thisFlight.getSourceAirPort(), destAirport)){
 				continue;
-			}
-			if (flightChain.get(currentFlightIndex).getFlightId() == 556) {
-				System.out.println("321");
 			}
 			long flightTime = getFlightTime(thisFlight.getSourceAirPort().getId(), destAirport.getId(), ac);
 			if (flightTime > 0){
