@@ -92,6 +92,11 @@ public class Aircraft implements Cloneable {
 		aFlight.setAssignedAir(this);
 		flightChain.add(aFlight);
 	}
+	
+	public void addFlight(int index, Flight aFlight) {
+		aFlight.setAssignedAir(this);
+		flightChain.add(index, aFlight);
+	}
 
 	public boolean hasFlight(Flight aFlight) {
 		return flightChain.contains(aFlight);
