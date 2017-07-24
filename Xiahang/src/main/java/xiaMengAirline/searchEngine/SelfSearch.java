@@ -331,7 +331,6 @@ public class SelfSearch {
 				thisFlight.setArrivalTime(addMinutes(thisFlight.getDepartureTime(), flightTime));
 				thisFlight.setDesintationAirport(destAirport);
 				thisFlight.setPlannedFlight(thisFlight.clone());
-				
 				List<Flight> newFlightChain = new ArrayList<Flight>();
 				newFlightChain.add(thisFlight);
 				newFlightChain.add(nextFlight);
@@ -344,7 +343,9 @@ public class SelfSearch {
 					return destIndexAndNewFight;
 				} catch (AirportNotAcceptArrivalTime anaat){
 					FlightTime avaliableTime = anaat.getAvailableTime();
-					if (avaliableTime.getDepartureTime() == null || avaliableTime.getDepartureTime().compareTo(nextFlight.getDepartureTime()) == 0){
+					if (getHourDifference(avaliableTime.getArrivalTime(), getPlannedArrival(thisFlight)) < 24){
+						//Date adjustedDeparture = getValidDeparture(tempDeparture, thisFlight.getSourceAirPort());
+
 						thisFlight.setArrivalTime(avaliableTime.getArrivalTime());
 						thisFlight.setDepartureTime(addMinutes(thisFlight.getArrivalTime(), -flightTime));
 						HashMap<Integer, Flight> destIndexAndNewFight = new HashMap<Integer, Flight>();
