@@ -90,7 +90,10 @@ public class SelfSearch {
 				Flight thisFlight = anaat.getaFlight();
 				FlightTime avaliableTime = anaat.getAvailableTime();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
-				
+				if (thisFlight.getFlightId() == 1125){
+					System.out.println(getPlannedArrival(thisFlight) + "-" + avaliableTime.getArrivalTime());
+					System.out.println(getHourDifference(avaliableTime.getArrivalTime(), getPlannedArrival(thisFlight)));
+				}
 				
 				if (avaliableTime.isIsTyphoon() && isJointFlight(thisFlight) && getJointFlight(thisFlight) != null
 						&& !thisFlight.isInternationalFlight() && !getJointFlight(thisFlight).isInternationalFlight()){
@@ -428,7 +431,7 @@ public class SelfSearch {
 	
 	// flight is eligible for delay
 	public boolean isEligibalDelay(Date planTime, Date adjustTime, boolean isInternational){
-		if (getHourDifference(adjustTime, planTime) > (isInternational ? internationalMaxDelay : domesticMaxDelay)){
+		if (getMinuteDifference(adjustTime, planTime) > (isInternational ? internationalMaxDelay * 60 : domesticMaxDelay * 60)){
 			return false;
 		}
 		
