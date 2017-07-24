@@ -30,7 +30,10 @@ public class Aircraft implements Cloneable {
 	private Aircraft cancelAircrafted = null;
 	private List<Flight> dropOutList = new ArrayList<Flight>();
 	private boolean isUpdated = false;
-	private Aircraft alternativeAircraft = null; //alternative aircraft must be a cloned air, and assigned to one & only one its parent aircraft
+	private Aircraft alternativeAircraft = null; // alternative aircraft must be
+													// a cloned air, and
+													// assigned to one & only
+													// one its parent aircraft
 
 	public String getId() {
 		return id;
@@ -251,13 +254,13 @@ public class Aircraft implements Cloneable {
 			newFlightChain.add(aFlight.clone());
 		}
 		aNew.setFlightChain(newFlightChain);
-		
+
 		List<Flight> newDropList = new ArrayList<Flight>();
-		for (Flight aFlight:dropOutList) {
+		for (Flight aFlight : dropOutList) {
 			newDropList.add(aFlight);
 		}
 		aNew.setDropOutList(newDropList);
-		
+
 		return (aNew);
 	}
 
@@ -493,7 +496,8 @@ public class Aircraft implements Cloneable {
 											"Departure Too Earlier");
 
 								} else {
-									if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
+									if (nextFlight.getDepartureTime()
+											.compareTo(newFlightTime.getDepartureTime()) != 0) {
 										nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
 										isChanged = true;
 									}
@@ -527,7 +531,8 @@ public class Aircraft implements Cloneable {
 									} else {
 										// it shall be normal airport close, so
 										// not delay too much
-										if (nextFlight.getDepartureTime().compareTo(newFlightTime.getDepartureTime()) != 0) {
+										if (nextFlight.getDepartureTime()
+												.compareTo(newFlightTime.getDepartureTime()) != 0) {
 											nextFlight.setDepartureTime(newFlightTime.getDepartureTime());
 											isChanged = true;
 										}
@@ -553,7 +558,20 @@ public class Aircraft implements Cloneable {
 				currentFlight.setArrivalTime(newArrival);
 				isChanged = true;
 			}
-				
+
+		}
+		// check if last flight can arrive destination?
+		FlightTime aScheduledTime = new FlightTime();
+		aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
+		aScheduledTime.setDepartureTime(null);
+
+		FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
+				AirPort.GroundingTime);
+
+		if (newFlightTime != null) {
+			if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
+				throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
+			}
 		}
 		return isChanged;
 
@@ -604,7 +622,6 @@ public class Aircraft implements Cloneable {
 		return -1;
 	}
 
-
 	public boolean isUpdated() {
 		return isUpdated;
 	}
@@ -620,6 +637,5 @@ public class Aircraft implements Cloneable {
 	public void setAlternativeAircraft(Aircraft alternativeAircraft) {
 		this.alternativeAircraft = alternativeAircraft;
 	}
-	
 
 }
