@@ -136,18 +136,20 @@ public class Utils {
 	
 	public static BigDecimal hoursBetweenTime(Date date1, Date date2) {  
 		long diff = date1.getTime() - date2.getTime();
-		long days = diff / (1000 * 60 * 60 * 24);  
 		
-		long hours = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60 * 60);
-		
+	    long nh = 1000 * 60 * 60;
+	    
+	    long hours = diff / nh;
+	    
 		return new BigDecimal(hours);
     }
 	
 	public static BigDecimal minutiesBetweenTime(Date date1, Date date2) {  
 		long diff = date1.getTime() - date2.getTime();
-		long days = diff / (1000 * 60 * 60 * 24);  
 		
-		long mins = (diff-days*(1000 * 60 * 60 * 24))/(1000* 60);
+	    long nm = 1000 * 60;
+		
+		long mins = diff / nm;
 		
 		return new BigDecimal(mins);
     }
