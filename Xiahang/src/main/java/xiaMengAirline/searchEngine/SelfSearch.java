@@ -55,9 +55,9 @@ public class SelfSearch {
 		while (!isFinish){
 			List<Flight> flights = aircraft.getFlightChain();
 			try{
-				aircraft.adjustFlightTime(startIndex);
+				boolean adjusted = aircraft.adjustFlightTime(startIndex);
 				isFinish = true;
-				if (startIndex == 0){
+				if (startIndex == 0 && !adjusted){
 					originalAir.setAlternativeAircraft(null);
 				}
 			} catch (AirportNotAcceptArrivalTime anaat){
