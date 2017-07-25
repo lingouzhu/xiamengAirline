@@ -116,16 +116,26 @@ public class AirPort {
 
 				}
 				
-				if (retFlightTime == null) {
-					if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().after(aCloseDate)
-							&& requestTime.getDepartureTime().before(aOpenDate)) {
+				if (retFlightTime == null && requestTime.getDepartureTime()!=null) {
+					String dDateC = formatter.format(requestTime.getDepartureTime());
+					String dDateO = dDateC;
+					dDateC += " ";
+					dDateC += aClose.getCloseTime();
+					dDateO += " ";
+					dDateO += aClose.getOpenTime();
+					
+					Date dCloseDate = formatter2.parse(dDateC);
+					Date dOpenDate = formatter2.parse(dDateO);
+					
+					if (requestTime.getDepartureTime()!=null && requestTime.getDepartureTime().after(dCloseDate)
+							&& requestTime.getDepartureTime().before(dOpenDate)) {
 						retFlightTime = new FlightTime();
 						retFlightTime.setArrivalTime(requestTime.getArrivalTime());
 						Calendar cl = Calendar.getInstance();
 						cl.setTime(requestTime.getArrivalTime());
 						cl.add(Calendar.MINUTE, groundingTime);
-						if (cl.getTime().before(aOpenDate)) {
-							retFlightTime.setDepartureTime(aOpenDate);
+						if (cl.getTime().before(dOpenDate)) {
+							retFlightTime.setDepartureTime(dOpenDate);
 						} else {
 							retFlightTime.setDepartureTime(cl.getTime());
 						}

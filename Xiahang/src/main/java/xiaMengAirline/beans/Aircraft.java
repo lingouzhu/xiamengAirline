@@ -89,7 +89,12 @@ public class Aircraft implements Cloneable {
 		aFlight.setAssignedAir(this);
 		flightChain.add(aFlight);
 	}
-
+	
+	public void addFlight(int index, Flight aFlight) {
+		aFlight.setAssignedAir(this);
+		flightChain.add(index, aFlight);
+	}
+	
 	public boolean hasFlight(Flight aFlight) {
 		return flightChain.contains(aFlight);
 	}
@@ -265,7 +270,7 @@ public class Aircraft implements Cloneable {
 			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
 		SelfSearch selfAdjustEngine = new SelfSearch(mySolution);
 		if (!isCancel) {
-			selfAdjustEngine.adjustAircraft(this, 0);
+			selfAdjustEngine.adjustAircraft(this, 0, mySolution.getAircraft(id, type, true, true));
 		}
 
 	}
