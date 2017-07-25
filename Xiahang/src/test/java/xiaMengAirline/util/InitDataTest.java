@@ -24,6 +24,7 @@ import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.evaluator.aviation2017.Main;
 import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 
@@ -282,7 +283,7 @@ public class InitDataTest {
 		XiaMengAirlineSolution sol105 = selfEngine.constructInitialSolution();
 		XiaMengAirlineSolution initial105 = sol105.reConstruct();
 		initial105.refreshCost(true);
-		assertEquals(15175, initial105.getCost().longValue());
+		assertEquals(15775, initial105.getCost().longValue());
 		
 		
 		
@@ -295,7 +296,12 @@ public class InitDataTest {
 		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		initialOutput.refreshCost(true);
-		assertEquals(1446508, initialOutput.getCost().longValue());
+		assertEquals(1516670, initialOutput.getCost().longValue());
+		
+		initialOutput.generateOutput("0");
+		Main main = new Main();
+		main.evalutor("数据森林_"+initialOutput.getStrCost()+"_0.csv");
+		
 		Aircraft air94 = initialOutput.getAircraft("94", "2", false, false);
 		Aircraft air94C = initialOutput.getAircraft("94", "2", true, false);
 		Flight f1156 = air94C.getFlightByFlightId(1156);
@@ -303,14 +309,8 @@ public class InitDataTest {
 		assertEquals("49", f1156.getDesintationAirport().getId());
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 11:35:00"), f1156.getDepartureTime());
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 14:20:00"), f1156.getArrivalTime());
-		Flight f2375 = air94.getFlightByFlightId(2375);
-		assertEquals("72", f2375.getSourceAirPort().getId());
-		assertEquals("49", f2375.getDesintationAirport().getId());
-		assertEquals(Utils.stringFormatToTime2("06/05/2017 11:15:00"), f2375.getDepartureTime());
-		assertEquals(Utils.stringFormatToTime2("06/05/2017 13:50:00"), f2375.getArrivalTime());
 		
 		
-		//initialOutput.generateOutput("1");
 		//test local search
 		LocalSearch localEngine = new LocalSearch();
 		XiaMengAirlineSolution sol133 = new XiaMengAirlineSolution();
@@ -332,21 +332,23 @@ public class InitDataTest {
 		System.out.println("Initial cost " + initialSolution.getCost());
 		long startTime=System.currentTimeMillis();
 		aBetterSolution = localEngine.constructNewSolution(initialSolution);
-		System.out.println("Current cost " + aBetterSolution.getCost());
+		System.out.println("Iter1, Current cost " + aBetterSolution.getCost());
 		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-		System.out.println("Current cost " + aBetterSolution.getCost());
+		System.out.println("Iter2, Current cost " + aBetterSolution.getCost());
 		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-		System.out.println("Current cost " + aBetterSolution.getCost());
+		System.out.println("Iter3, Current cost " + aBetterSolution.getCost());
 		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-		System.out.println("Current cost " + aBetterSolution.getCost());
+		System.out.println("Iter4, Current cost " + aBetterSolution.getCost());
 		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-		System.out.println("Current cost " + aBetterSolution.getCost());
+		System.out.println("Iter5, Current cost " + aBetterSolution.getCost());
 		long endTime=System.currentTimeMillis();
 		long mins = (endTime - startTime)/(1000* 60);
 		System.out.println("Consumed ... " + mins);
 		aBetterOutput = aBetterSolution.reConstruct();
 		aBetterOutput.refreshCost(true);
-		aBetterOutput.generateOutput(String.valueOf(mins));
+		aBetterOutput.generateOutput("b");
+		main = new Main();
+		main.evalutor("数据森林_"+aBetterOutput.getStrCost()+"_b.csv");
 	}
 	
 

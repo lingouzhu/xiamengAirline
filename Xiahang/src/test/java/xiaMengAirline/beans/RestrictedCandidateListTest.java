@@ -21,6 +21,7 @@ public class RestrictedCandidateListTest {
 
 	@Before
 	public void setUp() throws Exception {
+		RestrictedCandidateList.maxBestSolutions = 3;
 	}
 
 	@Test
