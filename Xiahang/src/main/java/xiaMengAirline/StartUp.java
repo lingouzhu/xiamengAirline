@@ -32,9 +32,9 @@ public class StartUp {
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		initialOutput.refreshCost(true);
 		
-		initialSolution.generateOutput(String.valueOf("0"));
+		initialOutput.generateOutput(String.valueOf("0"));
 		Main main = new Main();
-		main.evalutor("数据森林_"+initialSolution.getStrCost()+"_0.csv");
+		main.evalutor("数据森林_"+initialOutput.getStrCost()+"_0.csv");
 		
 		
 		
