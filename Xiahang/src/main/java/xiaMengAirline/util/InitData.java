@@ -51,6 +51,9 @@ public class InitData {
 	/** last flight*/
 	public static Map<String, Flight> lastFlightMap = new HashMap<String, Flight>();
 	
+	/** flight < 50 mins*/
+	public static Map<String, Integer> specialFlightMap = new HashMap<String, Integer>();
+	
 	/** domestic airports list **/
 	public static List<String> domesticAirportList = new ArrayList<String> (); 
 	
@@ -126,6 +129,16 @@ public class InitData {
 					Flight aFlight = flightList.get(i);
 					if (i == 0) {
 						firstFlightMap.put(aAir.getId(), aFlight);
+					} else {
+						Flight pFlight = flightList.get(i - 1);
+						int bTime = Utils.minutiesBetweenTime(aFlight.getDepartureTime(), pFlight.getArrivalTime()).intValue();
+						if (bTime < 50) {
+//							System.out.println(pFlight.getArrivalTime());
+//							System.out.println(aFlight.getDepartureTime());
+//							System.out.println(bTime);
+							
+							specialFlightMap.put(String.valueOf(pFlight.getFlightId()) + "_" + String.valueOf(aFlight.getFlightId()) , bTime);
+						}
 					}
 					
 					if (i == flightList.size() - 1) {
