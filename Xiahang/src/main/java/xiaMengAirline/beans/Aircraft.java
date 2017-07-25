@@ -395,6 +395,22 @@ public class Aircraft implements Cloneable {
 				}
 
 			}
+			
+			//  5.7  border limited
+			if (i == 0) {
+				if (!flight.getSourceAirPort().getId().equals(InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
+					return false;
+				}
+				
+			}
+			
+			if (i == flightChain.size() - 1) {
+				if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
+						|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
+					return false;
+				}
+				
+			}
 		}
 
 		return true;

@@ -14,6 +14,7 @@ import xiaMengAirline.util.Utils;
 
 public class XiaMengAirlineSolution implements Cloneable {
 	private BigDecimal cost = new BigDecimal("0");
+	private String strCost = "";
 	private HashMap<String, Aircraft> schedule = new HashMap<String, Aircraft>();
 
 	private List<String> outputList = new ArrayList<String>();
@@ -92,9 +93,9 @@ this.cost = new BigDecimal("0");
 							BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(), newFlight.getPlannedFlight().getDepartureTime());
 							
 							if (hourDiff.signum() == -1){
-								System.out.println(newFlight.getDepartureTime());
-								System.out.println(newFlight.getPlannedFlight().getDepartureTime());
-								System.out.println(hourDiff);
+//								System.out.println(newFlight.getDepartureTime());
+//								System.out.println(newFlight.getPlannedFlight().getDepartureTime());
+//								System.out.println(hourDiff);
 								
 								ahead = ahead.add(hourDiff.abs().multiply(newFlight.getImpCoe()));
 								cost = cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(newFlight.getImpCoe()));
@@ -151,12 +152,12 @@ this.cost = new BigDecimal("0");
 			
 			
 		}
-		System.out.println("empty:" + empty);
-		System.out.println("change:" + change);
-		System.out.println("cancel:" + cancel.toString());
-		System.out.println("delay:" + delay.toString());
-		System.out.println("ahead:" + ahead.toString());
-		System.out.println("connect:" + connect.toString());
+//		System.out.println("empty:" + empty);
+//		System.out.println("change:" + change);
+//		System.out.println("cancel:" + cancel.toString());
+//		System.out.println("delay:" + delay.toString());
+//		System.out.println("ahead:" + ahead.toString());
+//		System.out.println("connect:" + connect.toString());
 		// joint flight 
 //		for (Flight cancelFlight : joint2CancelFlightList) {
 //			for (Flight flight : joint1FlightList) {
@@ -410,7 +411,20 @@ this.cost = new BigDecimal("0");
 	}
 
 	public void generateOutput(String minutes) {
-		CSVUtils.exportCsv(new File("数据森林" + "_" + cost.toString() + "_" + minutes), outputList);
+		if (cost.toString().length() > 11) {
+			this.strCost = cost.toString().substring(0, 11);
+		} else {
+			this.strCost = cost.toString();
+		}
+		CSVUtils.exportCsv(new File("数据森林" + "_" + this.strCost + "_" + minutes+".csv"), outputList);
+	}
+
+	public String getStrCost() {
+		return strCost;
+	}
+
+	public void setStrCost(String strCost) {
+		this.strCost = strCost;
 	}
 
 	public boolean adjust() throws CloneNotSupportedException {

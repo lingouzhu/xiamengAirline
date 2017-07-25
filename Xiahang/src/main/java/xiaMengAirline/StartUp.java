@@ -7,6 +7,7 @@ import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.evaluator.aviation2017.Main;
 import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
@@ -18,7 +19,7 @@ public class StartUp {
 		
 		long startTime=System.currentTimeMillis();
 		//Step1, Load all data & initialize
-		String initDatafile = "XiahangData20170705_1.xlsx";
+		String initDatafile = "XiahangData.xlsx";
 		
 		InitData.initData(initDatafile);
 		
@@ -29,38 +30,44 @@ public class StartUp {
 		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
 		//initOutput is optional, to setup a baseline
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
-		initialOutput.refreshCost(false);
+		initialOutput.refreshCost(true);
 		
-		System.out.println("Initial solution cost " + initialOutput.getCost());
+		initialSolution.generateOutput(String.valueOf("0"));
+		Main main = new Main();
+		main.evalutor("数据森林_"+initialSolution.getStrCost()+"_0.csv");
 		
 		
-//		if (!initialOutput.validate(false)) {
-//			System.out.println("Fail to build inital solution! ");
+		
+//		System.out.println("Initial solution cost " + initialOutput.getCost());
+//		
+//		
+////		if (!initialOutput.validate(false)) {
+////			System.out.println("Fail to build inital solution! ");
+////			return;
+////		}
+////		
+//		//Step3, loop through to search optimized solutions
+//		XiaMengAirlineSolution aBetterSolution = initialSolution;
+//		for (int i = 0; i < iterLength;i++) {
+//			aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
+//			System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
+//		}
+//		
+//		//Step4, ensure solution is valid
+//		XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct();
+//		if (!aBetterOutput.validate(false)) {
+//			System.out.println("Fail to build final solution! ");
 //			return;
 //		}
 //		
-		//Step3, loop through to search optimized solutions
-		XiaMengAirlineSolution aBetterSolution = initialSolution;
-		for (int i = 0; i < iterLength;i++) {
-			aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-			System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
-		}
-		
-		//Step4, ensure solution is valid
-		XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct();
-		if (!aBetterOutput.validate(false)) {
-			System.out.println("Fail to build final solution! ");
-			return;
-		}
-		
-		//Step5, calcuate cost
-		aBetterOutput.refreshCost(true);
-		// execute time
-		long endTime=System.currentTimeMillis();
-		long mins = (endTime - startTime)/(1000* 60);
-		
-		//Step6, generate output
-		aBetterOutput.generateOutput(String.valueOf(mins));
+//		//Step5, calcuate cost
+//		aBetterOutput.refreshCost(true);
+//		// execute time
+//		long endTime=System.currentTimeMillis();
+//		long mins = (endTime - startTime)/(1000* 60);
+//		
+//		//Step6, generate output
+//		aBetterOutput.generateOutput(String.valueOf(mins));
 		
 	}
 
