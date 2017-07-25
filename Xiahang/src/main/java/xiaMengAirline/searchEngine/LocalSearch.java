@@ -109,7 +109,7 @@ public class LocalSearch {
 						}
 						if (!isFound) {
 							System.out.println("Unable to find more valid aircrafts for exchange!");
-							System.out.println("Completed batch ... " + currentBatch);
+							System.out.println("Completed air ... " + air1.getId() + " on batch " + currentBatch);
 							break;
 						}
 					}
@@ -523,6 +523,10 @@ public class LocalSearch {
 
 					}
 					
+				}
+				
+				if (isImproved) {
+					System.out.println("Completed air ... " + air1.getId() + " on batch " + currentBatch);
 				}
 				
 			}
