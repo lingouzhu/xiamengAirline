@@ -9,7 +9,7 @@ import java.util.TreeMap;
 import xiaMengAirline.util.InitData;
 
 public class RestrictedCandidateList {
-	final public static int maxBestSolutions = 3;
+	final public static int maxBestSolutions = 5;
 	private BigDecimal lowestCost = new BigDecimal(Long.MAX_VALUE);
 	private BigDecimal highestCost = new BigDecimal(-1);
 	private int currentLevel = 0;
