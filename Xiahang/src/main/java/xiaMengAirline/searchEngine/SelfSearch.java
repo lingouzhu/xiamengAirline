@@ -30,7 +30,6 @@ import xiaMengAirline.util.InitData;
 
 public class SelfSearch {
 	private static final Logger logger = Logger.getLogger(SelfSearch.class);
-	private final int minGroundTime = 50; //plz ensure remove this!
 	private XiaMengAirlineSolution mySolution = null;
 	
 	public XiaMengAirlineSolution constructInitialSolution()
@@ -74,7 +73,7 @@ public class SelfSearch {
 			firstFlightTime.setArrivalTime(startDate);
 			firstFlightTime.setDepartureTime(firstFlight.getDepartureTime());
 			
-			FlightTime newfirstFlightTime = firstFlight.getSourceAirPort().requestAirport(firstFlightTime, minGroundTime);
+			FlightTime newfirstFlightTime = firstFlight.getSourceAirPort().requestAirport(firstFlightTime, firstFlight.getGroundingTime(0,1));
 			if (newfirstFlightTime != null && newfirstFlightTime.getDepartureTime() != null) {
 				if (getHourDifference(firstFlight.getDepartureTime(), newfirstFlightTime.getDepartureTime()) > 6) {
 					for (AirPortClose aClose : firstFlight.getSourceAirPort().getCloseSchedule()) {
@@ -121,7 +120,7 @@ public class SelfSearch {
 						thisFlight.setDepartureTime(adjustedDeparture);
 						thisFlight.calcuateNextArrivalTime();
 						if (flightIndex < flights.size() - 1) {
-							flights.get(flightIndex + 1).setDepartureTime(addMinutes(avaliableTime.getDepartureTime(), minGroundTime));
+							flights.get(flightIndex + 1).setDepartureTime(addMinutes(avaliableTime.getDepartureTime(), flights.get(flightIndex + 1).getGroundingTime(flightIndex, flightIndex + 1)));
 						}
 					} else {
 						try {
@@ -258,7 +257,7 @@ public class SelfSearch {
 		List<Flight> flights = aircraft.getFlightChain();
 		Flight thisFlight = flights.get(flightIndex);
 		Flight newFlight = new Flight();
-		newFlight.setDepartureTime(addMinutes(flights.get(flightIndex - 1).getArrivalTime(), minGroundTime));
+		newFlight.setDepartureTime(addMinutes(flights.get(flightIndex - 1).getArrivalTime(), newFlight.getGroundingTime(flightIndex - 1, flightIndex)));
 		newFlight.setSourceAirPort(thisFlight.getSourceAirPort());
 		HashMap<Integer, Flight> indexFlightPair = createNewFlight(newFlight, flightIndex, aircraft);
 		if (indexFlightPair != null){
@@ -333,11 +332,11 @@ public class SelfSearch {
 				FlightTime tempFlightTime = new FlightTime();
 				tempFlightTime.setArrivalTime(lastFlight.getArrivalTime());
 				tempFlightTime.setDepartureTime(nextFlight.getDepartureTime());
-				if (nextFlight.getSourceAirPort().requestAirport(tempFlightTime, minGroundTime) == null){
+				if (nextFlight.getSourceAirPort().requestAirport(tempFlightTime, nextFlight.getGroundingTime(i-1,i)) == null){
 					tempFlightTime.setArrivalTime(nextFlight.getArrivalTime());
 					if (i < flightChain.size() - 2){
 						tempFlightTime.setDepartureTime(flightChain.get(i + 1).getDepartureTime());
-						if (nextFlight.getDesintationAirport().requestAirport(tempFlightTime, minGroundTime) == null){
+						if (nextFlight.getDesintationAirport().requestAirport(tempFlightTime, nextFlight.getGroundingTime(i, i+1)) == null){
 							if (!isValidParking(thisFlight.getArrivalTime(), nextFlight.getDepartureTime(), thisFlight.getDesintationAirport())){
 								continue;
 							}

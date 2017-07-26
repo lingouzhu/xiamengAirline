@@ -12,6 +12,8 @@ import xiaMengAirline.util.InitData;
 public class Flight implements Cloneable {
 	private static final Logger logger = Logger.getLogger(Flight.class);
 	
+	final public static int GroundingTime = 50;
+	
 	private int flightId;
 	private Date schdDate;
 	private AirPort sourceAirPort;
@@ -150,18 +152,26 @@ public class Flight implements Cloneable {
 	
 	
 	//to do
-	public int getGroundingTime () {
+	public int getGroundingTime (int fromFlightId, int toFlightId) {
 		//check  if actual grounding time is less than the standard
-//		Calendar cl = Calendar. getInstance();
-//	    cl.setTime(previousFlight.plannedFlight.getArrivalTime());
-//	    cl.add(Calendar.MINUTE, AirPort.GroundingTime);
-//	    if (cl.getTime().after(plannedFlight.getDepartureTime())) {
-//	    	long diff = plannedFlight.getDepartureTime().getTime() - previousFlight.getPlannedFlight().getArrivalTime().getTime();
-//			long diffMin = diff / (60 * 1000);
-//			logger.warn("From Flight " + previousFlight.flightId + " changed grounding time to " + diffMin);
-//			return (int) diffMin;
-//	    } else 
-	    	return AirPort.GroundingTime;
+		//check if this is the first flight
+		if (fromFlightId >= toFlightId)
+			return GroundingTime;
+		
+		String currentFlightId = String.valueOf(fromFlightId);
+		String nextFlightId = String.valueOf(toFlightId);
+
+		
+		//look up special flight time table
+		String searchKey = currentFlightId;
+		searchKey += "_";
+		searchKey +=  nextFlightId;
+		
+		if (InitData.specialFlightMap.containsKey(searchKey))
+			return (InitData.specialFlightMap.get(searchKey));
+		else
+			return GroundingTime;
+		
 	}
 
 

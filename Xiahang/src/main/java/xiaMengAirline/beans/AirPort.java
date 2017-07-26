@@ -11,7 +11,6 @@ public class AirPort {
 	private String id;
 	private List<AirPortClose> closeSchedule = new ArrayList<AirPortClose> ();
 	private List<RegularAirPortClose> regularCloseSchedule = new ArrayList<RegularAirPortClose> ();
-	final public static int GroundingTime = 50;
 
 	public String getId() {
 		return id;

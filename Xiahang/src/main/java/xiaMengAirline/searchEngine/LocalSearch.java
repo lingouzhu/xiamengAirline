@@ -18,7 +18,7 @@ import xiaMengAirline.util.InitData;
 public class LocalSearch {
 
 	private static final Logger logger = Logger.getLogger(LocalSearch.class);
-	private static final int BATCH_SIZE = 10;
+	private static final int BATCH_SIZE = 20;
 
 	private BigDecimal lowestScore = new BigDecimal(Long.MAX_VALUE);
 

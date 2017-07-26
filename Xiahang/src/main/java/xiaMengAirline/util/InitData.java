@@ -138,7 +138,6 @@ public class InitData {
 //							System.out.println(bTime);
 							
 							specialFlightMap.put(String.valueOf(pFlight.getFlightId()) + "_" + String.valueOf(aFlight.getFlightId()) , bTime);
-							specialFlightMap.put(String.valueOf(String.valueOf(aFlight.getFlightId() + "_" + pFlight.getFlightId())  ) , bTime);
 						}
 					}
 					

@@ -253,7 +253,9 @@ public class Aircraft implements Cloneable {
 		Aircraft aNew = (Aircraft) super.clone();
 		List<Flight> newFlightChain = new ArrayList<Flight>();
 		for (Flight aFlight : flightChain) {
-			newFlightChain.add(aFlight.clone());
+			Flight newFlight = aFlight.clone();
+			newFlight.setAssignedAir(aNew);
+			newFlightChain.add(newFlight);
 		}
 		aNew.setFlightChain(newFlightChain);
 		
@@ -472,7 +474,7 @@ public class Aircraft implements Cloneable {
 			if (i > startPosition) {
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(currentFlight.getArrivalTime());
-				int plannedGroundingTime = nextFlight.getGroundingTime();
+				int plannedGroundingTime = nextFlight.getGroundingTime(currentFlight.getFlightId(), nextFlight.getFlightId());
 				cl.add(Calendar.MINUTE, plannedGroundingTime);
 				FlightTime aScheduledTime = new FlightTime();
 				aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
@@ -571,7 +573,7 @@ public class Aircraft implements Cloneable {
 		aScheduledTime.setDepartureTime(null);
 
 		FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
-				AirPort.GroundingTime);
+				currentFlight.getGroundingTime(currentFlight.getFlightId(), -1));
 		
 		if (newFlightTime != null) {
 			if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {

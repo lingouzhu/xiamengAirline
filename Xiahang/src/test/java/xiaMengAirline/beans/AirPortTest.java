@@ -131,6 +131,8 @@ public class AirPortTest {
 		InitData.originalSolution.replaceOrAddNewAircraft(air2);
 		InitData.maxFligthId = 205;
 		InitData.plannedMaxFligthId = 205;
+		
+		InitData.specialFlightMap.put("104_105" , 30);
 
 	}
 
@@ -273,6 +275,7 @@ public class AirPortTest {
 	private Flight createFlight(int flightId, String srcPort, String destPort) {
 		Flight flight = new Flight();
 		flight.setSchdNo(flightId);
+		flight.setFlightId(flightId);
 		AirPort aAirport = InitData.airportList.getAirport(srcPort);
 		AirPort bAirport = InitData.airportList.getAirport(destPort);
 		;
@@ -498,7 +501,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("03/05/2017 14:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("03/05/2017 20:00:00"));
 
-		FlightTime rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		FlightTime rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals(null, rightTime);
 
@@ -507,7 +510,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("08/05/2017 14:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("08/05/2017 20:00:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals(null, rightTime);
 
@@ -518,7 +521,7 @@ public class AirPortTest {
 
 		System.out.println(Utils.timeFormatToString2(aTime.getArrivalTime()));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("07/05/2017 17:00:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("07/05/2017 17:50:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -531,7 +534,7 @@ public class AirPortTest {
 
 		System.out.println(Utils.timeFormatToString2(aTime.getArrivalTime()));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("07/05/2017 17:00:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("07/05/2017 20:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -543,7 +546,7 @@ public class AirPortTest {
 
 		System.out.println(Utils.timeFormatToString2(aTime.getArrivalTime()));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("07/05/2017 17:00:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("07/05/2017 17:50:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -553,7 +556,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 10:00:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("06/05/2017 13:00:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("06/05/2017 16:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -564,7 +567,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:59:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 10:00:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("06/05/2017 13:59:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("06/05/2017 16:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -576,7 +579,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:59:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 15:00:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals(null, rightTime);
 
@@ -585,7 +588,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 01:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 15:00:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("26/05/2017 06:10:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("26/05/2017 15:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -595,7 +598,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 01:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 06:20:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("26/05/2017 06:10:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("26/05/2017 07:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -606,7 +609,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 00:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 03:20:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals("26/05/2017 00:00:00", Utils.timeFormatToString2(rightTime.getArrivalTime()));
 		assertEquals("26/05/2017 06:10:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
@@ -616,7 +619,7 @@ public class AirPortTest {
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 00:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 06:15:00"));
 
-		rightTime = aAirport.requestAirport(aTime, AirPort.GroundingTime);
+		rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals(null, rightTime);
 
@@ -741,6 +744,7 @@ public class AirPortTest {
 		air1.setFlightChain(flightChain);
 		for (Flight aFlight : flightChain) {
 			aFlight.setPlannedFlight(aFlight.clone());
+			aFlight.setAssignedAir(air1);
 		}
 
 		try {
@@ -1107,7 +1111,7 @@ public class AirPortTest {
 				assertEquals(aFlight.getPlannedFlight().getArrivalTime(), aFlight.getArrivalTime());
 				assertEquals(aFlight.getPlannedFlight().getDepartureTime(), aFlight.getDepartureTime());
 			}
-			assertEquals(30, f105.getGroundingTime());
+			assertEquals(30, f105.getGroundingTime(104,105));
 		} catch (AirportNotAcceptArrivalTime e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
