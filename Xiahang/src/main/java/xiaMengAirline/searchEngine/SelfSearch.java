@@ -130,7 +130,7 @@ public class SelfSearch {
 								return null;
 							}
 						} catch (Exception e){
-							e.printStackTrace();
+							//e.printStackTrace();
 							print("Invalid aircraft: AicraftId " + thisAc.getId());
 							return null;
 						}
@@ -144,7 +144,7 @@ public class SelfSearch {
 							throw new AircraftNotAdjustable(aircraft);
 						}
 					} catch (Exception e){
-						e.printStackTrace();
+						//e.printStackTrace();
 						print("Invalid aircraft: AicraftId " + thisAc.getId());
 						throw new AircraftNotAdjustable(aircraft);
 					}
@@ -171,7 +171,7 @@ public class SelfSearch {
 						throw new AircraftNotAdjustable(aircraft);
 					}
 				} catch (Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 					print("Invalid aircraft: AicraftId " + thisAc.getId());
 					throw new AircraftNotAdjustable(aircraft);
 				}
@@ -186,14 +186,14 @@ public class SelfSearch {
 						throw new AircraftNotAdjustable(aircraft);
 					}
 				} catch (Exception e){
-					e.printStackTrace();
+					//e.printStackTrace();
 					print("Invalid aircraft: AicraftId " + thisAc.getId());
 					throw new AircraftNotAdjustable(aircraft);
 				}
 				startIndex = flightIndex;
 			} catch (Exception e){
 				// invalid
-				e.printStackTrace();
+				//e.printStackTrace();
 				throw new AircraftNotAdjustable(aircraft);
 			}
 
@@ -559,10 +559,12 @@ public class SelfSearch {
 	}
 	
 	public boolean isValidParking(Date arrivalTime, Date departureTime, AirPort airport){
-		for (AirPortClose aClose : airport.getCloseSchedule()) {
-			if (arrivalTime.compareTo(aClose.getStartTime()) <= 0
-					&& departureTime.compareTo(aClose.getEndTime()) >= 0) {
-				return false;
+		if (arrivalTime != null && arrivalTime != null) {
+			for (AirPortClose aClose : airport.getCloseSchedule()) {
+				if (arrivalTime.compareTo(aClose.getStartTime()) <= 0
+						&& departureTime.compareTo(aClose.getEndTime()) >= 0) {
+					return false;
+				}
 			}
 		}
 		return true;
