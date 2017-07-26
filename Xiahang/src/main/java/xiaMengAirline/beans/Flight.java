@@ -150,7 +150,7 @@ public class Flight implements Cloneable {
 	
 	
 	//to do
-	public int getGroundingTime (Flight previousFlight) {
+	public int getGroundingTime () {
 		//check  if actual grounding time is less than the standard
 //		Calendar cl = Calendar. getInstance();
 //	    cl.setTime(previousFlight.plannedFlight.getArrivalTime());

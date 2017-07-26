@@ -1107,7 +1107,7 @@ public class AirPortTest {
 				assertEquals(aFlight.getPlannedFlight().getArrivalTime(), aFlight.getArrivalTime());
 				assertEquals(aFlight.getPlannedFlight().getDepartureTime(), aFlight.getDepartureTime());
 			}
-			assertEquals(30, f105.getGroundingTime(f104));
+			assertEquals(30, f105.getGroundingTime());
 		} catch (AirportNotAcceptArrivalTime e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

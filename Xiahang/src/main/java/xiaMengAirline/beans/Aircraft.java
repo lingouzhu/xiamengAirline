@@ -472,7 +472,7 @@ public class Aircraft implements Cloneable {
 			if (i > startPosition) {
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(currentFlight.getArrivalTime());
-				int plannedGroundingTime = nextFlight.getGroundingTime(currentFlight);
+				int plannedGroundingTime = nextFlight.getGroundingTime();
 				cl.add(Calendar.MINUTE, plannedGroundingTime);
 				FlightTime aScheduledTime = new FlightTime();
 				aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
