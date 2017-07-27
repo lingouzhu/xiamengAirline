@@ -21,7 +21,7 @@ import xiaMengAirline.util.InitData;
 
 public class StartUp {
 
-	final public static long iterLength = 1L;
+	final public static long iterLength = 2L;
 	final public static long preiterLength = 10L;
 	final public static long postiterLength = 5L;
 	final public static int preQueueSize = 15;
@@ -137,6 +137,15 @@ public class StartUp {
 			System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
 		}
 		
+		long endTime = System.currentTimeMillis();
+		long mins = (endTime - startTime) / (1000 * 60);
+		System.out.println("Consumed ... " + mins);
+		aBetterOutput = aBetterSolution.reConstruct();
+		aBetterOutput.refreshCost(true);
+		aBetterOutput.generateOutput("d");
+		main = new Main();
+		main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_d.csv");
+		
 		// step3c, small post iteration on most searchable data
 		airList = new ArrayList<Aircraft>(aBetterSolution.getSchedule().values());
 		topAirList = new TreeMap<Integer, List<Aircraft>>();
@@ -204,14 +213,14 @@ public class StartUp {
 		}
 		
 		
-		long endTime = System.currentTimeMillis();
-		long mins = (endTime - startTime) / (1000 * 60);
+		endTime = System.currentTimeMillis();
+		mins = (endTime - startTime) / (1000 * 60);
 		System.out.println("Consumed ... " + mins);
 		aBetterOutput = aBetterSolution.reConstruct();
 		aBetterOutput.refreshCost(true);
-		aBetterOutput.generateOutput("c");
+		aBetterOutput.generateOutput("e");
 		main = new Main();
-		main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_c.csv");
+		main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_e.csv");
 
 	}
 
