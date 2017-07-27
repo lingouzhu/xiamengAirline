@@ -18,7 +18,7 @@ import xiaMengAirline.util.InitData;
 public class LocalSearch {
 
 	private static final Logger logger = Logger.getLogger(LocalSearch.class);
-	private static final int BATCH_SIZE = 20;
+	private int BATCH_SIZE = 20;
 
 	private BigDecimal lowestScore = new BigDecimal(Long.MAX_VALUE);
 
@@ -53,10 +53,7 @@ public class LocalSearch {
 		return (adjust(newSolution).subtract(oldSolution.getCost()));
 	}
 
-	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
-			throws CloneNotSupportedException {
-		List<Aircraft> checkSList = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
-
+	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution) throws CloneNotSupportedException {
 		// build batch list for first air
 		HashMap<Integer, List<Aircraft>> airBatchList = new HashMap<Integer, List<Aircraft>>();
 		int numberOfBatches = (int) Math.ceil((float) checkSList.size() / BATCH_SIZE);
@@ -75,13 +72,13 @@ public class LocalSearch {
 			RestrictedCandidateList neighboursResult = new RestrictedCandidateList();
 			int currentBatch = entry.getKey();
 			List<Aircraft> firstAirList = entry.getValue();
-			List<Aircraft> firstAirNewList = new ArrayList<Aircraft> ();
-			//rebuild search list as from latest best solution
+			List<Aircraft> firstAirNewList = new ArrayList<Aircraft>();
+			// rebuild search list as from latest best solution
 			for (Aircraft air1 : firstAirList) {
 				air1 = bestSolution.getAircraft(air1.getId(), air1.getType(), air1.isCancel(), false);
 				firstAirNewList.add(air1);
 			}
-			
+
 			System.out.println("Processing batch ... " + currentBatch);
 			for (Aircraft air1 : firstAirNewList) {
 				logger.info("Processing first air " + air1.getId());
@@ -99,8 +96,7 @@ public class LocalSearch {
 						while (air2CheckList.size() > 0 || isFound) {
 							air2 = air2CheckList.remove(InitData.rndNumbers.nextInt(air2CheckList.size()));
 							if ((air1.isCancel() && air2.isCancel())
-									&& (air1.getAlternativeAircraft() == null
-											&& air2.getAlternativeAircraft() == null)
+									&& (air1.getAlternativeAircraft() == null && air2.getAlternativeAircraft() == null)
 									&& (!air1.isUpdated() && !air2.isUpdated())) {
 								;
 							} else {
@@ -522,13 +518,13 @@ public class LocalSearch {
 						}
 
 					}
-					
+
 				}
-				
+
 				if (isImproved) {
 					System.out.println("Completed air ... " + air1.getId() + " on batch " + currentBatch);
 				}
-				
+
 			}
 			if (neighboursResult.hasSolution()) {
 				bestSolution = neighboursResult.selectASoluiton();
@@ -538,6 +534,20 @@ public class LocalSearch {
 		}
 
 		return bestSolution;
+	}
 
+	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
+			throws CloneNotSupportedException {
+		List<Aircraft> checkSList = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
+		return buildSolution(checkSList, bestSolution);
+
+	}
+
+	public int getBATCH_SIZE() {
+		return BATCH_SIZE;
+	}
+
+	public void setBATCH_SIZE(int bATCH_SIZE) {
+		BATCH_SIZE = bATCH_SIZE;
 	}
 }

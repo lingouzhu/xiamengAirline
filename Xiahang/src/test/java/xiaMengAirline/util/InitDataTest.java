@@ -117,6 +117,13 @@ public class InitDataTest {
 		
 		assertEquals(false,InitData.domesticAirportList.contains("36") && InitData.domesticAirportList.contains("4"));
 		
+		//grounding time
+		Aircraft air134 = InitData.originalSolution.getAircraft("134", "2", false, false).clone();
+		Flight f399 = air134.getFlightByFlightId(399);
+		Flight f760 = air134.getFlightByFlightId(760);
+		assertEquals(45, f399.getGroundingTime(337,399));
+		assertEquals(50, f760.getGroundingTime(57,760));
+		
 		Aircraft air116 = InitData.originalSolution.getAircraft("116", "2", false, false).clone();
 		try {
 			air116.adjustFlightTime(0);
@@ -296,7 +303,7 @@ public class InitDataTest {
 		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		initialOutput.refreshCost(true);
-		assertEquals(1516670, initialOutput.getCost().longValue());
+		assertEquals(1514185, initialOutput.getCost().longValue());
 		
 		initialOutput.generateOutput("0");
 		Main main = new Main();
@@ -336,11 +343,11 @@ public class InitDataTest {
 		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
 		System.out.println("Iter2, Current cost " + aBetterSolution.getCost());
 		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-		System.out.println("Iter3, Current cost " + aBetterSolution.getCost());
-		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-		System.out.println("Iter4, Current cost " + aBetterSolution.getCost());
-		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-		System.out.println("Iter5, Current cost " + aBetterSolution.getCost());
+//		System.out.println("Iter3, Current cost " + aBetterSolution.getCost());
+//		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
+//		System.out.println("Iter4, Current cost " + aBetterSolution.getCost());
+//		aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
+//		System.out.println("Iter5, Current cost " + aBetterSolution.getCost());
 		long endTime=System.currentTimeMillis();
 		long mins = (endTime - startTime)/(1000* 60);
 		System.out.println("Consumed ... " + mins);

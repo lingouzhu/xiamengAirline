@@ -16,7 +16,7 @@ public class RestrictedCandidateList {
 	private TreeMap<BigDecimal, List<XiaMengAirlineSolution>> bestSolutionList = new TreeMap<BigDecimal, List<XiaMengAirlineSolution>>  ();
 	
 	public boolean addSolution (XiaMengAirlineSolution aNewSolution) {
-		if (currentLevel < maxBestSolutions) {
+		if (bestSolutionList.size() < maxBestSolutions) {
 			if (bestSolutionList.containsKey(aNewSolution.getCost())) {
 				bestSolutionList.get(aNewSolution.getCost()).add(aNewSolution);
 				currentLevel++;
