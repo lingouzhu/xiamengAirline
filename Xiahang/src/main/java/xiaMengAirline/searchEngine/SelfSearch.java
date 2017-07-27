@@ -39,11 +39,6 @@ public class SelfSearch {
 		List<Aircraft> airList = new ArrayList<Aircraft> (mySolution.getSchedule().values());
 		for (Aircraft aircraft : airList){
 			adjustAircraft(aircraft, 0, mySolution.getAircraft(aircraft.getId(), aircraft.getType(), true, true));
-
-
-			if (aircraft.getId().equals("99")) {
-				System.out.println(aircraft.getAlternativeAircraft().getFlightChain().get(0).getDepartureTime());
-			}
 		}
 		XiaMengAirlineSolution aNewSol = mySolution.reConstruct();
 		aNewSol.refreshCost(false);
@@ -257,8 +252,24 @@ public class SelfSearch {
 		List<Flight> flights = aircraft.getFlightChain();
 		Flight thisFlight = flights.get(flightIndex);
 		Flight newFlight = new Flight();
-		newFlight.setDepartureTime(addMinutes(flights.get(flightIndex - 1).getArrivalTime(), newFlight.getGroundingTime(flightIndex - 1, flightIndex)));
+		FlightTime tempFt = new FlightTime();
+		tempFt.setArrivalTime(flights.get(flightIndex - 1).getArrivalTime());
+		Date tempDep = addMinutes(flights.get(flightIndex - 1).getArrivalTime(), newFlight.getGroundingTime(flightIndex - 1, flightIndex));
+		tempFt.setDepartureTime(tempDep);
+		tempFt = thisFlight.getSourceAirPort().requestAirport(tempFt, newFlight.getGroundingTime(flightIndex - 1, flightIndex));
+		if (tempFt == null){
+			newFlight.setDepartureTime(tempDep);
+		}else{
+			if (tempFt.getDepartureTime() == null){
+				newFlight.setDepartureTime(tempDep);
+			}else{
+				newFlight.setDepartureTime(tempFt.getDepartureTime());
+			}
+		}
+		
 		newFlight.setSourceAirPort(thisFlight.getSourceAirPort());
+		
+		
 		HashMap<Integer, Flight> indexFlightPair = createNewFlight(newFlight, flightIndex, aircraft);
 		if (indexFlightPair != null){
 			Map.Entry<Integer,Flight> entry=indexFlightPair.entrySet().iterator().next();
