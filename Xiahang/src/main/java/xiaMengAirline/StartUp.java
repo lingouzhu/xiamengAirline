@@ -1,6 +1,5 @@
 package xiaMengAirline;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -184,7 +183,7 @@ public class StartUp {
 					}
 				}
 				if (topAirList.keySet().size() > queueSize) {
-					topAirList.remove(topAirList.firstEntry());
+					topAirList.remove(topAirList.firstKey());
 				}
 				
 			}
