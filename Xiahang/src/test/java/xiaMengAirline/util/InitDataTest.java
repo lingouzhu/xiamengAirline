@@ -6,9 +6,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +20,7 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.FlightTime;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.aviation2017.Main;
@@ -145,6 +144,43 @@ public class InitDataTest {
 		} catch (AirportNotAvailable e) {
 			fail("shall not fail");
 		}
+		
+		Aircraft air35 = InitData.originalSolution.getAircraft("35", "2", false, false).clone();
+		Flight f817 = air35.getFlightByFlightId(817);
+		Flight f610 = air35.getFlightByFlightId(610);
+		Flight f1026 = air35.getFlightByFlightId(1026);
+		air35.removeFlightChain(f610, f1026);
+		f817.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 18:00:00"));
+		try {
+			air35.adjustFlightTime(air35.getFlightChain().indexOf(f817));
+		} catch (AirportNotAcceptArrivalTime e) {
+			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+					+ " To " + e.getaFlight().getDesintationAirport().getId()
+					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
+		} catch (FlightDurationNotFound e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AirportNotAcceptDepartureTime e) {
+			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+					+ " To " + e.getaFlight().getDesintationAirport().getId()
+					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
+			System.out.println(e.getCasue());
+			assertEquals(381, e.getaFlight().getFlightId());
+			assertEquals(Utils.stringFormatToTime2("06/05/2017 16:00:00"), e.getAvailableTime().getDepartureTime());
+		} catch (AirportNotAvailable e) {
+			fail("shall not fail");
+		}
+		
+		AirPort port49 = InitData.airportList.getAirport("49");
+		FlightTime aReq = new FlightTime();
+		aReq.setArrivalTime(Utils.stringFormatToTime2("05/05/2017 23:35:00"));
+		aReq.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 00:25:00"));
+		aReq = port49.requestAirport(aReq, 50);
+		assertEquals(Utils.stringFormatToTime2("06/05/2017 06:10:00"), aReq.getDepartureTime());
+		
+		fail("stop");
 		
 		
 		Aircraft air93 = InitData.originalSolution.getAircraft("93", "2", false, false).clone();
