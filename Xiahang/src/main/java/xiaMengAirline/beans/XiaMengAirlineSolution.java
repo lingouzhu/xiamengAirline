@@ -458,8 +458,13 @@ this.cost = new BigDecimal("0");
 			} else {
 				Aircraft airCancel = aircraft.clone();
 				if (aircraft.getAlternativeAircraft() != null) {
-					Aircraft airAltCancel = airCancel.getAlternativeAircraft().clone();
-					airCancel.getFlightChain().addAll(airAltCancel.getFlightChain());
+					Aircraft airAltCancel = airCancel.getAlternativeAircraft();
+					for (Flight aFlight:airAltCancel.getFlightChain()) {
+						if (airCancel.getFlightByFlightId(aFlight.getFlightId()) == null) {
+							airCancel.getFlightChain().addAll(airAltCancel.getFlightChain());
+						}
+					}
+					
 				}
 				costSolution.replaceOrAddNewAircraft(airCancel);
 			}
