@@ -14,6 +14,7 @@ public class RestrictedCandidateList {
 	private BigDecimal highestCost = new BigDecimal(-1);
 	private int currentLevel = 0;
 	private TreeMap<BigDecimal, List<XiaMengAirlineSolution>> bestSolutionList = new TreeMap<BigDecimal, List<XiaMengAirlineSolution>>  ();
+	private String version = "0"; //Iter_Batch
 	
 	public boolean addSolution (XiaMengAirlineSolution aNewSolution) {
 		if (bestSolutionList.size() < maxBestSolutions) {
@@ -132,6 +133,14 @@ public class RestrictedCandidateList {
 
 	public void setBestSolutionList(TreeMap<BigDecimal, List<XiaMengAirlineSolution>> bestSolutionList) {
 		this.bestSolutionList = bestSolutionList;
+	}
+
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
 }

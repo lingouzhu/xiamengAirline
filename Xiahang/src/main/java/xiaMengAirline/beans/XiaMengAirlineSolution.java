@@ -461,7 +461,7 @@ this.cost = new BigDecimal("0");
 					Aircraft airAltCancel = airCancel.getAlternativeAircraft();
 					for (Flight aFlight:airAltCancel.getFlightChain()) {
 						if (airCancel.getFlightByFlightId(aFlight.getFlightId()) == null) {
-							airCancel.getFlightChain().addAll(airAltCancel.getFlightChain());
+							airCancel.getFlightChain().add(aFlight.clone());
 						}
 					}
 					
