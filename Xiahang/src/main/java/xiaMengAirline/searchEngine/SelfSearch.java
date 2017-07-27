@@ -75,7 +75,7 @@ public class SelfSearch {
 			
 			FlightTime newfirstFlightTime = firstFlight.getSourceAirPort().requestAirport(firstFlightTime, firstFlight.getGroundingTime(0,1));
 			if (newfirstFlightTime != null && newfirstFlightTime.getDepartureTime() != null) {
-				if (getHourDifference(firstFlight.getDepartureTime(), newfirstFlightTime.getDepartureTime()) > 6) {
+				if (getMinuteDifference(firstFlight.getDepartureTime(), newfirstFlightTime.getDepartureTime()) > 360) {
 					for (AirPortClose aClose : firstFlight.getSourceAirPort().getCloseSchedule()) {
 						if (firstFlight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
 								&& firstFlight.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
@@ -387,7 +387,7 @@ public class SelfSearch {
 					return destIndexAndNewFight;
 				} catch (AirportNotAcceptArrivalTime anaat){
 					FlightTime avaliableTime = anaat.getAvailableTime();
-					if (getHourDifference(avaliableTime.getArrivalTime(), getPlannedArrival(thisFlight)) < 24){
+					if (getMinuteDifference(avaliableTime.getArrivalTime(), getPlannedArrival(thisFlight)) < 24 * 60){
 						if (!isValidParking(avaliableTime.getArrivalTime(), avaliableTime.getDepartureTime(), thisFlight.getDesintationAirport())){
 							continue;
 						}
