@@ -269,6 +269,12 @@ public class ResultEvaluator implements Cloneable{
         }
         Set<String> originFlightIdSet = flightMap.keySet();
         if(!resultFlightMap.keySet().containsAll(originFlightIdSet)) {
+        	for (String aFlight:originFlightIdSet) {
+        		if (!resultFlightMap.keySet().contains(aFlight)) {
+        			System.out.println("Missing " + aFlight);
+        			
+        		}
+        	}
             //少一个航班，算违背一次约束
             Iterator<String> flightIdIter = resultFlightMap.keySet().iterator();
             while(flightIdIter.hasNext()){

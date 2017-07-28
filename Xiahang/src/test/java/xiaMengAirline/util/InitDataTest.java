@@ -6,11 +6,15 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import xiaMengAirline.StartUp;
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
@@ -180,7 +184,7 @@ public class InitDataTest {
 		aReq = port49.requestAirport(aReq, 50);
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 06:10:00"), aReq.getDepartureTime());
 		
-		fail("stop");
+		
 		
 		
 		Aircraft air93 = InitData.originalSolution.getAircraft("93", "2", false, false).clone();
@@ -322,6 +326,34 @@ public class InitDataTest {
 			fail("shall not fail");
 		}
 		
+		System.out.println("top list ...");
+		List<Aircraft> airList = new ArrayList<Aircraft>(InitData.originalSolution.getSchedule().values());
+		TreeMap<Integer, List<Aircraft>> topAirList = StartUp.searchTopList(airList);
+		for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
+			int key = entry.getKey();
+			List<Aircraft> value = entry.getValue();
+			for (Aircraft air:value)
+				System.out.println("Score " + key + " Air " + air.getId());
+
+		}
+		
+		System.out.println("heavy list ...");
+		airList = new ArrayList<Aircraft>(InitData.originalSolution.getSchedule().values());
+		topAirList = StartUp.searchHeavyList(airList);
+		for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
+			int key = entry.getKey();
+			List<Aircraft> value = entry.getValue();
+			for (Aircraft air:value)
+				System.out.println("Score " + key + " Air " + air.getId());
+
+		}
+		
+	
+		Main main2 = new Main();
+		main2.evalutor("dataforest_985118.3490_d.csv");
+		
+		fail("stop");
+
 		SelfSearch selfEngine = new SelfSearch(aTest);
 		XiaMengAirlineSolution sol105 = selfEngine.constructInitialSolution();
 		XiaMengAirlineSolution initial105 = sol105.reConstruct();
