@@ -561,9 +561,10 @@ public class ResultEvaluator implements Cloneable{
                     if(!rf.isStraighten())  //如果不是联程拉直导致取消的航班，才能计算取消权重
                        cancelFlightNum += originFlight.getImportRatio();
                     else {
-                        if(!flightMap.get(rf.getFlightId()).isConnected()){//如果是联程拉直导致取消的航班,判断是其否是联程航班
+                    	ResultFlight connectedFlight = resultFlightMap.get(originFlight.getConnectedFlightId());
+                        if(connectedFlight.isCancel() || !originFlight.isConnected()){//如果是联程拉直导致取消的航班,判断是其否是联程航班，并且判断联程航班是否取消
                             constraintViolationNum += 1;
-                            System.out.println("如果是联程拉直导致取消的航班,判断是其否是联程航班  filghtID: " + rf.getFlightId());
+                            System.out.println("如果是联程拉直导致取消的航班,判断是其否是联程航班，并且判断联程航班是否取消  filghtID: " + rf.getFlightId());
                             isFeasible = false;
                         }
                     }
