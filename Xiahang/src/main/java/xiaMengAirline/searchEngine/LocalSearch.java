@@ -162,18 +162,22 @@ public class LocalSearch {
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+									
+									if (aNewSolution.validateIter()) {
+										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
-									BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-
-									if (deltaCost.longValue() < 0) {
-										logger.info("Better Solution exists! Method 1 : " + deltaCost);
-										isImproved = true;
-										XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-										aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
-										aBetterSolution.refreshCost(deltaCost);
-										neighboursResult.addSolution(aBetterSolution);
+										if (deltaCost.longValue() < 0) {
+											logger.info("Better Solution exists! Method 1 : " + deltaCost);
+											isImproved = true;
+											XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+											aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+											aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
+											aBetterSolution.refreshCost(deltaCost);
+											neighboursResult.addSolution(aBetterSolution);
+										}										
 									}
+
+
 
 								}
 							}
@@ -226,18 +230,22 @@ public class LocalSearch {
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+									
+									if (aNewSolution.validateIter()) {
+										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
-									BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-
-									if (deltaCost.longValue() < 0) {
-										logger.info("Better Solution exists! Method 2 : " + deltaCost);
-										isImproved = true;
-										XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-										aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
-										aBetterSolution.refreshCost(deltaCost);
-										neighboursResult.addSolution(aBetterSolution);
+										if (deltaCost.longValue() < 0) {
+											logger.info("Better Solution exists! Method 2 : " + deltaCost);
+											isImproved = true;
+											XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+											aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
+											aBetterSolution.refreshCost(deltaCost);
+											neighboursResult.addSolution(aBetterSolution);
+										}										
 									}
+
+
 
 								}
 							}
