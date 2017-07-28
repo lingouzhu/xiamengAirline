@@ -214,7 +214,39 @@ public class XiaMengAirlineSolution implements Cloneable {
 	}
 	
 	public boolean validateIter() {
-		return false;
+		List<Integer> cancenFlightIDList = new ArrayList<Integer>();
+		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
+		try {
+			for (Aircraft aAir : schedule) {
+				if (aAir.isCancel()) {
+					List<Flight> cancelFlightList = aAir.getFlightChain();
+					for (Flight cancelFlight : cancelFlightList) {
+						cancenFlightIDList.add(cancelFlight.getFlightId());
+					}
+				}
+			}
+			
+			for (Aircraft aAir : schedule) {
+				if (!aAir.isCancel()) {
+					List<Flight> flightList = aAir.getFlightChain();
+					for (int i = 1; i < flightList.size(); i++) {
+						
+						Flight flight = flightList.get(i);
+						Flight preFlight = flightList.get(i - 1);
+						// joint flight error
+						if (InitData.jointFlightMap.get(preFlight.getFlightId()) != null
+								&& !cancenFlightIDList.contains(InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId())
+								&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight.getFlightId()) {
+							return false;
+						}
+							
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.getStackTrace();
+		}
+		return true;
 	}
 
 	public boolean validate(boolean isCheckLianChengOnly) {
