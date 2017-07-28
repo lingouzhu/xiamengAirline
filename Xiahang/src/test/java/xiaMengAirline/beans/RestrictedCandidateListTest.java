@@ -81,9 +81,9 @@ public class RestrictedCandidateListTest {
 		assertEquals(3, rcl.getCurrentLevel());
 
 		rcl.addSolution(sol7);
-		assertEquals(70, rcl.getHighestCost().longValue());
+		assertEquals(100, rcl.getHighestCost().longValue());
 		assertEquals(50, rcl.getLowestCost().longValue());
-		assertEquals(2, rcl.getCurrentLevel());
+		assertEquals(4, rcl.getCurrentLevel());
 
 		List<String> checkList = new ArrayList<String>();
 		checkList.add(new String("1_0"));
