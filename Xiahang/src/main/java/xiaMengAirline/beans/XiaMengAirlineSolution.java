@@ -550,5 +550,23 @@ public class XiaMengAirlineSolution implements Cloneable {
 		return costSolution;
 
 	}
+	
+	public boolean validflightNumers() {
+		boolean numMatchFlg = false;
+		int count = 0;
+		
+		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
+//			for (Aircraft aAir : schedule) {
+//					List<Flight> flightChain = aAir.getFlightChain();
+//
+//					for (Flight flight : aAir.getFlightChain()) {
+//						if () {
+//							
+//						}
+//					}
+//						Flight flight = flightChain.get(i);
+		return numMatchFlg;
+	}
+		
 
 }
