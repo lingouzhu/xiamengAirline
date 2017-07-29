@@ -152,7 +152,7 @@ public class Flight implements Cloneable {
 	
 	
 	//to do
-	public int getGroundingTime (int fromFlightId, int toFlightId) {
+	public static int getGroundingTime (int fromFlightId, int toFlightId) {
 		//check  if actual grounding time is less than the standard
 		//check if this is the first flight
 		if (fromFlightId >= toFlightId)
