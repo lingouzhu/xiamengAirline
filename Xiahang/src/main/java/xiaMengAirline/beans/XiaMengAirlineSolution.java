@@ -8,11 +8,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.util.CSVUtils;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
 
 public class XiaMengAirlineSolution implements Cloneable {
+	private static final Logger logger = Logger.getLogger(XiaMengAirlineSolution.class);
 	private BigDecimal cost = new BigDecimal("0");
 	private String strCost = "";
 	private HashMap<String, Aircraft> schedule = new HashMap<String, Aircraft>();
@@ -515,6 +519,9 @@ public class XiaMengAirlineSolution implements Cloneable {
 		} catch (Exception ex) {
 			return false;
 		}
+		for (Aircraft aAir:airList) {
+			logger.info("Before adjust:Reconstruct Air " + aAir.getId() + " isCancel " + aAir.isCancel());
+		}
 		XiaMengAirlineSolution aNewSol = reConstruct();
 		aNewSol.refreshCost(false);
 		cost = aNewSol.getCost();
@@ -536,26 +543,31 @@ public class XiaMengAirlineSolution implements Cloneable {
 		for (Aircraft aircraft : schedule.values()) {
 			if (aircraft.isCancel()) {
 				Aircraft airCancel = aircraft.clone();
-				Aircraft normalAir = costSolution.getAircraft(aircraft.getId(), aircraft.getType(), false, false).clone(); 
-				boolean isFound = false;
-				if (aircraft.getAlternativeAircraft() != null) {
-					Aircraft airAltCancel = airCancel.getAlternativeAircraft();
-					for (Flight aFlight : airAltCancel.getFlightChain()) {
-						
-						if (airCancel.getFlightByFlightId(aFlight.getFlightId()) == null) {
-							airCancel.getFlightChain().add(aFlight.clone());
-							//if new cancelled, we need remove it from normal air
-							if (normalAir.getFlightByFlightId(aFlight.getFlightId()) != null) {
-								normalAir.getFlightChain().remove(normalAir.getFlightByFlightId(aFlight.getFlightId()));
-								isFound = true;
+				Aircraft normalAir = costSolution.getAircraft(aircraft.getId(), aircraft.getType(), false, false);
+				if (normalAir == null) {
+					logger.info("Warning! air does not have normal " + aircraft.getId());
+				} else {
+					boolean isFound = false;
+					if (aircraft.getAlternativeAircraft() != null) {
+						Aircraft airAltCancel = airCancel.getAlternativeAircraft();
+						for (Flight aFlight : airAltCancel.getFlightChain()) {
+							
+							if (airCancel.getFlightByFlightId(aFlight.getFlightId()) == null) {
+								airCancel.getFlightChain().add(aFlight.clone());
+								//if new cancelled, we need remove it from normal air
+								if (normalAir.getFlightByFlightId(aFlight.getFlightId()) != null) {
+									normalAir.getFlightChain().remove(normalAir.getFlightByFlightId(aFlight.getFlightId()));
+									isFound = true;
+								}
 							}
 						}
-					}
 
+					}
+					costSolution.replaceOrAddNewAircraft(airCancel);
+					if (isFound)
+						costSolution.replaceOrAddNewAircraft(normalAir);					
 				}
-				costSolution.replaceOrAddNewAircraft(airCancel);
-				if (isFound)
-					costSolution.replaceOrAddNewAircraft(normalAir);
+
 			}
 
 		}
