@@ -354,7 +354,7 @@ public class InitDataTest {
 		try {
 			air91.adjustFlightTime(0);
 		} catch (AirportNotAcceptArrivalTime e) {
-			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+			System.out.println("AirportNotAcceptArrivalTim e" + e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
 			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
@@ -363,7 +363,7 @@ public class InitDataTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (AirportNotAcceptDepartureTime e) {
-			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+			System.out.println("AirportNotAcceptArrivalTime " + e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
 			System.out.println(e.getCasue());
@@ -371,7 +371,6 @@ public class InitDataTest {
 		} catch (AirportNotAvailable e) {
 			fail("shall not fail");
 		}
-		fail("stop");
 		
 		Main main2 = new Main();
 		main2.evalutor("dataforest_985118.3490_d.csv");
@@ -401,8 +400,25 @@ public class InitDataTest {
 		Main main = new Main();
 		main.evalutor("数据森林_"+initialOutput.getStrCost()+"_0.csv");
 		
-		Aircraft air94 = initialOutput.getAircraft("94", "2", false, false);
-		Aircraft air94C = initialOutput.getAircraft("94", "2", true, false);
+				
+		Aircraft air94 = initialSolution.getAircraft("94", "2", false, false).clone();
+		Aircraft air94C = initialSolution.getAircraft("94", "2", true, false).clone();
+		
+		XiaMengAirlineSolution aTestSol = new XiaMengAirlineSolution();
+		aTestSol.replaceOrAddNewAircraft(air94);
+		aTestSol.replaceOrAddNewAircraft(air94C);
+		XiaMengAirlineSolution aTestOut = aTestSol.reConstruct();
+		aTestOut.refreshCost(false);
+		assertEquals(14927, aTestOut.getCost().longValue());
+		
+		fail("stop");
+		LocalSearch localEngine = new LocalSearch();
+		List<Aircraft> testAirList = new ArrayList<Aircraft> ();
+		testAirList.add(air94);
+		localEngine.buildSolution(testAirList, initialSolution);
+		
+		
+		
 		Flight f1156 = air94C.getFlightByFlightId(1156);
 		assertEquals("72", f1156.getSourceAirPort().getId());
 		assertEquals("49", f1156.getDesintationAirport().getId());
@@ -411,7 +427,7 @@ public class InitDataTest {
 		
 		
 		//test local search
-		LocalSearch localEngine = new LocalSearch();
+		
 		XiaMengAirlineSolution sol133 = new XiaMengAirlineSolution();
 		Aircraft air133 = initialSolution.getAircraft("133", "2", false, false);
 		air94 = initialSolution.getAircraft("94", "2", false, false);

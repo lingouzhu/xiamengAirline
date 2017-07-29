@@ -220,6 +220,18 @@ public class Aircraft implements Cloneable {
 
 		this.flightChain.removeAll(removeList);
 	}
+	
+	public List<Flight> getSpecifiedFlightChain(Flight startFlight, Flight endFlight) {
+		List<Flight> retList = new ArrayList<Flight>();
+		int retSFlighttartPosition = this.flightChain.indexOf(startFlight);
+		int retFlightEndPosition = this.flightChain.indexOf(endFlight);
+
+		for (int i = retSFlighttartPosition; i <= retFlightEndPosition; i++)
+			retList.add(this.flightChain.get(i));
+
+		return (retList);
+		
+	}
 
 	public List<AirPort> getAirports() {
 		ArrayList<AirPort> retAirPortList = new ArrayList<AirPort>();
@@ -254,6 +266,8 @@ public class Aircraft implements Cloneable {
 		List<Flight> newFlightChain = new ArrayList<Flight>();
 		for (Flight aFlight : flightChain) {
 			Flight newFlight = aFlight.clone();
+			newFlight.setPlannedFlight(aFlight.getPlannedFlight());
+			newFlight.setPlannedAir(aFlight.getPlannedAir());
 			newFlight.setAssignedAir(aNew);
 			newFlightChain.add(newFlight);
 		}
@@ -264,6 +278,8 @@ public class Aircraft implements Cloneable {
 			newDropList.add(aFlight);
 		}
 		aNew.setDropOutList(newDropList);
+		if (alternativeAircraft!=null)
+			aNew.setAlternativeAircraft(alternativeAircraft.clone());
 		
 		return (aNew);
 	}

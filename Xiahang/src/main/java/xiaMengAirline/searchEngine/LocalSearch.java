@@ -48,12 +48,13 @@ public class LocalSearch {
 
 	private BigDecimal calculateDeltaCost(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution)
 			throws CloneNotSupportedException {
-		oldSolution.reConstruct();
-		oldSolution.refreshCost(false);
-		return (adjust(newSolution).subtract(oldSolution.getCost()));
+		XiaMengAirlineSolution oldSolOut = oldSolution.reConstruct();
+		oldSolOut.refreshCost(false);
+		return (adjust(newSolution).subtract(oldSolOut.getCost()));
 	}
 
-	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution) throws CloneNotSupportedException {
+	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution)
+			throws CloneNotSupportedException {
 		// build batch list for first air
 		HashMap<Integer, List<Aircraft>> airBatchList = new HashMap<Integer, List<Aircraft>>();
 		int numberOfBatches = (int) Math.ceil((float) checkSList.size() / BATCH_SIZE);
@@ -120,6 +121,8 @@ public class LocalSearch {
 					int n = air2.getFlightChain().size();
 
 					// Method 1
+					// if aircraft1 flights is circuit, place it into
+					// cancellation route - Method 1
 					if (!air1.isCancel()) {
 						for (int uu = 0; uu <= m - 1; uu++) {
 							Flight flightAir1 = air1.getFlight(uu);
@@ -155,14 +158,12 @@ public class LocalSearch {
 									airList.add(cancelledAir);
 
 									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									if (air1.getAlternativeAircraft() != null)
-										airOldList.add(air1.getAlternativeAircraft());
-									else
-										airOldList.add(air1);
+									airOldList.add(air1);
+									airOldList.add(bestSolution.getAircraft(air1.getId(), air1.getType(), true, true));
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
-									
+
 									if (aNewSolution.validateIter()) {
 										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
@@ -174,10 +175,8 @@ public class LocalSearch {
 											aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
 											aBetterSolution.refreshCost(deltaCost);
 											neighboursResult.addSolution(aBetterSolution);
-										}										
+										}
 									}
-
-
 
 								}
 							}
@@ -223,14 +222,12 @@ public class LocalSearch {
 									airList.add(cancelledAir);
 
 									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									if (air2.getAlternativeAircraft() != null)
-										airOldList.add(air2.getAlternativeAircraft());
-									else
-										airOldList.add(air2);
+									airOldList.add(air2);
+									airOldList.add(bestSolution.getAircraft(air2.getId(), air2.getType(), true, true));
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
-									
+
 									if (aNewSolution.validateIter()) {
 										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
@@ -242,10 +239,8 @@ public class LocalSearch {
 											aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
 											aBetterSolution.refreshCost(deltaCost);
 											neighboursResult.addSolution(aBetterSolution);
-										}										
+										}
 									}
-
-
 
 								}
 							}
@@ -271,8 +266,39 @@ public class LocalSearch {
 										air2.getFlight(aMatched.getAir2DestFlight()), air1DestFlight, false);
 								newAircraft2.insertFlightChain(air1, air1.getFlight(aMatched.getAir1SourceFlight()),
 										air1.getFlight(aMatched.getAir1DestFlight()), air2DestFlight, false);
+
+								// if cancel flights, need adjust its
+								// alternative
+								if (newAircraft1.isCancel()) {
+									Aircraft airCancelAlt = newAircraft1.getAlternativeAircraft();
+									if (airCancelAlt != null) {
+										List<Flight> movedFlights = newAircraft1
+												.getSpecifiedFlightChain(air1SourceFlight, air1DestFlight);
+										for (Flight aFlight : movedFlights) {
+											if (airCancelAlt.getFlightByFlightId(aFlight.getFlightId()) != null) {
+												airCancelAlt.getFlightChain().remove(
+														airCancelAlt.getFlightByFlightId(aFlight.getFlightId()));
+											}
+										}
+									}
+								}
+
+								if (newAircraft2.isCancel()) {
+									Aircraft airCancelAlt = newAircraft2.getAlternativeAircraft();
+									if (airCancelAlt != null) {
+										List<Flight> movedFlights = newAircraft2
+												.getSpecifiedFlightChain(air2SourceFlight, air2DestFlight);
+										for (Flight aFlight : movedFlights) {
+											if (airCancelAlt.getFlightByFlightId(aFlight.getFlightId()) != null) {
+												airCancelAlt.getFlightChain().remove(
+														airCancelAlt.getFlightByFlightId(aFlight.getFlightId()));
+											}
+										}
+									}
+								}
 								newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
 								newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
+
 
 								logger.info("Method 3 After exchange ...");
 								List<Flight> updateList1 = newAircraft1.getFlightChain();
@@ -294,27 +320,24 @@ public class LocalSearch {
 								airList.add(newAircraft2);
 
 								ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-								if (air1.getAlternativeAircraft() != null)
-									airOldList.add(air1.getAlternativeAircraft());
-								else
-									airOldList.add(air1);
-								if (air2.getAlternativeAircraft() != null)
-									airOldList.add(air2.getAlternativeAircraft());
-								else
-									airOldList.add(air2);
+								airOldList.add(air1);
+								airOldList.add(air2);
 
 								XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 								XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
+								if (aNewSolution.validateIter()) {
 
-								BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-								if (deltaCost.longValue() < 0) {
-									logger.info("Better Solution exists! Method 3 : " + deltaCost);
-									isImproved = true;
-									XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-									aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-									aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-									aBetterSolution.refreshCost(deltaCost);
-									neighboursResult.addSolution(aBetterSolution);
+									BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+
+									if (deltaCost.longValue() < 0) {
+										logger.info("Better Solution exists! Method 3 : " + deltaCost);
+										isImproved = true;
+										XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+										aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+										aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+										aBetterSolution.refreshCost(deltaCost);
+										neighboursResult.addSolution(aBetterSolution);
+									}
 								}
 
 							}
@@ -335,7 +358,7 @@ public class LocalSearch {
 										Flight air2Flight = newAircraft2.getFlight(x);
 
 										newAircraft2.insertFlightChain(air1, flightAir1, destFlight, air2Flight, true);
-										newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
+										
 
 										logger.info("Method 4 After exchange ...");
 										List<Flight> updateList1 = newAircraft1.getFlightChain();
@@ -350,6 +373,24 @@ public class LocalSearch {
 										}
 										logger.info("Method 4 Complete exchange ...");
 
+										// if cancel flights, need adjust its
+										// alternative
+										if (newAircraft1.isCancel()) {
+											Aircraft airCancelAlt = newAircraft1.getAlternativeAircraft();
+											if (airCancelAlt != null) {
+												List<Flight> movedFlights = newAircraft1
+														.getSpecifiedFlightChain(air1SourceFlight, air1DestFlight);
+												for (Flight aFlight : movedFlights) {
+													if (airCancelAlt
+															.getFlightByFlightId(aFlight.getFlightId()) != null) {
+														airCancelAlt.getFlightChain().remove(airCancelAlt
+																.getFlightByFlightId(aFlight.getFlightId()));
+													}
+												}
+											}
+										}
+										newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
+
 										// only update solution when new change
 										// goes better
 										ArrayList<Aircraft> airList = new ArrayList<Aircraft>();
@@ -357,30 +398,24 @@ public class LocalSearch {
 										airList.add(newAircraft2);
 
 										ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-
-										if (air1.getAlternativeAircraft() != null)
-											airOldList.add(air1.getAlternativeAircraft());
-										else
-											airOldList.add(air1);
-										if (air2.getAlternativeAircraft() != null)
-											airOldList.add(air2.getAlternativeAircraft());
-										else
-											airOldList.add(air2);
+										airOldList.add(air1);
+										airOldList.add(air2);
 
 										XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 										XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
 
-										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
-										if (deltaCost.longValue() < 0) {
-											logger.info("Better Solution exists! Method 4 : " + deltaCost);
-											isImproved = true;
-											XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-											aBetterSolution.refreshCost(deltaCost);
-											neighboursResult.addSolution(aBetterSolution);
+										if (aNewSolution.validateIter()) {
+											BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+											if (deltaCost.longValue() < 0) {
+												logger.info("Better Solution exists! Method 4 : " + deltaCost);
+												isImproved = true;
+												XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+												aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+												aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+												aBetterSolution.refreshCost(deltaCost);
+												neighboursResult.addSolution(aBetterSolution);
+											}
 										}
-
 									}
 								}
 							}
@@ -402,7 +437,7 @@ public class LocalSearch {
 										Flight air1Flight = newAircraft1.getFlight(u);
 
 										newAircraft1.insertFlightChain(air2, flightAir2, destFlight, air1Flight, true);
-										newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
+										
 
 										logger.info("Method 5 After exchange ...");
 										List<Flight> updateList1 = newAircraft1.getFlightChain();
@@ -416,6 +451,23 @@ public class LocalSearch {
 													"Air  " + newAircraft2.getId() + " Flights: " + aF.getFlightId());
 										}
 										logger.info("Method 5 Complete exchange ...");
+										
+										// if cancel flights, need adjust its
+										// alternative
+										if (newAircraft2.isCancel()) {
+											Aircraft airCancelAlt = newAircraft2.getAlternativeAircraft();
+											if (airCancelAlt != null) {
+												List<Flight> movedFlights = newAircraft2
+														.getSpecifiedFlightChain(air2SourceFlight, air2DestFlight);
+												for (Flight aFlight : movedFlights) {
+													if (airCancelAlt.getFlightByFlightId(aFlight.getFlightId()) != null) {
+														airCancelAlt.getFlightChain().remove(
+																airCancelAlt.getFlightByFlightId(aFlight.getFlightId()));
+													}
+												}
+											}
+										}
+										newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
 
 										// only update solution when new change
 										// goes better
@@ -424,29 +476,26 @@ public class LocalSearch {
 										airList.add(newAircraft2);
 
 										ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-										if (air1.getAlternativeAircraft() != null)
-											airOldList.add(air1.getAlternativeAircraft());
-										else
-											airOldList.add(air1);
-										if (air2.getAlternativeAircraft() != null)
-											airOldList.add(air2.getAlternativeAircraft());
-										else
-											airOldList.add(air2);
+										airOldList.add(air1);
+										airOldList.add(air2);
 
 										XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 										XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
 
-										BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
+										if (aNewSolution.validateIter()) {
+											BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
-										if (deltaCost.longValue() < 0) {
-											logger.info("Better Solution exists! Method 5 : " + deltaCost);
-											isImproved = true;
-											XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-											aBetterSolution.refreshCost(deltaCost);
-											neighboursResult.addSolution(aBetterSolution);
+											if (deltaCost.longValue() < 0) {
+												logger.info("Better Solution exists! Method 5 : " + deltaCost);
+												isImproved = true;
+												XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+												aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+												aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+												aBetterSolution.refreshCost(deltaCost);
+												neighboursResult.addSolution(aBetterSolution);
+											}
 										}
+
 									}
 
 								}
@@ -496,28 +545,24 @@ public class LocalSearch {
 									airList.add(newAircraft2);
 
 									ArrayList<Aircraft> airOldList = new ArrayList<Aircraft>();
-									if (air1.getAlternativeAircraft() != null)
-										airOldList.add(air1.getAlternativeAircraft());
-									else
-										airOldList.add(air1);
-									if (air2.getAlternativeAircraft() != null)
-										airOldList.add(air2.getAlternativeAircraft());
-									else
-										airOldList.add(air2);
+									airOldList.add(air1);
+									airOldList.add(air2);
 
 									XiaMengAirlineSolution aNewSolution = buildLocalSolution(airList);
 									XiaMengAirlineSolution aOldSolution = buildLocalSolution(airOldList);
 
 									BigDecimal deltaCost = calculateDeltaCost(aNewSolution, aOldSolution);
 
-									if (deltaCost.longValue() < 0) {
-										logger.info("Better Solution exists! Method 6 : " + deltaCost);
-										isImproved = true;
-										XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
-										aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
-										aBetterSolution.refreshCost(deltaCost);
-										neighboursResult.addSolution(aBetterSolution);
+									if (aNewSolution.validateIter()) {
+										if (deltaCost.longValue() < 0) {
+											logger.info("Better Solution exists! Method 6 : " + deltaCost);
+											isImproved = true;
+											XiaMengAirlineSolution aBetterSolution = bestSolution.clone();
+											aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
+											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
+											aBetterSolution.refreshCost(deltaCost);
+											neighboursResult.addSolution(aBetterSolution);
+										}
 									}
 
 								}

@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.util.CSVUtils;
 import xiaMengAirline.util.InitData;
 import xiaMengAirline.util.Utils;
@@ -74,6 +73,10 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
 		for (Aircraft aAir : airList) {
+//			System.out.println("Cost Air: " + aAir.getId());
+//			for (Flight aFlight:aAir.getFlightChain()) {
+//				System.out.println("   Flight " + aFlight.getFlightId() + " Departure Time: " + Utils.timeFormatter2(aFlight.getDepartureTime()));
+//			}
 			if (!aAir.isCancel()) {
 				for (Flight newFlight : aAir.getFlightChain()) {
 
@@ -535,7 +538,8 @@ public class XiaMengAirlineSolution implements Cloneable {
 //		for (Aircraft aAir : airList) {
 //			logger.info("Before Reconstruct Air " + aAir.getId() + " isCancel " + aAir.isCancel());
 //		}
-		for (Aircraft aircraft : schedule.values()) {
+		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		for (Aircraft aircraft : airList) {
 			if (aircraft.getAlternativeAircraft() != null) {
 				costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
 			} else {
