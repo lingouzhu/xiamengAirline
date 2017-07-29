@@ -563,6 +563,34 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 	}
 	
+	public boolean validflightNumers3(XiaMengAirlineSolution anotherSolution) {
+		int count = 0;
+		int countb = 0;
+		
+		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
+		for (Aircraft aAir : schedule) {
+			for (Flight aFlight:aAir.getFlightChain()) {
+				if (aFlight.getFlightId() <= InitData.plannedMaxFligthId)
+					count ++;
+			}
+			count += aAir.getDropOutList().size();
+			
+		}
+		
+		List<Aircraft> scheduleb = new ArrayList<Aircraft>(anotherSolution.getSchedule().values());
+		for (Aircraft aAir : scheduleb) {
+			countb += aAir.getFlightChain().size();
+		}
+		
+		if (count!=countb) {
+			System.out.println("Flights not matched! new " + count + " old " + countb);
+			return false;
+		}
+		
+		
+		return true;
+	}
+	
 	public boolean validflightNumers(XiaMengAirlineSolution anotherSolution) {
 		int count = 0;
 		int countb = 0;
@@ -578,7 +606,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 		}
 		
 		if (count!=countb) {
-			System.out.println("Flights not matched!");
+			System.out.println("Flights not matched! new " + count + " old " + countb);
 			return false;
 		}
 		

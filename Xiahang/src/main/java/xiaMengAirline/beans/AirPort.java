@@ -74,7 +74,8 @@ public class AirPort {
 				retFlightTime.setIsTyphoon(true);
 			if ((requestTime.getDepartureTime() != null) 
 					&& requestTime.getArrivalTime().before(aClose.getStartTime())
-					&& (requestTime.getDepartureTime().after(aClose.getEndTime())) 
+					&& ((requestTime.getDepartureTime().after(aClose.getEndTime()))
+							||(requestTime.getDepartureTime().compareTo(aClose.getEndTime())) == 0)
 					&& !aClose.isAllowForTakeoff()
 					&& (aClose.getAllocatedParking() == 0)
 					) {

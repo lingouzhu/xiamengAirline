@@ -373,6 +373,34 @@ public class InitDataTest {
 			fail("shall not fail");
 		}
 		
+		Aircraft air3 = InitData.originalSolution.getAircraft("3", "2", false, false).clone();
+		Flight f386 = air3.getFlightByFlightId(386);
+		f386.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 09:20:00"));
+		air3.getFlightChain().remove(1);
+		air3.getFlightChain().remove(1);
+		try {
+			air3.adjustFlightTime(air3.getFlightChain().indexOf(f386));
+		} catch (AirportNotAcceptArrivalTime e) {
+			System.out.println("AirportNotAcceptArrivalTim e" + e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+					+ " To " + e.getaFlight().getDesintationAirport().getId()
+					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
+		} catch (FlightDurationNotFound e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AirportNotAcceptDepartureTime e) {
+			System.out.println("AirportNotAcceptArrivalTime " + e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
+					+ " To " + e.getaFlight().getDesintationAirport().getId()
+					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
+			System.out.println(e.getCasue());
+			fail("shall not fail");
+		} catch (AirportNotAvailable e) {
+			fail("shall not fail");
+		}
+		
+		fail("stop");
+		
 		Main main2 = new Main();
 		main2.evalutor("dataforest_985118.3490_d.csv");
 		
