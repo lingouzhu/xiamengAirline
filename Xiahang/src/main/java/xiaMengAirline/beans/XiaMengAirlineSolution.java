@@ -551,24 +551,81 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 	}
 	
-	public boolean validflightNumers() {
-		boolean numMatchFlg = false;
+	public boolean validflightNumers(XiaMengAirlineSolution anotherSolution) {
 		int count = 0;
+		int countb = 0;
 		
 		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
 		for (Aircraft aAir : schedule) {
-			for (Flight flight : aAir.getFlightChain()) {
-				if (flight.getFlightId() <= InitData.maxFligthId) {
-					count++;
+			count += aAir.getFlightChain().size();
+		}
+		
+		List<Aircraft> scheduleb = new ArrayList<Aircraft>(anotherSolution.getSchedule().values());
+		for (Aircraft aAir : scheduleb) {
+			countb += aAir.getFlightChain().size();
+		}
+		
+		if (count!=countb) {
+			System.out.println("Flights not matched!");
+			return false;
+		}
+		
+		
+		return true;
+	}
+	
+	public boolean validAlternativeflightNumers(XiaMengAirlineSolution anotherSolution) {
+		int count = 0;
+		int countb = 0;
+		int countExta = 0;
+		int countDropout = 0;
+		
+		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
+		for (Aircraft aAir : schedule) {
+			if (aAir.getAlternativeAircraft()!=null) {
+				count += aAir.getAlternativeAircraft().getFlightChain().size();
+				for (Flight aFlight:aAir.getAlternativeAircraft().getFlightChain()) {
+					if (aFlight.getFlightId() > InitData.plannedMaxFligthId)
+						countExta++;
 				}
+				countDropout += aAir.getAlternativeAircraft().getDropOutList().size();
 			}
 		}
-		if (count == InitData.fligthNum) {
-			numMatchFlg = true;
-		} else {
-			System.out.println("num dismatch, org num:" + InitData.fligthNum + ", new num:"+ count);
+		
+		List<Aircraft> scheduleb = new ArrayList<Aircraft>(anotherSolution.getSchedule().values());
+		for (Aircraft aAir : scheduleb) {
+			countb += aAir.getFlightChain().size();
 		}
-		return numMatchFlg;
+		countb += countExta;
+		countb -= countDropout;
+		
+
+		
+		if (count!=countb) {
+			System.out.println("Alternative Flights not matched! Expected " + countb + " actual " + count);
+			for (Aircraft aAir : schedule) {
+				if (aAir.getAlternativeAircraft()!=null) {
+					System.out.println("Alt Air " + aAir.getId() + " cancel " + aAir.isCancel());
+					for (Flight aFlight:aAir.getAlternativeAircraft().getFlightChain()) {
+						System.out.println("    Flight Id " + aFlight.getFlightId());
+					}
+					for (Flight aFlight:aAir.getAlternativeAircraft().getDropOutList()) {
+						System.out.println("    Dropout Flight Id " + aFlight.getFlightId());
+					}
+				}
+			}
+			for (Aircraft aAir : scheduleb) {
+				System.out.println("Main Air " + aAir.getId() + " cancel " + aAir.isCancel());
+				for (Flight aFlight:aAir.getFlightChain()) {
+					System.out.println("    Flight Id " + aFlight.getFlightId());
+				}
+			}
+			System.out.println("Alternative Flights not matched Completed!");
+			return false;
+		}
+		
+		
+		return true;
 	}
 		
 

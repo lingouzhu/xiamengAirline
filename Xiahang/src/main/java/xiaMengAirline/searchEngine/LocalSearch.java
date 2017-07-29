@@ -32,19 +32,21 @@ public class LocalSearch {
 
 	}
 
-	private BigDecimal adjust(XiaMengAirlineSolution newSolution) throws CloneNotSupportedException, SolutionNotValid {
+	private BigDecimal adjust(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) throws CloneNotSupportedException, SolutionNotValid {
 		List<Aircraft> airList = new ArrayList<Aircraft>(newSolution.getSchedule().values());
 
 		for (Aircraft aAir : airList) {
 			if (!aAir.validate())
 				return lowestScore;
 		}
-		if (!newSolution.validflightNumers()) {
+		if (!newSolution.validflightNumers(oldSolution)) {
 			throw new SolutionNotValid(newSolution, "exchange");
 		}
 
 		if (newSolution.adjust()) {
-			if (!newSolution.validflightNumers()) {
+			if (!newSolution.validAlternativeflightNumers(oldSolution) 
+					|| !newSolution.validflightNumers(oldSolution)) {
+				newSolution.validAlternativeflightNumers(oldSolution);
 				throw new SolutionNotValid(newSolution, "adjust");
 			}
 			return newSolution.getCost();
@@ -57,7 +59,7 @@ public class LocalSearch {
 			throws CloneNotSupportedException, SolutionNotValid {
 		XiaMengAirlineSolution oldSolOut = oldSolution.reConstruct();
 		oldSolOut.refreshCost(false);
-		return (adjust(newSolution).subtract(oldSolOut.getCost()));
+		return (adjust(newSolution, oldSolution).subtract(oldSolOut.getCost()));
 	}
 
 	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution)

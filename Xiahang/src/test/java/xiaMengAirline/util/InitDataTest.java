@@ -412,6 +412,8 @@ public class InitDataTest {
 		aTestOut.refreshCost(false);
 		assertEquals(14927, aTestOut.getCost().longValue());
 		
+		aTestSol.validflightNumers(aTestSol);
+		
 		fail("stop");
 		LocalSearch localEngine = new LocalSearch();
 		List<Aircraft> testAirList = new ArrayList<Aircraft> ();
