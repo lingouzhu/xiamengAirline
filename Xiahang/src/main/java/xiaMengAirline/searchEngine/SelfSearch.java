@@ -238,6 +238,17 @@ public class SelfSearch {
 	        if (thisCost > itCost){
 	        	aircraft = newReturnAc;
 	        	aircraftCancel = newReturnAcCancel;
+	        	//double ensure, no duplicated
+	        	for (Flight aFlight:aircraft.getFlightChain()) {
+	        		if (aircraftCancel.getFlightByFlightId(aFlight.getFlightId()) != null) {
+	        			aircraftCancel.getFlightChain().remove(aircraftCancel.getFlightByFlightId(aFlight.getFlightId()));
+	        		}
+	        	}
+	        	for (Flight aFlight:aircraft.getDropOutList()) {
+	        		if (aircraftCancel.getFlightByFlightId(aFlight.getFlightId()) != null) {
+	        			aircraftCancel.getFlightChain().remove(aircraftCancel.getFlightByFlightId(aFlight.getFlightId()));
+	        		}
+	        	}
 	        	thisCost = itCost;
 	        }
 	    }

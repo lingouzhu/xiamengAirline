@@ -42,10 +42,13 @@ public class LocalSearch {
 		if (!newSolution.validflightNumers(oldSolution)) {
 			throw new SolutionNotValid(newSolution, "exchange");
 		}
+		
 
+		XiaMengAirlineSolution backup = newSolution.clone();
 		if (newSolution.adjust()) {
 			if (!newSolution.validAlternativeflightNumers(oldSolution) 
 					|| !newSolution.validflightNumers(oldSolution)) {
+				backup.adjust();
 				newSolution.validAlternativeflightNumers(oldSolution);
 				throw new SolutionNotValid(newSolution, "adjust");
 			}

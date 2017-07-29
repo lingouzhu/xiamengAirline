@@ -515,10 +515,21 @@ public class XiaMengAirlineSolution implements Cloneable {
 	public boolean adjust() throws CloneNotSupportedException {
 		// To-do, add adjustment solution
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		//must reset alternative first
+		for (Aircraft aAir : airList) {
+			aAir.setAlternativeAircraft(null);
+		}
 		try {
 			for (Aircraft aAir : airList) {
 				if (!aAir.isCancel()) {
+					if (aAir.getAlternativeAircraft() != null)
+						//if already there, it is because setup by cancel
+						//cancel will be merged anyway, therefore reset it again.
+						aAir.setAlternativeAircraft(null); 
 					aAir.adjustment(this);
+				} else {
+					if (aAir.getAlternativeAircraft()==null)
+						aAir.setAlternativeAircraft(aAir.clone());
 				}
 			}
 		} catch (Exception ex) {
@@ -574,11 +585,11 @@ public class XiaMengAirlineSolution implements Cloneable {
 		return true;
 	}
 	
-	public boolean validAlternativeflightNumers(XiaMengAirlineSolution anotherSolution) {
+	public boolean validAlternativeflightNumers(XiaMengAirlineSolution oldSolution) {
 		int count = 0;
 		int countb = 0;
-		int countExta = 0;
 		int countDropout = 0;
+		int countExtra = 0;
 		
 		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
 		for (Aircraft aAir : schedule) {
@@ -586,18 +597,23 @@ public class XiaMengAirlineSolution implements Cloneable {
 				count += aAir.getAlternativeAircraft().getFlightChain().size();
 				for (Flight aFlight:aAir.getAlternativeAircraft().getFlightChain()) {
 					if (aFlight.getFlightId() > InitData.plannedMaxFligthId)
-						countExta++;
+						countExtra++;
 				}
 				countDropout += aAir.getAlternativeAircraft().getDropOutList().size();
 			}
 		}
+		count -= countExtra;
+		count += countDropout;
 		
-		List<Aircraft> scheduleb = new ArrayList<Aircraft>(anotherSolution.getSchedule().values());
-		for (Aircraft aAir : scheduleb) {
+		countExtra = 0;
+		for (Aircraft aAir : schedule) {
 			countb += aAir.getFlightChain().size();
+			for (Flight aFlight:aAir.getFlightChain()) {
+				if (aFlight.getFlightId() > InitData.plannedMaxFligthId)
+					countExtra++;
+			}
 		}
-		countb += countExta;
-		countb -= countDropout;
+		countb -= countExtra;
 		
 
 		
@@ -614,8 +630,17 @@ public class XiaMengAirlineSolution implements Cloneable {
 					}
 				}
 			}
+			for (Aircraft aAir : schedule) {
+				if (aAir.getAlternativeAircraft()!=null) {
+					System.out.println("Main Air " + aAir.getId() + " cancel " + aAir.isCancel());
+					for (Flight aFlight:aAir.getFlightChain()) {
+						System.out.println("    Flight Id " + aFlight.getFlightId());
+					}
+				}
+			}
+			List<Aircraft> scheduleb = new ArrayList<Aircraft>(oldSolution.getSchedule().values());
 			for (Aircraft aAir : scheduleb) {
-				System.out.println("Main Air " + aAir.getId() + " cancel " + aAir.isCancel());
+				System.out.println("Old Air " + aAir.getId() + " cancel " + aAir.isCancel());
 				for (Flight aFlight:aAir.getFlightChain()) {
 					System.out.println("    Flight Id " + aFlight.getFlightId());
 				}
