@@ -556,15 +556,18 @@ public class XiaMengAirlineSolution implements Cloneable {
 		int count = 0;
 		
 		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
-//			for (Aircraft aAir : schedule) {
-//					List<Flight> flightChain = aAir.getFlightChain();
-//
-//					for (Flight flight : aAir.getFlightChain()) {
-//						if () {
-//							
-//						}
-//					}
-//						Flight flight = flightChain.get(i);
+		for (Aircraft aAir : schedule) {
+			for (Flight flight : aAir.getFlightChain()) {
+				if (flight.getFlightId() <= InitData.maxFligthId) {
+					count++;
+				}
+			}
+		}
+		if (count == InitData.fligthNum) {
+			numMatchFlg = true;
+		} else {
+			System.out.println("num dismatch, org num:" + InitData.fligthNum + ", new num:"+ count);
+		}
 		return numMatchFlg;
 	}
 		
