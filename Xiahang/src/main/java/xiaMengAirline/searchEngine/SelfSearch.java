@@ -119,23 +119,31 @@ public class SelfSearch {
 						}
 					} else {
 						try {
-							aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
-							if (aircraft == null){
-								print("Invalid aircraft: AicraftId " + thisAc.getId());
-								return null;
+							if (flightIndex != flights.size() - 1){
+								aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
+								if (aircraft == null){
+									print("Invalid aircraft: AicraftId " + thisAc.getId());
+									throw new AircraftNotAdjustable(aircraft);
+								}
+							} else {
+								throw new AircraftNotAdjustable(aircraft);
 							}
 						} catch (Exception e){
 							//e.printStackTrace();
 							print("Invalid aircraft: AicraftId " + thisAc.getId());
-							return null;
+							throw new AircraftNotAdjustable(aircraft);
 						}
 					}
 					startIndex = flightIndex;
 				}else{
 					try {
-						aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
-						if (aircraft == null){
-							print("Invalid aircraft: AicraftId " + thisAc.getId());
+						if (flightIndex != flights.size() - 1){
+							aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
+							if (aircraft == null){
+								print("Invalid aircraft: AicraftId " + thisAc.getId());
+								throw new AircraftNotAdjustable(aircraft);
+							}
+						} else {
 							throw new AircraftNotAdjustable(aircraft);
 						}
 					} catch (Exception e){
@@ -160,9 +168,13 @@ public class SelfSearch {
 				}
 				
 				try {
-					aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
-					if (aircraft == null){
-						print("Invalid aircraft: AicraftId " + thisAc.getId());
+					if (flightIndex != flights.size() - 1){
+						aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
+						if (aircraft == null){
+							print("Invalid aircraft: AicraftId " + thisAc.getId());
+							throw new AircraftNotAdjustable(aircraft);
+						}
+					} else {
 						throw new AircraftNotAdjustable(aircraft);
 					}
 				} catch (Exception e){
@@ -175,9 +187,13 @@ public class SelfSearch {
 				Flight thisFlight = ana.getaFlight();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
 				try {
-					aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
-					if (aircraft == null){
-						print("Invalid aircraft: AicraftId " + thisAc.getId());
+					if (flightIndex != flights.size() - 1){
+						aircraft = cancelFlight(aircraft, aircraftCancel, flightIndex);
+						if (aircraft == null){
+							print("Invalid aircraft: AicraftId " + thisAc.getId());
+							throw new AircraftNotAdjustable(aircraft);
+						}
+					} else {
 						throw new AircraftNotAdjustable(aircraft);
 					}
 				} catch (Exception e){
