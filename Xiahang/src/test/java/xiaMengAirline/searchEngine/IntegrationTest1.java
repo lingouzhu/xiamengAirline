@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
@@ -149,7 +150,7 @@ public class IntegrationTest1 {
 	}
 
 	@Test
-	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException {
+	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, SolutionNotValid {
 
 		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
 		aSolution.replaceOrAddNewAircraft(air1);

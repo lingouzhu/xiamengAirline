@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
+import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
@@ -37,7 +38,7 @@ public class LocalSearchTest {
 	}
 
 	@Test
-	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable {
+	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, SolutionNotValid {
 		Aircraft air1 = new Aircraft();
 		List<Flight> flightChain = new ArrayList<Flight>();
 		flightChain.add(createFlight(101, "ORF", "EWR"));

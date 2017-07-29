@@ -20,6 +20,7 @@ import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
+import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
@@ -43,7 +44,7 @@ public class InitDataTest {
 	}
 
 	@Test
-	public void testInitData() throws ParseException, CloneNotSupportedException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
+	public void testInitData() throws ParseException, CloneNotSupportedException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable, SolutionNotValid {
 
 		Aircraft air50 = InitData.originalSolution.getAircraft("50", "2", false,false).clone();
 		

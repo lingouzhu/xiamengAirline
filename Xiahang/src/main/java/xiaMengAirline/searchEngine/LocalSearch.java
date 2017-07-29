@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
@@ -31,15 +32,21 @@ public class LocalSearch {
 
 	}
 
-	private BigDecimal adjust(XiaMengAirlineSolution newSolution) throws CloneNotSupportedException {
+	private BigDecimal adjust(XiaMengAirlineSolution newSolution) throws CloneNotSupportedException, SolutionNotValid {
 		List<Aircraft> airList = new ArrayList<Aircraft>(newSolution.getSchedule().values());
 
 		for (Aircraft aAir : airList) {
 			if (!aAir.validate())
 				return lowestScore;
 		}
+		if (!newSolution.validflightNumers()) {
+			throw new SolutionNotValid(newSolution, "exchange");
+		}
 
 		if (newSolution.adjust()) {
+			if (!newSolution.validflightNumers()) {
+				throw new SolutionNotValid(newSolution, "adjust");
+			}
 			return newSolution.getCost();
 		} else
 			return lowestScore;
@@ -47,14 +54,14 @@ public class LocalSearch {
 	}
 
 	private BigDecimal calculateDeltaCost(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution)
-			throws CloneNotSupportedException {
+			throws CloneNotSupportedException, SolutionNotValid {
 		XiaMengAirlineSolution oldSolOut = oldSolution.reConstruct();
 		oldSolOut.refreshCost(false);
 		return (adjust(newSolution).subtract(oldSolOut.getCost()));
 	}
 
 	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution)
-			throws CloneNotSupportedException {
+			throws CloneNotSupportedException, SolutionNotValid {
 		// build batch list for first air
 		HashMap<Integer, List<Aircraft>> airBatchList = new HashMap<Integer, List<Aircraft>>();
 		int numberOfBatches = (int) Math.ceil((float) checkSList.size() / BATCH_SIZE);
@@ -590,7 +597,7 @@ public class LocalSearch {
 	}
 
 	public XiaMengAirlineSolution constructNewSolution(XiaMengAirlineSolution bestSolution)
-			throws CloneNotSupportedException {
+			throws CloneNotSupportedException, SolutionNotValid {
 		List<Aircraft> checkSList = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
 		return buildSolution(checkSList, bestSolution);
 

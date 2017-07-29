@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
+import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
@@ -21,7 +22,7 @@ import xiaMengAirline.util.InitData;
 
 public class StartUp {
 
-	final public static long iterLength = 1L;
+	final public static long iterLength = 0L;
 	final public static long preiterLength = 0L;
 	final public static long postiterLength = 0L;
 	final public static int preQueueSize = 15;
@@ -233,6 +234,11 @@ public class StartUp {
 			aBetterOutput.generateOutput("e");
 			main = new Main();
 			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_e.csv");
+		} catch (SolutionNotValid ex) {
+			ex.printStackTrace();
+			System.out.println("Reason: " + ex.getInvalidTime());
+			XiaMengAirlineSolution aSolution = ex.getaSolution();
+			aSolution.generateOutput("error");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
