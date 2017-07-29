@@ -275,7 +275,7 @@ public class Aircraft implements Cloneable {
 		
 		List<Flight> newDropList = new ArrayList<Flight>();
 		for (Flight aFlight:dropOutList) {
-			newDropList.add(aFlight);
+			newDropList.add(aFlight.clone());
 		}
 		aNew.setDropOutList(newDropList);
 		if (alternativeAircraft!=null)
