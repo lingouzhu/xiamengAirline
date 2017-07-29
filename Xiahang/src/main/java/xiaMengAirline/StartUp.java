@@ -152,12 +152,13 @@ public class StartUp {
 			InitData.initData(initDatafile);
 
 			LocalSearch localEngine = new LocalSearch();
-			SelfSearch selfEngine = new SelfSearch(InitData.originalSolution.clone());
+			//SelfSearch selfEngine = new SelfSearch(InitData.originalSolution.clone());
 
 			// Step2, construct initial solution & validate it
-			XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
+			XiaMengAirlineSolution initialSolution = InitData.originalSolution.clone();
+			XiaMengAirlineSolution initialOutput = initialSolution.getBestSolution();
 			// initOutput is optional, to setup a baseline
-			XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
+			//XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 			initialOutput.refreshCost(true);
 
 			initialOutput.generateOutput(String.valueOf("0"));
