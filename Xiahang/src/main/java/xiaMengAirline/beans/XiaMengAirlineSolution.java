@@ -697,6 +697,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 	public XiaMengAirlineSolution getBestSolution() throws CloneNotSupportedException, AircraftNotAdjustable{
 		XiaMengAirlineSolution bestSolution = new XiaMengAirlineSolution();
+		List<Aircraft> cancelList = new ArrayList<Aircraft> ();
 		for (Aircraft aircraft : schedule.values()) {
 			if (!aircraft.isCancel()) {
 				SingleAircraftSearch sas = new SingleAircraftSearch(aircraft, true);
@@ -714,13 +715,19 @@ public class XiaMengAirlineSolution implements Cloneable {
 					bestSolution.replaceOrAddNewAircraft(normalAc.clone());
 				}
 				if (cancelAc != null){
-//					Aircraft currentCancel = getAircraft(cancelAc.getId(), cancelAc.getType(), true, true);
-//					cancelAc.getFlightChain().addAll(currentCancel.getFlightChain());
-					bestSolution.replaceOrAddNewAircraft(cancelAc.clone());
+					cancelList.add(cancelAc.clone());
 				}
 				
 			}
 		}
+		if (!cancelList.isEmpty()) {
+			for (Aircraft cancelAc:cancelList) {
+				Aircraft currentCancel = getAircraft(cancelAc.getId(), cancelAc.getType(), true, true);
+				cancelAc.getFlightChain().addAll(currentCancel.getFlightChain());
+				bestSolution.replaceOrAddNewAircraft(cancelAc.clone());			
+			}
+		}
+			
 		return bestSolution;
 	}
 }

@@ -166,9 +166,9 @@ public class StartUp {
 			else
 				System.out.println("Failed init!");
 
-//			initialOutput.generateOutput(String.valueOf("0"));
+			initialOutput.generateOutput(String.valueOf("0"));
 			Main main = new Main();
-//			main.evalutor("数据森林_" + initialOutput.getStrCost() + "_0.csv");
+			main.evalutor("数据森林_" + initialOutput.getStrCost() + "_0.csv");
 
 			// System.out.println("Initial solution cost " +
 			// initialOutput.getCost());
