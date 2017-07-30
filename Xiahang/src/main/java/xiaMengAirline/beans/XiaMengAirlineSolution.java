@@ -732,7 +732,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 				for (Aircraft ac : resultAircraftPair) {
 					if (ac != null) {
 						Aircraft aBase = bestSolution.getAircraft(ac.getId(), ac.getId(), ac.isCancel(), true);
-						if (!aBase.isCancel())
+						if (!ac.isCancel())
 							aBase.setAlternativeAircraft(ac.clone());
 						else {
 							Aircraft cancelAir = ac.clone();
@@ -742,8 +742,15 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 					}
 				}
+			} else {
+				Aircraft aBase = bestSolution.getAircraft(aircraft.getId(), aircraft.getId(), aircraft.isCancel(), true);
+				Aircraft aBaseAlt = aBase.getAlternativeAircraft();
+				if (aBaseAlt == null) {
+					aBase.setAlternativeAircraft(aircraft.clone());
+				}
 			}
 		}
+		
 
 		if (!bestSolution.validAlternativeflightNumers(this)) {
 			System.out.println("Not pass!");

@@ -403,6 +403,21 @@ public class InitDataTest {
 		boolean isJoined = InitData.jointFlightMap.containsKey(f45.getFlightId());
 		assertEquals(true, isJoined);
 		assertEquals(65, InitData.jointFlightMap.get(f45.getFlightId()).getFlightId());
+		
+		Aircraft air79 = InitData.originalSolution.getAircraft("79", "2", false, false).clone();
+		Aircraft air79c = InitData.originalSolution.getAircraft("79", "2", true, true).clone();
+		XiaMengAirlineSolution aSol = new XiaMengAirlineSolution();
+		aSol.replaceOrAddNewAircraft(air79);
+		Flight f1594 = air79.getFlightByFlightId(1594);
+		Flight f1605 = air79.getFlightByFlightId(1605);
+		air79c.getFlightChain().add(f1605);
+		air79c.getFlightChain().add(f1594);
+		air79.getFlightChain().remove(f1605);
+		air79.getFlightChain().remove(f1594);
+		
+		XiaMengAirlineSolution aBSol = aSol.getBestSolution();
+		
+		
 		fail("stop");
 		
 		Main main2 = new Main();
