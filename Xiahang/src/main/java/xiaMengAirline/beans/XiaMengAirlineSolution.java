@@ -547,6 +547,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 		return true; // return false, if unable to build valid solution
 	}
 
+	
 	public XiaMengAirlineSolution reConstruct() throws CloneNotSupportedException {
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
 //		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
@@ -696,38 +697,28 @@ public class XiaMengAirlineSolution implements Cloneable {
 		
 
 	public XiaMengAirlineSolution getBestSolution() throws CloneNotSupportedException, AircraftNotAdjustable{
-		XiaMengAirlineSolution bestSolution = new XiaMengAirlineSolution();
-		List<Aircraft> cancelList = new ArrayList<Aircraft> ();
-		for (Aircraft aircraft : schedule.values()) {
+		XiaMengAirlineSolution bestSolution = this.clone();
+		List<Aircraft> airListBase = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
+		//must reset alternative first
+		for (Aircraft aAir : airListBase) {
+			if (aAir.getAlternativeAircraft() != null) 
+				aAir.getAlternativeAircraft().clear();
+			aAir.setAlternativeAircraft(null);
+		}
+		
+		for (Aircraft aircraft : airListBase) {
 			if (!aircraft.isCancel()) {
 				SingleAircraftSearch sas = new SingleAircraftSearch(aircraft, true);
 				ArrayList<Aircraft> resultAircraftPair = sas.getAdjustedAircraftPair();
-				Aircraft normalAc = null;
-				Aircraft cancelAc = null;
 				for (Aircraft ac : resultAircraftPair) {
-		        	if (ac.isCancel()) {
-		        		cancelAc = ac;
-		        	}else {
-		        		normalAc = ac;
-		        	}
+					if (ac !=null) {
+						Aircraft aBase = bestSolution.getAircraft(ac.getId(), ac.getId(), ac.isCancel(), true);
+						aBase.setAlternativeAircraft(ac.clone());
+					}
 		        }
-				if (normalAc != null){
-					bestSolution.replaceOrAddNewAircraft(normalAc.clone());
-				}
-				if (cancelAc != null){
-					cancelList.add(cancelAc.clone());
-				}
-				
 			}
 		}
-		if (!cancelList.isEmpty()) {
-			for (Aircraft cancelAc:cancelList) {
-				Aircraft currentCancel = getAircraft(cancelAc.getId(), cancelAc.getType(), true, true);
-				cancelAc.getFlightChain().addAll(currentCancel.getFlightChain());
-				bestSolution.replaceOrAddNewAircraft(cancelAc.clone());			
-			}
-		}
-			
+		
 		return bestSolution;
 	}
 }
