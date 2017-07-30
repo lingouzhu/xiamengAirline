@@ -39,17 +39,17 @@ public class SingleAircraftSearch {
 	private ArrayList<Flight> originalFlights;
 	private TreeMap<Long, ArrayList<ArrayList<Flight>>> openArrayList = new TreeMap<Long, ArrayList<ArrayList<Flight>>>();
 	private ArrayList<ArrayList<Flight>> finishedArrayList = new ArrayList<ArrayList<Flight>>();
+	private boolean isFullSearch;
 	
-	public SingleAircraftSearch(Aircraft aAircraft) throws CloneNotSupportedException {
+	public SingleAircraftSearch(Aircraft aAircraft, boolean isFullSearch) throws CloneNotSupportedException {
 		originalAircraft = aAircraft.clone();
 		originalFlights = (ArrayList<Flight>) originalAircraft.getFlightChain();
 	}
 	
-	public ArrayList<Aircraft> getAdjustedAircraftPair() throws CloneNotSupportedException{
+	public ArrayList<Aircraft> getAdjustedAircraftPair() throws CloneNotSupportedException, AircraftNotAdjustable{
 		boolean started = false;
 		boolean finished = false;
 		// loop to open all solutions
-		int i = 0;
 		while ((!started || !finished)){
 			try {
 				finished = processNextPath(started);
@@ -57,9 +57,16 @@ public class SingleAircraftSearch {
 				e.printStackTrace();
 			}
 			started = true;
+			if (finishedArrayList.size() > 0){
+				if (!isFullSearch){
+					finished = true;
+				}
+			}
 		}
-		
-		
+		if (finishedArrayList.size() == 0){
+			// no solution
+			throw new AircraftNotAdjustable(originalAircraft);
+		}
 		
 		// evaluate solutions to get the best solution
 		ArrayList<Flight> bestList = finishedArrayList.get(0);
@@ -70,6 +77,24 @@ public class SingleAircraftSearch {
 				bestList = list;
 				bestCost = newCost;
 			}
+		}
+		
+		boolean adjusted = false;
+		if (originalFlights.size() == bestList.size()){
+			for (int i = 0; i < bestList.size() - 1; i++){
+				if (originalFlights.get(i).getFlightId() != bestList.get(i).getFlightId()
+						|| originalFlights.get(i).getArrivalTime() != bestList.get(i).getArrivalTime()
+						|| originalFlights.get(i).getDepartureTime() != bestList.get(i).getDepartureTime()
+						|| originalFlights.get(i).getSourceAirPort() != bestList.get(i).getSourceAirPort()
+						|| originalFlights.get(i).getDesintationAirport() != bestList.get(i).getDesintationAirport()){
+					adjusted = true;
+				}
+			}
+		} else {
+			adjusted = true;
+		}
+		if (!adjusted){
+			return null;
 		}
 		// get flights canceled from best solution
 		ArrayList<Flight> cancelList = new ArrayList<Flight>();
