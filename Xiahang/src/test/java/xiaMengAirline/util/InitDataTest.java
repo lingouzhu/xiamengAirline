@@ -394,11 +394,15 @@ public class InitDataTest {
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
 			System.out.println(e.getCasue());
-			fail("shall not fail");
 		} catch (AirportNotAvailable e) {
 			fail("shall not fail");
 		}
 		
+		Aircraft air90 = InitData.originalSolution.getAircraft("90", "2", false, false).clone();
+		Flight f45 = air90.getFlightByFlightId(45);
+		boolean isJoined = InitData.jointFlightMap.containsKey(f45.getFlightId());
+		assertEquals(true, isJoined);
+		assertEquals(65, InitData.jointFlightMap.get(f45.getFlightId()).getFlightId());
 		fail("stop");
 		
 		Main main2 = new Main();
@@ -441,6 +445,8 @@ public class InitDataTest {
 		assertEquals(14927, aTestOut.getCost().longValue());
 		
 		aTestSol.validflightNumers(aTestSol);
+		
+
 		
 		fail("stop");
 		LocalSearch localEngine = new LocalSearch();

@@ -628,7 +628,16 @@ public class XiaMengAirlineSolution implements Cloneable {
 					if (aFlight.getFlightId() > InitData.plannedMaxFligthId)
 						countExtra++;
 				}
-				countDropout += aAir.getAlternativeAircraft().getDropOutList().size();
+				for (Flight aDFlight:aAir.getAlternativeAircraft().getDropOutList()) {
+					if (InitData.jointFlightMap.containsKey(aDFlight.getFlightId())) {
+						Flight jF = InitData.jointFlightMap.get(aDFlight.getFlightId());
+						if (jF == null)
+							countDropout++;
+						else 
+							System.out.println("Drop off only for 2nd flight!");
+					} else 
+						System.out.println("Drop off only for joined");
+				}
 			}
 		}
 		count -= countExtra;

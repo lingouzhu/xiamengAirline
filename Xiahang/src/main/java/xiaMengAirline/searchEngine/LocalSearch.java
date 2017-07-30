@@ -39,19 +39,19 @@ public class LocalSearch {
 			if (!aAir.validate())
 				return lowestScore;
 		}
-//		if (!newSolution.validflightNumers(oldSolution)) {
-//			throw new SolutionNotValid(newSolution, "exchange");
-//		}
+		if (!newSolution.validflightNumers(oldSolution)) {
+			throw new SolutionNotValid(newSolution, "exchange");
+		}
 		
 
-		//XiaMengAirlineSolution backup = newSolution.clone();
+		XiaMengAirlineSolution backup = newSolution.clone();
 		if (newSolution.adjust()) {
-//			if (!newSolution.validAlternativeflightNumers(oldSolution) 
-//					|| !newSolution.validflightNumers(oldSolution)) {
-//				backup.adjust();
-//				newSolution.validAlternativeflightNumers(oldSolution);
-//				throw new SolutionNotValid(newSolution, "adjust");
-//			}
+			if (!newSolution.validAlternativeflightNumers(oldSolution) 
+					|| !newSolution.validflightNumers(oldSolution)) {
+				backup.adjust();
+				newSolution.validAlternativeflightNumers(oldSolution);
+				throw new SolutionNotValid(newSolution, "adjust");
+			}
 			return newSolution.getCost();
 		} else
 			return lowestScore;
