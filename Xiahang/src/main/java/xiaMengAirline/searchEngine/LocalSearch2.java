@@ -1,7 +1,9 @@
 package xiaMengAirline.searchEngine;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -617,6 +619,14 @@ public class LocalSearch2 {
 				bestSolution = neighboursResult.selectASoluiton();
 				neighboursResult.clear();
 				System.out.println("Completed batch ... " + currentBatch + " Cost: " + bestSolution.getCost());
+				if (bestSolution.getCost().longValue() < 90 && (currentBatch % 3 == 0)) {
+					Date dNow = new Date( );
+				      SimpleDateFormat ft = 
+				      new SimpleDateFormat ("hh_mm_ss");
+					XiaMengAirlineSolution aBetterOutput = bestSolution.reConstruct();
+					aBetterOutput.refreshCost(true);
+					aBetterOutput.generateOutput("batch_"+currentBatch+"_"+ft.format(dNow));
+				}
 			}
 		}
 

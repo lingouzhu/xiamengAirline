@@ -201,9 +201,6 @@ public class StartUp {
 			for (int i = 0; i < iterLength; i++) {
 				aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
 				System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
-				aBetterOutput = aBetterOutput.reConstruct();
-				aBetterOutput.refreshCost(true);
-				aBetterOutput.generateOutput("bb"+"_"+ i);
 			}
 
 			// step3c, small post iteration on most searchable data
