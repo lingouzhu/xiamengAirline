@@ -47,6 +47,10 @@ public class SingleAircraftSearch {
 	}
 	
 	public ArrayList<Aircraft> getAdjustedAircraftPair() throws CloneNotSupportedException, AircraftNotAdjustable{
+		if (originalFlights.size() < 2){
+			throw new AircraftNotAdjustable(originalAircraft);
+		}
+		
 		boolean started = false;
 		boolean finished = false;
 		// loop to open all solutions
@@ -639,6 +643,7 @@ public class SingleAircraftSearch {
 	 * @param flightChain
 	 * @throws CloneNotSupportedException
 	 * @throws FlightDurationNotFound
+	 * @throws AircraftNotAdjustable 
 	 */
 	public void openJointFlightNode(Flight originalFlight, ArrayList<Flight> origFlightChain) throws CloneNotSupportedException, FlightDurationNotFound{
 		Flight jointFlight = getJointFlight(originalFlight);
@@ -652,9 +657,13 @@ public class SingleAircraftSearch {
 			flightChain.add(newFlight);
 			// get next node
 			int jointFlightIndex = getFlightIndexByFlightId(jointFlight.getFlightId());
-			Flight nextFlight = originalFlights.get(jointFlightIndex + 1).clone();
-			flightChain.add(nextFlight);
-			insertPathToOpenList(flightChain);
+			if (jointFlightIndex > originalFlights.size() - 2) {
+				finishedArrayList.add(flightChain);
+			} else {
+				Flight nextFlight = originalFlights.get(jointFlightIndex + 1).clone();
+				flightChain.add(nextFlight);
+				insertPathToOpenList(flightChain);
+			}
 		}
 	}
 	
