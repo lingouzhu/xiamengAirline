@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.searchEngine.SingleAircraftSearch;
 import xiaMengAirline.util.CSVUtils;
 import xiaMengAirline.util.InitData;
@@ -694,11 +695,11 @@ public class XiaMengAirlineSolution implements Cloneable {
 	}
 		
 
-	public XiaMengAirlineSolution getBestSolution() throws CloneNotSupportedException{
+	public XiaMengAirlineSolution getBestSolution() throws CloneNotSupportedException, AircraftNotAdjustable{
 		XiaMengAirlineSolution bestSolution = new XiaMengAirlineSolution();
 		for (Aircraft aircraft : schedule.values()) {
 			if (!aircraft.isCancel()) {
-				SingleAircraftSearch sas = new SingleAircraftSearch(aircraft);
+				SingleAircraftSearch sas = new SingleAircraftSearch(aircraft, true);
 				ArrayList<Aircraft> resultAircraftPair = sas.getAdjustedAircraftPair();
 				Aircraft normalAc = null;
 				Aircraft cancelAc = null;
