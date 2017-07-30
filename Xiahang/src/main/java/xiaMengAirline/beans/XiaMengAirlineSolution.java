@@ -75,10 +75,12 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
 		for (Aircraft aAir : airList) {
-//			System.out.println("Cost Air: " + aAir.getId());
-//			for (Flight aFlight:aAir.getFlightChain()) {
-//				System.out.println("   Flight " + aFlight.getFlightId() + " Departure Time: " + Utils.timeFormatter2(aFlight.getDepartureTime()));
-//			}
+			// System.out.println("Cost Air: " + aAir.getId());
+			// for (Flight aFlight:aAir.getFlightChain()) {
+			// System.out.println(" Flight " + aFlight.getFlightId() + "
+			// Departure Time: " +
+			// Utils.timeFormatter2(aFlight.getDepartureTime()));
+			// }
 			if (!aAir.isCancel()) {
 				for (Flight newFlight : aAir.getFlightChain()) {
 
@@ -517,9 +519,9 @@ public class XiaMengAirlineSolution implements Cloneable {
 	public boolean adjust() throws CloneNotSupportedException {
 		// To-do, add adjustment solution
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
-		//must reset alternative first
+		// must reset alternative first
 		for (Aircraft aAir : airList) {
-			if (aAir.getAlternativeAircraft() != null) 
+			if (aAir.getAlternativeAircraft() != null)
 				aAir.getAlternativeAircraft().clear();
 			aAir.setAlternativeAircraft(null);
 		}
@@ -527,12 +529,13 @@ public class XiaMengAirlineSolution implements Cloneable {
 			for (Aircraft aAir : airList) {
 				if (!aAir.isCancel()) {
 					if (aAir.getAlternativeAircraft() != null)
-						//if already there, it is because setup by cancel
-						//cancel will be merged anyway, therefore reset it again.
-						aAir.setAlternativeAircraft(null); 
+						// if already there, it is because setup by cancel
+						// cancel will be merged anyway, therefore reset it
+						// again.
+						aAir.setAlternativeAircraft(null);
 					aAir.adjustment(this);
 				} else {
-					if (aAir.getAlternativeAircraft()==null)
+					if (aAir.getAlternativeAircraft() == null)
 						aAir.setAlternativeAircraft(aAir.clone());
 				}
 			}
@@ -549,30 +552,18 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 	public XiaMengAirlineSolution reConstruct2() throws CloneNotSupportedException {
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
-//		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
-//		for (Aircraft aAir : airList) {
-//			logger.info("Before Reconstruct Air " + aAir.getId() + " isCancel " + aAir.isCancel());
-//		}
+		// List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		// for (Aircraft aAir : airList) {
+		// logger.info("Before Reconstruct Air " + aAir.getId() + " isCancel " +
+		// aAir.isCancel());
+		// }
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
 		for (Aircraft aircraft : airList) {
-			if (!aircraft.isCancel()) {
-				if (aircraft.getAlternativeAircraft() != null) {
-					costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
-				} else {
-					costSolution.replaceOrAddNewAircraft(aircraft.clone());
-				}				
+			if (aircraft.getAlternativeAircraft() != null) {
+				costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
 			} else {
-				Aircraft cancelAir = aircraft.clone();
-				if (aircraft.getAlternativeAircraft() != null) {
-					for (Flight aFlight:aircraft.getAlternativeAircraft().getFlightChain()) {
-						if (cancelAir.getFlightByFlightId(aFlight.getFlightId()) == null)
-							cancelAir.getFlightChain().add(aFlight.clone());
-					}
-					
-				}
-					
-				
-				costSolution.replaceOrAddNewAircraft(cancelAir);
+				costSolution.replaceOrAddNewAircraft(aircraft.clone());
+
 			}
 
 		}
@@ -580,13 +571,14 @@ public class XiaMengAirlineSolution implements Cloneable {
 		return costSolution;
 
 	}
-	
+
 	public XiaMengAirlineSolution reConstruct() throws CloneNotSupportedException {
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
-//		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
-//		for (Aircraft aAir : airList) {
-//			logger.info("Before Reconstruct Air " + aAir.getId() + " isCancel " + aAir.isCancel());
-//		}
+		// List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		// for (Aircraft aAir : airList) {
+		// logger.info("Before Reconstruct Air " + aAir.getId() + " isCancel " +
+		// aAir.isCancel());
+		// }
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
 		for (Aircraft aircraft : airList) {
 			if (aircraft.getAlternativeAircraft() != null) {
@@ -599,116 +591,112 @@ public class XiaMengAirlineSolution implements Cloneable {
 		return costSolution;
 
 	}
-	
+
 	public boolean validflightNumers3(XiaMengAirlineSolution anotherSolution) {
 		int count = 0;
 		int countb = 0;
-		
+
 		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
 		for (Aircraft aAir : schedule) {
-			for (Flight aFlight:aAir.getFlightChain()) {
+			for (Flight aFlight : aAir.getFlightChain()) {
 				if (aFlight.getFlightId() <= InitData.plannedMaxFligthId)
-					count ++;
+					count++;
 			}
 			count += aAir.getDropOutList().size();
-			
+
 		}
-		
+
 		List<Aircraft> scheduleb = new ArrayList<Aircraft>(anotherSolution.getSchedule().values());
 		for (Aircraft aAir : scheduleb) {
 			countb += aAir.getFlightChain().size();
 		}
-		
-		if (count!=countb) {
+
+		if (count != countb) {
 			System.out.println("Flights not matched! new " + count + " old " + countb);
 			return false;
 		}
-		
-		
+
 		return true;
 	}
-	
+
 	public boolean validflightNumers(XiaMengAirlineSolution anotherSolution) {
 		int count = 0;
 		int countb = 0;
-		
+
 		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
 		for (Aircraft aAir : schedule) {
 			count += aAir.getFlightChain().size();
 		}
-		
+
 		List<Aircraft> scheduleb = new ArrayList<Aircraft>(anotherSolution.getSchedule().values());
 		for (Aircraft aAir : scheduleb) {
 			countb += aAir.getFlightChain().size();
 		}
-		
-		if (count!=countb) {
+
+		if (count != countb) {
 			System.out.println("Flights not matched! new " + count + " old " + countb);
 			return false;
 		}
-		
-		
+
 		return true;
 	}
-	
+
 	public boolean validAlternativeflightNumers(XiaMengAirlineSolution oldSolution) {
 		int count = 0;
 		int countb = 0;
 		int countDropout = 0;
 		int countExtra = 0;
-		
+
 		List<Aircraft> schedule = new ArrayList<Aircraft>(getSchedule().values());
 		for (Aircraft aAir : schedule) {
-			if (aAir.getAlternativeAircraft()!=null) {
+			if (aAir.getAlternativeAircraft() != null) {
 				count += aAir.getAlternativeAircraft().getFlightChain().size();
-				for (Flight aFlight:aAir.getAlternativeAircraft().getFlightChain()) {
+				for (Flight aFlight : aAir.getAlternativeAircraft().getFlightChain()) {
 					if (aFlight.getFlightId() > InitData.plannedMaxFligthId)
 						countExtra++;
 				}
-				for (Flight aDFlight:aAir.getAlternativeAircraft().getDropOutList()) {
+				for (Flight aDFlight : aAir.getAlternativeAircraft().getDropOutList()) {
 					if (InitData.jointFlightMap.containsKey(aDFlight.getFlightId())) {
 						Flight jF = InitData.jointFlightMap.get(aDFlight.getFlightId());
 						if (jF == null)
 							countDropout++;
-						else 
+						else
 							System.out.println("Drop off only for 2nd flight!");
-					} else 
+					} else
 						System.out.println("Drop off only for joined");
 				}
 			}
 		}
 		count -= countExtra;
 		count += countDropout;
-		
+
 		countExtra = 0;
 		for (Aircraft aAir : schedule) {
 			countb += aAir.getFlightChain().size();
-			for (Flight aFlight:aAir.getFlightChain()) {
+			for (Flight aFlight : aAir.getFlightChain()) {
 				if (aFlight.getFlightId() > InitData.plannedMaxFligthId)
 					countExtra++;
 			}
 		}
 		countb -= countExtra;
-		
 
-		
-		if (count!=countb) {
+		if (count != countb) {
 			System.out.println("Alternative Flights not matched! Expected " + countb + " actual " + count);
 			for (Aircraft aAir : schedule) {
-				if (aAir.getAlternativeAircraft()!=null) {
+				if (aAir.getAlternativeAircraft() != null) {
 					System.out.println("Alt Air " + aAir.getId() + " cancel " + aAir.isCancel());
-					for (Flight aFlight:aAir.getAlternativeAircraft().getFlightChain()) {
+					for (Flight aFlight : aAir.getAlternativeAircraft().getFlightChain()) {
 						System.out.println("    Flight Id " + aFlight.getFlightId());
 					}
-					for (Flight aFlight:aAir.getAlternativeAircraft().getDropOutList()) {
+					for (Flight aFlight : aAir.getAlternativeAircraft().getDropOutList()) {
 						System.out.println("    Dropout Flight Id " + aFlight.getFlightId());
 					}
 				}
 			}
 			for (Aircraft aAir : schedule) {
-				if (aAir.getAlternativeAircraft()!=null) {
+				if (aAir.getAlternativeAircraft() != null) {
 					System.out.println("Main Air " + aAir.getId() + " cancel " + aAir.isCancel());
-					for (Flight aFlight:aAir.getFlightChain()) {
+					for (Flight aFlight : aAir.getFlightChain()) {
 						System.out.println("    Flight Id " + aFlight.getFlightId());
 					}
 				}
@@ -716,42 +704,51 @@ public class XiaMengAirlineSolution implements Cloneable {
 			List<Aircraft> scheduleb = new ArrayList<Aircraft>(oldSolution.getSchedule().values());
 			for (Aircraft aAir : scheduleb) {
 				System.out.println("Old Air " + aAir.getId() + " cancel " + aAir.isCancel());
-				for (Flight aFlight:aAir.getFlightChain()) {
+				for (Flight aFlight : aAir.getFlightChain()) {
 					System.out.println("    Flight Id " + aFlight.getFlightId());
 				}
 			}
 			System.out.println("Alternative Flights not matched Completed!");
 			return false;
 		}
-		
-		
+
 		return true;
 	}
-		
 
-	public XiaMengAirlineSolution getBestSolution() throws CloneNotSupportedException, AircraftNotAdjustable{
+	public XiaMengAirlineSolution getBestSolution() throws CloneNotSupportedException, AircraftNotAdjustable {
 		XiaMengAirlineSolution bestSolution = this.clone();
 		List<Aircraft> airListBase = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
-		//must reset alternative first
+		// must reset alternative first
 		for (Aircraft aAir : airListBase) {
-			if (aAir.getAlternativeAircraft() != null) 
+			if (aAir.getAlternativeAircraft() != null)
 				aAir.getAlternativeAircraft().clear();
 			aAir.setAlternativeAircraft(null);
 		}
-		
+
 		for (Aircraft aircraft : airListBase) {
 			if (!aircraft.isCancel()) {
 				SingleAircraftSearch sas = new SingleAircraftSearch(aircraft, true);
 				ArrayList<Aircraft> resultAircraftPair = sas.getAdjustedAircraftPair();
 				for (Aircraft ac : resultAircraftPair) {
-					if (ac !=null) {
+					if (ac != null) {
 						Aircraft aBase = bestSolution.getAircraft(ac.getId(), ac.getId(), ac.isCancel(), true);
-						aBase.setAlternativeAircraft(ac.clone());
+						if (!aBase.isCancel())
+							aBase.setAlternativeAircraft(ac.clone());
+						else {
+							Aircraft cancelAir = ac.clone();
+							cancelAir.getFlightChain().addAll(aBase.getFlightChain());
+							aBase.setAlternativeAircraft(cancelAir);
+						}
+
 					}
-		        }
+				}
 			}
 		}
-		
+
+		if (!bestSolution.validAlternativeflightNumers(this)) {
+			System.out.println("Not pass!");
+		}
+
 		return bestSolution;
 	}
 }
