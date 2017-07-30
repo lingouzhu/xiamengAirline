@@ -70,7 +70,7 @@ public class SelfSearch {
 			
 			FlightTime newfirstFlightTime = firstFlight.getSourceAirPort().requestAirport(firstFlightTime, firstFlight.getGroundingTime(0,1));
 			if (newfirstFlightTime != null && newfirstFlightTime.getDepartureTime() != null) {
-				if (getMinuteDifference(firstFlight.getDepartureTime(), newfirstFlightTime.getDepartureTime()) > 360) {
+				if (!firstFlight.isInternationalFlight() && getMinuteDifference(firstFlight.getDepartureTime(), newfirstFlightTime.getDepartureTime()) > 360) {
 					for (AirPortClose aClose : firstFlight.getSourceAirPort().getCloseSchedule()) {
 						if (firstFlight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
 								&& firstFlight.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
@@ -96,16 +96,16 @@ public class SelfSearch {
 				FlightTime avaliableTime = anaat.getAvailableTime();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
 				
-				if (avaliableTime.isIsTyphoon() && isJointFlight(thisFlight) && getJointFlight(thisFlight) != null
-						&& !thisFlight.isInternationalFlight() && !getJointFlight(thisFlight).isInternationalFlight()){
-					Aircraft forkAir = aircraft.clone();
-					Flight firstFlight = forkAir.getFlightChain().get(flightIndex);
-					Flight secondFlight = forkAir.getFlightChain().get(flightIndex + 1); 
-					firstFlight.setDesintationAirport(secondFlight.getDesintationAirport());
-					firstFlight.setArrivalTime(addMinutes(firstFlight.getDepartureTime(), getJointFlightDuration(firstFlight, secondFlight, forkAir)));
-					forkAir.moveToDropOut(secondFlight);
-					forkList.put(flightIndex, forkAir);
-				}
+				//if (avaliableTime.isIsTyphoon() && isJointFlight(thisFlight) && getJointFlight(thisFlight) != null
+				//		&& !thisFlight.isInternationalFlight() && !getJointFlight(thisFlight).isInternationalFlight()){
+				//	Aircraft forkAir = aircraft.clone();
+				//	Flight firstFlight = forkAir.getFlightChain().get(flightIndex);
+				//	Flight secondFlight = forkAir.getFlightChain().get(flightIndex + 1); 
+				//	firstFlight.setDesintationAirport(secondFlight.getDesintationAirport());
+				//	firstFlight.setArrivalTime(addMinutes(firstFlight.getDepartureTime(), getJointFlightDuration(firstFlight, secondFlight, forkAir)));
+				//	forkAir.moveToDropOut(secondFlight);
+				//	forkList.put(flightIndex, forkAir);
+				//}
 				
 				if (isEligibalDelay(getPlannedArrival(thisFlight), avaliableTime.getArrivalTime(), thisFlight.isInternationalFlight())){
 					Date tempDeparture = addMinutes(avaliableTime.getArrivalTime(), (int)getMinuteDifference(getPlannedDeparture(thisFlight), getPlannedArrival(thisFlight)));
@@ -156,16 +156,16 @@ public class SelfSearch {
 			} catch (AirportNotAcceptDepartureTime anadt){
 				Flight thisFlight = anadt.getaFlight();
 				int flightIndex = aircraft.getFlightIndexByFlightId(thisFlight.getFlightId());
-				if (isJointFlight(thisFlight) && getJointFlight(thisFlight) == null
-						&& !thisFlight.isInternationalFlight() && !flights.get(flightIndex - 1).isInternationalFlight()){
-					Aircraft forkAir = aircraft.clone();
-					Flight firstFlight = forkAir.getFlightChain().get(flightIndex - 1);
-					Flight secondFlight = forkAir.getFlightChain().get(flightIndex); 
-					firstFlight.setDesintationAirport(secondFlight.getDesintationAirport());
-					firstFlight.setArrivalTime(addMinutes(firstFlight.getDepartureTime(), getJointFlightDuration(firstFlight, secondFlight, forkAir)));
-					forkAir.moveToDropOut(secondFlight);
-					forkList.put(flightIndex, forkAir);
-				}
+				//if (isJointFlight(thisFlight) && getJointFlight(thisFlight) == null
+				//		&& !thisFlight.isInternationalFlight() && !flights.get(flightIndex - 1).isInternationalFlight()){
+				//	Aircraft forkAir = aircraft.clone();
+				//	Flight firstFlight = forkAir.getFlightChain().get(flightIndex - 1);
+				//	Flight secondFlight = forkAir.getFlightChain().get(flightIndex); 
+				//	firstFlight.setDesintationAirport(secondFlight.getDesintationAirport());
+				//	firstFlight.setArrivalTime(addMinutes(firstFlight.getDepartureTime(), getJointFlightDuration(firstFlight, secondFlight, forkAir)));
+				//	forkAir.moveToDropOut(secondFlight);
+				//	forkList.put(flightIndex, forkAir);
+				//}
 				
 				try {
 					if (flightIndex != flights.size() - 1){
