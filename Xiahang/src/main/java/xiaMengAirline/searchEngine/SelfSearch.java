@@ -217,41 +217,41 @@ public class SelfSearch {
 				infinitLoopCnt++;
 			}
 		}
-//		double thisCost = getAircraftCost(aircraft, aircraftCancel);
-//		
-//		Iterator<Entry<Integer, Aircraft>> it = forkList.entrySet().iterator();
-//	    while (it.hasNext()) {
-//	        Map.Entry<Integer, Aircraft> pair = (Map.Entry<Integer, Aircraft>) it.next();
-//	        int nextStartIndex = pair.getKey();
-//	        Aircraft nextForkAc = pair.getValue();
-//	        Aircraft newReturnAc = null;
-//	        Aircraft newReturnAcCancel = null;
-//	        List<Aircraft> newReturnPair = adjustAircraft(nextForkAc, nextStartIndex, aircraftCancel);
-//	        for (Aircraft ac : newReturnPair) {
-//	        	if (ac.isCancel()) {
-//	        		newReturnAcCancel = ac;
-//	        	}else {
-//	        		newReturnAc = ac;
-//	        	}
-//	        }
-//	        double itCost = getAircraftCost(newReturnAc, newReturnAcCancel);
-//	        if (thisCost > itCost){
-//	        	aircraft = newReturnAc;
-//	        	aircraftCancel = newReturnAcCancel;
-//	        	//double ensure, no duplicated
-//	        	for (Flight aFlight:aircraft.getFlightChain()) {
-//	        		if (aircraftCancel.getFlightByFlightId(aFlight.getFlightId()) != null) {
-//	        			aircraftCancel.getFlightChain().remove(aircraftCancel.getFlightByFlightId(aFlight.getFlightId()));
-//	        		}
-//	        	}
-//	        	for (Flight aFlight:aircraft.getDropOutList()) {
-//	        		if (aircraftCancel.getFlightByFlightId(aFlight.getFlightId()) != null) {
-//	        			aircraftCancel.getFlightChain().remove(aircraftCancel.getFlightByFlightId(aFlight.getFlightId()));
-//	        		}
-//	        	}
-//	        	thisCost = itCost;
-//	        }
-//	    }
+		double thisCost = getAircraftCost(aircraft, aircraftCancel);
+		
+		Iterator<Entry<Integer, Aircraft>> it = forkList.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry<Integer, Aircraft> pair = (Map.Entry<Integer, Aircraft>) it.next();
+	        int nextStartIndex = pair.getKey();
+	        Aircraft nextForkAc = pair.getValue();
+	        Aircraft newReturnAc = null;
+	        Aircraft newReturnAcCancel = null;
+	        List<Aircraft> newReturnPair = adjustAircraft(nextForkAc, nextStartIndex, aircraftCancel);
+	        for (Aircraft ac : newReturnPair) {
+	        	if (ac.isCancel()) {
+	        		newReturnAcCancel = ac;
+	        	}else {
+	        		newReturnAc = ac;
+	        	}
+	        }
+	        double itCost = getAircraftCost(newReturnAc, newReturnAcCancel);
+	        if (thisCost > itCost){
+	        	aircraft = newReturnAc;
+	        	aircraftCancel = newReturnAcCancel;
+	        	//double ensure, no duplicated
+	        	for (Flight aFlight:aircraft.getFlightChain()) {
+	        		if (aircraftCancel.getFlightByFlightId(aFlight.getFlightId()) != null) {
+	        			aircraftCancel.getFlightChain().remove(aircraftCancel.getFlightByFlightId(aFlight.getFlightId()));
+	        		}
+	        	}
+	        	for (Flight aFlight:aircraft.getDropOutList()) {
+	        		if (aircraftCancel.getFlightByFlightId(aFlight.getFlightId()) != null) {
+	        			aircraftCancel.getFlightChain().remove(aircraftCancel.getFlightByFlightId(aFlight.getFlightId()));
+	        		}
+	        	}
+	        	thisCost = itCost;
+	        }
+	    }
 
 		
     	aircraft.setAlternativeAircraft(null);
