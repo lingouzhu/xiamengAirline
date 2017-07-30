@@ -203,7 +203,7 @@ public class StartUp {
 				System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
 				aBetterOutput = aBetterOutput.reConstruct();
 				aBetterOutput.refreshCost(true);
-				aBetterOutput.generateOutput("bb");
+				aBetterOutput.generateOutput("bb"+"_"+ i);
 			}
 
 			// step3c, small post iteration on most searchable data
