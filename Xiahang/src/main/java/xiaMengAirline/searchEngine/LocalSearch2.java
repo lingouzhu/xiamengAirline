@@ -17,9 +17,9 @@ import xiaMengAirline.beans.RestrictedCandidateList;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.util.InitData;
 
-public class LocalSearch {
+public class LocalSearch2 {
 
-	private static final Logger logger = Logger.getLogger(LocalSearch.class);
+	private static final Logger logger = Logger.getLogger(LocalSearch2.class);
 	private int BATCH_SIZE = 20;
 
 	private BigDecimal lowestScore = new BigDecimal(Long.MAX_VALUE);
@@ -83,7 +83,7 @@ public class LocalSearch {
 			throws CloneNotSupportedException, SolutionNotValid {
 		XiaMengAirlineSolution oldSolOut = oldSolution.reConstruct();
 		oldSolOut.refreshCost(false);
-		return (adjust(newSolution, oldSolution).subtract(oldSolOut.getCost()));
+		return (adjust2(newSolution, oldSolution).subtract(oldSolOut.getCost()));
 	}
 
 	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution)
