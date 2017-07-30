@@ -22,9 +22,9 @@ import xiaMengAirline.util.InitData;
 
 public class StartUp {
 
-	final public static long iterLength = 2L;
-	final public static long preiterLength = 30L;
-	final public static long postiterLength = 10L;
+	final public static long iterLength = 1L;
+	final public static long preiterLength = 1L;
+	final public static long postiterLength = 1L;
 	final public static int preQueueSize = 15;
 	final public static int postQueueSize = 10;
 
@@ -152,14 +152,14 @@ public class StartUp {
 			InitData.initData(initDatafile);
 
 			LocalSearch localEngine = new LocalSearch();
-			SelfSearch selfEngine = new SelfSearch(InitData.originalSolution.clone());
+			//SelfSearch selfEngine = new SelfSearch(InitData.originalSolution.clone());
 
 			// Step2, construct initial solution & validate it
-			//XiaMengAirlineSolution initialSolution = InitData.originalSolution.clone();
-			//XiaMengAirlineSolution initialOutput = initialSolution.getBestSolution();
+			XiaMengAirlineSolution initialSolution = InitData.originalSolution.clone();
+			XiaMengAirlineSolution initialOutput = initialSolution.getBestSolution();
 			// initOutput is optional, to setup a baseline
-			XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
-			XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
+			//XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
+			//XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 			initialOutput.refreshCost(true);
 			if (initialOutput.validflightNumers3(InitData.originalSolution))
 				System.out.println("Passed init!");

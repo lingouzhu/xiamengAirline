@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
@@ -39,22 +40,34 @@ public class LocalSearch {
 			if (!aAir.validate())
 				return lowestScore;
 		}
-		if (!newSolution.validflightNumers(oldSolution)) {
-			throw new SolutionNotValid(newSolution, "exchange");
-		}
+//		if (!newSolution.validflightNumers(oldSolution)) {
+//			throw new SolutionNotValid(newSolution, "exchange");
+//		}
 		
 
-		XiaMengAirlineSolution backup = newSolution.clone();
-		if (newSolution.adjust()) {
-			if (!newSolution.validAlternativeflightNumers(oldSolution) 
-					|| !newSolution.validflightNumers(oldSolution)) {
-				backup.adjust();
-				newSolution.validAlternativeflightNumers(oldSolution);
-				throw new SolutionNotValid(newSolution, "adjust");
-			}
-			return newSolution.getCost();
-		} else
+//		XiaMengAirlineSolution backup = newSolution.clone();
+		
+		try {
+			XiaMengAirlineSolution adjustedSolution = null;
+			adjustedSolution = newSolution.getBestSolution();
+			adjustedSolution.refreshCost(false);
+			newSolution.setCost(adjustedSolution.getCost());
+			adjustedSolution.clear();
+		} catch (AircraftNotAdjustable ex) {
+			logger.warn("Unable to adjust solution for the air " + ex.getAir().getId());
 			return lowestScore;
+		}
+		
+//		if (newSolution.adjust()) {
+//			if (!newSolution.validAlternativeflightNumers(oldSolution) 
+//					|| !newSolution.validflightNumers(oldSolution)) {
+//				backup.adjust();
+//				newSolution.validAlternativeflightNumers(oldSolution);
+//				throw new SolutionNotValid(newSolution, "adjust");
+//			}
+			return newSolution.getCost();
+//		} else
+//			return lowestScore;
 
 	}
 

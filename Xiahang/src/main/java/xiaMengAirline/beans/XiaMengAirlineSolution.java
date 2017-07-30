@@ -714,6 +714,8 @@ public class XiaMengAirlineSolution implements Cloneable {
 					bestSolution.replaceOrAddNewAircraft(normalAc.clone());
 				}
 				if (cancelAc != null){
+//					Aircraft currentCancel = getAircraft(cancelAc.getId(), cancelAc.getType(), true, true);
+//					cancelAc.getFlightChain().addAll(currentCancel.getFlightChain());
 					bestSolution.replaceOrAddNewAircraft(cancelAc.clone());
 				}
 				
