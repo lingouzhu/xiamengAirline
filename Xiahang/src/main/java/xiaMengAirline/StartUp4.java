@@ -22,9 +22,9 @@ import xiaMengAirline.util.InitData;
 
 public class StartUp4 {
 
-	final public static long iterLength = 1L;
-	final public static long preiterLength = 1L;
-	final public static long postiterLength = 0L;
+	final public static long iterLength = 2L;
+	final public static long preiterLength = 10L;
+	final public static long postiterLength = 5L;
 	final public static int preQueueSize = 15;
 	final public static int postQueueSize = 10;
 
@@ -203,7 +203,7 @@ public class StartUp4 {
 				aBetterOutput = aBetterSolution.reConstruct2();
 				aBetterOutput.refreshCost(true);
 				aBetterSolution.setCost(aBetterOutput.getCost());
-				aBetterOutput.generateOutput("bb");
+				aBetterOutput.generateOutput("bb_"+i);
 				System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
 			}
 

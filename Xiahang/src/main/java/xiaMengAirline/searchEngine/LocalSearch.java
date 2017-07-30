@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
@@ -33,25 +32,6 @@ public class LocalSearch {
 
 	}
 	
-	private BigDecimal adjust2(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) throws CloneNotSupportedException, SolutionNotValid {
-		List<Aircraft> airList = new ArrayList<Aircraft>(newSolution.getSchedule().values());
-
-		for (Aircraft aAir : airList) {
-			if (!aAir.validate())
-				return lowestScore;
-		}
-		
-		try {
-			XiaMengAirlineSolution aBetterSolution = newSolution.getBestSolution();
-			aBetterSolution.refreshCost(false);
-			return aBetterSolution.getCost();
-		} catch (AircraftNotAdjustable ex) {
-			logger.warn("New solution is not adjustable air " + ex.getAir().getId());
-			return lowestScore;
-		}
-
-
-	}
 
 	private BigDecimal adjust(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) throws CloneNotSupportedException, SolutionNotValid {
 		List<Aircraft> airList = new ArrayList<Aircraft>(newSolution.getSchedule().values());
@@ -60,19 +40,19 @@ public class LocalSearch {
 			if (!aAir.validate())
 				return lowestScore;
 		}
-		if (!newSolution.validflightNumers(oldSolution)) {
-			throw new SolutionNotValid(newSolution, "exchange");
-		}
+//		if (!newSolution.validflightNumers(oldSolution)) {
+//			throw new SolutionNotValid(newSolution, "exchange");
+//		}
 		
 
-		XiaMengAirlineSolution backup = newSolution.clone();
+//		XiaMengAirlineSolution backup = newSolution.clone();
 		if (newSolution.adjust()) {
-			if (!newSolution.validAlternativeflightNumers(oldSolution) 
-					|| !newSolution.validflightNumers(oldSolution)) {
-				backup.adjust();
-				newSolution.validAlternativeflightNumers(oldSolution);
-				throw new SolutionNotValid(newSolution, "adjust");
-			}
+//			if (!newSolution.validAlternativeflightNumers(oldSolution) 
+//					|| !newSolution.validflightNumers(oldSolution)) {
+//				backup.adjust();
+//				newSolution.validAlternativeflightNumers(oldSolution);
+//				throw new SolutionNotValid(newSolution, "adjust");
+//			}
 			return newSolution.getCost();
 		} else
 			return lowestScore;

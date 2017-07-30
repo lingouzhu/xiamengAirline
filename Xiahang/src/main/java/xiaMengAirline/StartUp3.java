@@ -201,7 +201,7 @@ public class StartUp3 {
 				aBetterOutput = aBetterSolution.reConstruct2();
 				aBetterOutput.refreshCost(true);
 				aBetterSolution.setCost(aBetterOutput.getCost());
-				aBetterOutput.generateOutput("bb");
+				aBetterOutput.generateOutput("bb_" + i);
 				System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
 			}
 

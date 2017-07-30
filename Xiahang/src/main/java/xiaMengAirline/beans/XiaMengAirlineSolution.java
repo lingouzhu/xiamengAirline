@@ -547,6 +547,11 @@ public class XiaMengAirlineSolution implements Cloneable {
 		aNewSol.refreshCost(false);
 		cost = aNewSol.getCost();
 		aNewSol.clear();
+		
+		if (!validAlternativeflightNumers(this)) {
+			System.out.println("Invalid solution!");
+		}
+		
 		return true; // return false, if unable to build valid solution
 	}
 
