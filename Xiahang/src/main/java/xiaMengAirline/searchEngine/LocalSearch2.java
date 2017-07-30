@@ -43,8 +43,9 @@ public class LocalSearch2 {
 		
 		try {
 			XiaMengAirlineSolution aBetterSolution = newSolution.getBestSolution();
-			aBetterSolution.refreshCost(false);
-			return aBetterSolution.getCost();
+			XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct2();
+			aBetterOutput.refreshCost(false);
+			return aBetterOutput.getCost();
 		} catch (AircraftNotAdjustable ex) {
 			logger.warn("New solution is not adjustable air " + ex.getAir().getId());
 			return lowestScore;

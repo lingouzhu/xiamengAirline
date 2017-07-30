@@ -547,6 +547,39 @@ public class XiaMengAirlineSolution implements Cloneable {
 		return true; // return false, if unable to build valid solution
 	}
 
+	public XiaMengAirlineSolution reConstruct2() throws CloneNotSupportedException {
+		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
+//		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+//		for (Aircraft aAir : airList) {
+//			logger.info("Before Reconstruct Air " + aAir.getId() + " isCancel " + aAir.isCancel());
+//		}
+		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		for (Aircraft aircraft : airList) {
+			if (!aircraft.isCancel()) {
+				if (aircraft.getAlternativeAircraft() != null) {
+					costSolution.replaceOrAddNewAircraft(aircraft.getAlternativeAircraft().clone());
+				} else {
+					costSolution.replaceOrAddNewAircraft(aircraft.clone());
+				}				
+			} else {
+				Aircraft cancelAir = aircraft.clone();
+				if (aircraft.getAlternativeAircraft() != null) {
+					for (Flight aFlight:aircraft.getAlternativeAircraft().getFlightChain()) {
+						if (cancelAir.getFlightByFlightId(aFlight.getFlightId()) == null)
+							cancelAir.getFlightChain().add(aFlight.clone());
+					}
+					
+				}
+					
+				
+				costSolution.replaceOrAddNewAircraft(cancelAir);
+			}
+
+		}
+
+		return costSolution;
+
+	}
 	
 	public XiaMengAirlineSolution reConstruct() throws CloneNotSupportedException {
 		XiaMengAirlineSolution costSolution = new XiaMengAirlineSolution();
