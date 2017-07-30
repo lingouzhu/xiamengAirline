@@ -518,6 +518,8 @@ public class XiaMengAirlineSolution implements Cloneable {
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
 		//must reset alternative first
 		for (Aircraft aAir : airList) {
+			if (aAir.getAlternativeAircraft() != null) 
+				aAir.getAlternativeAircraft().clear();
 			aAir.setAlternativeAircraft(null);
 		}
 		try {

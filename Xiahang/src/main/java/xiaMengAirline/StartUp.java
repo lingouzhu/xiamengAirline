@@ -215,6 +215,10 @@ public class StartUp {
 			long endTime = System.currentTimeMillis();
 			long mins = (endTime - startTime) / (1000 * 60);
 			System.out.println("Consumed ... " + mins);
+			if (aBetterSolution.validAlternativeflightNumers(InitData.originalSolution))
+				System.out.println("Pass Iter!!!");
+			else
+				System.out.println("Failed Iter!!!");
 			aBetterOutput = aBetterSolution.reConstruct();
 			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
 				System.out.println("Pass Iter!");
