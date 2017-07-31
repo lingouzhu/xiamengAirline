@@ -20,7 +20,7 @@ import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.util.InitData;
 
-public class StartUp {
+public class StartUp1a {
 
 	final public static long iterLength = 2L;
 	final public static long preiterLength = 10L;
@@ -227,20 +227,20 @@ public class StartUp {
 			//step3d, single improvement
 			//XiaMengAirlineSolution finalSolution = aBetterSolution.getBestSolution();
 			//re-adjust
-//			aBetterOutput = aBetterSolution.getBestSolution();
-//			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
-//				System.out.println("Pass Iter2!");
-//			else
-//				System.out.println("Failed Iter2!");
-//
-//			long endTime = System.currentTimeMillis();
-//			long mins = (endTime - startTime) / (1000 * 60);
-//			System.out.println("Consumed ... " + mins);
-//			
-//			aBetterOutput.refreshCost(true);
-//			aBetterOutput.generateOutput("dd");
-//			main = new Main();
-//			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_dd.csv");
+			aBetterOutput = aBetterSolution.getBestSolution();
+			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
+				System.out.println("Pass Iter2!");
+			else
+				System.out.println("Failed Iter2!");
+
+			long endTime = System.currentTimeMillis();
+			long mins = (endTime - startTime) / (1000 * 60);
+			System.out.println("Consumed ... " + mins);
+			
+			aBetterOutput.refreshCost(true);
+			aBetterOutput.generateOutput("dd");
+			main = new Main();
+			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_dd.csv");
 
 		} catch (SolutionNotValid ex) {
 			ex.printStackTrace();
