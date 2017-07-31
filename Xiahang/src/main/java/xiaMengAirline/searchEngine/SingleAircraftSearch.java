@@ -149,7 +149,7 @@ public class SingleAircraftSearch {
 	}
 	
 	public void openFirstNode() throws CloneNotSupportedException, FlightDurationNotFound, ParseException {
-		Flight thisFlight = originalFlights.get(0);
+		Flight thisFlight = originalFlights.get(0).clone();
 		// try earlier departure
 		Date earlyDepTime = getPossibleEarlierDepartureTime(thisFlight, thisFlight.getSourceAirPort(), false, null);
 		if (earlyDepTime != null && !thisFlight.isInternationalFlight()) {
