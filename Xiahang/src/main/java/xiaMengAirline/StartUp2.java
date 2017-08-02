@@ -22,7 +22,7 @@ import xiaMengAirline.util.InitData;
 public class StartUp2 {
 
 	final public static long iterLength = 0L;
-	final public static long preiterLength = 5L;
+	final public static long preiterLength = 10L;
 	final public static long postiterLength = 1L;
 	final public static int preQueueSize = 15;
 	final public static int postQueueSize = 10;
