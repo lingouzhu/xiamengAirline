@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.beans.Flight;
+
 
 public class Aircraft {
 	private static final Logger logger = Logger.getLogger(Aircraft.class);
