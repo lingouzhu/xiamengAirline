@@ -1,6 +1,6 @@
-package xiaMengAirline.newBranch.BasicObject;
+package xiaMengAirline.newBranch.BusinessDomain;
 
-public class UnavailableEventType {
+public class ResourceUnavailableEventType {
 	boolean allowForTakeOff;
 	boolean allowForLanding;
 	boolean allowForParking;

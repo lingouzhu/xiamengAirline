@@ -2,12 +2,48 @@ package xiaMengAirline.newBranch.BasicObject;
 
 import java.util.List;
 
-import xiaMengAirline.newBranch.BusinessDomain.AirportAvailability;
+import xiaMengAirline.newBranch.BusinessDomain.ResourceAvailability;
+import xiaMengAirline.newBranch.BusinessDomain.ResourceUnavailableEvent;
+import xiaMengAirline.newBranch.BusinessDomain.ResourceUnavailableEventType;
 
-public class Airport {
+public class Airport implements ResourceAvailability {
 	private String id;
-	private AirportAvailability airportAvaiablityChecker = new AirportAvailability();
-	
+	private List<ResourceUnavailableEvent> events;
+
+	@Override
+	public void setImpactEvents(List<ResourceUnavailableEvent> events) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public List<ResourceUnavailableEvent> getImpactEvents() {
+		return events;
+	}
+
+	@Override
+	public List<ResourceUnavailableEventType> estimateImpact(PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PairedTime estimateNextAvailable(PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PairedTime estimatePreviousAvailable(PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int setResoruceCapability(int maxAllowed) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 	public String getId() {
 		return id;
@@ -16,23 +52,5 @@ public class Airport {
 	public void setId(String id) {
 		this.id = id;
 	}
-
-
-
-	public void setCloseSchedule(List<ResourceUnavailableEvent> closeSchedule) {
-		airportAvaiablityChecker.setImpactEvents(closeSchedule);
-	}
-	
-	public Airport() {
-		super();
-		airportAvaiablityChecker.setAImpactAirport(this);
-	}
-
-	public void setMaximumParking (int maxParking) {
-		airportAvaiablityChecker.setMaximumParking(maxParking);
-	}
-
-
-
 
 }

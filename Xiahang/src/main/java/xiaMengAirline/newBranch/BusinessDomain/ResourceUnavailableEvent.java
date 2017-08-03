@@ -1,7 +1,9 @@
-package xiaMengAirline.newBranch.BasicObject;
+package xiaMengAirline.newBranch.BusinessDomain;
 
 import java.util.Date;
 import java.util.List;
+
+import xiaMengAirline.newBranch.BasicObject.PairedTime;
 
 public abstract class ResourceUnavailableEvent  {
 	Date startTime;
@@ -14,7 +16,7 @@ public abstract class ResourceUnavailableEvent  {
 		return retPair;
 	}
 
-	public abstract List<UnavailableEventType> getFixedUnavailableEventType() ;
+	public abstract List<ResourceUnavailableEventType> getUnavailableEventType() ;
 
 	public Date getStartTime() {
 		return startTime;

@@ -11,6 +11,7 @@ public class DomesticFlight extends Flight {
 	@Override
 	public boolean cancelFlight() {
 		// TODO Auto-generated method stub
+		System.out.println("Cancel dometic");
 		return false;
 	}
 
