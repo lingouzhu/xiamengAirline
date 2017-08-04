@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import xiaMengAirline.Exception.AircraftNotAdjustable;
-import xiaMengAirline.Exception.AirportNotAvailable;
-import xiaMengAirline.Exception.FlightDurationNotFound;
-import xiaMengAirline.Exception.SolutionNotValid;
-import xiaMengAirline.beans.Aircraft;
-import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.MatchedFlight;
-import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.Exception.AircraftNotAdjustableBackup;
+import xiaMengAirline.Exception.AirportNotAvailableBackup;
+import xiaMengAirline.Exception.FlightDurationNotFoundBackup;
+import xiaMengAirline.Exception.SolutionNotValidBackup;
+import xiaMengAirline.beans.AircraftBackup;
+import xiaMengAirline.beans.FlightBackup;
+import xiaMengAirline.beans.MatchedFlightBackup;
+import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
 import xiaMengAirline.evaluator.aviation2017.Main;
-import xiaMengAirline.searchEngine.LocalSearch2;
-import xiaMengAirline.util.InitData;
+import xiaMengAirline.searchEngine.LocalSearch2Backup;
+import xiaMengAirline.util.InitDataBackup;
 
 public class StartUp3 {
 
@@ -27,18 +27,18 @@ public class StartUp3 {
 	final public static int preQueueSize = 15;
 	final public static int postQueueSize = 10;
 
-	public static TreeMap<Integer, List<Aircraft>> searchHeavyList(List<Aircraft> airList) {
-		TreeMap<Integer, List<Aircraft>> topAirList = new TreeMap<Integer, List<Aircraft>>();
+	public static TreeMap<Integer, List<AircraftBackup>> searchHeavyList(List<AircraftBackup> airList) {
+		TreeMap<Integer, List<AircraftBackup>> topAirList = new TreeMap<Integer, List<AircraftBackup>>();
 
 		int topOverlapped = -1;
 		int bottomOverlapped = Integer.MAX_VALUE;
 		int queueSize = postQueueSize;
-		for (Aircraft aAir : airList) {
+		for (AircraftBackup aAir : airList) {
 			int numberOfOverLapped = 0;
-			for (Aircraft bAir : airList) {
+			for (AircraftBackup bAir : airList) {
 				if (!aAir.getId().equals(bAir.getId())) {
-					HashMap<Flight, List<MatchedFlight>> matchedFlights = aAir.getMatchedFlights(bAir);
-					for (Map.Entry<Flight, List<MatchedFlight>> entry : matchedFlights.entrySet()) {
+					HashMap<FlightBackup, List<MatchedFlightBackup>> matchedFlights = aAir.getMatchedFlights(bAir);
+					for (Map.Entry<FlightBackup, List<MatchedFlightBackup>> entry : matchedFlights.entrySet()) {
 						numberOfOverLapped += entry.getValue().size();
 					}
 				}
@@ -48,7 +48,7 @@ public class StartUp3 {
 				if (topAirList.containsKey(numberOfOverLapped)) {
 					topAirList.get(numberOfOverLapped).add(aAir);
 				} else {
-					List<Aircraft> list = new ArrayList<Aircraft>();
+					List<AircraftBackup> list = new ArrayList<AircraftBackup>();
 					list.add(aAir);
 					topAirList.put(numberOfOverLapped, list);
 				}
@@ -62,7 +62,7 @@ public class StartUp3 {
 				if (topAirList.containsKey(numberOfOverLapped)) {
 					topAirList.get(numberOfOverLapped).add(aAir);
 				} else if (numberOfOverLapped > bottomOverlapped) {
-					List<Aircraft> list = new ArrayList<Aircraft>();
+					List<AircraftBackup> list = new ArrayList<AircraftBackup>();
 					list.add(aAir);
 					topAirList.put(numberOfOverLapped, list);
 					if (numberOfOverLapped < bottomOverlapped) {
@@ -82,18 +82,18 @@ public class StartUp3 {
 
 	}
 
-	public static TreeMap<Integer, List<Aircraft>> searchTopList(List<Aircraft> airList) {
-		TreeMap<Integer, List<Aircraft>> topAirList = new TreeMap<Integer, List<Aircraft>>();
+	public static TreeMap<Integer, List<AircraftBackup>> searchTopList(List<AircraftBackup> airList) {
+		TreeMap<Integer, List<AircraftBackup>> topAirList = new TreeMap<Integer, List<AircraftBackup>>();
 
 		int topOverlapped = -1;
 		int bottomOverlapped = Integer.MAX_VALUE;
 		int queueSize = preQueueSize;
-		for (Aircraft aAir : airList) {
+		for (AircraftBackup aAir : airList) {
 			int numberOfOverLapped = 0;
-			for (Aircraft bAir : airList) {
+			for (AircraftBackup bAir : airList) {
 				if (!aAir.getId().equals(bAir.getId())) {
-					HashMap<Flight, List<MatchedFlight>> matchedFlights = aAir.getMatchedFlights(bAir);
-					for (Map.Entry<Flight, List<MatchedFlight>> entry : matchedFlights.entrySet()) {
+					HashMap<FlightBackup, List<MatchedFlightBackup>> matchedFlights = aAir.getMatchedFlights(bAir);
+					for (Map.Entry<FlightBackup, List<MatchedFlightBackup>> entry : matchedFlights.entrySet()) {
 						numberOfOverLapped += entry.getValue().size();
 					}
 				}
@@ -104,7 +104,7 @@ public class StartUp3 {
 					if (topAirList.containsKey(numberOfOverLapped)) {
 						topAirList.get(numberOfOverLapped).add(aAir);
 					} else {
-						List<Aircraft> list = new ArrayList<Aircraft>();
+						List<AircraftBackup> list = new ArrayList<AircraftBackup>();
 						list.add(aAir);
 						topAirList.put(numberOfOverLapped, list);
 					}
@@ -118,7 +118,7 @@ public class StartUp3 {
 					if (topAirList.containsKey(numberOfOverLapped)) {
 						topAirList.get(numberOfOverLapped).add(aAir);
 					} else if (numberOfOverLapped < topOverlapped) {
-						List<Aircraft> list = new ArrayList<Aircraft>();
+						List<AircraftBackup> list = new ArrayList<AircraftBackup>();
 						list.add(aAir);
 						topAirList.put(numberOfOverLapped, list);
 						if (numberOfOverLapped < bottomOverlapped) {
@@ -141,22 +141,22 @@ public class StartUp3 {
 
 	}
 
-	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFound,
-			AirportNotAvailable, AircraftNotAdjustable {
+	public static void main(String[] args) throws CloneNotSupportedException, ParseException, FlightDurationNotFoundBackup,
+			AirportNotAvailableBackup, AircraftNotAdjustableBackup {
 		try {
 			long startTime = System.currentTimeMillis();
 			// Step1, Load all data & initialize
 			String initDatafile = "XiahangData.xlsx";
-			InitData.initData(initDatafile);
+			InitDataBackup.initData(initDatafile);
 
-			LocalSearch2 localEngine = new LocalSearch2();
+			LocalSearch2Backup localEngine = new LocalSearch2Backup();
 
 			// Step2, construct initial solution & validate it
-			XiaMengAirlineSolution initialSolution = InitData.originalSolution.getBestSolution();
-			XiaMengAirlineSolution initialOutput = initialSolution.reConstruct2();
+			XiaMengAirlineSolutionBackup initialSolution = InitDataBackup.originalSolution.getBestSolution();
+			XiaMengAirlineSolutionBackup initialOutput = initialSolution.reConstruct2();
 			initialOutput.refreshCost(true);
 			initialSolution.setCost(initialOutput.getCost());
-			if (initialOutput.validflightNumers3(InitData.originalSolution))
+			if (initialOutput.validflightNumers3(InitDataBackup.originalSolution))
 				System.out.println("Passed init!");
 			else
 				System.out.println("Failed init!");
@@ -166,29 +166,29 @@ public class StartUp3 {
 			main.evalutor("数据森林_" + initialOutput.getStrCost() + "_0.csv");
 
 
-			XiaMengAirlineSolution aBetterSolution = initialSolution;
+			XiaMengAirlineSolutionBackup aBetterSolution = initialSolution;
 			// step3a, small iteration on most important data
-			List<Aircraft> airList = new ArrayList<Aircraft>(aBetterSolution.getSchedule().values());
-			TreeMap<Integer, List<Aircraft>> topAirList = searchTopList(airList);
+			List<AircraftBackup> airList = new ArrayList<AircraftBackup>(aBetterSolution.getSchedule().values());
+			TreeMap<Integer, List<AircraftBackup>> topAirList = searchTopList(airList);
 
 			int currentSize = localEngine.getBATCH_SIZE();
 
-			List<Aircraft> importantAirList = new ArrayList<Aircraft>();
-			for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
+			List<AircraftBackup> importantAirList = new ArrayList<AircraftBackup>();
+			for (Map.Entry<Integer, List<AircraftBackup>> entry : topAirList.entrySet()) {
 				importantAirList.addAll(entry.getValue());
 			}
 			localEngine.setBATCH_SIZE(importantAirList.size());
 
 			for (int i = 0; i < preiterLength; i++) {
-				List<Aircraft> preIterList = new ArrayList<Aircraft>(importantAirList);
+				List<AircraftBackup> preIterList = new ArrayList<AircraftBackup>(importantAirList);
 				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
 				System.out.println("Pre-Iter " + i + " Cost: " + aBetterSolution.getCost());
 			}
-			XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct2();
+			XiaMengAirlineSolutionBackup aBetterOutput = aBetterSolution.reConstruct2();
 			aBetterOutput.refreshCost(false);
 			aBetterSolution.setCost(aBetterOutput.getCost());
 			
-			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
+			if (aBetterOutput.validflightNumers3(InitDataBackup.originalSolution))
 				System.out.println("Pass Pre-Iter!");
 			else
 				System.out.println("Failed Pre-Iter!");
@@ -206,17 +206,17 @@ public class StartUp3 {
 			}
 
 			// step3c, small post iteration on most searchable data
-			airList = new ArrayList<Aircraft>(aBetterSolution.getSchedule().values());
+			airList = new ArrayList<AircraftBackup>(aBetterSolution.getSchedule().values());
 
 			topAirList = searchHeavyList(airList);
 
-			importantAirList = new ArrayList<Aircraft>();
-			for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
+			importantAirList = new ArrayList<AircraftBackup>();
+			for (Map.Entry<Integer, List<AircraftBackup>> entry : topAirList.entrySet()) {
 				importantAirList.addAll(entry.getValue());
 			}
 			localEngine.setBATCH_SIZE(importantAirList.size());
 			for (int i = 0; i < postiterLength; i++) {
-				List<Aircraft> preIterList = new ArrayList<Aircraft>(importantAirList);
+				List<AircraftBackup> preIterList = new ArrayList<AircraftBackup>(importantAirList);
 				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
 				System.out.println("Post-Iter " + i + " Cost: " + aBetterSolution.getCost());
 			}
@@ -231,12 +231,12 @@ public class StartUp3 {
 			//XiaMengAirlineSolution finalSolution = aBetterSolution.getBestSolution();
 			//re-adjust
 			aBetterSolution = aBetterSolution.getBestSolution();
-			if (aBetterSolution.validAlternativeflightNumers(InitData.originalSolution))
+			if (aBetterSolution.validAlternativeflightNumers(InitDataBackup.originalSolution))
 				System.out.println("Pass Iter Single!!!");
 			else
 				System.out.println("Failed Iter Single!!!");
 			aBetterOutput = aBetterSolution.reConstruct2();
-			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
+			if (aBetterOutput.validflightNumers3(InitDataBackup.originalSolution))
 				System.out.println("Pass Iter Single Constructed!");
 			else
 				System.out.println("Failed Iter Single Cosntructed!");
@@ -251,10 +251,10 @@ public class StartUp3 {
 			main = new Main();
 			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_ee.csv");
 
-		} catch (SolutionNotValid ex) {
+		} catch (SolutionNotValidBackup ex) {
 			ex.printStackTrace();
 			System.out.println("Reason: " + ex.getInvalidTime());
-			XiaMengAirlineSolution aSolution = ex.getaSolution();
+			XiaMengAirlineSolutionBackup aSolution = ex.getaSolution();
 			aSolution.generateOutput("error");
 		} catch (Exception ex) {
 			ex.printStackTrace();

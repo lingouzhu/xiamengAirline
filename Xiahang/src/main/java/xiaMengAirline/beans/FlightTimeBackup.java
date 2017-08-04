@@ -7,7 +7,7 @@ import java.util.Date;
  * The FlightTime class specify suggested flight arrival / departure time,
  * @author Leonard
  */
-public class FlightTime {
+public class FlightTimeBackup {
 	/** Represents suggested arrival time.
 	*/
 	private Date arrivalTime;

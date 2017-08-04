@@ -1,6 +1,6 @@
 package xiaMengAirline.util;
 
-public class Constant {
+public class ConstantBackup {
 
 
 

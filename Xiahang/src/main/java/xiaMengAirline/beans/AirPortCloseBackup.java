@@ -2,7 +2,7 @@ package xiaMengAirline.beans;
 
 import java.util.Date;
 
-public class AirPortClose {
+public class AirPortCloseBackup {
 	private Date startTime;
 	private Date endTime;
 	private boolean allowForTakeoff = true;

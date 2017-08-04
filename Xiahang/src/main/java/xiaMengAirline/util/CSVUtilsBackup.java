@@ -10,14 +10,14 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.FlightBackup;
 
 /**   
  * CSV操作(导出和导入)
  *
  * @author Data Forest
  */
-public class CSVUtils {
+public class CSVUtilsBackup {
     
     /**
      * 导出
@@ -106,18 +106,18 @@ public class CSVUtils {
     }
     
     
-    public static String flight2Output(Flight flight, String airID, String isCancel, String isStretch, String isEmpty) {
+    public static String flight2Output(FlightBackup flight, String airID, String isCancel, String isStretch, String isEmpty) {
     	
     	String output = "";
     	if ("1".equals(isCancel)) {
     		output = flight.getFlightId() + "," + flight.getPlannedFlight().getSourceAirPort().getId() + ","
-        			+ flight.getPlannedFlight().getDesintationAirport().getId() + "," + Utils.timeFormatter2(flight.getPlannedFlight().getDepartureTime()) 
-        			+  "," + Utils.timeFormatter2(flight.getPlannedFlight().getArrivalTime()) + "," + flight.getPlannedAir().getId() + "," 
+        			+ flight.getPlannedFlight().getDesintationAirport().getId() + "," + UtilsBackup.timeFormatter2(flight.getPlannedFlight().getDepartureTime()) 
+        			+  "," + UtilsBackup.timeFormatter2(flight.getPlannedFlight().getArrivalTime()) + "," + flight.getPlannedAir().getId() + "," 
         			+ isCancel + ","+ isStretch + ","+ isEmpty;
     	} else {
     		output = flight.getFlightId() + "," + flight.getSourceAirPort().getId() + ","
-        			+ flight.getDesintationAirport().getId() + "," + Utils.timeFormatter2(flight.getDepartureTime()) 
-        			+  "," + Utils.timeFormatter2(flight.getArrivalTime()) + "," + airID + "," 
+        			+ flight.getDesintationAirport().getId() + "," + UtilsBackup.timeFormatter2(flight.getDepartureTime()) 
+        			+  "," + UtilsBackup.timeFormatter2(flight.getArrivalTime()) + "," + airID + "," 
         			+ isCancel + ","+ isStretch + ","+ isEmpty;
     	}
     	

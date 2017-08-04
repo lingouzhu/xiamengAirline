@@ -8,23 +8,23 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.Exception.AirportNotAvailable;
-import xiaMengAirline.Exception.FlightDurationNotFound;
-import xiaMengAirline.Exception.SolutionNotValid;
-import xiaMengAirline.beans.AirPort;
-import xiaMengAirline.beans.Aircraft;
-import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.util.InitData;
-import xiaMengAirline.util.Utils;
+import xiaMengAirline.Exception.AirportNotAvailableBackup;
+import xiaMengAirline.Exception.FlightDurationNotFoundBackup;
+import xiaMengAirline.Exception.SolutionNotValidBackup;
+import xiaMengAirline.beans.AirPortBackup;
+import xiaMengAirline.beans.AircraftBackup;
+import xiaMengAirline.beans.FlightBackup;
+import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.util.InitDataBackup;
+import xiaMengAirline.util.UtilsBackup;
 
 public class LocalSearchTest {
 
-	private Flight createFlight(int flightId, String srcPort, String destPort) {
-		Flight flight = new Flight();
+	private FlightBackup createFlight(int flightId, String srcPort, String destPort) {
+		FlightBackup flight = new FlightBackup();
 		flight.setSchdNo(flightId);
-		AirPort aAirport = InitData.airportList.getAirport(srcPort);
-		AirPort bAirport = InitData.airportList.getAirport(destPort);
+		AirPortBackup aAirport = InitDataBackup.airportList.getAirport(srcPort);
+		AirPortBackup bAirport = InitDataBackup.airportList.getAirport(destPort);
 		
 
 		flight.setSourceAirPort(aAirport);
@@ -38,9 +38,9 @@ public class LocalSearchTest {
 	}
 
 	@Test
-	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, SolutionNotValid {
-		Aircraft air1 = new Aircraft();
-		List<Flight> flightChain = new ArrayList<Flight>();
+	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, FlightDurationNotFoundBackup, AirportNotAvailableBackup, SolutionNotValidBackup {
+		AircraftBackup air1 = new AircraftBackup();
+		List<FlightBackup> flightChain = new ArrayList<FlightBackup>();
 		flightChain.add(createFlight(101, "ORF", "EWR"));
 		flightChain.add(createFlight(102, "EWR", "STL"));
 		flightChain.add(createFlight(103, "STL", "CLE"));
@@ -49,17 +49,17 @@ public class LocalSearchTest {
 		air1.setFlightChain(flightChain);
 		air1.setId("1");
 		air1.setType("1");
-		for (Flight aFlight:flightChain) {
-			aFlight.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
-			aFlight.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		for (FlightBackup aFlight:flightChain) {
+			aFlight.setDepartureTime(UtilsBackup.stringFormatToTime2("27/06/2017 06:50:00"));
+			aFlight.setArrivalTime(UtilsBackup.stringFormatToTime2("27/06/2017 17:00:00"));
 			aFlight.setImpCoe(new BigDecimal(1.5));
 			aFlight.setAssignedAir(air1);
 			aFlight.setPlannedFlight(aFlight);
 			aFlight.setPlannedAir(air1);
 		}
 
-		Aircraft air2 = new Aircraft();
-		List<Flight> flightChain2 = new ArrayList<Flight>();
+		AircraftBackup air2 = new AircraftBackup();
+		List<FlightBackup> flightChain2 = new ArrayList<FlightBackup>();
 		flightChain2.add(createFlight(201, "CLE", "ATL"));
 		flightChain2.add(createFlight(202, "ATL", "EWR"));
 		flightChain2.add(createFlight(203, "EWR", "BWI"));
@@ -68,18 +68,18 @@ public class LocalSearchTest {
 		air2.setFlightChain(flightChain2);
 		air2.setId("2");
 		air2.setType("2");
-		for (Flight aFlight:flightChain2) {
-			aFlight.setDepartureTime(Utils.stringFormatToTime2("27/06/2017 06:50:00"));
-			aFlight.setArrivalTime(Utils.stringFormatToTime2("27/06/2017 17:00:00"));
+		for (FlightBackup aFlight:flightChain2) {
+			aFlight.setDepartureTime(UtilsBackup.stringFormatToTime2("27/06/2017 06:50:00"));
+			aFlight.setArrivalTime(UtilsBackup.stringFormatToTime2("27/06/2017 17:00:00"));
 			aFlight.setImpCoe(new BigDecimal(1.5));
 			aFlight.setAssignedAir(air2);
 			aFlight.setPlannedFlight(aFlight);
 			aFlight.setPlannedAir(air2);
 		}
 		
-		LocalSearch searchEngine = new LocalSearch();
+		LocalSearchBackup searchEngine = new LocalSearchBackup();
 		
-		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
+		XiaMengAirlineSolutionBackup aSolution = new XiaMengAirlineSolutionBackup();
 		aSolution.replaceOrAddNewAircraft(air1);
 		aSolution.replaceOrAddNewAircraft(air2);
 		

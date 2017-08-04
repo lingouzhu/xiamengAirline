@@ -6,26 +6,26 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.Exception.FlightDurationNotFound;
-import xiaMengAirline.util.InitData;
+import xiaMengAirline.Exception.FlightDurationNotFoundBackup;
+import xiaMengAirline.util.InitDataBackup;
 
-public class Flight implements Cloneable {
-	private static final Logger logger = Logger.getLogger(Flight.class);
+public class FlightBackup implements Cloneable {
+	private static final Logger logger = Logger.getLogger(FlightBackup.class);
 	
 	final public static int GroundingTime = 50;
 	
 	private int flightId;
 	private Date schdDate;
-	private AirPort sourceAirPort;
-	private AirPort desintationAirport;
+	private AirPortBackup sourceAirPort;
+	private AirPortBackup desintationAirport;
 	private boolean internationalFlight;
 	private int schdNo;
 	private Date arrivalTime;
 	private Date departureTime;
 	private BigDecimal impCoe;
-	private Aircraft assignedAir;
-	private Aircraft plannedAir;
-	private Flight plannedFlight;
+	private AircraftBackup assignedAir;
+	private AircraftBackup plannedAir;
+	private FlightBackup plannedFlight;
 	
 	public int getFlightId() {
 		return flightId;
@@ -33,16 +33,16 @@ public class Flight implements Cloneable {
 	public void setFlightId(int id) {
 		this.flightId = id;
 	}
-	public AirPort getSourceAirPort() {
+	public AirPortBackup getSourceAirPort() {
 		return sourceAirPort;
 	}
-	public void setSourceAirPort(AirPort sourceAirPort) {
+	public void setSourceAirPort(AirPortBackup sourceAirPort) {
 		this.sourceAirPort = sourceAirPort;
 	}
-	public AirPort getDesintationAirport() {
+	public AirPortBackup getDesintationAirport() {
 		return desintationAirport;
 	}
-	public void setDesintationAirport(AirPort desintationAirport) {
+	public void setDesintationAirport(AirPortBackup desintationAirport) {
 		this.desintationAirport = desintationAirport;
 	}
 	public Date getArrivalTime() {
@@ -87,11 +87,11 @@ public class Flight implements Cloneable {
 		return true;
 	}
 	
-	public Flight clone() throws CloneNotSupportedException {
-		return (Flight) (super.clone());
+	public FlightBackup clone() throws CloneNotSupportedException {
+		return (FlightBackup) (super.clone());
 	}
 	
-	public Date calcuateNextArrivalTime () throws FlightDurationNotFound {
+	public Date calcuateNextArrivalTime () throws FlightDurationNotFoundBackup {
 		if (plannedFlight == null || (plannedFlight != null && !plannedFlight.getDesintationAirport().getId().equals(desintationAirport.getId()))) {
 			//find out flight time
 			String searchKey = assignedAir.getType();
@@ -101,14 +101,14 @@ public class Flight implements Cloneable {
 			searchKey += desintationAirport.getId();
 			
 			int flightDur = 0;
-			if (InitData.fightDurationMap.containsKey(searchKey))
-				flightDur =  InitData.fightDurationMap.get(searchKey);
+			if (InitDataBackup.fightDurationMap.containsKey(searchKey))
+				flightDur =  InitDataBackup.fightDurationMap.get(searchKey);
 			else {
 				if (plannedFlight == null)
-					throw new FlightDurationNotFound(this, searchKey);
-				Flight linkedFlight = InitData.jointFlightMap.get(flightId);
+					throw new FlightDurationNotFoundBackup(this, searchKey);
+				FlightBackup linkedFlight = InitDataBackup.jointFlightMap.get(flightId);
 				if (linkedFlight == null)
-					throw new FlightDurationNotFound(this, searchKey);
+					throw new FlightDurationNotFoundBackup(this, searchKey);
 				else {
 					long diff = plannedFlight.getArrivalTime().getTime() - plannedFlight.getDepartureTime().getTime();
 					diff += linkedFlight.getArrivalTime().getTime() - linkedFlight.getDepartureTime().getTime();
@@ -131,22 +131,22 @@ public class Flight implements Cloneable {
 		}
 
 	}
-	public Aircraft getAssignedAir() {
+	public AircraftBackup getAssignedAir() {
 		return assignedAir;
 	}
-	public void setAssignedAir(Aircraft assignedAir) {
+	public void setAssignedAir(AircraftBackup assignedAir) {
 		this.assignedAir = assignedAir;
 	}
-	public Aircraft getPlannedAir() {
+	public AircraftBackup getPlannedAir() {
 		return plannedAir;
 	}
-	public void setPlannedAir(Aircraft plannedAir) {
+	public void setPlannedAir(AircraftBackup plannedAir) {
 		this.plannedAir = plannedAir;
 	}
-	public Flight getPlannedFlight() {
+	public FlightBackup getPlannedFlight() {
 		return plannedFlight;
 	}
-	public void setPlannedFlight(Flight plannedFlight) {
+	public void setPlannedFlight(FlightBackup plannedFlight) {
 		this.plannedFlight = plannedFlight;
 	}
 	
@@ -167,8 +167,8 @@ public class Flight implements Cloneable {
 		searchKey += "_";
 		searchKey +=  nextFlightId;
 		
-		if (InitData.specialFlightMap.containsKey(searchKey))
-			return (InitData.specialFlightMap.get(searchKey));
+		if (InitDataBackup.specialFlightMap.containsKey(searchKey))
+			return (InitDataBackup.specialFlightMap.get(searchKey));
 		else
 			return GroundingTime;
 		

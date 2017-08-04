@@ -4,7 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class RegularAirPortClose {
+public class RegularAirPortCloseBackup {
 	
 	private int port;
 	private String closeTime;

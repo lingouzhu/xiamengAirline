@@ -11,41 +11,41 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.Exception.SolutionNotValid;
-import xiaMengAirline.beans.AirPort;
-import xiaMengAirline.beans.Aircraft;
-import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.util.InitData;
-import xiaMengAirline.util.Utils;
+import xiaMengAirline.Exception.SolutionNotValidBackup;
+import xiaMengAirline.beans.AirPortBackup;
+import xiaMengAirline.beans.AircraftBackup;
+import xiaMengAirline.beans.FlightBackup;
+import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.util.InitDataBackup;
+import xiaMengAirline.util.UtilsBackup;
 
 public class IntegrationTest1 {
 
-	Aircraft air1 = new Aircraft();
+	AircraftBackup air1 = new AircraftBackup();
 
-	Aircraft air2 = new Aircraft();
+	AircraftBackup air2 = new AircraftBackup();
 
-	private Flight createFlight(int flightId, String srcPort, String destPort, String planneddestPort, Date depTime,
+	private FlightBackup createFlight(int flightId, String srcPort, String destPort, String planneddestPort, Date depTime,
 			Date plannedDepTime, String plannedAirType, BigDecimal impCoe, int schdNo, Date scheDate) {
-		Flight flight = new Flight();
+		FlightBackup flight = new FlightBackup();
 		try {
 
 			flight.setFlightId(flightId);
-			AirPort aAirport = InitData.airportList.getAirport(srcPort);
-			AirPort bAirport = InitData.airportList.getAirport(destPort);
-			AirPort pAirport = InitData.airportList.getAirport(planneddestPort);
+			AirPortBackup aAirport = InitDataBackup.airportList.getAirport(srcPort);
+			AirPortBackup bAirport = InitDataBackup.airportList.getAirport(destPort);
+			AirPortBackup pAirport = InitDataBackup.airportList.getAirport(planneddestPort);
 			flight.setSourceAirPort(aAirport);
 			flight.setDesintationAirport(bAirport);
 
 			flight.setDepartureTime(depTime);
-			flight.setArrivalTime(Utils.addMinutes(depTime, 60));
+			flight.setArrivalTime(UtilsBackup.addMinutes(depTime, 60));
 
 			flight.setPlannedFlight(flight.clone());
 
 			flight.getPlannedFlight().setDesintationAirport(pAirport);
 			flight.getPlannedFlight().setDepartureTime(plannedDepTime);
 
-			Aircraft plannedAir = new Aircraft();
+			AircraftBackup plannedAir = new AircraftBackup();
 			plannedAir.setType(plannedAirType);
 			plannedAir.setId("10");
 			flight.setPlannedAir(plannedAir);
@@ -68,7 +68,7 @@ public class IntegrationTest1 {
 	@Before
 	public void setUp() throws Exception {
 
-		InitData.plannedMaxFligthId = 1000;
+		InitDataBackup.plannedMaxFligthId = 1000;
 		// Flight fligt1 = createFlight(102, "002", "003", "003",
 		// Utils.timeStr2date("2017-01-01 13:00:00"),
 		// Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"),
@@ -83,14 +83,14 @@ public class IntegrationTest1 {
 		// InitData.jointFlightMap.put(fligt2.getFlightId(), null);
 		//
 		// delay 1 hour 100
-		List<Flight> flightChain = new ArrayList<Flight>();
-		flightChain.add(createFlight(101, "001", "002", "002", Utils.timeStr2date("2017-01-01 10:00:00"),
-				Utils.timeStr2date("2017-01-01 9:00:00"), "1", new BigDecimal("1"), 201,
-				Utils.dateStr2date("2017-01-01")));
+		List<FlightBackup> flightChain = new ArrayList<FlightBackup>();
+		flightChain.add(createFlight(101, "001", "002", "002", UtilsBackup.timeStr2date("2017-01-01 10:00:00"),
+				UtilsBackup.timeStr2date("2017-01-01 9:00:00"), "1", new BigDecimal("1"), 201,
+				UtilsBackup.dateStr2date("2017-01-01")));
 		// joint 5000
-		flightChain.add(createFlight(10001, "002", "004", "003", Utils.timeStr2date("2017-01-01 10:00:00"),
-				Utils.timeStr2date("2017-01-01 10:00:00"), "1", new BigDecimal("1"), 202,
-				Utils.dateStr2date("2017-01-01")));
+		flightChain.add(createFlight(10001, "002", "004", "003", UtilsBackup.timeStr2date("2017-01-01 10:00:00"),
+				UtilsBackup.timeStr2date("2017-01-01 10:00:00"), "1", new BigDecimal("1"), 202,
+				UtilsBackup.dateStr2date("2017-01-01")));
 
 		// change air type
 		// flightChain.add(createFlight(104, "004", "005", "005",
@@ -128,16 +128,16 @@ public class IntegrationTest1 {
 		air1.setId("1");
 		air1.setType("1");
 
-		List<Flight> flightChain2 = new ArrayList<Flight>();
+		List<FlightBackup> flightChain2 = new ArrayList<FlightBackup>();
 
 		// cancel 1000
-		flightChain2.add(createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"),
-				Utils.timeStr2date("2017-01-01 13:00:00"), "1", new BigDecimal("1"), 202,
-				Utils.dateStr2date("2017-01-01")));
+		flightChain2.add(createFlight(102, "002", "003", "003", UtilsBackup.timeStr2date("2017-01-01 13:00:00"),
+				UtilsBackup.timeStr2date("2017-01-01 13:00:00"), "1", new BigDecimal("1"), 202,
+				UtilsBackup.dateStr2date("2017-01-01")));
 		// cancel 1000
-		flightChain2.add(createFlight(103, "003", "004", "004", Utils.timeStr2date("2017-01-01 18:00:00"),
-				Utils.timeStr2date("2017-01-01 18:00:00"), "1", new BigDecimal("1"), 202,
-				Utils.dateStr2date("2017-01-01")));
+		flightChain2.add(createFlight(103, "003", "004", "004", UtilsBackup.timeStr2date("2017-01-01 18:00:00"),
+				UtilsBackup.timeStr2date("2017-01-01 18:00:00"), "1", new BigDecimal("1"), 202,
+				UtilsBackup.dateStr2date("2017-01-01")));
 
 		// flightChain2.add(createFlight(201, "001", "002", "002",
 		// Utils.timeStr2date("2017-01-01 10:00:00"),
@@ -150,9 +150,9 @@ public class IntegrationTest1 {
 	}
 
 	@Test
-	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, SolutionNotValid {
+	public void testConstructNewSolution() throws CloneNotSupportedException, ParseException, SolutionNotValidBackup {
 
-		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
+		XiaMengAirlineSolutionBackup aSolution = new XiaMengAirlineSolutionBackup();
 		aSolution.replaceOrAddNewAircraft(air1);
 		aSolution.replaceOrAddNewAircraft(air2);
 
@@ -161,9 +161,9 @@ public class IntegrationTest1 {
 		assertEquals(7100, aSolution.getCost().intValue());
 
 		// aSolution.generateOutput("2");
-		LocalSearch searchEngine = new LocalSearch();
+		LocalSearchBackup searchEngine = new LocalSearchBackup();
 
-		XiaMengAirlineSolution aBetterSolution = null;
+		XiaMengAirlineSolutionBackup aBetterSolution = null;
 
 		aBetterSolution = searchEngine.constructNewSolution(aSolution);
 		aBetterSolution.refreshCost(true);

@@ -1,6 +1,6 @@
 package xiaMengAirline.beans;
 
-public class MatchedFlight {
+public class MatchedFlightBackup {
 	private int air1SourceFlight;
 	private int air1DestFlight;
 	private int air2SourceFlight;

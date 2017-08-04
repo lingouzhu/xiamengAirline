@@ -10,27 +10,27 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.Exception.AircraftNotAdjustable;
-import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
-import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
-import xiaMengAirline.Exception.AirportNotAvailable;
-import xiaMengAirline.Exception.FlightDurationNotFound;
-import xiaMengAirline.searchEngine.SelfSearch;
-import xiaMengAirline.util.InitData;
-import xiaMengAirline.util.Utils;
+import xiaMengAirline.Exception.AircraftNotAdjustableBackup;
+import xiaMengAirline.Exception.AirportNotAcceptArrivalTimeBackup;
+import xiaMengAirline.Exception.AirportNotAcceptDepartureTimeBackup;
+import xiaMengAirline.Exception.AirportNotAvailableBackup;
+import xiaMengAirline.Exception.FlightDurationNotFoundBackup;
+import xiaMengAirline.searchEngine.SelfSearchBackup;
+import xiaMengAirline.util.InitDataBackup;
+import xiaMengAirline.util.UtilsBackup;
 
-public class Aircraft implements Cloneable {
-	private static final Logger logger = Logger.getLogger(Aircraft.class);
+public class AircraftBackup implements Cloneable {
+	private static final Logger logger = Logger.getLogger(AircraftBackup.class);
 	final static private int MAXIMUM_EARLIER_TIME = 6; // HOUR
 	final static public int DOMESTIC_MAXIMUM_DELAY_TIME = 24; // HOUR
 	final static public int INTERNATIONAL_MAXIMUM_DELAY_TIME = 36; // HOUR
 	private String id;
 	private String type;
-	private List<Flight> flightChain = new ArrayList<Flight>();
+	private List<FlightBackup> flightChain = new ArrayList<FlightBackup>();
 	private boolean isCancel = false;
-	private List<Flight> dropOutList = new ArrayList<Flight>();
+	private List<FlightBackup> dropOutList = new ArrayList<FlightBackup>();
 	private boolean isUpdated = false;
-	private Aircraft alternativeAircraft = null; //alternative aircraft must be a cloned air, and assigned to one & only one its parent aircraft
+	private AircraftBackup alternativeAircraft = null; //alternative aircraft must be a cloned air, and assigned to one & only one its parent aircraft
 
 	public String getId() {
 		return id;
@@ -48,11 +48,11 @@ public class Aircraft implements Cloneable {
 		this.type = type;
 	}
 
-	public List<Flight> getFlightChain() {
+	public List<FlightBackup> getFlightChain() {
 		return flightChain;
 	}
 
-	public Flight getFlight(int position) {
+	public FlightBackup getFlight(int position) {
 		if (position >= 0)
 			return this.flightChain.get(position);
 		else
@@ -60,8 +60,8 @@ public class Aircraft implements Cloneable {
 
 	}
 
-	public Flight getFlightByFlightId(int aFlightId) {
-		for (Flight aFlight : flightChain) {
+	public FlightBackup getFlightByFlightId(int aFlightId) {
+		for (FlightBackup aFlight : flightChain) {
 			if (aFlight.getFlightId() == aFlightId)
 				return aFlight;
 		}
@@ -69,9 +69,9 @@ public class Aircraft implements Cloneable {
 
 	}
 
-	public List<Flight> getFlightByScheduleId(int aScheduleId) {
-		List<Flight> retFlights = new ArrayList<Flight>();
-		for (Flight aFlight : flightChain) {
+	public List<FlightBackup> getFlightByScheduleId(int aScheduleId) {
+		List<FlightBackup> retFlights = new ArrayList<FlightBackup>();
+		for (FlightBackup aFlight : flightChain) {
 			if (aFlight.getSchdNo() == aScheduleId) {
 				retFlights.add(aFlight);
 			}
@@ -81,21 +81,21 @@ public class Aircraft implements Cloneable {
 
 	}
 
-	public void setFlightChain(List<Flight> flightChain) {
+	public void setFlightChain(List<FlightBackup> flightChain) {
 		this.flightChain = flightChain;
 	}
 
-	public void addFlight(Flight aFlight) {
+	public void addFlight(FlightBackup aFlight) {
 		aFlight.setAssignedAir(this);
 		flightChain.add(aFlight);
 	}
 	
-	public void addFlight(int index, Flight aFlight) {
+	public void addFlight(int index, FlightBackup aFlight) {
 		aFlight.setAssignedAir(this);
 		flightChain.add(index, aFlight);
 	}
 	
-	public boolean hasFlight(Flight aFlight) {
+	public boolean hasFlight(FlightBackup aFlight) {
 		return flightChain.contains(aFlight);
 	}
 
@@ -112,8 +112,8 @@ public class Aircraft implements Cloneable {
 	 * @return none
 	 * @throws CloneNotSupportedException
 	 */
-	public void insertFlight(Flight aFlight, int position) throws CloneNotSupportedException {
-		Aircraft aAir = this.clone();
+	public void insertFlight(FlightBackup aFlight, int position) throws CloneNotSupportedException {
+		AircraftBackup aAir = this.clone();
 		aAir.clear();
 		aFlight.setPlannedAir(aAir);
 		aFlight.setAssignedAir(this);
@@ -136,8 +136,8 @@ public class Aircraft implements Cloneable {
 	 *            inserted before this position
 	 * @return none
 	 */
-	public void insertFlightChain(Aircraft sourceAircraft, List<Integer> addFlights, int position) {
-		List<Flight> newFlights = new ArrayList<Flight>();
+	public void insertFlightChain(AircraftBackup sourceAircraft, List<Integer> addFlights, int position) {
+		List<FlightBackup> newFlights = new ArrayList<FlightBackup>();
 		for (int anAdd : addFlights) {
 			sourceAircraft.getFlight(anAdd).setAssignedAir(this);
 			newFlights.add(sourceAircraft.getFlight(anAdd));
@@ -164,9 +164,9 @@ public class Aircraft implements Cloneable {
 	 *            is inserted before the insertFlight or after
 	 * @return none
 	 */
-	public void insertFlightChain(Aircraft sourceAircraft, Flight startFlight, Flight endFlight, Flight insertFlight,
+	public void insertFlightChain(AircraftBackup sourceAircraft, FlightBackup startFlight, FlightBackup endFlight, FlightBackup insertFlight,
 			boolean isBefore) {
-		List<Flight> newFlights = new ArrayList<Flight>();
+		List<FlightBackup> newFlights = new ArrayList<FlightBackup>();
 		int addFlightStartPosition = sourceAircraft.getFlightChain().indexOf(startFlight);
 		int addFlightEndPosition = sourceAircraft.getFlightChain().indexOf(endFlight);
 		int insertFlightPosition = this.flightChain.indexOf(insertFlight);
@@ -193,7 +193,7 @@ public class Aircraft implements Cloneable {
 	 * @return none
 	 */
 	public void removeFlightChain(List<Integer> deleteFlights) {
-		List<Flight> removeList = new ArrayList<Flight>();
+		List<FlightBackup> removeList = new ArrayList<FlightBackup>();
 		for (Integer i : deleteFlights)
 			removeList.add(this.flightChain.get(i));
 
@@ -210,8 +210,8 @@ public class Aircraft implements Cloneable {
 	 *            specify the end flight, to be removed.
 	 * @return none
 	 */
-	public void removeFlightChain(Flight startFlight, Flight endFlight) {
-		List<Flight> removeList = new ArrayList<Flight>();
+	public void removeFlightChain(FlightBackup startFlight, FlightBackup endFlight) {
+		List<FlightBackup> removeList = new ArrayList<FlightBackup>();
 		int removeSFlighttartPosition = this.flightChain.indexOf(startFlight);
 		int removeFlightEndPosition = this.flightChain.indexOf(endFlight);
 
@@ -221,8 +221,8 @@ public class Aircraft implements Cloneable {
 		this.flightChain.removeAll(removeList);
 	}
 	
-	public List<Flight> getSpecifiedFlightChain(Flight startFlight, Flight endFlight) {
-		List<Flight> retList = new ArrayList<Flight>();
+	public List<FlightBackup> getSpecifiedFlightChain(FlightBackup startFlight, FlightBackup endFlight) {
+		List<FlightBackup> retList = new ArrayList<FlightBackup>();
 		int retSFlighttartPosition = this.flightChain.indexOf(startFlight);
 		int retFlightEndPosition = this.flightChain.indexOf(endFlight);
 
@@ -233,9 +233,9 @@ public class Aircraft implements Cloneable {
 		
 	}
 
-	public List<AirPort> getAirports() {
-		ArrayList<AirPort> retAirPortList = new ArrayList<AirPort>();
-		for (Flight aFlight : flightChain) {
+	public List<AirPortBackup> getAirports() {
+		ArrayList<AirPortBackup> retAirPortList = new ArrayList<AirPortBackup>();
+		for (FlightBackup aFlight : flightChain) {
 			retAirPortList.add(aFlight.getSourceAirPort());
 		}
 		if (!flightChain.isEmpty()) {
@@ -246,7 +246,7 @@ public class Aircraft implements Cloneable {
 
 	}
 
-	public AirPort getAirport(int position, boolean isSource) {
+	public AirPortBackup getAirport(int position, boolean isSource) {
 		if (isSource)
 			return (flightChain.get(position).getSourceAirPort());
 		else
@@ -261,11 +261,11 @@ public class Aircraft implements Cloneable {
 		this.isCancel = isCancel;
 	}
 
-	public Aircraft clone() throws CloneNotSupportedException {
-		Aircraft aNew = (Aircraft) super.clone();
-		List<Flight> newFlightChain = new ArrayList<Flight>();
-		for (Flight aFlight : flightChain) {
-			Flight newFlight = aFlight.clone();
+	public AircraftBackup clone() throws CloneNotSupportedException {
+		AircraftBackup aNew = (AircraftBackup) super.clone();
+		List<FlightBackup> newFlightChain = new ArrayList<FlightBackup>();
+		for (FlightBackup aFlight : flightChain) {
+			FlightBackup newFlight = aFlight.clone();
 			newFlight.setPlannedFlight(aFlight.getPlannedFlight());
 			newFlight.setPlannedAir(aFlight.getPlannedAir());
 			newFlight.setAssignedAir(aNew);
@@ -273,8 +273,8 @@ public class Aircraft implements Cloneable {
 		}
 		aNew.setFlightChain(newFlightChain);
 		
-		List<Flight> newDropList = new ArrayList<Flight>();
-		for (Flight aFlight:dropOutList) {
+		List<FlightBackup> newDropList = new ArrayList<FlightBackup>();
+		for (FlightBackup aFlight:dropOutList) {
 			newDropList.add(aFlight.clone());
 		}
 		aNew.setDropOutList(newDropList);
@@ -284,9 +284,9 @@ public class Aircraft implements Cloneable {
 		return (aNew);
 	}
 
-	public void adjustment(XiaMengAirlineSolution mySolution)
-			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
-		SelfSearch selfAdjustEngine = new SelfSearch(mySolution);
+	public void adjustment(XiaMengAirlineSolutionBackup mySolution)
+			throws CloneNotSupportedException, ParseException, FlightDurationNotFoundBackup, AirportNotAvailableBackup, AircraftNotAdjustableBackup {
+		SelfSearchBackup selfAdjustEngine = new SelfSearchBackup(mySolution);
 		if (!isCancel) {
 			selfAdjustEngine.adjustAircraft(this, 0, mySolution.getAircraft(id, type, true, true));
 		}
@@ -305,11 +305,11 @@ public class Aircraft implements Cloneable {
 		dropOutList.clear();
 	}
 
-	public HashMap<Flight, List<Flight>> getCircuitFlights() {
-		HashMap<Flight, List<Flight>> retCircuitList = new HashMap<Flight, List<Flight>>();
+	public HashMap<FlightBackup, List<FlightBackup>> getCircuitFlights() {
+		HashMap<FlightBackup, List<FlightBackup>> retCircuitList = new HashMap<FlightBackup, List<FlightBackup>>();
 
-		for (Flight aFlight : flightChain) {
-			ArrayList<Flight> matchedList = new ArrayList<Flight>();
+		for (FlightBackup aFlight : flightChain) {
+			ArrayList<FlightBackup> matchedList = new ArrayList<FlightBackup>();
 			int currentPos = flightChain.indexOf(aFlight);
 			String currentSourceAirport = aFlight.getSourceAirPort().getId();
 			for (int j = currentPos + 1; j < flightChain.size(); j++) {
@@ -327,21 +327,21 @@ public class Aircraft implements Cloneable {
 
 	}
 
-	public HashMap<Flight, List<MatchedFlight>> getMatchedFlights(Aircraft air2) {
-		HashMap<Flight, List<MatchedFlight>> retMatchedList = new HashMap<Flight, List<MatchedFlight>>();
+	public HashMap<FlightBackup, List<MatchedFlightBackup>> getMatchedFlights(AircraftBackup air2) {
+		HashMap<FlightBackup, List<MatchedFlightBackup>> retMatchedList = new HashMap<FlightBackup, List<MatchedFlightBackup>>();
 
-		for (Flight aFlight : flightChain) {
+		for (FlightBackup aFlight : flightChain) {
 			String sourceAirPortAir1 = aFlight.getSourceAirPort().getId();
-			for (Flight bFlight : air2.getFlightChain()) {
+			for (FlightBackup bFlight : air2.getFlightChain()) {
 				String sourceAirPortAir2 = bFlight.getSourceAirPort().getId();
 				if (sourceAirPortAir1.equals(sourceAirPortAir2)) {
-					List<MatchedFlight> matchedList = new ArrayList<MatchedFlight>();
+					List<MatchedFlightBackup> matchedList = new ArrayList<MatchedFlightBackup>();
 					for (int i = flightChain.indexOf(aFlight); i < flightChain.size(); i++) {
 						String airPortA = getFlight(i).getDesintationAirport().getId();
 						for (int j = air2.getFlightChain().indexOf(bFlight); j < air2.getFlightChain().size(); j++) {
 							String airPortB = air2.getFlight(j).getDesintationAirport().getId();
 							if (airPortA.equals(airPortB)) {
-								MatchedFlight aMatched = new MatchedFlight();
+								MatchedFlightBackup aMatched = new MatchedFlightBackup();
 								aMatched.setAir1SourceFlight(flightChain.indexOf(aFlight));
 								aMatched.setAir1DestFlight(i);
 								aMatched.setAir2SourceFlight(air2.getFlightChain().indexOf(bFlight));
@@ -364,7 +364,7 @@ public class Aircraft implements Cloneable {
 	}
 
 	public void sortFlights() {
-		Utils.sort(flightChain, "departureTime", true);
+		UtilsBackup.sort(flightChain, "departureTime", true);
 	}
 
 	public boolean validate() {
@@ -372,41 +372,41 @@ public class Aircraft implements Cloneable {
 		if (isCancel)
 			return true;
 
-		List<Flight> flightChain = getFlightChain();
+		List<FlightBackup> flightChain = getFlightChain();
 
 		for (int i = 0; i < flightChain.size(); i++) {
-			Flight flight = flightChain.get(i);
+			FlightBackup flight = flightChain.get(i);
 
 			String startPort = flight.getSourceAirPort().getId();
 			String endPort = flight.getDesintationAirport().getId();
 			String airID = getId();
 
-			if (InitData.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
+			if (InitDataBackup.airLimitationList.contains(airID + "_" + startPort + "_" + endPort)) {
 				return false;
 			}
 			if (i != 0) {
-				Flight preFlight = flightChain.get(i - 1);
+				FlightBackup preFlight = flightChain.get(i - 1);
 
 				if (!preFlight.getDesintationAirport().getId().equals(flight.getSourceAirPort().getId())) {
 					return false;
 				}
 
-				if (Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime())
+				if (UtilsBackup.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime())
 						.compareTo(new BigDecimal("50")) < 0
-						&& (preFlight.getFlightId() > InitData.plannedMaxFligthId
-								|| flight.getFlightId() > InitData.plannedMaxFligthId
-								|| Utils.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime())
+						&& (preFlight.getFlightId() > InitDataBackup.plannedMaxFligthId
+								|| flight.getFlightId() > InitDataBackup.plannedMaxFligthId
+								|| UtilsBackup.minutiesBetweenTime(flight.getDepartureTime(), preFlight.getArrivalTime())
 										.compareTo(
-												Utils.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(),
+												UtilsBackup.minutiesBetweenTime(flight.getPlannedFlight().getDepartureTime(),
 														preFlight.getPlannedFlight().getArrivalTime())) != 0
 								|| !flight.getPlannedAir().getId().equals(preFlight.getPlannedAir().getId()))) {
 					return false;
 				}
 
-				if (InitData.jointFlightMap.get(preFlight.getFlightId()) != null) {
+				if (InitDataBackup.jointFlightMap.get(preFlight.getFlightId()) != null) {
 					if (preFlight.getDesintationAirport().getId()
 							.equals((preFlight.getPlannedFlight().getDesintationAirport().getId()))
-							&& InitData.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight
+							&& InitDataBackup.jointFlightMap.get(preFlight.getFlightId()).getFlightId() != flight
 									.getFlightId()) {
 						return false;
 					}
@@ -416,15 +416,15 @@ public class Aircraft implements Cloneable {
 			
 			//  5.7  border limited
 			if (i == 0) {
-				if (!flight.getSourceAirPort().getId().equals(InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
+				if (!flight.getSourceAirPort().getId().equals(InitDataBackup.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
 					return false;
 				}
 				
 			}
 			
 			if (i == flightChain.size() - 1) {
-				if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
-						|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
+				if (!flight.getSourceAirPort().getId().equals(InitDataBackup.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
+						|| !flight.getDesintationAirport().getId().equals(InitDataBackup.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
 					return false;
 				}
 				
@@ -456,53 +456,53 @@ public class Aircraft implements Cloneable {
 	 * @exception ParseException
 	 *                - date format is not valid
 	 * @see ParseException
-	 * @exception AirportNotAcceptArrivalTime
+	 * @exception AirportNotAcceptArrivalTimeBackup
 	 *                - the destination airport does not accept suggested
 	 *                arrival time. This exception contains two objects, flight
 	 *                (Flight), where the problem flight is at the flight chain
-	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
+	 * @see FlightBackup availableTime (FlightTime), suggested arr/dep by airport, if
 	 *      caused by typhoon
-	 * @see FlightTime
-	 * @exception FlightDurationNotFound
+	 * @see FlightTimeBackup
+	 * @exception FlightDurationNotFoundBackup
 	 *                - the flight duration is not found, means flight not
 	 *                allowed. This exception contains two objects, theFlight
 	 *                (Flight), flight is not allowed searchKey (String), the
 	 *                failed search key for the lookup
-	 * @throws AirportNotAcceptDepartureTime
+	 * @throws AirportNotAcceptDepartureTimeBackup
 	 *             - the airport does not accept suggested departure time. - the
 	 *             source airport does not accept suggested departure time. This
 	 *             exception contains two objects, flight (Flight), where the
 	 *             problem flight is at the flight chain
-	 * @throws AirportNotAvailable
-	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
+	 * @throws AirportNotAvailableBackup
+	 * @see FlightBackup availableTime (FlightTime), suggested arr/dep by airport, if
 	 *      caused by typhoon
-	 * @see FlightTime
+	 * @see FlightTimeBackup
 	 */
 
-	public boolean adjustFlightTime(int startPosition) throws ParseException, AirportNotAcceptArrivalTime,
-			FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable {
+	public boolean adjustFlightTime(int startPosition) throws ParseException, AirportNotAcceptArrivalTimeBackup,
+			FlightDurationNotFoundBackup, AirportNotAcceptDepartureTimeBackup, AirportNotAvailableBackup {
 		boolean isChanged = false;
-		Flight currentFlight = null;
-		Flight nextFlight = null;
+		FlightBackup currentFlight = null;
+		FlightBackup nextFlight = null;
 		for (int i = startPosition; i < flightChain.size(); i++) {
 			nextFlight = flightChain.get(i);
 
 			if (i > startPosition) {
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(currentFlight.getArrivalTime());
-				int plannedGroundingTime = Flight.getGroundingTime(currentFlight.getFlightId(), nextFlight.getFlightId());
+				int plannedGroundingTime = FlightBackup.getGroundingTime(currentFlight.getFlightId(), nextFlight.getFlightId());
 				cl.add(Calendar.MINUTE, plannedGroundingTime);
-				FlightTime aScheduledTime = new FlightTime();
+				FlightTimeBackup aScheduledTime = new FlightTimeBackup();
 				aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
 				if (cl.getTime().before(nextFlight.getPlannedFlight().getDepartureTime()))
 					aScheduledTime.setDepartureTime(nextFlight.getPlannedFlight().getDepartureTime());
 				else
 					aScheduledTime.setDepartureTime(cl.getTime());
-				FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
+				FlightTimeBackup newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
 						plannedGroundingTime);
 				if (newFlightTime != null) {
 					if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
-						throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
+						throw new AirportNotAcceptArrivalTimeBackup(currentFlight, newFlightTime);
 					} else {
 						// check if departure time earlier
 						if (newFlightTime.getDepartureTime().before(nextFlight.getPlannedFlight().getDepartureTime())) {
@@ -516,7 +516,7 @@ public class Aircraft implements Cloneable {
 									logger.warn("This flight earlier too much - " + nextFlight.getFlightId()
 											+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
 											+ " wanted dep: " + newFlightTime.getDepartureTime());
-									throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime,
+									throw new AirportNotAcceptDepartureTimeBackup(nextFlight, newFlightTime,
 											"Departure Too Earlier");
 
 								} else {
@@ -526,7 +526,7 @@ public class Aircraft implements Cloneable {
 									}
 								}
 							} else
-								throw new AirportNotAcceptDepartureTime(nextFlight, newFlightTime,
+								throw new AirportNotAcceptDepartureTimeBackup(nextFlight, newFlightTime,
 										"Departure Earlier Not Allowed For International");
 						} else {
 							if (nextFlight.getPlannedFlight().getDepartureTime()
@@ -537,7 +537,7 @@ public class Aircraft implements Cloneable {
 								if (newFlightTime.isIsTyphoon()) {
 									// if aircraft can arrive but cannot
 									// departure, typhoon not allows parking!
-									throw new AirportNotAvailable(currentFlight, newFlightTime);
+									throw new AirportNotAvailableBackup(currentFlight, newFlightTime);
 								} else {
 									// if delay too much
 									cl.setTime(nextFlight.getPlannedFlight().getDepartureTime());
@@ -550,7 +550,7 @@ public class Aircraft implements Cloneable {
 										logger.warn("This flight delays too long - " + nextFlight.getFlightId()
 												+ " planned dep: " + nextFlight.getPlannedFlight().getDepartureTime()
 												+ " wanted dep: " + newFlightTime.getDepartureTime());
-										throw new AirportNotAvailable(currentFlight, newFlightTime);
+										throw new AirportNotAvailableBackup(currentFlight, newFlightTime);
 									} else {
 										// it shall be normal airport close, so
 										// not delay too much
@@ -584,16 +584,16 @@ public class Aircraft implements Cloneable {
 		}
 		
 		//check if last flight can arrive destination?
-		FlightTime aScheduledTime = new FlightTime();
+		FlightTimeBackup aScheduledTime = new FlightTimeBackup();
 		aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
 		aScheduledTime.setDepartureTime(null);
 
-		FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
-				Flight.getGroundingTime(currentFlight.getFlightId(), -1));
+		FlightTimeBackup newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
+				FlightBackup.getGroundingTime(currentFlight.getFlightId(), -1));
 		
 		if (newFlightTime != null) {
 			if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
-				throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
+				throw new AirportNotAcceptArrivalTimeBackup(currentFlight, newFlightTime);
 			} 
 		} 		
 		return isChanged;
@@ -601,11 +601,11 @@ public class Aircraft implements Cloneable {
 	}
 
 
-	public List<Flight> getDropOutList() {
+	public List<FlightBackup> getDropOutList() {
 		return dropOutList;
 	}
 
-	public void setDropOutList(List<Flight> dropOutList) {
+	public void setDropOutList(List<FlightBackup> dropOutList) {
 		this.dropOutList = dropOutList;
 	}
 
@@ -620,7 +620,7 @@ public class Aircraft implements Cloneable {
 	 * @return true - if the flight has been successfully moved. false - flight
 	 *         is not belong to this aircraft.
 	 */
-	public boolean moveToDropOut(Flight aFlight) {
+	public boolean moveToDropOut(FlightBackup aFlight) {
 		if (flightChain.contains(aFlight)) {
 			dropOutList.add(aFlight);
 			flightChain.remove(aFlight);
@@ -647,11 +647,11 @@ public class Aircraft implements Cloneable {
 		this.isUpdated = isUpdated;
 	}
 
-	public Aircraft getAlternativeAircraft() {
+	public AircraftBackup getAlternativeAircraft() {
 		return alternativeAircraft;
 	}
 
-	public void setAlternativeAircraft(Aircraft alternativeAircraft) {
+	public void setAlternativeAircraft(AircraftBackup alternativeAircraft) {
 		this.alternativeAircraft = alternativeAircraft;
 	}
 	

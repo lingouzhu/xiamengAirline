@@ -14,10 +14,10 @@ import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.collections4.comparators.ComparableComparator;
 
-import xiaMengAirline.beans.Aircraft;
-import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.AircraftBackup;
+import xiaMengAirline.beans.FlightBackup;
 
-public class Utils {
+public class UtilsBackup {
 
 
 	public static boolean isEmpty(String str) {  
@@ -159,20 +159,20 @@ public class Utils {
 	    return cl.getTime();
 	}
 	
-	public static BigDecimal calCostbyAir(Aircraft orgAir, Aircraft newAir) {
+	public static BigDecimal calCostbyAir(AircraftBackup orgAir, AircraftBackup newAir) {
 		
 		BigDecimal cost = new BigDecimal("0");
 		// org air
 		for (int i = 0; i < orgAir.getFlightChain().size(); i++) {
 			
-			Flight orgFlight = orgAir.getFlightChain().get(i);
+			FlightBackup orgFlight = orgAir.getFlightChain().get(i);
 			boolean existFlg = false;
 			// new air
 			for (int j = 0; j < newAir.getFlightChain().size(); j++) {
 				
-				Flight newFlight = newAir.getFlightChain().get(j);
+				FlightBackup newFlight = newAir.getFlightChain().get(j);
 				// empty
-				if (i == 0 && newFlight.getFlightId() > InitData.plannedMaxFligthId) {
+				if (i == 0 && newFlight.getFlightId() > InitDataBackup.plannedMaxFligthId) {
 					cost = cost.add(new BigDecimal("5000"));
 				}
 				// exist
@@ -180,7 +180,7 @@ public class Utils {
 					existFlg = true;
 					// delay or move up
 					if (!orgFlight.getDepartureTime().equals(newFlight.getDepartureTime())) {
-						BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(), orgFlight.getDepartureTime());
+						BigDecimal hourDiff = UtilsBackup.hoursBetweenTime(newFlight.getDepartureTime(), orgFlight.getDepartureTime());
 						
 						if (hourDiff.signum() == -1){
 							cost = cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(orgFlight.getImpCoe()));
@@ -189,9 +189,9 @@ public class Utils {
 						}
 					}
 					// joint stretch
-					if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null) {
+					if (InitDataBackup.jointFlightMap.get(newFlight.getFlightId()) != null) {
 						if (!newFlight.getDesintationAirport().getId().equals((orgFlight.getDesintationAirport().getId()))) {
-							Flight nextFlight = InitData.jointFlightMap.get(newFlight.getFlightId());
+							FlightBackup nextFlight = InitDataBackup.jointFlightMap.get(newFlight.getFlightId());
 							
 							cost = cost.add(new BigDecimal("750").multiply(newFlight.getImpCoe()));
 							cost = cost.add(new BigDecimal("750").multiply(nextFlight.getImpCoe()));
@@ -206,7 +206,7 @@ public class Utils {
 			// cancel
 			if (!existFlg) {
 				// not 2nd of joint flight
-				if (!InitData.jointFlightMap.containsKey(orgFlight.getFlightId()) || InitData.jointFlightMap.get(orgFlight.getFlightId()) != null) {
+				if (!InitDataBackup.jointFlightMap.containsKey(orgFlight.getFlightId()) || InitDataBackup.jointFlightMap.get(orgFlight.getFlightId()) != null) {
 					cost = cost.add(new BigDecimal("1000").multiply(orgFlight.getImpCoe()));
 				}
 			}

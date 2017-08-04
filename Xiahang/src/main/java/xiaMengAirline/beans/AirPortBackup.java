@@ -7,10 +7,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class AirPort {
+public class AirPortBackup {
 	private String id;
-	private List<AirPortClose> closeSchedule = new ArrayList<AirPortClose>();
-	private List<RegularAirPortClose> regularCloseSchedule = new ArrayList<RegularAirPortClose>();
+	private List<AirPortCloseBackup> closeSchedule = new ArrayList<AirPortCloseBackup>();
+	private List<RegularAirPortCloseBackup> regularCloseSchedule = new ArrayList<RegularAirPortCloseBackup>();
 
 	public String getId() {
 		return id;
@@ -20,19 +20,19 @@ public class AirPort {
 		this.id = id;
 	}
 
-	public boolean equal(AirPort anotherAirport) {
+	public boolean equal(AirPortBackup anotherAirport) {
 		return id.equals(anotherAirport.getId());
 	}
 
-	public FlightTime requestAirport(FlightTime requestTime, int groundingTime) throws ParseException {
+	public FlightTimeBackup requestAirport(FlightTimeBackup requestTime, int groundingTime) throws ParseException {
 		// check airport events first
-		FlightTime retFlightTime = null;
-		for (AirPortClose aClose : closeSchedule) {
+		FlightTimeBackup retFlightTime = null;
+		for (AirPortCloseBackup aClose : closeSchedule) {
 			if (requestTime.getArrivalTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getArrivalTime().compareTo(aClose.getEndTime()) < 0) {
 				if ((aClose.getAllocatedParking() == 0) || (!aClose.isAllowForLanding())) {
 					if (retFlightTime == null)
-						retFlightTime = new FlightTime();
+						retFlightTime = new FlightTimeBackup();
 					retFlightTime.setArrivalTime(aClose.getEndTime());
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aClose.getEndTime());
@@ -53,7 +53,7 @@ public class AirPort {
 					&& requestTime.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
 				if (retFlightTime == null) {
 					if (!aClose.isAllowForTakeoff()) {
-						retFlightTime = new FlightTime();
+						retFlightTime = new FlightTimeBackup();
 						// check if enough grounding time
 						Calendar cl = Calendar.getInstance();
 						cl.setTime(requestTime.getArrivalTime());
@@ -79,7 +79,7 @@ public class AirPort {
 					&& !aClose.isAllowForTakeoff()
 					&& (aClose.getAllocatedParking() == 0)
 					) {
-				retFlightTime = new FlightTime();
+				retFlightTime = new FlightTimeBackup();
 				// check if enough grounding time
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(requestTime.getArrivalTime());
@@ -108,7 +108,7 @@ public class AirPort {
 
 		}
 		if (retFlightTime == null) {
-			for (RegularAirPortClose aClose : regularCloseSchedule) {
+			for (RegularAirPortCloseBackup aClose : regularCloseSchedule) {
 				SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 				String aDateC = formatter.format(requestTime.getArrivalTime());
 				String aDateO = aDateC;
@@ -123,7 +123,7 @@ public class AirPort {
 				Date aOpenDate = formatter2.parse(aDateO);
 
 				if (requestTime.getArrivalTime().after(aCloseDate) && requestTime.getArrivalTime().before(aOpenDate)) {
-					retFlightTime = new FlightTime();
+					retFlightTime = new FlightTimeBackup();
 					retFlightTime.setArrivalTime(aOpenDate);
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aOpenDate);
@@ -150,7 +150,7 @@ public class AirPort {
 
 					if (requestTime.getDepartureTime() != null && requestTime.getDepartureTime().after(dCloseDate)
 							&& requestTime.getDepartureTime().before(dOpenDate)) {
-						retFlightTime = new FlightTime();
+						retFlightTime = new FlightTimeBackup();
 						retFlightTime.setArrivalTime(requestTime.getArrivalTime());
 						Calendar cl = Calendar.getInstance();
 						cl.setTime(requestTime.getArrivalTime());
@@ -170,27 +170,27 @@ public class AirPort {
 		return retFlightTime;
 	}
 
-	public List<AirPortClose> getCloseSchedule() {
+	public List<AirPortCloseBackup> getCloseSchedule() {
 		return closeSchedule;
 	}
 
-	public void setCloseSchedule(List<AirPortClose> closeSchedule) {
+	public void setCloseSchedule(List<AirPortCloseBackup> closeSchedule) {
 		this.closeSchedule = closeSchedule;
 	}
 
-	public void addCloseSchedule(AirPortClose aCloseSchedule) {
+	public void addCloseSchedule(AirPortCloseBackup aCloseSchedule) {
 		closeSchedule.add(aCloseSchedule);
 	}
 
-	public List<RegularAirPortClose> getRegularCloseSchedule() {
+	public List<RegularAirPortCloseBackup> getRegularCloseSchedule() {
 		return regularCloseSchedule;
 	}
 
-	public void setRegularCloseSchedule(List<RegularAirPortClose> regularCloseSchedule) {
+	public void setRegularCloseSchedule(List<RegularAirPortCloseBackup> regularCloseSchedule) {
 		this.regularCloseSchedule = regularCloseSchedule;
 	}
 
-	public void addRegularCloseSchedule(RegularAirPortClose aRegularCloseSchedule) {
+	public void addRegularCloseSchedule(RegularAirPortCloseBackup aRegularCloseSchedule) {
 		regularCloseSchedule.add(aRegularCloseSchedule);
 	}
 

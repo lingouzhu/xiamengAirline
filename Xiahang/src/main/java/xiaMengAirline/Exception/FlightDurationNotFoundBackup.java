@@ -1,14 +1,14 @@
 package xiaMengAirline.Exception;
 
-import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.FlightBackup;
 
-public class FlightDurationNotFound extends Exception {
-	Flight theFlight;
+public class FlightDurationNotFoundBackup extends Exception {
+	FlightBackup theFlight;
 	String searchKey;
-	public Flight getTheFlight() {
+	public FlightBackup getTheFlight() {
 		return theFlight;
 	}
-	public void setTheFlight(Flight theFlight) {
+	public void setTheFlight(FlightBackup theFlight) {
 		this.theFlight = theFlight;
 	}
 	public String getSearchKey() {
@@ -17,7 +17,7 @@ public class FlightDurationNotFound extends Exception {
 	public void setSearchKey(String searchKey) {
 		this.searchKey = searchKey;
 	}
-	public FlightDurationNotFound(Flight theFlight, String searchKey) {
+	public FlightDurationNotFoundBackup(FlightBackup theFlight, String searchKey) {
 		super();
 		this.theFlight = theFlight;
 		this.searchKey = searchKey;

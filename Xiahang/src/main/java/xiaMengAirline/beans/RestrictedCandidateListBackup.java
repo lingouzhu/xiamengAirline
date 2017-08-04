@@ -6,23 +6,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import xiaMengAirline.util.InitData;
+import xiaMengAirline.util.InitDataBackup;
 
-public class RestrictedCandidateList {
+public class RestrictedCandidateListBackup {
 	public static int maxBestSolutions = 10;
 	private BigDecimal lowestCost = new BigDecimal(Long.MAX_VALUE);
 	private BigDecimal highestCost = new BigDecimal(-1);
 	private int currentLevel = 0;
-	private TreeMap<BigDecimal, List<XiaMengAirlineSolution>> bestSolutionList = new TreeMap<BigDecimal, List<XiaMengAirlineSolution>>  ();
+	private TreeMap<BigDecimal, List<XiaMengAirlineSolutionBackup>> bestSolutionList = new TreeMap<BigDecimal, List<XiaMengAirlineSolutionBackup>>  ();
 	private String version = "0"; //Iter_Batch
 	
-	public boolean addSolution (XiaMengAirlineSolution aNewSolution) {
+	public boolean addSolution (XiaMengAirlineSolutionBackup aNewSolution) {
 		if (bestSolutionList.size() < maxBestSolutions) {
 			if (bestSolutionList.containsKey(aNewSolution.getCost())) {
 				bestSolutionList.get(aNewSolution.getCost()).add(aNewSolution);
 				currentLevel++;
 			} else {
-				List<XiaMengAirlineSolution> aSolutionList = new ArrayList<XiaMengAirlineSolution> ();
+				List<XiaMengAirlineSolutionBackup> aSolutionList = new ArrayList<XiaMengAirlineSolutionBackup> ();
 				aSolutionList.add(aNewSolution);
 				bestSolutionList.put(aNewSolution.getCost(), aSolutionList);
 				currentLevel++;
@@ -37,18 +37,18 @@ public class RestrictedCandidateList {
 					|| aNewSolution.getCost().compareTo(highestCost) == 0 ) {
 				// when this score already existed
 				if (bestSolutionList.containsKey(aNewSolution.getCost())) {
-					List<XiaMengAirlineSolution> aSolutionList = bestSolutionList.get(aNewSolution.getCost());
+					List<XiaMengAirlineSolutionBackup> aSolutionList = bestSolutionList.get(aNewSolution.getCost());
 					aSolutionList.add(aNewSolution);
 				} else {
 					// when a new lower score
-					List<XiaMengAirlineSolution> aSolutionList = new ArrayList<XiaMengAirlineSolution> ();
+					List<XiaMengAirlineSolutionBackup> aSolutionList = new ArrayList<XiaMengAirlineSolutionBackup> ();
 					aSolutionList.add(aNewSolution);
 					bestSolutionList.put(aNewSolution.getCost(), aSolutionList);
 				}
 				if (bestSolutionList.keySet().size() > 1) {
-					List<XiaMengAirlineSolution> dropSolutions = bestSolutionList.remove(bestSolutionList.lastEntry().getKey());
+					List<XiaMengAirlineSolutionBackup> dropSolutions = bestSolutionList.remove(bestSolutionList.lastEntry().getKey());
 					currentLevel= currentLevel + 1 - dropSolutions.size();
-					for (XiaMengAirlineSolution aSol:dropSolutions)
+					for (XiaMengAirlineSolutionBackup aSol:dropSolutions)
 						aSol.clear();
 					if (aNewSolution.getCost().compareTo(lowestCost) == -1) 
 						lowestCost = aNewSolution.getCost();
@@ -67,9 +67,9 @@ public class RestrictedCandidateList {
 	}
 	
 	public void clear () {
-		for(Map.Entry<BigDecimal, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
-			  List<XiaMengAirlineSolution> solutionList= entry.getValue();
-			  for (XiaMengAirlineSolution aSolution:solutionList)
+		for(Map.Entry<BigDecimal, List<XiaMengAirlineSolutionBackup>> entry : bestSolutionList.entrySet()) {
+			  List<XiaMengAirlineSolutionBackup> solutionList= entry.getValue();
+			  for (XiaMengAirlineSolutionBackup aSolution:solutionList)
 				  aSolution.clear();
 			  solutionList.clear();
 			  
@@ -77,7 +77,7 @@ public class RestrictedCandidateList {
 		bestSolutionList.clear();
 	}
 	
-	public XiaMengAirlineSolution selectASoluiton () throws CloneNotSupportedException {
+	public XiaMengAirlineSolutionBackup selectASoluiton () throws CloneNotSupportedException {
 		if (!bestSolutionList.isEmpty()) {
 			// randomly select one
 			int lowest = 0;
@@ -85,12 +85,12 @@ public class RestrictedCandidateList {
 			//int selected = lowest + (int) (Math.random() * ((highest - lowest) + 1));
 			
 			
-			List<XiaMengAirlineSolution> allNewSolutions = new ArrayList<XiaMengAirlineSolution> ();
-			for(Map.Entry<BigDecimal, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
+			List<XiaMengAirlineSolutionBackup> allNewSolutions = new ArrayList<XiaMengAirlineSolutionBackup> ();
+			for(Map.Entry<BigDecimal, List<XiaMengAirlineSolutionBackup>> entry : bestSolutionList.entrySet()) {
 				  allNewSolutions.addAll(entry.getValue());
 			}
 			
-			return allNewSolutions.get(InitData.rndRcl.nextInt(allNewSolutions.size())).clone();
+			return allNewSolutions.get(InitDataBackup.rndRcl.nextInt(allNewSolutions.size())).clone();
 		} else 
 			return null;
 
@@ -127,11 +127,11 @@ public class RestrictedCandidateList {
 		this.currentLevel = currentLevel;
 	}
 
-	public TreeMap<BigDecimal, List<XiaMengAirlineSolution>> getBestSolutionList() {
+	public TreeMap<BigDecimal, List<XiaMengAirlineSolutionBackup>> getBestSolutionList() {
 		return bestSolutionList;
 	}
 
-	public void setBestSolutionList(TreeMap<BigDecimal, List<XiaMengAirlineSolution>> bestSolutionList) {
+	public void setBestSolutionList(TreeMap<BigDecimal, List<XiaMengAirlineSolutionBackup>> bestSolutionList) {
 		this.bestSolutionList = bestSolutionList;
 	}
 
