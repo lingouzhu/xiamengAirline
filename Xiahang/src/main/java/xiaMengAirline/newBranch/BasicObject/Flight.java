@@ -5,10 +5,7 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
-
-import xiaMengAirline.newBranch.BusinessDomain.AdjustableMethod;
-
-public abstract class Flight implements AdjustableMethod {
+public class Flight {
 	private static final Logger logger = Logger.getLogger(Flight.class);
 	
 	
@@ -20,10 +17,15 @@ public abstract class Flight implements AdjustableMethod {
 	private int schdNo;
 	private Date arrivalTime;
 	private Date departureTime;
+	private Passenger normalPassenger;
+	private Passenger joinedPassenger;
+	private Passenger plannedNormalPassenger;
+	private Passenger plannedJoinedPassenger;
 	private BigDecimal impCoe;
 	private Aircraft assignedAir;
 	private Aircraft plannedAir;
 	private Flight plannedFlight;
+	private FlightAdjustableMethod adjustableMethod;
 	public int getFlightId() {
 		return flightId;
 	}
@@ -98,6 +100,37 @@ public abstract class Flight implements AdjustableMethod {
 	}
 	public void setDesintationAirport(Airport desintationAirport) {
 		this.desintationAirport = desintationAirport;
+	}
+
+	public FlightAdjustableMethod getAdjustableMethod() {
+		return adjustableMethod;
+	}
+	public void setAdjustableMethod(FlightAdjustableMethod adjustableMethod) {
+		this.adjustableMethod = adjustableMethod;
+	}
+	public Passenger getNormalPassenger() {
+		return normalPassenger;
+	}
+	public void setNormalPassenger(Passenger normalPassenger) {
+		this.normalPassenger = normalPassenger;
+	}
+	public Passenger getJoinedPassenger() {
+		return joinedPassenger;
+	}
+	public void setJoinedPassenger(Passenger joinedPassenger) {
+		this.joinedPassenger = joinedPassenger;
+	}
+	public Passenger getPlannedNormalPassenger() {
+		return plannedNormalPassenger;
+	}
+	public void setPlannedNormalPassenger(Passenger plannedNormalPassenger) {
+		this.plannedNormalPassenger = plannedNormalPassenger;
+	}
+	public Passenger getPlannedJoinedPassenger() {
+		return plannedJoinedPassenger;
+	}
+	public void setPlannedJoinedPassenger(Passenger plannedJoinedPassenger) {
+		this.plannedJoinedPassenger = plannedJoinedPassenger;
 	}
 	
 	

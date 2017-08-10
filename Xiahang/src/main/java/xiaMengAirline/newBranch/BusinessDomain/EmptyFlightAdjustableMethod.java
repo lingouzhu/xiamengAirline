@@ -5,36 +5,36 @@ import java.util.Date;
 import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.Airport;
 import xiaMengAirline.newBranch.BasicObject.Flight;
+import xiaMengAirline.newBranch.BasicObject.FlightAdjustableMethod;
 
-public class DomesticFlight extends Flight {
-
-	@Override
-	public boolean cancelFlight() {
-		// TODO Auto-generated method stub
-		System.out.println("Cancel dometic");
-		return false;
-	}
+public class EmptyFlightAdjustableMethod implements FlightAdjustableMethod {
 
 	@Override
-	public boolean addNewEmptyFlight() {
+	public boolean cancelFlight(Flight aFlight) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean moveToNewAircraft(Aircraft newAir) {
+	public boolean addNewEmptyFlight(Flight aFlight) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean moveToNewDestination(Airport newDestAirport) {
+	public boolean moveToNewAircraft(Flight aFlight, Aircraft newAir) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean moveToNewDepartureTime(Date newDepartureTime) {
+	public boolean moveToNewDestination(Flight aFlight, Airport newDestAirport) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean moveToNewDepartureTime(Flight aFlight, Date newDepartureTime) {
 		// TODO Auto-generated method stub
 		return false;
 	}

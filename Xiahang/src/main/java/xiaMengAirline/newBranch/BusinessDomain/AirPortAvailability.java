@@ -42,4 +42,10 @@ public class AirPortAvailability implements ResourceAvailability {
 		return 0;
 	}
 
+	@Override
+	public boolean applyForResource(PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

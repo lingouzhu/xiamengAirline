@@ -1,12 +1,10 @@
-package xiaMengAirline.newBranch.BusinessDomain;
+package xiaMengAirline.newBranch.BasicObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-
-import xiaMengAirline.newBranch.LocalOptimize.AirlineAbstractedSolution;
 
 
 

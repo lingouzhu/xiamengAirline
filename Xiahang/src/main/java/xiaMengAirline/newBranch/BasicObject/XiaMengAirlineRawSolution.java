@@ -1,8 +1,5 @@
 package xiaMengAirline.newBranch.BasicObject;
 
-import xiaMengAirline.newBranch.BusinessDomain.XiaMengAirlineFeasibleSolution;
-import xiaMengAirline.newBranch.LocalOptimize.AirlineAbstractedSolution;
-
 public class XiaMengAirlineRawSolution extends AirlineAbstractedSolution {
 	private XiaMengAirlineFeasibleSolution aFeasibleSolution = null;
 	private int version;

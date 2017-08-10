@@ -11,6 +11,7 @@ public class Aircraft {
 	private static final Logger logger = Logger.getLogger(Aircraft.class);
 	private String id;
 	private String type;
+	private int numberOfSeats;
 	private List<Flight> flightChain = new ArrayList<Flight>();
 	private boolean isCancel = false;
 	
@@ -40,5 +41,11 @@ public class Aircraft {
 	}
 	public static Logger getLogger() {
 		return logger;
+	}
+	public int getNumberOfSeats() {
+		return numberOfSeats;
+	}
+	public void setNumberOfSeats(int numberOfSeats) {
+		this.numberOfSeats = numberOfSeats;
 	}
 }

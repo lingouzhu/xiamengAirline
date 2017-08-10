@@ -4,6 +4,7 @@ import xiaMengAirline.newBranch.BusinessDomain.AirPortAvailability;
 
 public class Airport {
 	private String id;
+	private boolean isDomestic;
 	private AirPortAvailability  myAvailability = null;
 
 	public String getId() {
@@ -20,6 +21,14 @@ public class Airport {
 
 	public void setMyAvailability(AirPortAvailability myAvailability) {
 		this.myAvailability = myAvailability;
+	}
+
+	public boolean isDomestic() {
+		return isDomestic;
+	}
+
+	public void setDomestic(boolean isDomestic) {
+		this.isDomestic = isDomestic;
 	}
 
 

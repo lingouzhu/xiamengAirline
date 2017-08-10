@@ -12,5 +12,7 @@ public interface ResourceAvailability {
 	public PairedTime estimateNextAvailable (PairedTime requestedTime);
 	public PairedTime estimatePreviousAvailable (PairedTime requestedTime);
 	public int setResoruceCapability (int maxAllowed);
+	public boolean applyForResource (PairedTime requestedTime);
+	
 
 }

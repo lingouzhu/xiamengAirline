@@ -1,10 +1,15 @@
-package xiaMengAirline.newBranch.LocalOptimize;
+package xiaMengAirline.newBranch.BasicObject;
 
+import java.util.HashMap;
 import java.util.List;
-
-import xiaMengAirline.newBranch.BasicObject.Aircraft;
+import java.util.Map;
 
 public class AirlineAbstractedSolution implements AirlineSolution {
+	private Map<String, Aircraft> schedule = new HashMap<String, Aircraft>(); //key NORMAL_airId or CANCEL_airId
+	private Map <String, Flight> allFlights; //key flight id
+	//original passenger distributes to list of flights
+	//key - NORMAL_passengerId or JOIN_passerngerId
+	private Map<String, List<Flight>> passengerDistribution = new HashMap<String, List<Flight>> (); 
 
 	@Override
 	public void addOrReplaceAircraft(Aircraft aAircraft) {
@@ -29,5 +34,7 @@ public class AirlineAbstractedSolution implements AirlineSolution {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 }

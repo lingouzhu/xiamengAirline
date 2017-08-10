@@ -1,7 +1,7 @@
 package xiaMengAirline.newBranch.GlobalOptimize;
 
+import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineFeasibleSolution;
 import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineRawSolution;
-import xiaMengAirline.newBranch.BusinessDomain.XiaMengAirlineFeasibleSolution;
 
 public class OptimizationController {
 	private RestrictedCandidcateList aRCL;

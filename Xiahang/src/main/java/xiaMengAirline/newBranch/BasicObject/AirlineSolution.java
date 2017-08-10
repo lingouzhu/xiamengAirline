@@ -1,8 +1,6 @@
-package xiaMengAirline.newBranch.LocalOptimize;
+package xiaMengAirline.newBranch.BasicObject;
 
 import java.util.List;
-
-import xiaMengAirline.newBranch.BasicObject.Aircraft;
 
 public interface AirlineSolution {
 	public void addOrReplaceAircraft (Aircraft aAircraft);
