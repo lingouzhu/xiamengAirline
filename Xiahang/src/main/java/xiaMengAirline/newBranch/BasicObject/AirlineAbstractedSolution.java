@@ -4,35 +4,50 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AirlineAbstractedSolution implements AirlineSolution {
+public abstract class AirlineAbstractedSolution  {
 	private Map<String, Aircraft> schedule = new HashMap<String, Aircraft>(); //key NORMAL_airId or CANCEL_airId
 	private Map <String, Flight> allFlights; //key flight id
 	//original passenger distributes to list of flights
 	//key - NORMAL_passengerId or JOIN_passerngerId
-	private Map<String, List<Flight>> passengerDistribution = new HashMap<String, List<Flight>> (); 
+	private Map <String, Airport> allAirports; //key airport Id
+	private Map<String, List<Flight>> passengerDistribution = new HashMap<String, List<Flight>> ();
+	
+	private int version;
+	
+	public AirlineAbstractedSolution springOutNewSolution (List<Aircraft> selectedAir) {
+		return null;
+	}
+	
+	public void mergeUpdatedSolution (AirlineAbstractedSolution betterSolution) {
+		
+	}
 
-	@Override
 	public void addOrReplaceAircraft(Aircraft aAircraft) {
 		// TODO Auto-generated method stub
 
 	}
 
-	@Override
 	public List<Aircraft> getAircrafts() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Aircraft getAircraft(String id, String type) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public Aircraft getCancelAircraft(Aircraft regularAircraft) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public int getVersion() {
+		return version;
+	}
+
+	public void setVersion(int version) {
+		this.version = version;
 	}
 
 

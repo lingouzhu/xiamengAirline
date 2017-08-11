@@ -3,10 +3,8 @@ package xiaMengAirline.newBranch.BusinessDomain;
 import java.util.Date;
 
 import xiaMengAirline.newBranch.BasicObject.Aircraft;
-import xiaMengAirline.newBranch.BasicObject.AirlineSolution;
 import xiaMengAirline.newBranch.BasicObject.Airport;
 import xiaMengAirline.newBranch.BasicObject.Flight;
-import xiaMengAirline.newBranch.BasicObject.FlightAdjustableMethod;
 
 public class DomesticFlightAdjustableMethod implements FlightAdjustableMethod {
 

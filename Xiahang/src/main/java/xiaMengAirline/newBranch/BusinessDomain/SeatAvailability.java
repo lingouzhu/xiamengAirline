@@ -4,7 +4,7 @@ import java.util.List;
 
 import xiaMengAirline.newBranch.BasicObject.PairedTime;
 
-public class AirPortAvailability implements ResourceAvailability {
+public class SeatAvailability implements ResourceAvailability {
 
 	@Override
 	public void setImpactEvents(List<ResourceUnavailableEvent> events) {
@@ -53,7 +53,6 @@ public class AirPortAvailability implements ResourceAvailability {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 
 
 

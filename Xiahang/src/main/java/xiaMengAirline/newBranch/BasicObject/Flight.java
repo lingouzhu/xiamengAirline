@@ -5,6 +5,8 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.newBranch.BusinessDomain.FlightAdjustableMethod;
+
 public class Flight {
 	private static final Logger logger = Logger.getLogger(Flight.class);
 	
@@ -14,6 +16,8 @@ public class Flight {
 	private Airport sourceAirPort;
 	private Airport desintationAirport;
 	private boolean internationalFlight;
+	private Flight joined1stlight;
+	private Flight joined2ndFlight;
 	private int schdNo;
 	private Date arrivalTime;
 	private Date departureTime;
@@ -132,6 +136,20 @@ public class Flight {
 	public void setPlannedJoinedPassenger(Passenger plannedJoinedPassenger) {
 		this.plannedJoinedPassenger = plannedJoinedPassenger;
 	}
+	public Flight getJoined1stlight() {
+		return joined1stlight;
+	}
+	public void setJoined1stlight(Flight joined1stlight) {
+		this.joined1stlight = joined1stlight;
+	}
+	public Flight getJoined2ndFlight() {
+		return joined2ndFlight;
+	}
+	public void setJoined2ndFlight(Flight joined2ndFlight) {
+		this.joined2ndFlight = joined2ndFlight;
+	}
+	
+
 	
 	
 	

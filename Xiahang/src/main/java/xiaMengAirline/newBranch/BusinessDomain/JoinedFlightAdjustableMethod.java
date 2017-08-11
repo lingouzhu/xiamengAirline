@@ -5,7 +5,6 @@ import java.util.Date;
 import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.Airport;
 import xiaMengAirline.newBranch.BasicObject.Flight;
-import xiaMengAirline.newBranch.BasicObject.FlightAdjustableMethod;
 
 public class JoinedFlightAdjustableMethod implements FlightAdjustableMethod {
 

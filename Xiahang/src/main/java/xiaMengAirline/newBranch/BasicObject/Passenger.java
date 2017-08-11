@@ -1,5 +1,7 @@
 package xiaMengAirline.newBranch.BasicObject;
 
+import xiaMengAirline.newBranch.BusinessDomain.PassengerAdjustableMethod;
+
 public class Passenger {
 	private String passengerId; //original flight id
 	private Flight assignedFlight;

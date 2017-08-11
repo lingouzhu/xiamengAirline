@@ -5,15 +5,17 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.newBranch.BusinessDomain.ResourceAvailability;
+
 
 
 public class Aircraft {
 	private static final Logger logger = Logger.getLogger(Aircraft.class);
 	private String id;
 	private String type;
-	private int numberOfSeats;
 	private List<Flight> flightChain = new ArrayList<Flight>();
 	private boolean isCancel = false;
+	private ResourceAvailability seatsAvailability;
 	
 	public String getId() {
 		return id;
@@ -42,10 +44,10 @@ public class Aircraft {
 	public static Logger getLogger() {
 		return logger;
 	}
-	public int getNumberOfSeats() {
-		return numberOfSeats;
+	public ResourceAvailability getSeatsAvailability() {
+		return seatsAvailability;
 	}
-	public void setNumberOfSeats(int numberOfSeats) {
-		this.numberOfSeats = numberOfSeats;
+	public void setSeatsAvailability(ResourceAvailability seatsAvailability) {
+		this.seatsAvailability = seatsAvailability;
 	}
 }

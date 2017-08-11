@@ -2,7 +2,6 @@ package xiaMengAirline.newBranch.BasicObject;
 
 public class XiaMengAirlineRawSolution extends AirlineAbstractedSolution {
 	private XiaMengAirlineFeasibleSolution aFeasibleSolution = null;
-	private int version;
 
 	public XiaMengAirlineFeasibleSolution getaFeasibleSolution() {
 		return aFeasibleSolution;
@@ -10,14 +9,6 @@ public class XiaMengAirlineRawSolution extends AirlineAbstractedSolution {
 
 	public void setaFeasibleSolution(XiaMengAirlineFeasibleSolution aFeasibleSolution) {
 		this.aFeasibleSolution = aFeasibleSolution;
-	}
-
-	public int getVersion() {
-		return version;
-	}
-
-	public void setVersion(int version) {
-		this.version = version;
 	}
 
 }

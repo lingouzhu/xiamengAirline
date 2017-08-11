@@ -1,9 +1,10 @@
 package xiaMengAirline.newBranch.BusinessDomain;
 
 public class ResourceUnavailableEventType {
-	boolean allowForTakeOff;
-	boolean allowForLanding;
-	boolean allowForParking;
+	private boolean allowForTakeOff = true;
+	private boolean allowForLanding = true;
+	private boolean allowForParking = true;
+	private boolean hasFreeRoom = true;
 	public boolean isAllowForTakeOff() {
 		return allowForTakeOff;
 	}
@@ -22,5 +23,12 @@ public class ResourceUnavailableEventType {
 	public void setAllowForParking(boolean allowForParking) {
 		this.allowForParking = allowForParking;
 	}
+	public boolean isHasFreeRoom() {
+		return hasFreeRoom;
+	}
+	public void setHasFreeRoom(boolean hasFreeRoom) {
+		this.hasFreeRoom = hasFreeRoom;
+	}
+
 
 }

@@ -1,10 +1,7 @@
-package xiaMengAirline.newBranch.BasicObject;
+package xiaMengAirline.newBranch.BusinessDomain;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import xiaMengAirline.newBranch.BusinessDomain.ResourceUnavailableEvent;
-import xiaMengAirline.newBranch.BusinessDomain.ResourceUnavailableEventType;
 
 public class AirportTyphoonClose extends ResourceUnavailableEvent {
 	private boolean allowForTakeoff;

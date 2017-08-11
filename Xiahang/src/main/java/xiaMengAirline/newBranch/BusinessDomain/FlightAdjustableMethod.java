@@ -1,6 +1,10 @@
-package xiaMengAirline.newBranch.BasicObject;
+package xiaMengAirline.newBranch.BusinessDomain;
 
 import java.util.Date;
+
+import xiaMengAirline.newBranch.BasicObject.Aircraft;
+import xiaMengAirline.newBranch.BasicObject.Airport;
+import xiaMengAirline.newBranch.BasicObject.Flight;
 
 public interface FlightAdjustableMethod {
 	public boolean cancelFlight (Flight aFlight);
