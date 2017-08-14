@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 
 import xiaMengAirline.newBranch.BusinessDomain.FlightAdjustableMethod;
 
-public class Flight {
+public class Flight implements Cloneable {
 	private static final Logger logger = Logger.getLogger(Flight.class);
 	
 	
@@ -149,6 +149,9 @@ public class Flight {
 		this.joined2ndFlight = joined2ndFlight;
 	}
 	
+	public Flight clone() throws CloneNotSupportedException {
+		return (Flight) (super.clone());
+	}
 
 	
 	

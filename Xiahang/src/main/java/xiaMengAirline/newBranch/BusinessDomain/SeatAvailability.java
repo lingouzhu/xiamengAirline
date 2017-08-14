@@ -54,6 +54,15 @@ public class SeatAvailability implements ResourceAvailability {
 		return false;
 	}
 
+	@Override
+	public ResourceAvailability clone() throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		return (ResourceAvailability) super.clone();
+	}
+
+
+
+
 
 
 }

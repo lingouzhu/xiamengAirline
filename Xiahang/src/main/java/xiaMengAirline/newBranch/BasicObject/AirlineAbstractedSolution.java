@@ -1,5 +1,6 @@
 package xiaMengAirline.newBranch.BasicObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ public abstract class AirlineAbstractedSolution  {
 	//key - NORMAL_passengerId or JOIN_passerngerId
 	private Map <String, Airport> allAirports; //key airport Id
 	private Map<String, List<Flight>> passengerDistribution = new HashMap<String, List<Flight>> ();
+	private List<Flight> dropOutList = new ArrayList<Flight> ();
 	
 	private int version;
 	
@@ -48,6 +50,18 @@ public abstract class AirlineAbstractedSolution  {
 
 	public void setVersion(int version) {
 		this.version = version;
+	}
+
+	public List<Flight> getDropOutList() {
+		return dropOutList;
+	}
+
+	public Map<String, Aircraft> getSchedule() {
+		return schedule;
+	}
+
+	public void setSchedule(Map<String, Aircraft> schedule) {
+		this.schedule = schedule;
 	}
 
 

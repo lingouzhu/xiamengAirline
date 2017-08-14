@@ -4,7 +4,7 @@ import java.util.List;
 
 import xiaMengAirline.newBranch.BasicObject.PairedTime;
 
-public interface ResourceAvailability {
+public interface ResourceAvailability extends Cloneable {
 	
 	public void setImpactEvents (List<ResourceUnavailableEvent> events);
 	public List<ResourceUnavailableEvent> getImpactEvents();
@@ -14,6 +14,7 @@ public interface ResourceAvailability {
 	public PairedTime estimatePreviousAvailable (PairedTime requestedTime);
 	public int setResoruceCapability (int maxAllowed);
 	public boolean applyForResource (int numberOfResources, PairedTime requestedTime);
+	public  ResourceAvailability clone () throws CloneNotSupportedException;
 	
 
 }
