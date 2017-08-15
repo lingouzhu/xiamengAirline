@@ -12,7 +12,7 @@ public interface ResourceAvailability extends Cloneable {
 	public int estimateCurrentAvailable (PairedTime requestedTime);
 	public PairedTime estimateNextAvailable (PairedTime requestedTime);
 	public PairedTime estimatePreviousAvailable (PairedTime requestedTime);
-	public int setResoruceCapability (int maxAllowed);
+	public void setResoruceCapability (int maxAllowed);
 	public boolean applyForResource (int numberOfResources, PairedTime requestedTime);
 	public  ResourceAvailability clone () throws CloneNotSupportedException;
 	

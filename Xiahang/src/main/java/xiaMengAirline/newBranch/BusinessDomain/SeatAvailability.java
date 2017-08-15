@@ -43,9 +43,8 @@ public class SeatAvailability implements ResourceAvailability {
 	}
 
 	@Override
-	public int setResoruceCapability(int maxAllowed) {
+	public void setResoruceCapability(int maxAllowed) {
 		// TODO Auto-generated method stub
-		return 0;
 	}
 
 	@Override

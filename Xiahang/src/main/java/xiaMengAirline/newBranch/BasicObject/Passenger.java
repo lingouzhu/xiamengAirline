@@ -3,10 +3,10 @@ package xiaMengAirline.newBranch.BasicObject;
 import xiaMengAirline.newBranch.BusinessDomain.PassengerAdjustableMethod;
 
 public class Passenger {
-	private String passengerId; //original flight id
 	private Flight assignedFlight;
 	private Aircraft assignedAir;
-	private int passengerNumber;
+	private Flight plannedFlight;
+	private Aircraft plannedAir;
 	private boolean isNormal; //normal passenger or joined
 	private PassengerAdjustableMethod adjustableMethod;
 	
@@ -23,29 +23,38 @@ public class Passenger {
 	public void setAssignedAir(Aircraft assignedAir) {
 		this.assignedAir = assignedAir;
 	}
-	public int getPassengerNumber() {
-		return passengerNumber;
-	}
-	public void setPassengerNumber(int passengerNumber) {
-		this.passengerNumber = passengerNumber;
-	}
+
 	public PassengerAdjustableMethod getAdjustableMethod() {
 		return adjustableMethod;
 	}
 	public void setAdjustableMethod(PassengerAdjustableMethod adjustableMethod) {
 		this.adjustableMethod = adjustableMethod;
 	}
-	public String getPassengerId() {
-		return passengerId;
-	}
-	public void setPassengerId(String passengerId) {
-		this.passengerId = passengerId;
+
+	public Passenger(Flight assignedFlight, Aircraft assignedAir) {
+		super();
+		this.assignedFlight = assignedFlight;
+		this.assignedAir = assignedAir;
+		this.plannedFlight = assignedFlight;
+		this.plannedAir = assignedAir;
 	}
 	public boolean isNormal() {
 		return isNormal;
 	}
 	public void setNormal(boolean isNormal) {
 		this.isNormal = isNormal;
+	}
+	public Flight getPlannedFlight() {
+		return plannedFlight;
+	}
+	public void setPlannedFlight(Flight plannedFlight) {
+		this.plannedFlight = plannedFlight;
+	}
+	public Aircraft getPlannedAir() {
+		return plannedAir;
+	}
+	public void setPlannedAir(Aircraft plannedAir) {
+		this.plannedAir = plannedAir;
 	}
 
 }

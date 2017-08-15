@@ -34,9 +34,9 @@ public class XiaMengAirlineFeasibleSolution extends AirlineAbstractedSolution {
 	public BigDecimal calCostbyAir(XiaMengAirlineFeasibleSolution newSolution) {
 
 		BigDecimal cost = new BigDecimal("0");
-		List<Aircraft> oldAirs = new ArrayList<Aircraft>(getSchedule().values());
+		List<Aircraft> oldAirs = new ArrayList<Aircraft>(getNormalSchedule().values());
 		for (Aircraft orgAir : oldAirs) {
-			Aircraft newAir = getAircraft(orgAir.getId(), orgAir.getType());
+			Aircraft newAir = getAircraft(orgAir.getId(), orgAir.getType(), true);
 			// org air
 			for (int i = 0; i < orgAir.getFlightChain().size(); i++) {
 

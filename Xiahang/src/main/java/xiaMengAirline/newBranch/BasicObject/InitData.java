@@ -23,6 +23,7 @@ import xiaMengAirline.beans.AircraftBackup;
 import xiaMengAirline.beans.FlightBackup;
 import xiaMengAirline.beans.RegularAirPortCloseBackup;
 import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.newBranch.BusinessDomain.SeatAvailability;
 
 
 
@@ -38,9 +39,7 @@ public class InitData {
 	public static Map<String, Integer> fightDurationMap = new HashMap<String, Integer>();
 	
 	/** aircraft list */
-	public static XiaMengAirlineSolutionBackup originalSolution = new XiaMengAirlineSolutionBackup();
-	
-	public static AirPortListBackup airportList = new AirPortListBackup();
+	public static XiaMengAirlineRawSolution originalSolution = new XiaMengAirlineRawSolution();
 	
 	/** joint flight -- key: flight id, value : next flight (if no then null)*/
 	public static Map<Integer, FlightBackup> jointFlightMap = new HashMap<Integer, FlightBackup>();
@@ -80,23 +79,22 @@ public class InitData {
 					cnt++;
 					continue;
 				}
-				FlightBackup aFlight = new FlightBackup();
+				Flight aFlight = new Flight();
 				int aFlightId = (int)row.getCell(0).getNumericCellValue();
 				if (aFlightId > maxFligthId) {
 					maxFligthId = aFlightId;
-					plannedMaxFligthId = maxFligthId;
 				}
 					
 				
 				aFlight.setFlightId(aFlightId);
 				aFlight.setSchdDate(row.getCell(1).getDateCellValue());
-				aFlight.setInternationalFlight(UtilsBackup.interToBoolean(row.getCell(2).getStringCellValue()));
+				aFlight.setInternationalFlight(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
 				aFlight.setSchdNo((int)row.getCell(3).getNumericCellValue());
 				
-				AirPortBackup aAirport = airportList.getAirport(String.valueOf((int)row.getCell(4).getNumericCellValue()));
+				Airport aAirport = originalSolution.getAirport(String.valueOf((int)row.getCell(4).getNumericCellValue()));
 				aFlight.setSourceAirPort(aAirport);
 				
-				aAirport = airportList.getAirport(String.valueOf((int)row.getCell(5).getNumericCellValue()));
+				aAirport = originalSolution.getAirport(String.valueOf((int)row.getCell(5).getNumericCellValue()));
 				aFlight.setDesintationAirport(aAirport);
 				
 				aFlight.setDepartureTime(row.getCell(6).getDateCellValue());
@@ -105,20 +103,36 @@ public class InitData {
 				String airId = String.valueOf((int)row.getCell(8).getNumericCellValue());
 				String airType = String.valueOf((int)row.getCell(9).getNumericCellValue());
 				
-				AircraftBackup aAir = originalSolution.getAircraft(airId, airType, false, true);
+				Aircraft aAir = originalSolution.getAircraft(airId, airType, true);
 				
-				//aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()));
-				aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
+				int passengerNumber = (int)row.getCell(10).getNumericCellValue();
+				int joinedPassengerNumber = (int)row.getCell(11).getNumericCellValue();
+				
+				for (int i=1;i<=passengerNumber;i++) {
+					Passenger aPass = new Passenger(aFlight, aAir);
+					if (i <= joinedPassengerNumber) 
+						aPass.setNormal(false);
+					else
+						aPass.setNormal(true);
+					aFlight.getPassengers().add(aPass);
+				}
+				
+				int seatsNumber = (int)row.getCell(12).getNumericCellValue();
+				SeatAvailability airSeats = new SeatAvailability();
+				airSeats.setResoruceCapability(seatsNumber);
+				airSeats.applyForResource(aFlight.getPassengers().size(), null);
+				aAir.setSeatsAvailability(airSeats);
+				
+				
+				aFlight.setImpCoe(new BigDecimal(row.getCell(13).getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
 				aFlight.setAssignedAir(aAir);
-				AircraftBackup aPlannedAir = aAir.clone();
+				Aircraft aPlannedAir = aAir.clone();
 				aPlannedAir.clear();
 				aFlight.setPlannedAir(aPlannedAir);
 				aFlight.setPlannedFlight(aFlight.clone());
 				aAir.addFlight(aFlight);
-				//originalSolution.replaceOrAddNewAircraft(aAir);
-				
-				
 	        }
+			plannedMaxFligthId = maxFligthId;
 			
 			List<AircraftBackup> schedule = new ArrayList<AircraftBackup> ( originalSolution.getSchedule().values());
 			HashMap<String, FlightBackup> flightScheduleNumber = new HashMap<String, FlightBackup> ();

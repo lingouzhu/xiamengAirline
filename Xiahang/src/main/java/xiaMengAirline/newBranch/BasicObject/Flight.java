@@ -2,6 +2,7 @@ package xiaMengAirline.newBranch.BasicObject;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -21,10 +22,8 @@ public class Flight implements Cloneable {
 	private int schdNo;
 	private Date arrivalTime;
 	private Date departureTime;
-	private Passenger normalPassenger;
-	private Passenger joinedPassenger;
-	private Passenger plannedNormalPassenger;
-	private Passenger plannedJoinedPassenger;
+	private List<Passenger> passengers;
+	private List<Passenger> plannedPassengers;
 	private BigDecimal impCoe;
 	private Aircraft assignedAir;
 	private Aircraft plannedAir;
@@ -112,30 +111,8 @@ public class Flight implements Cloneable {
 	public void setAdjustableMethod(FlightAdjustableMethod adjustableMethod) {
 		this.adjustableMethod = adjustableMethod;
 	}
-	public Passenger getNormalPassenger() {
-		return normalPassenger;
-	}
-	public void setNormalPassenger(Passenger normalPassenger) {
-		this.normalPassenger = normalPassenger;
-	}
-	public Passenger getJoinedPassenger() {
-		return joinedPassenger;
-	}
-	public void setJoinedPassenger(Passenger joinedPassenger) {
-		this.joinedPassenger = joinedPassenger;
-	}
-	public Passenger getPlannedNormalPassenger() {
-		return plannedNormalPassenger;
-	}
-	public void setPlannedNormalPassenger(Passenger plannedNormalPassenger) {
-		this.plannedNormalPassenger = plannedNormalPassenger;
-	}
-	public Passenger getPlannedJoinedPassenger() {
-		return plannedJoinedPassenger;
-	}
-	public void setPlannedJoinedPassenger(Passenger plannedJoinedPassenger) {
-		this.plannedJoinedPassenger = plannedJoinedPassenger;
-	}
+
+
 	public Flight getJoined1stlight() {
 		return joined1stlight;
 	}
@@ -152,6 +129,19 @@ public class Flight implements Cloneable {
 	public Flight clone() throws CloneNotSupportedException {
 		return (Flight) (super.clone());
 	}
+	public List<Passenger> getPassengers() {
+		return passengers;
+	}
+	public void setPassengers(List<Passenger> passengers) {
+		this.passengers = passengers;
+	}
+	public List<Passenger> getPlannedPassengers() {
+		return plannedPassengers;
+	}
+	public void setPlannedPassengers(List<Passenger> plannedPassengers) {
+		this.plannedPassengers = plannedPassengers;
+	}
+
 
 	
 	
