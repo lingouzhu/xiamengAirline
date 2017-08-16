@@ -4,65 +4,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 import xiaMengAirline.newBranch.BasicObject.PairedTime;
+import xiaMengAirline.newBranch.BasicObject.ResourceUnavailableEvent;
+import xiaMengAirline.newBranch.BasicObject.ResourceUnavailableEventType;
 
-public class AirPortAvailability implements ResourceAvailability {
+public class AirPortAvailability {
 	private List<ResourceUnavailableEvent> eventlist = new ArrayList<ResourceUnavailableEvent> ();
+	private int currentAllocated = 0;
 
 
 
-	@Override
 	public List<ResourceUnavailableEvent> getImpactEvents() {
-		// TODO Auto-generated method stub
-		return null;
+		return eventlist;
 	}
-
-	@Override
-	public List<ResourceUnavailableEventType> getUnavailabilityReasons(PairedTime requestedTime) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int estimateCurrentAvailable(PairedTime requestedTime) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public PairedTime estimateNextAvailable(PairedTime requestedTime) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public PairedTime estimatePreviousAvailable(PairedTime requestedTime) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setResoruceCapability(int maxAllowed) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public boolean applyForResource(int numberOfResources, PairedTime requestedTime) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public ResourceAvailability clone() throws CloneNotSupportedException {
-		// TODO Auto-generated method stub
-		return  (ResourceAvailability) super.clone();
-	}
-
-	@Override
+	
 	public void addImpactEvent(ResourceUnavailableEvent event) {
 		eventlist.add(event);
 		
 	}
 
+	public List<ResourceUnavailableEventType> estimateCurrentAvailable(PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+
+	public PairedTime estimateNextAvailable(PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	public PairedTime estimatePreviousAvailable(PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public boolean applyForResource(int numberOfResources, PairedTime requestedTime) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public AirPortAvailability clone() throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		return  (AirPortAvailability) super.clone();
+	}
 
 
 

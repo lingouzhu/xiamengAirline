@@ -17,15 +17,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import xiaMengAirline.beans.AirPortBackup;
-import xiaMengAirline.beans.AirPortCloseBackup;
-import xiaMengAirline.beans.AirPortListBackup;
-import xiaMengAirline.beans.AircraftBackup;
-import xiaMengAirline.beans.FlightBackup;
-import xiaMengAirline.beans.RegularAirPortCloseBackup;
-import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
 import xiaMengAirline.newBranch.BusinessDomain.AirPortAvailability;
-import xiaMengAirline.newBranch.BusinessDomain.AirportRegularClose;
 import xiaMengAirline.newBranch.BusinessDomain.DomesticFlightAdjustableMethod;
 import xiaMengAirline.newBranch.BusinessDomain.InternationalFlightAdjustableMethod;
 import xiaMengAirline.newBranch.BusinessDomain.JoinedFlightAdjustableMethod;
@@ -123,8 +115,8 @@ public class InitData {
 				
 				int seatsNumber = (int)row.getCell(12).getNumericCellValue();
 				SeatAvailability airSeats = new SeatAvailability();
-				airSeats.setResoruceCapability(seatsNumber);
-				airSeats.applyForResource(aFlight.getPassengers().size(), null);
+				airSeats.setSeatCapability(seatsNumber);
+				airSeats.applyForResource(aFlight.getPassengers().size());
 				aAir.setSeatsAvailability(airSeats);
 				
 				
@@ -279,18 +271,19 @@ public class InitData {
 					continue;
 				}
 				
-				AirPortCloseBackup portCloseBean = new AirPortCloseBackup();
+				AirportTyphoonClose portCloseBean = new AirportTyphoonClose();
 				String airPortId = String.valueOf((int)row.getCell(3).getNumericCellValue());
-				AirPortBackup aAirport = airportList.getAirport(airPortId);
+				Airport aAirport = originalSolution.getAirport(airPortId);
 				portCloseBean.setStartTime(row.getCell(0).getDateCellValue());
 				portCloseBean.setEndTime(row.getCell(1).getDateCellValue());
 				String impactType = row.getCell(2).getStringCellValue();
 				if (impactType.equals("降落")) {
-					portCloseBean.setAllowForLanding(false);
+					portCloseBean.getUnavailableEventType().setAllowForLanding(false);
 				} else if (impactType.equals("起飞")) {
-					portCloseBean.setAllowForTakeoff(false);
+					portCloseBean.getUnavailableEventType().setAllowForTakeOff(false);;
 				} else if (impactType.equals("停机")) {
-					portCloseBean.setMaximumParking(0);
+					int nParking =  (int)row.getCell(6).getNumericCellValue();
+					portCloseBean.getUnavailableEventType().setParkingCapability(nParking);
 				}
 				
 				

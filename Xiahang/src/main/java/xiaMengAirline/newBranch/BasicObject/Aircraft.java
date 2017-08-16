@@ -6,8 +6,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.newBranch.BusinessDomain.ResourceAvailability;
-import xiaMengAirline.util.UtilsBackup;
+import xiaMengAirline.newBranch.BusinessDomain.SeatAvailability;
 
 
 
@@ -17,7 +16,7 @@ public class Aircraft implements Cloneable {
 	private String type;
 	private List<Flight> flightChain = new ArrayList<Flight>();
 	private boolean isCancel = false;
-	private ResourceAvailability seatsAvailability;
+	private SeatAvailability seatsAvailability = null;
 	
 	public String getId() {
 		return id;
@@ -303,12 +302,7 @@ public class Aircraft implements Cloneable {
 	public static Logger getLogger() {
 		return logger;
 	}
-	public ResourceAvailability getSeatsAvailability() {
-		return seatsAvailability;
-	}
-	public void setSeatsAvailability(ResourceAvailability seatsAvailability) {
-		this.seatsAvailability = seatsAvailability;
-	}
+
 	
 	public Aircraft clone() throws CloneNotSupportedException {
 		Aircraft aNew = (Aircraft) super.clone();
@@ -321,11 +315,16 @@ public class Aircraft implements Cloneable {
 			newFlightChain.add(newFlight);
 		}
 		aNew.setFlightChain(newFlightChain);
-		aNew.setSeatsAvailability(seatsAvailability.clone());
 		
 		return (aNew);
 	}
 	public void clear() {
 		flightChain.clear();
+	}
+	public SeatAvailability getSeatsAvailability() {
+		return seatsAvailability;
+	}
+	public void setSeatsAvailability(SeatAvailability seatsAvailability) {
+		this.seatsAvailability = seatsAvailability;
 	}
 }

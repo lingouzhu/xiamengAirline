@@ -1,11 +1,11 @@
 package xiaMengAirline.newBranch.BasicObject;
 
-import xiaMengAirline.newBranch.BusinessDomain.ResourceAvailability;
+import xiaMengAirline.newBranch.BusinessDomain.AirPortAvailability;
 
 public class Airport {
 	private String id;
 	private boolean isDomestic;
-	private ResourceAvailability  airportAvailability = null;
+	private AirPortAvailability  airportAvailability = null;
 
 	public String getId() {
 		return id;
@@ -24,14 +24,13 @@ public class Airport {
 		this.isDomestic = isDomestic;
 	}
 
-	public ResourceAvailability getAirportAvailability() {
+	public AirPortAvailability getAirportAvailability() {
 		return airportAvailability;
 	}
 
-	public void setAirportAvailability(ResourceAvailability airportAvailability) {
+	public void setAirportAvailability(AirPortAvailability airportAvailability) {
 		this.airportAvailability = airportAvailability;
 	}
-
 
 
 }

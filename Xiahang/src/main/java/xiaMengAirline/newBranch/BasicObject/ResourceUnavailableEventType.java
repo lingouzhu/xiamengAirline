@@ -1,10 +1,11 @@
-package xiaMengAirline.newBranch.BusinessDomain;
+package xiaMengAirline.newBranch.BasicObject;
 
 public class ResourceUnavailableEventType {
 	private boolean allowForTakeOff = true;
 	private boolean allowForLanding = true;
-	private boolean allowForParking = true;
-	private boolean hasFreeRoom = true;
+	private int parkingCapability = Integer.MAX_VALUE;
+	
+	
 	public boolean isAllowForTakeOff() {
 		return allowForTakeOff;
 	}
@@ -17,18 +18,11 @@ public class ResourceUnavailableEventType {
 	public void setAllowForLanding(boolean allowForLanding) {
 		this.allowForLanding = allowForLanding;
 	}
-	public boolean isAllowForParking() {
-		return allowForParking;
+	public int getParkingCapability() {
+		return parkingCapability;
 	}
-	public void setAllowForParking(boolean allowForParking) {
-		this.allowForParking = allowForParking;
+	public void setParkingCapability(int parkingCapability) {
+		this.parkingCapability = parkingCapability;
 	}
-	public boolean isHasFreeRoom() {
-		return hasFreeRoom;
-	}
-	public void setHasFreeRoom(boolean hasFreeRoom) {
-		this.hasFreeRoom = hasFreeRoom;
-	}
-
-
 }
+
