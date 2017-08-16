@@ -6,11 +6,6 @@ import xiaMengAirline.newBranch.BasicObject.PairedTime;
 
 public class SeatAvailability implements ResourceAvailability {
 
-	@Override
-	public void setImpactEvents(List<ResourceUnavailableEvent> events) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public List<ResourceUnavailableEvent> getImpactEvents() {
@@ -57,6 +52,12 @@ public class SeatAvailability implements ResourceAvailability {
 	public ResourceAvailability clone() throws CloneNotSupportedException {
 		// TODO Auto-generated method stub
 		return (ResourceAvailability) super.clone();
+	}
+
+	@Override
+	public void addImpactEvent(ResourceUnavailableEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

@@ -1,16 +1,14 @@
 package xiaMengAirline.newBranch.BusinessDomain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import xiaMengAirline.newBranch.BasicObject.PairedTime;
 
 public class AirPortAvailability implements ResourceAvailability {
+	private List<ResourceUnavailableEvent> eventlist = new ArrayList<ResourceUnavailableEvent> ();
 
-	@Override
-	public void setImpactEvents(List<ResourceUnavailableEvent> events) {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	@Override
 	public List<ResourceUnavailableEvent> getImpactEvents() {
@@ -57,6 +55,12 @@ public class AirPortAvailability implements ResourceAvailability {
 	public ResourceAvailability clone() throws CloneNotSupportedException {
 		// TODO Auto-generated method stub
 		return  (ResourceAvailability) super.clone();
+	}
+
+	@Override
+	public void addImpactEvent(ResourceUnavailableEvent event) {
+		eventlist.add(event);
+		
 	}
 
 

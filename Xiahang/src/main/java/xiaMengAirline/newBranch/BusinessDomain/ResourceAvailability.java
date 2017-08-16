@@ -6,7 +6,7 @@ import xiaMengAirline.newBranch.BasicObject.PairedTime;
 
 public interface ResourceAvailability extends Cloneable {
 	
-	public void setImpactEvents (List<ResourceUnavailableEvent> events);
+	public void addImpactEvent (ResourceUnavailableEvent event);
 	public List<ResourceUnavailableEvent> getImpactEvents();
 	public List<ResourceUnavailableEventType> getUnavailabilityReasons (PairedTime requestedTime);
 	public int estimateCurrentAvailable (PairedTime requestedTime);

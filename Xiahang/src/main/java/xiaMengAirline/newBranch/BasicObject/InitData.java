@@ -4,6 +4,7 @@ package xiaMengAirline.newBranch.BasicObject;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,11 @@ import xiaMengAirline.beans.AircraftBackup;
 import xiaMengAirline.beans.FlightBackup;
 import xiaMengAirline.beans.RegularAirPortCloseBackup;
 import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.newBranch.BusinessDomain.AirPortAvailability;
+import xiaMengAirline.newBranch.BusinessDomain.AirportRegularClose;
+import xiaMengAirline.newBranch.BusinessDomain.DomesticFlightAdjustableMethod;
+import xiaMengAirline.newBranch.BusinessDomain.InternationalFlightAdjustableMethod;
+import xiaMengAirline.newBranch.BusinessDomain.JoinedFlightAdjustableMethod;
 import xiaMengAirline.newBranch.BusinessDomain.SeatAvailability;
 
 
@@ -41,20 +47,14 @@ public class InitData {
 	/** aircraft list */
 	public static XiaMengAirlineRawSolution originalSolution = new XiaMengAirlineRawSolution();
 	
-	/** joint flight -- key: flight id, value : next flight (if no then null)*/
-	public static Map<Integer, FlightBackup> jointFlightMap = new HashMap<Integer, FlightBackup>();
-	
 	/** fist flight*/
-	public static Map<String, FlightBackup> firstFlightMap = new HashMap<String, FlightBackup>();
+	public static Map<String, Flight> firstFlightMap = new HashMap<String, Flight>();
 	
 	/** last flight*/
-	public static Map<String, FlightBackup> lastFlightMap = new HashMap<String, FlightBackup>();
+	public static Map<String, Flight> lastFlightMap = new HashMap<String, Flight>();
 	
 	/** flight < 50 mins*/
 	public static Map<String, Integer> specialFlightMap = new HashMap<String, Integer>();
-	
-	/** domestic airports list **/
-	public static List<String> domesticAirportList = new ArrayList<String> (); 
 	
 	public static int maxFligthId = 0;
 	public static int plannedMaxFligthId = 0;
@@ -89,6 +89,10 @@ public class InitData {
 				aFlight.setFlightId(aFlightId);
 				aFlight.setSchdDate(row.getCell(1).getDateCellValue());
 				aFlight.setInternationalFlight(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
+				if (aFlight.isInternationalFlight())
+					aFlight.getAdjustableMethod().add(new InternationalFlightAdjustableMethod());
+				else
+					aFlight.getAdjustableMethod().add(new DomesticFlightAdjustableMethod());
 				aFlight.setSchdNo((int)row.getCell(3).getNumericCellValue());
 				
 				Airport aAirport = originalSolution.getAirport(String.valueOf((int)row.getCell(4).getNumericCellValue()));
@@ -134,18 +138,18 @@ public class InitData {
 	        }
 			plannedMaxFligthId = maxFligthId;
 			
-			List<AircraftBackup> schedule = new ArrayList<AircraftBackup> ( originalSolution.getSchedule().values());
-			HashMap<String, FlightBackup> flightScheduleNumber = new HashMap<String, FlightBackup> ();
-			for (AircraftBackup aAir:schedule) {
+			List<Aircraft> schedule = new ArrayList<Aircraft> ( originalSolution.getNormalSchedule().values());
+			HashMap<String, Flight> flightScheduleNumber = new HashMap<String, Flight> ();
+			for (Aircraft aAir:schedule) {
 				aAir.sortFlights();
-				List<FlightBackup> flightList = aAir.getFlightChain();
+				List<Flight> flightList = aAir.getFlightChain();
 				for (int i = 0; i < flightList.size(); i++) {
-					FlightBackup aFlight = flightList.get(i);
+					Flight aFlight = flightList.get(i);
 					if (i == 0) {
 						firstFlightMap.put(aAir.getId(), aFlight);
 					} else {
-						FlightBackup pFlight = flightList.get(i - 1);
-						int bTime = UtilsBackup.minutiesBetweenTime(aFlight.getDepartureTime(), pFlight.getArrivalTime()).intValue();
+						Flight pFlight = flightList.get(i - 1);
+						int bTime = Utils.minutiesBetweenTime(aFlight.getDepartureTime(), pFlight.getArrivalTime()).intValue();
 						if (bTime < 50) {
 //							System.out.println(pFlight.getArrivalTime());
 //							System.out.println(aFlight.getDepartureTime());
@@ -161,24 +165,20 @@ public class InitData {
 					
 					String aKey = Integer.toString(aFlight.getSchdNo());
 					aKey += "_";
-					aKey += UtilsBackup.dateFormatter(aFlight.getSchdDate());
+					aKey += Utils.dateFormatter(aFlight.getSchdDate());
 					
-					FlightBackup lastFlight = flightScheduleNumber.put(aKey, aFlight);
+					Flight lastFlight = flightScheduleNumber.put(aKey, aFlight);
 					if (lastFlight !=null) {
-						jointFlightMap.put(lastFlight.getFlightId(),aFlight.clone());
-						jointFlightMap.put(aFlight.getFlightId(),null);
+						lastFlight.setJoined1stlight(lastFlight);
+						lastFlight.setJoined2ndFlight(aFlight);
+						lastFlight.getAdjustableMethod().add(new JoinedFlightAdjustableMethod());
+						
+						aFlight.setJoined1stlight(lastFlight);
+						aFlight.setJoined2ndFlight(aFlight);
+						aFlight.getAdjustableMethod().add(new JoinedFlightAdjustableMethod());
+						
 					}
 					
-					if (!aFlight.isInternationalFlight()) {
-						String sourceAirport = aFlight.getSourceAirPort().getId();
-						String destAirport = aFlight.getDesintationAirport().getId();
-						if (!domesticAirportList.contains(sourceAirport)) {
-							domesticAirportList.add(sourceAirport);
-						}
-						if (!domesticAirportList.contains(destAirport)) {
-							domesticAirportList.add(destAirport);
-						}
-					}
 					
 				}
 				
@@ -191,6 +191,25 @@ public class InitData {
 //					logger.debug("		Flight id " + aFlight.getSchdNo());
 //				}
 //			}
+			
+			//****************************************airport type
+			Sheet airportSheet = wb.getSheet("机场");  
+			cnt = 0;
+			for (Row row : airportSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				String airPortId =  String.valueOf((int)row.getCell(0).getNumericCellValue());
+				int domestic =  (int)row.getCell(1).getNumericCellValue();
+				
+				Airport aAirport = originalSolution.getAirport(airPortId);
+				if (domestic == 0)
+					aAirport.setDomestic(true);
+				else
+					aAirport.setDomestic(false);
+				
+			}
 			
 			//****************************************航班 飞机限制*************************************************//*
 			Sheet airLimitSheet = wb.getSheet("航线-飞机限制");  
@@ -216,15 +235,38 @@ public class InitData {
 					continue;
 				}
 				
-				RegularAirPortCloseBackup portCloseBean = new RegularAirPortCloseBackup();
+				AirportRegularClose portCloseBean = new AirportRegularClose();
 				String airPortId = String.valueOf((int)row.getCell(0).getNumericCellValue());
-				AirPortBackup aAirport = airportList.getAirport(airPortId);
-				portCloseBean.setCloseTime(UtilsBackup.timeFormatter(row.getCell(1).getDateCellValue()).substring(11));
-				portCloseBean.setOpenTime(UtilsBackup.timeFormatter(row.getCell(2).getDateCellValue()).substring(11));
-				portCloseBean.setCloseDate(UtilsBackup.dateFormatter(row.getCell(3).getDateCellValue()));
-				portCloseBean.setOpenDate(UtilsBackup.dateFormatter(row.getCell(4).getDateCellValue()));
+				Airport aAirport = originalSolution.getAirport(airPortId);
 				
-				aAirport.addRegularCloseSchedule(portCloseBean);
+				if (aAirport.getAirportAvailability() == null)
+					aAirport.setAirportAvailability(new AirPortAvailability());
+
+				SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+				String aStartTime = Utils.timeFormatter(row.getCell(1).getDateCellValue()).substring(11);
+				String aEndTime = Utils.timeFormatter(row.getCell(2).getDateCellValue()).substring(11);
+				
+				String aDate = "2017-05-05 ";
+				portCloseBean.setStartTime(formatter.parse(aDate + aStartTime));
+				portCloseBean.setEndTime(formatter.parse(aDate + aEndTime));
+				aAirport.getAirportAvailability().addImpactEvent(portCloseBean);
+				
+				aDate = "2017-05-06 ";
+				portCloseBean.setStartTime(formatter.parse(aDate + aStartTime));
+				portCloseBean.setEndTime(formatter.parse(aDate + aEndTime));
+				aAirport.getAirportAvailability().addImpactEvent(portCloseBean);
+				
+				aDate = "2017-05-07 ";
+				portCloseBean.setStartTime(formatter.parse(aDate + aStartTime));
+				portCloseBean.setEndTime(formatter.parse(aDate + aEndTime));
+				aAirport.getAirportAvailability().addImpactEvent(portCloseBean);
+				
+				if (!airPortId.equals("22")) {
+					aDate = "2017-05-08 ";
+					portCloseBean.setStartTime(formatter.parse(aDate + aStartTime));
+					portCloseBean.setEndTime(formatter.parse(aDate + aEndTime));
+					aAirport.getAirportAvailability().addImpactEvent(portCloseBean);
+				} 
 				
 			}
 			

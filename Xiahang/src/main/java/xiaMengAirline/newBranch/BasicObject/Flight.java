@@ -1,6 +1,7 @@
 package xiaMengAirline.newBranch.BasicObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class Flight implements Cloneable {
 	private Aircraft assignedAir;
 	private Aircraft plannedAir;
 	private Flight plannedFlight;
-	private FlightAdjustableMethod adjustableMethod;
+	private List<FlightAdjustableMethod> adjustableMethod = new ArrayList<FlightAdjustableMethod> ();
 	public int getFlightId() {
 		return flightId;
 	}
@@ -105,12 +106,6 @@ public class Flight implements Cloneable {
 		this.desintationAirport = desintationAirport;
 	}
 
-	public FlightAdjustableMethod getAdjustableMethod() {
-		return adjustableMethod;
-	}
-	public void setAdjustableMethod(FlightAdjustableMethod adjustableMethod) {
-		this.adjustableMethod = adjustableMethod;
-	}
 
 
 	public Flight getJoined1stlight() {
@@ -140,6 +135,9 @@ public class Flight implements Cloneable {
 	}
 	public void setPlannedPassengers(List<Passenger> plannedPassengers) {
 		this.plannedPassengers = plannedPassengers;
+	}
+	public List<FlightAdjustableMethod> getAdjustableMethod() {
+		return adjustableMethod;
 	}
 
 
