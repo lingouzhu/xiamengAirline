@@ -67,10 +67,10 @@ public class XiaMengAirlineFeasibleSolution extends AirlineAbstractedSolution {
 							}
 						}
 						// joint stretch
-						if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null) {
+						if (newFlight.getJoined1stlight()!=null && newFlight.getJoined1stlight()==newFlight) {
 							if (!newFlight.getDesintationAirport().getId()
 									.equals((orgFlight.getDesintationAirport().getId()))) {
-								Flight nextFlight = InitData.jointFlightMap.get(Flight.getFlightId());
+								Flight nextFlight = newFlight.getJoined2ndFlight();
 
 								cost = cost.add(new BigDecimal("750").multiply(newFlight.getImpCoe()));
 								cost = cost.add(new BigDecimal("750").multiply(nextFlight.getImpCoe()));
@@ -85,8 +85,7 @@ public class XiaMengAirlineFeasibleSolution extends AirlineAbstractedSolution {
 				// cancel
 				if (!existFlg) {
 					// not 2nd of joint flight
-					if (!InitData.jointFlightMap.containsKey(orgFlight.getFlightId())
-							|| InitData.jointFlightMap.get(orgFlight.getFlightId()) != null) {
+					if (orgFlight.getJoined2ndFlight() !=null && orgFlight.getJoined2ndFlight() == orgFlight) {
 						cost = cost.add(new BigDecimal("1000").multiply(orgFlight.getImpCoe()));
 					}
 				}
