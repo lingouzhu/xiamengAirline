@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import xiaMengAirline.newBranch.BasicObject.ResourceUnavailableEventType.AllowType;
 import xiaMengAirline.newBranch.BusinessDomain.AirPortAvailability;
 import xiaMengAirline.newBranch.BusinessDomain.DomesticFlightAdjustableMethod;
 import xiaMengAirline.newBranch.BusinessDomain.InternationalFlightAdjustableMethod;
@@ -47,6 +48,10 @@ public class InitData {
 	
 	/** flight < 50 mins*/
 	public static Map<String, Integer> specialFlightMap = new HashMap<String, Integer>();
+	
+	/** passenger transition table keyl sourceFlightId_sourceFlightId, value shortestTransition_numberOfPassenger*/
+	public static Map<String, String> passengerTransitionMap = new HashMap<String, String>();
+	
 	
 	public static int maxFligthId = 0;
 	public static int plannedMaxFligthId = 0;
@@ -278,16 +283,51 @@ public class InitData {
 				portCloseBean.setEndTime(row.getCell(1).getDateCellValue());
 				String impactType = row.getCell(2).getStringCellValue();
 				if (impactType.equals("降落")) {
-					portCloseBean.getUnavailableEventType().setAllowForLanding(false);
+					portCloseBean.getUnavailableEventType().setAllowForLanding(AllowType.NOT_ALLOWED);
 				} else if (impactType.equals("起飞")) {
-					portCloseBean.getUnavailableEventType().setAllowForTakeOff(false);;
+					portCloseBean.getUnavailableEventType().setAllowForTakeOff(AllowType.NOT_ALLOWED);
 				} else if (impactType.equals("停机")) {
 					int nParking =  (int)row.getCell(6).getNumericCellValue();
-					portCloseBean.getUnavailableEventType().setParkingCapability(nParking);
+					portCloseBean.getUnavailableEventType().setAllowForParking(AllowType.ALLOWED.CONDITION);
+					portCloseBean.getUnavailableEventType().setCapability(nParking);
 				}
 				
+				if (aAirport.getAirportAvailability() == null)
+					aAirport.setAirportAvailability(new AirPortAvailability());
+								
+				aAirport.getAirportAvailability().addImpactEvent(portCloseBean);
 				
-				aAirport.addCloseSchedule(portCloseBean);
+				//create special airport recover time
+				 if (impactType.equals("起飞")) {
+					 //only allows 2 flights take-off / landing before / after
+					 String aDate = "2017-05-06 ";
+					 String startHour = "15:";
+					 int startTime = 0;
+					 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+					 for (int i = 1;i <= 12; i++) {
+						 String startMin = String.format("%02d", startTime);
+						 String endMin = String.format("%02d", startTime + 5);
+						 AirportTyphoonClose portBufferBean1 = new AirportTyphoonClose();
+						 AirportTyphoonClose portBufferBean2 = new AirportTyphoonClose();
+
+						 portBufferBean1.setStartTime(formatter.parse(aDate + startHour + startMin ));
+						 portBufferBean1.getUnavailableEventType().setAllowForLanding(AllowType.CONDITION);
+						 portBufferBean1.getUnavailableEventType().setCapability(2);
+						 portBufferBean1.setEndTime(formatter.parse(aDate + startHour + endMin ));
+						 
+						 portBufferBean2.setStartTime(formatter.parse(aDate + startHour + startMin ));
+						 portBufferBean2.getUnavailableEventType().setAllowForTakeOff(AllowType.CONDITION);
+						 portBufferBean2.getUnavailableEventType().setCapability(2);						 
+						 portBufferBean2.setEndTime(formatter.parse(aDate + startHour + endMin ));
+						 
+						 aAirport.getAirportAvailability().addImpactEvent(portBufferBean1);
+						 aAirport.getAirportAvailability().addImpactEvent(portBufferBean2);
+						 
+						 startTime += 5;
+						 
+					 }
+				 }
 				
 			}
 			
@@ -309,6 +349,23 @@ public class InitData {
 				int time = (int)row.getCell(3).getNumericCellValue();
 				
 				fightDurationMap.put(airType + "_" + startPort + "_" + endPort, time);
+			}
+			
+			//****************************************旅客中转时间限制*************************************************//*
+			Sheet passengerTransitionSheet = wb.getSheet("中转时间限制");  
+			cnt = 0;
+			for (Row row : passengerTransitionSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				
+				String sourceFlightId = String.valueOf((int)row.getCell(0).getNumericCellValue());
+				String destFlightId = String.valueOf((int)row.getCell(1).getNumericCellValue());
+				String shortestTransition = String.valueOf((int)row.getCell(2).getNumericCellValue());
+				String numberOfPassenger = String.valueOf((int)row.getCell(3).getNumericCellValue());
+				
+				passengerTransitionMap.put( sourceFlightId+ "_" + destFlightId, shortestTransition + "_" + numberOfPassenger);
 			}
 			
 			 

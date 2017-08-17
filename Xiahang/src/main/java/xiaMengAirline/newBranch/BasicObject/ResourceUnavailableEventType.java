@@ -1,28 +1,53 @@
 package xiaMengAirline.newBranch.BasicObject;
 
+
+
 public class ResourceUnavailableEventType {
-	private boolean allowForTakeOff = true;
-	private boolean allowForLanding = true;
-	private int parkingCapability = Integer.MAX_VALUE;
+	public enum AllowType {
+	    ALLOWED,
+	    NOT_ALLOWED,
+	    CONDITION;
+	}
+	private AllowType allowForTakeOff = AllowType.ALLOWED;
+	private AllowType allowForLanding = AllowType.ALLOWED;
+	private AllowType allowForParking = AllowType.ALLOWED;
 	
-	
-	public boolean isAllowForTakeOff() {
+	private int capability = Integer.MAX_VALUE;
+
+	public AllowType getAllowForTakeOff() {
 		return allowForTakeOff;
 	}
-	public void setAllowForTakeOff(boolean allowForTakeOff) {
+
+	public void setAllowForTakeOff(AllowType allowForTakeOff) {
 		this.allowForTakeOff = allowForTakeOff;
 	}
-	public boolean isAllowForLanding() {
+
+	public AllowType getAllowForLanding() {
 		return allowForLanding;
 	}
-	public void setAllowForLanding(boolean allowForLanding) {
+
+	public void setAllowForLanding(AllowType allowForLanding) {
 		this.allowForLanding = allowForLanding;
 	}
-	public int getParkingCapability() {
-		return parkingCapability;
+
+	public AllowType getAllowForParking() {
+		return allowForParking;
 	}
-	public void setParkingCapability(int parkingCapability) {
-		this.parkingCapability = parkingCapability;
+
+	public void setAllowForParking(AllowType allowForParking) {
+		this.allowForParking = allowForParking;
 	}
+
+	public int getCapability() {
+		return capability;
+	}
+
+	public void setCapability(int capability) {
+		this.capability = capability;
+	}
+	
+	
+
+	
 }
 
