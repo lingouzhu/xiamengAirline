@@ -327,6 +327,60 @@ public class InitData {
 						 startTime += 5;
 						 
 					 }
+					 
+					 aDate = "2017-05-07 ";
+					 startHour = "17:";
+					 startTime = 0;
+
+					 for (int i = 1;i <= 12; i++) {
+						 String startMin = String.format("%02d", startTime);
+						 String endMin = String.format("%02d", startTime + 5);
+						 AirportTyphoonClose portBufferBean1 = new AirportTyphoonClose();
+						 AirportTyphoonClose portBufferBean2 = new AirportTyphoonClose();
+
+						 portBufferBean1.setStartTime(formatter.parse(aDate + startHour + startMin ));
+						 portBufferBean1.getUnavailableEventType().setAllowForLanding(AllowType.CONDITION);
+						 portBufferBean1.getUnavailableEventType().setCapability(2);
+						 portBufferBean1.setEndTime(formatter.parse(aDate + startHour + endMin ));
+						 
+						 portBufferBean2.setStartTime(formatter.parse(aDate + startHour + startMin ));
+						 portBufferBean2.getUnavailableEventType().setAllowForTakeOff(AllowType.CONDITION);
+						 portBufferBean2.getUnavailableEventType().setCapability(2);						 
+						 portBufferBean2.setEndTime(formatter.parse(aDate + startHour + endMin ));
+						 
+						 aAirport.getAirportAvailability().addImpactEvent(portBufferBean1);
+						 aAirport.getAirportAvailability().addImpactEvent(portBufferBean2);
+						 
+						 startTime += 5;
+						 
+					 }
+					 
+					 aDate = "2017-05-07 ";
+					 startHour = "18:";
+					 startTime = 0;
+
+					 for (int i = 1;i <= 12; i++) {
+						 String startMin = String.format("%02d", startTime);
+						 String endMin = String.format("%02d", startTime + 5);
+						 AirportTyphoonClose portBufferBean1 = new AirportTyphoonClose();
+						 AirportTyphoonClose portBufferBean2 = new AirportTyphoonClose();
+
+						 portBufferBean1.setStartTime(formatter.parse(aDate + startHour + startMin ));
+						 portBufferBean1.getUnavailableEventType().setAllowForLanding(AllowType.CONDITION);
+						 portBufferBean1.getUnavailableEventType().setCapability(2);
+						 portBufferBean1.setEndTime(formatter.parse(aDate + startHour + endMin ));
+						 
+						 portBufferBean2.setStartTime(formatter.parse(aDate + startHour + startMin ));
+						 portBufferBean2.getUnavailableEventType().setAllowForTakeOff(AllowType.CONDITION);
+						 portBufferBean2.getUnavailableEventType().setCapability(2);						 
+						 portBufferBean2.setEndTime(formatter.parse(aDate + startHour + endMin ));
+						 
+						 aAirport.getAirportAvailability().addImpactEvent(portBufferBean1);
+						 aAirport.getAirportAvailability().addImpactEvent(portBufferBean2);
+						 
+						 startTime += 5;
+						 
+					 }
 				 }
 				
 			}
