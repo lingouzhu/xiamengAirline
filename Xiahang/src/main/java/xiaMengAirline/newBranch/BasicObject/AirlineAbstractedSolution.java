@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 public abstract class AirlineAbstractedSolution  {
+	private static final Logger logger = Logger.getLogger(AirlineAbstractedSolution.class);
 	private Map<String, Aircraft> normalSchedule = new HashMap<String, Aircraft>(); //key airId
 	private Map<String, Aircraft> cancelledSchedule = new HashMap<String, Aircraft>(); //key airId
 	//original passenger distributes to list of flights
@@ -15,25 +18,169 @@ public abstract class AirlineAbstractedSolution  {
 	private Map <String, Airport> allAirports; //key airport Id
 	private List<Flight> dropOutList = new ArrayList<Flight> ();
 	
-	private int version;
+	//rule of versions a.b.c.d.e
+	//a is the main branch version
+	//b is the branched version from a
+	//c is the branched version from a.b
+	//d is the branched version from a.b.c
+	//e is the branched version from a.b.c.d
+	//etc.
+	private String version;
 	
-	public AirlineAbstractedSolution springOutNewSolution (List<Aircraft> selectedAir) {
-		return null;
-	}
-	
-	public void mergeUpdatedSolution (AirlineAbstractedSolution betterSolution) {
+	public AirlineAbstractedSolution clone() throws CloneNotSupportedException {
+		AirlineAbstractedSolution aNewSolution = (AirlineAbstractedSolution) super.clone();
+		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
+		for (String aAir : normalSchedule.keySet()) {
+			newSchedule.put(aAir, normalSchedule.get(aAir).clone());
+		}
+		aNewSolution.setNormalSchedule(newSchedule);
 		
+		HashMap<String, Aircraft> newCacnelSchedule = new HashMap<String, Aircraft>();
+		for (String aAir : cancelledSchedule.keySet()) {
+			newCacnelSchedule.put(aAir, cancelledSchedule.get(aAir).clone());
+		}
+		aNewSolution.setCancelledSchedule(newCacnelSchedule);
+		
+		List<Flight> newDropOutList = new ArrayList<Flight> ();
+		for (Flight aFlight:dropOutList) {
+			newDropOutList.add(aFlight.clone());
+		}
+		aNewSolution.setDropOutList(newDropOutList);
+		
+		Map <String, Airport> newAirports = new HashMap<String, Airport>();
+		for (String aAirport : newAirports.keySet()) {
+			newAirports.put(aAirport, newAirports.get(aAirport).clone());
+		}
+		aNewSolution.setAllAirports(newAirports);
+		aNewSolution.increaseMainVersion();
+		
+		return aNewSolution;
+	}
+	
+	public AirlineAbstractedSolution springOutNewSolution (List<String> selectedAir) throws CloneNotSupportedException {
+		AirlineAbstractedSolution aNewSolution = (AirlineAbstractedSolution) super.clone();
+		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
+		HashMap<String, Aircraft> newCacnelSchedule = new HashMap<String, Aircraft>();
+		List<Flight> newDropOutList = new ArrayList<Flight> ();
+		Map <String, Airport> newAirports = new HashMap<String, Airport>();
+		aNewSolution.setVersion(version+".0");
+		
+		for (String aAir : selectedAir) {
+			if (normalSchedule.containsKey(aAir)) {
+				newSchedule.put(aAir, normalSchedule.get(aAir).clone());
+			} else if (cancelledSchedule.containsKey(aAir)) {
+				cancelledSchedule.put(aAir, cancelledSchedule.get(aAir).clone());
+			} else {
+				logger.warn("Requst to branch unknow aircraft: " + aAir + " from solution version " + version);
+			}
+		}
+		aNewSolution.setNormalSchedule(newSchedule);
+		aNewSolution.setCancelledSchedule(newCacnelSchedule);
+		aNewSolution.setDropOutList(newDropOutList); //dropout list is not recyclable, and will not move out?
+		
+		//check airports
+		List<Aircraft> normalAir = new ArrayList<Aircraft> (newSchedule.values());
+		String airPortId;
+		for (Aircraft aAir:normalAir) {
+			for (Flight aFlight:aAir.getFlightChain()) {
+				airPortId = aFlight.getSourceAirPort().getId();
+				if (!newAirports.containsKey(airPortId)) {
+					newAirports.put(airPortId, getAirport(airPortId).clone());
+				}
+				airPortId = aFlight.getDesintationAirport().getId();
+				if (!newAirports.containsKey(airPortId)) {
+					newAirports.put(airPortId, getAirport(airPortId).clone());
+				}
+			}
+		}
+		
+		List<Aircraft> cancelledAir = new ArrayList<Aircraft> (newCacnelSchedule.values());
+		for (Aircraft aAir:cancelledAir) {
+			for (Flight aFlight:aAir.getFlightChain()) {
+				airPortId = aFlight.getSourceAirPort().getId();
+				if (!newAirports.containsKey(airPortId)) {
+					newAirports.put(airPortId, getAirport(airPortId).clone());
+				}
+				airPortId = aFlight.getDesintationAirport().getId();
+				if (!newAirports.containsKey(airPortId)) {
+					newAirports.put(airPortId, getAirport(airPortId).clone());
+				}
+			}
+		}
+		aNewSolution.setAllAirports(newAirports);
+		return aNewSolution;
+	
+	}
+	
+	public void increaseMainVersion () {
+		String[] versionList = version.split(".");
+		int mainVersion = Integer.parseInt(versionList[versionList.length -1]);
+		if (versionList.length == 1 ) {
+			setVersion(String.valueOf(mainVersion++));
+		} else {
+			String baseVersion = version.substring(0, version.lastIndexOf("."));
+			baseVersion += ".";
+			baseVersion += mainVersion++;
+			setVersion( baseVersion);
+		}
+	}
+	
+	//Attention! aircrafts must be aligned with baseline, unknown aircrafts will be ignored.
+	public boolean mergeUpdatedSolution (AirlineAbstractedSolution betterSolution) {
+		//merge allowed only when same baseline..
+		//if a.b.c merged back, parent must on a.b
+		if (betterSolution.getVersion().indexOf(".") == -1)
+			return false;
+		String baseVersion = betterSolution.getVersion().substring(0,betterSolution.getVersion().lastIndexOf("."));
+		if (!baseVersion.equals(version))
+			return false;
+		increaseMainVersion();
+				
+		//update normal
+		List<Aircraft> normalAirs =  new ArrayList<Aircraft> (betterSolution.getNormalSchedule().values());
+		for (Aircraft aAir:normalAirs) {
+			if (normalSchedule.containsKey(aAir.getId())) {
+				normalSchedule.put(aAir.getId(), aAir);
+			} else {
+				if (cancelledSchedule.containsKey(aAir.getId())) {
+					normalSchedule.put(aAir.getId(), aAir);
+					cancelledSchedule.remove(aAir.getId());
+				} else 
+					logger.warn("New aircraft will be ignored " + aAir.getId() + " from solution " + betterSolution.getVersion());
+			}
+		}
+		
+		//update cancel
+		List<Aircraft> cancelAirs =  new ArrayList<Aircraft> (betterSolution.getCancelledSchedule().values());
+		for (Aircraft aAir:cancelAirs) {
+			if (cancelledSchedule.containsKey(aAir.getId())) {
+				cancelledSchedule.put(aAir.getId(), aAir);
+			} else {
+				if (normalSchedule.containsKey(aAir.getId())) {
+					cancelledSchedule.put(aAir.getId(), aAir);
+					normalSchedule.remove(aAir.getId());
+				} else
+					logger.warn("New cancelled aircraft will be ignored " + aAir.getId() + " from solution " + betterSolution.getVersion());
+			}
+		}
+		
+		
+		//merge airport list
+		List<Airport> airports = new ArrayList<Airport> (betterSolution.getAllAirports().values());
+		for (Airport aAirport:airports) {
+			if (allAirports.containsKey(aAirport.getId())) {
+				allAirports.put(aAirport.getId(), aAirport);
+			} else {
+				logger.warn("new airport identified: " + aAirport.getId() + " merged from solution version " + betterSolution.getVersion());		
+			}
+		}
+		
+		//merge dropout list
+		dropOutList.addAll(betterSolution.getDropOutList());
+		
+		return true;
 	}
 
-	public void addOrReplaceAircraft(Aircraft aAircraft) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public List<Aircraft> getAircrafts() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	public Aircraft getAircraft(String id, String type, boolean autoGenerate) {
 		String aKey = id;
@@ -75,11 +222,11 @@ public abstract class AirlineAbstractedSolution  {
 		return getCancelAircraft(regularAircraft.getId(), regularAircraft.getType(), autoGenerate);
 	}
 
-	public int getVersion() {
+	public String getVersion() {
 		return version;
 	}
 
-	public void setVersion(int version) {
+	public void setVersion(String version) {
 		this.version = version;
 	}
 
