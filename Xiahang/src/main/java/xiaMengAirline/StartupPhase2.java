@@ -20,6 +20,7 @@ public class StartupPhase2 {
 		OptimizerStragety aStragety = new OptimizerStragety();
 		aStragety.setImpactEdge(0);
 		aStragety.setNumberOfSolution(20);
+		aStragety.setNumberOfIter(10);
 		aController.setaStragety(aStragety);
 		aController.constructSolutionSet(originalSolution);
 		

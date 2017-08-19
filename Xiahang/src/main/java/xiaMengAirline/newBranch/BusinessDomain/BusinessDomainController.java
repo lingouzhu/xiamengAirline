@@ -8,7 +8,7 @@ import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
 public class BusinessDomainController {
 	/**
 	 * The initalizeSolution function inspects the original solution, and only keep unchangeable part as domain rules
-	 * the function shall also adjust unchangeable into feasible, and calculate baseline cost according to business domain
+	 * the function shall also adjust unchangeable into feasible according to business domain
 	 * Ensure to put cancel flights into dropOutList, because those flights are not recyclable, but dont connect empty flight.
 	 * The connection of empty flights will be processed later.
 	 * 

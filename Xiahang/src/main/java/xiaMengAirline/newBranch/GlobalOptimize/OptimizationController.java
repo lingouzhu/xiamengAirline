@@ -5,7 +5,6 @@ import java.util.List;
 
 import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.Flight;
-import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolutionCost;
 import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
 import xiaMengAirline.newBranch.BusinessDomain.BusinessDomainController;
 import xiaMengAirline.newBranch.LocalOptimize.LocalOptimizationController;
@@ -21,7 +20,13 @@ public class OptimizationController {
 		//step1a, not changeable part and changeable part
 		List<XiaMengAirlineSolution> startUpSolutions = domainController.initalizeSoluion(aRawSolution.clone());
 		
-		//step1b, for changeable part, extract impacted flights
+		//step1b, for non changeable part, calculate cost
+		XiaMengAirlineSolution solutionVersion1 = startUpSolutions.get(0);
+		solutionVersion1.setVersion("1");
+		solutionVersion1.refreshCost(false);
+		
+		
+		//step1c, for changeable part, extract impacted flights
 		List<Flight> regularFlights = new ArrayList<Flight> ();
 		List<Aircraft> impactedAirList = new ArrayList<Aircraft> ();
 		XiaMengAirlineSolution changeablePart = startUpSolutions.get(1);
@@ -33,7 +38,28 @@ public class OptimizationController {
 		}
 		
 		//step2, pickup flights and fit into raw solution version 1
+		
+		//step2a, fit regular flights
 		LocalOptimizationController localController = new LocalOptimizationController();
+		List<XiaMengAirlineSolution> fittedSolutions = localController.fitRegularFlights(solutionVersion1, regularFlights);
+		
+		
+		//step2b, calculate cost
+		XiaMengAirlineSolution solutionVersion2 = fittedSolutions.get(0);
+		solutionVersion2.setVersion("2");
+		solutionVersion2.refreshCost(false);
+		
+		//step3, Iterative for exchange 
+		//step3a, 
+		
+		//step3b, iterative for better solution
+		IterativeSingleMethod aSingleDriver = new IterativeSingleMethod();
+		List<Aircraft> driver = aSingleDriver.getDrivesForIterative(fittedSolutions.get(1));
+		XiaMengAirlineSolution aBetterSolution;
+		GlobalOptimizer exchangeOptimzer = new GlobalSearchExchange();
+		for (int i=0; i< aStragety.getNumberOfIter();i++) {
+			aBetterSolution = exchangeOptimzer.discoverBetterSolution(driver, aBetterSolution);
+		}
 		
 		
 		

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import xiaMengAirline.newBranch.BusinessDomain.XiaMengAirlineSolutionCost;
+
 public class XiaMengAirlineSolution  implements Cloneable {
 	private static final Logger logger = Logger.getLogger(XiaMengAirlineSolution.class);
 	private Map<String, Aircraft> normalSchedule = new HashMap<String, Aircraft>(); //key airId
@@ -31,7 +33,7 @@ public class XiaMengAirlineSolution  implements Cloneable {
 	
 	public XiaMengAirlineSolution clone() throws CloneNotSupportedException {
 		XiaMengAirlineSolution aNewSolution = (XiaMengAirlineSolution) super.clone();
-		
+				
 		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
 		for (String aAir : normalSchedule.keySet()) {
 			newSchedule.put(aAir, normalSchedule.get(aAir).clone());
@@ -56,6 +58,8 @@ public class XiaMengAirlineSolution  implements Cloneable {
 		}
 		aNewSolution.setAllAirports(newAirports);
 		aNewSolution.increaseMainVersion();
+		
+		aNewSolution.setaCost(aCost.clone());
 		
 		return aNewSolution;
 	}
@@ -305,6 +309,10 @@ public class XiaMengAirlineSolution  implements Cloneable {
 
 	public void setaCost(XiaMengAirlineSolutionCost aCost) {
 		this.aCost = aCost;
+	}
+	
+	public void refreshCost(boolean output) {
+		aCost.refreshCost(output);
 	}
 
 

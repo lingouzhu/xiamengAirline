@@ -23,6 +23,7 @@ import xiaMengAirline.newBranch.BusinessDomain.DomesticFlightAdjustableMethod;
 import xiaMengAirline.newBranch.BusinessDomain.InternationalFlightAdjustableMethod;
 import xiaMengAirline.newBranch.BusinessDomain.JoinedFlightAdjustableMethod;
 import xiaMengAirline.newBranch.BusinessDomain.SeatAvailability;
+import xiaMengAirline.newBranch.BusinessDomain.XiaMengAirlineSolutionCost;
 
 
 
@@ -61,6 +62,7 @@ public class InitData {
 	public static XiaMengAirlineSolution initData(String initDatafile) throws Exception {
 		XiaMengAirlineSolution originalSolution = new XiaMengAirlineSolution();
 		originalSolution.setVersion("0");
+		originalSolution.setaCost(new XiaMengAirlineSolutionCost());
 				
 		try {
 			

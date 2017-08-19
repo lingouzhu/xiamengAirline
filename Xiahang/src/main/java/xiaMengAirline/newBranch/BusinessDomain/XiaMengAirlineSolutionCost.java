@@ -1,10 +1,16 @@
-package xiaMengAirline.newBranch.BasicObject;
+package xiaMengAirline.newBranch.BusinessDomain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+
+import xiaMengAirline.newBranch.BasicObject.Aircraft;
+import xiaMengAirline.newBranch.BasicObject.Flight;
+import xiaMengAirline.newBranch.BasicObject.InitData;
+import xiaMengAirline.newBranch.BasicObject.Utils;
+import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
 
 public class XiaMengAirlineSolutionCost implements Cloneable {
 	private static final Logger logger = Logger.getLogger(XiaMengAirlineSolutionCost.class);
