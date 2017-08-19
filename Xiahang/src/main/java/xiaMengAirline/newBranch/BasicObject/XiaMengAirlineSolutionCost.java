@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-public class XiaMengAirlineFeasibleSolution extends AirlineAbstractedSolution {
-	private static final Logger logger = Logger.getLogger(XiaMengAirlineFeasibleSolution.class);
+public class XiaMengAirlineSolutionCost implements Cloneable {
+	private static final Logger logger = Logger.getLogger(XiaMengAirlineSolutionCost.class);
 	private BigDecimal cost = new BigDecimal("0");
 	private List<String> outputList = new ArrayList<String>();
 
@@ -31,12 +31,12 @@ public class XiaMengAirlineFeasibleSolution extends AirlineAbstractedSolution {
 
 	}
 
-	public BigDecimal calCostbyAir(XiaMengAirlineFeasibleSolution newSolution) {
+	public BigDecimal calCostbyAir(XiaMengAirlineSolution oldSolution, XiaMengAirlineSolution newSolution) {
 
 		BigDecimal cost = new BigDecimal("0");
-		List<Aircraft> oldAirs = new ArrayList<Aircraft>(getNormalSchedule().values());
+		List<Aircraft> oldAirs = new ArrayList<Aircraft>(oldSolution.getNormalSchedule().values());
 		for (Aircraft orgAir : oldAirs) {
-			Aircraft newAir = getAircraft(orgAir.getId(), orgAir.getType(), true);
+			Aircraft newAir = oldSolution.getAircraft(orgAir.getId(), orgAir.getType(), true);
 			// org air
 			for (int i = 0; i < orgAir.getFlightChain().size(); i++) {
 
@@ -95,5 +95,22 @@ public class XiaMengAirlineFeasibleSolution extends AirlineAbstractedSolution {
 
 		return cost;
 	}
+
+	@Override
+	public XiaMengAirlineSolutionCost clone() throws CloneNotSupportedException {
+		XiaMengAirlineSolutionCost aNewCost = (XiaMengAirlineSolutionCost) super.clone();
+		aNewCost.setOutputList(new ArrayList<String> (outputList));
+		return aNewCost;
+	}
+
+	public List<String> getOutputList() {
+		return outputList;
+	}
+
+	public void setOutputList(List<String> outputList) {
+		this.outputList = outputList;
+	}
+	
+	
 
 }

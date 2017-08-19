@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-public abstract class AirlineAbstractedSolution  {
-	private static final Logger logger = Logger.getLogger(AirlineAbstractedSolution.class);
+public class XiaMengAirlineSolution  implements Cloneable {
+	private static final Logger logger = Logger.getLogger(XiaMengAirlineSolution.class);
 	private Map<String, Aircraft> normalSchedule = new HashMap<String, Aircraft>(); //key airId
 	private Map<String, Aircraft> cancelledSchedule = new HashMap<String, Aircraft>(); //key airId
 	//original passenger distributes to list of flights
@@ -17,6 +17,8 @@ public abstract class AirlineAbstractedSolution  {
 	//private Map<String, List<Flight>> passengerDistribution = new HashMap<String, List<Flight>> ();
 	private Map <String, Airport> allAirports; //key airport Id
 	private List<Flight> dropOutList = new ArrayList<Flight> ();
+	private XiaMengAirlineSolution aFeasibleSolution = null;
+	private XiaMengAirlineSolutionCost aCost = null;
 	
 	//rule of versions a.b.c.d.e
 	//a is the main branch version
@@ -27,8 +29,9 @@ public abstract class AirlineAbstractedSolution  {
 	//etc.
 	private String version;
 	
-	public AirlineAbstractedSolution clone() throws CloneNotSupportedException {
-		AirlineAbstractedSolution aNewSolution = (AirlineAbstractedSolution) super.clone();
+	public XiaMengAirlineSolution clone() throws CloneNotSupportedException {
+		XiaMengAirlineSolution aNewSolution = (XiaMengAirlineSolution) super.clone();
+		
 		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
 		for (String aAir : normalSchedule.keySet()) {
 			newSchedule.put(aAir, normalSchedule.get(aAir).clone());
@@ -57,8 +60,8 @@ public abstract class AirlineAbstractedSolution  {
 		return aNewSolution;
 	}
 	
-	public AirlineAbstractedSolution springOutNewSolution (List<String> selectedAir) throws CloneNotSupportedException {
-		AirlineAbstractedSolution aNewSolution = (AirlineAbstractedSolution) super.clone();
+	public XiaMengAirlineSolution springOutNewSolution (List<String> selectedAir) throws CloneNotSupportedException {
+		XiaMengAirlineSolution aNewSolution = (XiaMengAirlineSolution) super.clone();
 		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
 		HashMap<String, Aircraft> newCacnelSchedule = new HashMap<String, Aircraft>();
 		List<Flight> newDropOutList = new ArrayList<Flight> ();
@@ -126,7 +129,7 @@ public abstract class AirlineAbstractedSolution  {
 	}
 	
 	//Attention! aircrafts must be aligned with baseline, unknown aircrafts will be ignored.
-	public boolean mergeUpdatedSolution (AirlineAbstractedSolution betterSolution) {
+	public boolean mergeUpdatedSolution (XiaMengAirlineSolution betterSolution) {
 		//merge allowed only when same baseline..
 		//if a.b.c merged back, parent must on a.b
 		if (betterSolution.getVersion().indexOf(".") == -1)
@@ -286,6 +289,22 @@ public abstract class AirlineAbstractedSolution  {
 
 	public void setDropOutList(List<Flight> dropOutList) {
 		this.dropOutList = dropOutList;
+	}
+
+	public XiaMengAirlineSolution getaFeasibleSolution() {
+		return aFeasibleSolution;
+	}
+
+	public void setaFeasibleSolution(XiaMengAirlineSolution aFeasibleSolution) {
+		this.aFeasibleSolution = aFeasibleSolution;
+	}
+
+	public XiaMengAirlineSolutionCost getaCost() {
+		return aCost;
+	}
+
+	public void setaCost(XiaMengAirlineSolutionCost aCost) {
+		this.aCost = aCost;
 	}
 
 

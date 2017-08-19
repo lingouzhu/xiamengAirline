@@ -1,9 +1,9 @@
 package xiaMengAirline.newBranch.GlobalOptimize;
 
-import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineRawSolution;
+import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
 
 public interface GlobalOptimizer {
-	XiaMengAirlineRawSolution discoverBetterSolution (XiaMengAirlineRawSolution aSolution);
+	XiaMengAirlineSolution discoverBetterSolution (XiaMengAirlineSolution aSolution);
 	void setupIterativeStragety (IterativeMethod aStragety);
 
 }

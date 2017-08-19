@@ -37,9 +37,7 @@ public class InitData {
 	/** flght time map key: air_startport_endport value: time */
 	public static Map<String, Integer> fightDurationMap = new HashMap<String, Integer>();
 	
-	/** aircraft list */
-	public static XiaMengAirlineRawSolution originalSolution = new XiaMengAirlineRawSolution();
-	
+		
 	/** fist flight*/
 	public static Map<String, Flight> firstFlightMap = new HashMap<String, Flight>();
 	
@@ -60,7 +58,9 @@ public class InitData {
 	public static Random rndRcl = new Random();
 
 	
-	public static void initData(String initDatafile) {
+	public static XiaMengAirlineSolution initData(String initDatafile) throws Exception {
+		XiaMengAirlineSolution originalSolution = new XiaMengAirlineSolution();
+		originalSolution.setVersion("0");
 				
 		try {
 			
@@ -422,12 +422,13 @@ public class InitData {
 				passengerTransitionMap.put( sourceFlightId+ "_" + destFlightId, shortestTransition + "_" + numberOfPassenger);
 			}
 			
-			 
+			return originalSolution;
 			
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw e;
 		}  
 		
 	}
