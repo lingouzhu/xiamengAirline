@@ -122,7 +122,23 @@ public class Flight implements Cloneable {
 	}
 	
 	public Flight clone() throws CloneNotSupportedException {
-		return (Flight) (super.clone());
+		Flight newFlight = (Flight) (super.clone());
+		if (this == joined1stlight) {
+			newFlight.setJoined1stlight(newFlight);
+			newFlight.joined2ndFlight.setJoined1stlight(newFlight);
+		} else if (this == joined2ndFlight) {
+			newFlight.setJoined2ndFlight(newFlight);
+			newFlight.joined1stlight.setJoined2ndFlight(newFlight);
+		}
+		List<Passenger> newPassengerList = new ArrayList<Passenger> ();
+		for (Passenger aPass:passengers) {
+			Passenger newPass = aPass.clone();
+			newPass.setAssignedFlight(newFlight);
+			newPassengerList.add(newPass);
+		}
+		newFlight.setPassengers(newPassengerList);
+			
+		return newFlight;
 	}
 	public List<Passenger> getPassengers() {
 		return passengers;

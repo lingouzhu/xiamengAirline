@@ -2,7 +2,7 @@ package xiaMengAirline.newBranch.BasicObject;
 
 import xiaMengAirline.newBranch.BusinessDomain.AirPortAvailability;
 
-public class Airport {
+public class Airport implements Cloneable {
 	private String id;
 	private boolean isDomestic;
 	private AirPortAvailability  airportAvailability = null;
@@ -30,6 +30,14 @@ public class Airport {
 
 	public void setAirportAvailability(AirPortAvailability airportAvailability) {
 		this.airportAvailability = airportAvailability;
+	}
+
+	@Override
+	public Airport clone() throws CloneNotSupportedException {
+		Airport newAirport = (Airport) super.clone();
+		if (airportAvailability!= null)
+			newAirport.setAirportAvailability(airportAvailability.clone());
+		return newAirport;
 	}
 
 

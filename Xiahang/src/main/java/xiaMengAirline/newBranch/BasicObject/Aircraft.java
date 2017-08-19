@@ -306,12 +306,14 @@ public class Aircraft implements Cloneable {
 	
 	public Aircraft clone() throws CloneNotSupportedException {
 		Aircraft aNew = (Aircraft) super.clone();
+		if (seatsAvailability!=null)
+			aNew.setSeatsAvailability(seatsAvailability.clone());
 		List<Flight> newFlightChain = new ArrayList<Flight>();
 		for (Flight aFlight : flightChain) {
 			Flight newFlight = aFlight.clone();
-			newFlight.setPlannedFlight(aFlight.getPlannedFlight());
-			newFlight.setPlannedAir(aFlight.getPlannedAir());
 			newFlight.setAssignedAir(aNew);
+			for (Passenger aPass:newFlight.getPassengers()) 
+				aPass.setAssignedAir(aNew);
 			newFlightChain.add(newFlight);
 		}
 		aNew.setFlightChain(newFlightChain);

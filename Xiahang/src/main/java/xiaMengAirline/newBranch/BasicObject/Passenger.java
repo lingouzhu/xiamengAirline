@@ -2,7 +2,7 @@ package xiaMengAirline.newBranch.BasicObject;
 
 import xiaMengAirline.newBranch.BusinessDomain.PassengerAdjustableMethod;
 
-public class Passenger {
+public class Passenger implements Cloneable {
 	private Flight assignedFlight;
 	private Aircraft assignedAir;
 	private Flight plannedFlight;
@@ -55,6 +55,11 @@ public class Passenger {
 	}
 	public void setPlannedAir(Aircraft plannedAir) {
 		this.plannedAir = plannedAir;
+	}
+	@Override
+	public Passenger clone() throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		return (Passenger) super.clone();
 	}
 
 }
