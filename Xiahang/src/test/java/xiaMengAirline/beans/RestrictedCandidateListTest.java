@@ -13,7 +13,9 @@ import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.util.InitDataBackup;
+import xiaMengAirline.backup.beans.RestrictedCandidateListBackup;
+import xiaMengAirline.backup.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.backup.utils.InitDataBackup;
 
 import static org.junit.Assert.*;
 

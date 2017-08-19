@@ -14,23 +14,25 @@ import java.util.TreeMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.StartUp;
-import xiaMengAirline.Exception.AircraftNotAdjustableBackup;
-import xiaMengAirline.Exception.AirportNotAcceptArrivalTimeBackup;
-import xiaMengAirline.Exception.AirportNotAcceptDepartureTimeBackup;
-import xiaMengAirline.Exception.AirportNotAvailableBackup;
-import xiaMengAirline.Exception.FlightDurationNotFoundBackup;
-import xiaMengAirline.Exception.SolutionNotValidBackup;
-import xiaMengAirline.beans.AirPortBackup;
-import xiaMengAirline.beans.AirPortCloseBackup;
-import xiaMengAirline.beans.AircraftBackup;
-import xiaMengAirline.beans.FlightBackup;
-import xiaMengAirline.beans.FlightTimeBackup;
-import xiaMengAirline.beans.RegularAirPortCloseBackup;
-import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
-import xiaMengAirline.evaluator.aviation2017.Main;
-import xiaMengAirline.searchEngine.LocalSearchBackup;
-import xiaMengAirline.searchEngine.SelfSearchBackup;
+import xiaMengAirline.backup.StartUp;
+import xiaMengAirline.backup.Exception.AircraftNotAdjustableBackup;
+import xiaMengAirline.backup.Exception.AirportNotAcceptArrivalTimeBackup;
+import xiaMengAirline.backup.Exception.AirportNotAcceptDepartureTimeBackup;
+import xiaMengAirline.backup.Exception.AirportNotAvailableBackup;
+import xiaMengAirline.backup.Exception.FlightDurationNotFoundBackup;
+import xiaMengAirline.backup.Exception.SolutionNotValidBackup;
+import xiaMengAirline.backup.beans.AirPortBackup;
+import xiaMengAirline.backup.beans.AirPortCloseBackup;
+import xiaMengAirline.backup.beans.AircraftBackup;
+import xiaMengAirline.backup.beans.FlightBackup;
+import xiaMengAirline.backup.beans.FlightTimeBackup;
+import xiaMengAirline.backup.beans.RegularAirPortCloseBackup;
+import xiaMengAirline.backup.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.backup.evaluator.Main;
+import xiaMengAirline.backup.searchEngine.LocalSearchBackup;
+import xiaMengAirline.backup.searchEngine.SelfSearchBackup;
+import xiaMengAirline.backup.utils.InitDataBackup;
+import xiaMengAirline.backup.utils.UtilsBackup;
 
 public class InitDataTest {
 

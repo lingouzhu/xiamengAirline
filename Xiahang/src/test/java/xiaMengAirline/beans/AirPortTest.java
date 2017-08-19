@@ -13,12 +13,20 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.Exception.AirportNotAcceptArrivalTimeBackup;
-import xiaMengAirline.Exception.AirportNotAcceptDepartureTimeBackup;
-import xiaMengAirline.Exception.AirportNotAvailableBackup;
-import xiaMengAirline.Exception.FlightDurationNotFoundBackup;
-import xiaMengAirline.util.InitDataBackup;
-import xiaMengAirline.util.UtilsBackup;
+import xiaMengAirline.backup.Exception.AirportNotAcceptArrivalTimeBackup;
+import xiaMengAirline.backup.Exception.AirportNotAcceptDepartureTimeBackup;
+import xiaMengAirline.backup.Exception.AirportNotAvailableBackup;
+import xiaMengAirline.backup.Exception.FlightDurationNotFoundBackup;
+import xiaMengAirline.backup.beans.AirPortBackup;
+import xiaMengAirline.backup.beans.AirPortCloseBackup;
+import xiaMengAirline.backup.beans.AircraftBackup;
+import xiaMengAirline.backup.beans.FlightBackup;
+import xiaMengAirline.backup.beans.FlightTimeBackup;
+import xiaMengAirline.backup.beans.MatchedFlightBackup;
+import xiaMengAirline.backup.beans.RegularAirPortCloseBackup;
+import xiaMengAirline.backup.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.backup.utils.InitDataBackup;
+import xiaMengAirline.backup.utils.UtilsBackup;
 
 public class AirPortTest {
 

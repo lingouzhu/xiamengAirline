@@ -10,8 +10,12 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.util.InitDataBackup;
-import xiaMengAirline.util.UtilsBackup;
+import xiaMengAirline.backup.beans.AirPortBackup;
+import xiaMengAirline.backup.beans.AircraftBackup;
+import xiaMengAirline.backup.beans.FlightBackup;
+import xiaMengAirline.backup.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.backup.utils.InitDataBackup;
+import xiaMengAirline.backup.utils.UtilsBackup;
 
 public class XiaMengAirlineSolutionTest {
 	

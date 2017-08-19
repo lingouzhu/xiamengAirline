@@ -8,15 +8,16 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.Exception.AirportNotAvailableBackup;
-import xiaMengAirline.Exception.FlightDurationNotFoundBackup;
-import xiaMengAirline.Exception.SolutionNotValidBackup;
-import xiaMengAirline.beans.AirPortBackup;
-import xiaMengAirline.beans.AircraftBackup;
-import xiaMengAirline.beans.FlightBackup;
-import xiaMengAirline.beans.XiaMengAirlineSolutionBackup;
-import xiaMengAirline.util.InitDataBackup;
-import xiaMengAirline.util.UtilsBackup;
+import xiaMengAirline.backup.Exception.AirportNotAvailableBackup;
+import xiaMengAirline.backup.Exception.FlightDurationNotFoundBackup;
+import xiaMengAirline.backup.Exception.SolutionNotValidBackup;
+import xiaMengAirline.backup.beans.AirPortBackup;
+import xiaMengAirline.backup.beans.AircraftBackup;
+import xiaMengAirline.backup.beans.FlightBackup;
+import xiaMengAirline.backup.beans.XiaMengAirlineSolutionBackup;
+import xiaMengAirline.backup.searchEngine.LocalSearchBackup;
+import xiaMengAirline.backup.utils.InitDataBackup;
+import xiaMengAirline.backup.utils.UtilsBackup;
 
 public class LocalSearchTest {
 
