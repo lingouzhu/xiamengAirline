@@ -315,7 +315,7 @@ public class XiaMengAirlineSolution  implements Cloneable {
 	public void refreshCost(boolean output) {
 		aCost.refreshCost(this, output);
 	}
-
+	
 
 
 }

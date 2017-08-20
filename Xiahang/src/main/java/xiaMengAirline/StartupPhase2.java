@@ -6,9 +6,10 @@ import xiaMengAirline.newBranch.GlobalOptimize.OptimizationController;
 import xiaMengAirline.newBranch.GlobalOptimize.OptimizerStragety;
 
 public class StartupPhase2 {
+	public static long startTime;
 
 	public static void main(String[] args) throws Exception {
-		long startTime = System.currentTimeMillis();
+		startTime = System.currentTimeMillis();
 		System.out.println("Starting on ..." + startTime);
 		// Step1, Load all data & initialize
 		String initDatafile = "XiahangData20170809.xlsx";

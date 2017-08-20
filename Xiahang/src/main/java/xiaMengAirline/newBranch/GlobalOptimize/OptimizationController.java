@@ -1,8 +1,12 @@
 package xiaMengAirline.newBranch.GlobalOptimize;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import xiaMengAirline.StartupPhase2;
 import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.Flight;
 import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
@@ -20,22 +24,27 @@ public class OptimizationController {
 		//step1, partition raw solution into three pieces
 		
 		//step1a, not changeable part and changeable part
-		List<XiaMengAirlineSolution> startUpSolutions = domainController.initalizeSoluion(aRawSolution.clone());
+		XiaMengAirlineSolution solutionVersion1 = domainController.initalizeSoluion(aRawSolution.clone());
 		
 		//step1b, for non changeable part, calculate cost
-		XiaMengAirlineSolution solutionVersion1 = startUpSolutions.get(0);
 		solutionVersion1.setVersion("1");
 		XiaMengSolutionValidation aValidator = new XiaMengSolutionValidation();
 		aValidator.validate(solutionVersion1);
-		solutionVersion1.refreshCost(false);
+		solutionVersion1.refreshCost(true);
+		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		Calendar cal = Calendar.getInstance();
+		long endTime = System.currentTimeMillis();
+		long mins = (endTime - StartupPhase2.startTime) / (1000 * 60);
+		System.out.println("Consumed ... " + mins);
+		System.out.println(dateFormat.format(cal));
+		solutionVersion1.getaCost().generateOutput(dateFormat.format(cal) + "_" + String.valueOf(mins));
 		
 		
 		//step1c, for changeable part, extract impacted flights
 		List<Flight> regularFlights = new ArrayList<Flight> ();
 		List<Aircraft> impactedAirList = new ArrayList<Aircraft> ();
-		XiaMengAirlineSolution changeablePart = startUpSolutions.get(1);
-		List<Aircraft> airList = new ArrayList<Aircraft> (changeablePart.getNormalSchedule().values());
-		for (Aircraft aAir:airList) {
+		List<Aircraft> changeablePart = new ArrayList<Aircraft>(solutionVersion1.getCancelledSchedule().values());
+		for (Aircraft aAir:changeablePart) {
 			List<Aircraft> pairedAir = domainController.splitImpactedFlights(aAir, aStragety.getImpactEdge());
 			impactedAirList.add(pairedAir.get(0));
 			regularFlights.addAll(pairedAir.get(1).getFlightChain());
