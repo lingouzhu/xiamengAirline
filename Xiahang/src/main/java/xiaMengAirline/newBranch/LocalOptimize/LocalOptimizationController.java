@@ -19,11 +19,12 @@ public class LocalOptimizationController {
 	 *           the solution template, contains unchangeable part.
 	 * @param regularFlights
 	 * 			all flights are not impacted by typhoon, need be arrange for a best fit          
-	 * @return two aircraft set
-	 * 			The first solution is the fitting on the initialized solution, a solution version 2
-	 * 			The second solution contains set of aircrafts are idle, not used. 
+	 * @return new airline solution. The solution shall contain two parts,
+	 * 			The first part contains the fitting on the initialized solution, with aircraft flagged as isFinalized = true, if no further adjust required.
+	 * 			The second part contains unfinished aircrafts.
+	 * 			if flights cannot be processed, put into cancel list organized by original planned aircraft. 
 	 */
-	public List<XiaMengAirlineSolution> fitRegularFlights(XiaMengAirlineSolution initalizedSolution, List<Flight> regularFlights) {
+	public XiaMengAirlineSolution fitRegularFlights(XiaMengAirlineSolution initalizedSolution, List<Flight> regularFlights) {
 		return null;
 	}
 

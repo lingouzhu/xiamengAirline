@@ -14,6 +14,7 @@ public class Aircraft implements Cloneable {
 	private static final Logger logger = Logger.getLogger(Aircraft.class);
 	private String id;
 	private String type;
+	private boolean isFinalized = false;
 	private List<Flight> flightChain = new ArrayList<Flight>();
 	private boolean isCancel = false;
 	private SeatAvailability seatsAvailability = null;
@@ -328,5 +329,11 @@ public class Aircraft implements Cloneable {
 	}
 	public void setSeatsAvailability(SeatAvailability seatsAvailability) {
 		this.seatsAvailability = seatsAvailability;
+	}
+	public boolean isFinalized() {
+		return isFinalized;
+	}
+	public void setFinalized(boolean isFinalized) {
+		this.isFinalized = isFinalized;
 	}
 }

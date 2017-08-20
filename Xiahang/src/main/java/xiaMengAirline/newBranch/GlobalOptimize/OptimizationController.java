@@ -37,7 +37,7 @@ public class OptimizationController {
 		Calendar cal = Calendar.getInstance();
 		long endTime = System.currentTimeMillis();
 		long mins = (endTime - StartupPhase2.startTime) / (1000 * 60);
-		System.out.println("Consumed ... " + mins);
+		System.out.println(solutionVersion1 + " consumed ... " + mins);
 		System.out.println(dateFormat.format(cal));
 		solutionVersion1.getaCost().generateOutput(dateFormat.format(cal) + "_" + String.valueOf(mins));
 		
@@ -58,11 +58,11 @@ public class OptimizationController {
 		
 		//step2a, fit regular flights
 		LocalOptimizationController localController = new LocalOptimizationController();
-		List<XiaMengAirlineSolution> fittedSolutions = localController.fitRegularFlights(solutionVersion1, regularFlights);
+		XiaMengAirlineSolution fittedSolutions = localController.fitRegularFlights(solutionVersion1, regularFlights);
 		
 		
 		//step2b, merge cancel queue
-		XiaMengAirlineSolution solutionVersion2 = fittedSolutions.get(0);
+		XiaMengAirlineSolution solutionVersion2 = fittedSolutions;
 		solutionVersion2.setVersion("2");
 		
 		XiaMengAirlineSolution solutionImpactedPart = new XiaMengAirlineSolution();
@@ -79,7 +79,7 @@ public class OptimizationController {
 		cal = Calendar.getInstance();
 		endTime = System.currentTimeMillis();
 		mins = (endTime - StartupPhase2.startTime) / (1000 * 60);
-		System.out.println("Consumed ... " + mins);
+		System.out.println(solutionVersion3.getVersion() + " consumed ... " + mins);
 		System.out.println(dateFormat.format(cal));
 		solutionVersion3.getaCost().generateOutput(dateFormat.format(cal) + "_" + String.valueOf(mins));		
 		
