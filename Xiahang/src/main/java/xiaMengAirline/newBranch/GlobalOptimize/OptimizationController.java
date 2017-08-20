@@ -6,14 +6,16 @@ import java.util.List;
 import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.Flight;
 import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
+import xiaMengAirline.newBranch.BasicObject.Exception.InvaildSolution;
 import xiaMengAirline.newBranch.BusinessDomain.BusinessDomainController;
+import xiaMengAirline.newBranch.BusinessDomain.XiaMengSolutionValidation;
 import xiaMengAirline.newBranch.LocalOptimize.LocalOptimizationController;
 
 public class OptimizationController {
 	private RestrictedCandidcateList aRCL;
 	private OptimizerStragety aStragety = null;
 	
-	public void constructSolutionSet (XiaMengAirlineSolution aRawSolution) throws CloneNotSupportedException {
+	public void constructSolutionSet (XiaMengAirlineSolution aRawSolution) throws CloneNotSupportedException, InvaildSolution {
 		BusinessDomainController domainController = new BusinessDomainController();
 		//step1, partition raw solution into three pieces
 		
@@ -23,6 +25,8 @@ public class OptimizationController {
 		//step1b, for non changeable part, calculate cost
 		XiaMengAirlineSolution solutionVersion1 = startUpSolutions.get(0);
 		solutionVersion1.setVersion("1");
+		XiaMengSolutionValidation aValidator = new XiaMengSolutionValidation();
+		aValidator.validate(solutionVersion1);
 		solutionVersion1.refreshCost(false);
 		
 		

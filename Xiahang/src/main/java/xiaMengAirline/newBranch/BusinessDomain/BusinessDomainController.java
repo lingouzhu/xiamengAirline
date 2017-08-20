@@ -15,10 +15,10 @@ public class BusinessDomainController {
 	 * @author Data Forest
 	 * @param originalSolution,
 	 *           a raw solution.
-	 * @return split original solution into two solutions
+	 * @return split original solution into two parts
 	 * 	unchangeable solution part as first solution, and changeable solution part as second solution
 	 */
-	public List<XiaMengAirlineSolution> initalizeSoluion (XiaMengAirlineSolution originalSolution) {
+	public XiaMengAirlineSolution initalizeSoluion (XiaMengAirlineSolution originalSolution) {
 		return null;
 	}
 	

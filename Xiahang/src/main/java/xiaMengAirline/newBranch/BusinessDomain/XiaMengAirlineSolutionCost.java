@@ -41,7 +41,15 @@ public class XiaMengAirlineSolutionCost implements Cloneable {
 	public void refreshCost(XiaMengAirlineSolution aSolution, boolean setupOutput) {
 
 	}
-
+	
+	
+	/**
+	 * The generateOutput function generates solution output as required CSV format. 
+	 * 
+	 * @author Data Forest
+	 * @param	minues, the duration required to generate this file. The field will be part of file name.
+	 * @return 
+	 */
 	public void generateOutput(String minutes) {
 
 	}
