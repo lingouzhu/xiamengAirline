@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 
 import xiaMengAirline.StartupPhase2;
@@ -11,6 +12,7 @@ import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.Flight;
 import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
 import xiaMengAirline.newBranch.BasicObject.Exception.InvaildSolution;
+import xiaMengAirline.newBranch.BasicObject.Exception.InvaildSolution.PhaseType;
 import xiaMengAirline.newBranch.BusinessDomain.BusinessDomainController;
 import xiaMengAirline.newBranch.BusinessDomain.XiaMengSolutionValidation;
 import xiaMengAirline.newBranch.LocalOptimize.LocalOptimizationController;
@@ -44,6 +46,8 @@ public class OptimizationController {
 		List<Flight> regularFlights = new ArrayList<Flight> ();
 		List<Aircraft> impactedAirList = new ArrayList<Aircraft> ();
 		List<Aircraft> changeablePart = new ArrayList<Aircraft>(solutionVersion1.getCancelledSchedule().values());
+		//empty cancel queue
+		solutionVersion1.setCancelledSchedule(new HashMap<String, Aircraft>());
 		for (Aircraft aAir:changeablePart) {
 			List<Aircraft> pairedAir = domainController.splitImpactedFlights(aAir, aStragety.getImpactEdge());
 			impactedAirList.add(pairedAir.get(0));
@@ -57,10 +61,27 @@ public class OptimizationController {
 		List<XiaMengAirlineSolution> fittedSolutions = localController.fitRegularFlights(solutionVersion1, regularFlights);
 		
 		
-		//step2b, calculate cost
+		//step2b, merge cancel queue
 		XiaMengAirlineSolution solutionVersion2 = fittedSolutions.get(0);
 		solutionVersion2.setVersion("2");
-		solutionVersion2.refreshCost(false);
+		
+		XiaMengAirlineSolution solutionImpactedPart = new XiaMengAirlineSolution();
+		solutionImpactedPart.setVersion("2.1");
+		for (Aircraft aAir:impactedAirList) {
+			Aircraft airInSolution = solutionImpactedPart.getCancelAircraft(aAir.getId(), aAir.getType(), true);
+			airInSolution.getFlightChain().addAll(aAir.getFlightChain());
+		}
+		if (!solutionVersion2.mergeUpdatedSolution(solutionImpactedPart))
+			throw new InvaildSolution(solutionVersion2, "fail to merge impacted list into version 2", PhaseType.PICKUP_FLIGHTS);
+		XiaMengAirlineSolution solutionVersion3 = solutionVersion2;
+		aValidator.validate(solutionVersion3);
+		solutionVersion3.refreshCost(true);
+		cal = Calendar.getInstance();
+		endTime = System.currentTimeMillis();
+		mins = (endTime - StartupPhase2.startTime) / (1000 * 60);
+		System.out.println("Consumed ... " + mins);
+		System.out.println(dateFormat.format(cal));
+		solutionVersion3.getaCost().generateOutput(dateFormat.format(cal) + "_" + String.valueOf(mins));		
 		
 		//step3, Iterative for exchange 
 		//step3a, 
