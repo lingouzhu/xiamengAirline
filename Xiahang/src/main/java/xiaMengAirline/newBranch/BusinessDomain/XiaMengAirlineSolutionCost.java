@@ -29,7 +29,16 @@ public class XiaMengAirlineSolutionCost implements Cloneable {
 
 	}
 
-	public void refreshCost(boolean setupOutput) {
+	/**
+	 * The refresh function calculate cost from the solution. 
+	 * When airports do not connect, add empty flight cost and generate output with empty flight if required. But dont change solution data.
+	 * This function shall support a solution only with a single aircraft. 
+	 * 
+	 * @author Data Forest
+	 * @param	output, specify if need prepare output data
+	 * @return 
+	 */
+	public void refreshCost(XiaMengAirlineSolution aSolution, boolean setupOutput) {
 
 	}
 
