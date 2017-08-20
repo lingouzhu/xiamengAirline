@@ -19,6 +19,7 @@ public class XiaMengAirlineSolution  implements Cloneable {
 	//private Map<String, List<Flight>> passengerDistribution = new HashMap<String, List<Flight>> ();
 	private Map <String, Airport> allAirports; //key airport Id
 	private List<Flight> dropOutList = new ArrayList<Flight> ();
+	private List<Passenger> passerngerDropOutList = new ArrayList<Passenger> ();
 	private XiaMengAirlineSolution aFeasibleSolution = null;
 	private XiaMengAirlineSolutionCost aCost = null;
 	
@@ -51,6 +52,12 @@ public class XiaMengAirlineSolution  implements Cloneable {
 			newDropOutList.add(aFlight.clone());
 		}
 		aNewSolution.setDropOutList(newDropOutList);
+		
+		List<Passenger> newPassDropOutList = new ArrayList<Passenger> ();
+		for (Passenger aPass:newPassDropOutList) {
+			newPassDropOutList.add(aPass.clone());
+		}
+		aNewSolution.setPasserngerDropOutList(newPassDropOutList);
 		
 		Map <String, Airport> newAirports = new HashMap<String, Airport>();
 		for (String aAirport : newAirports.keySet()) {
@@ -185,6 +192,9 @@ public class XiaMengAirlineSolution  implements Cloneable {
 		//merge dropout list
 		dropOutList.addAll(betterSolution.getDropOutList());
 		
+		//merge dropout passenger list
+		passerngerDropOutList.addAll(betterSolution.getPasserngerDropOutList());
+		
 		return true;
 	}
 
@@ -314,6 +324,14 @@ public class XiaMengAirlineSolution  implements Cloneable {
 	
 	public void refreshCost(boolean output) {
 		aCost.refreshCost(this, output);
+	}
+
+	public List<Passenger> getPasserngerDropOutList() {
+		return passerngerDropOutList;
+	}
+
+	public void setPasserngerDropOutList(List<Passenger> passerngerDropOutList) {
+		this.passerngerDropOutList = passerngerDropOutList;
 	}
 	
 
