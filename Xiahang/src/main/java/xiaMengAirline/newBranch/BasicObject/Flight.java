@@ -29,6 +29,8 @@ public class Flight implements Cloneable {
 	private Aircraft assignedAir;
 	private Aircraft plannedAir;
 	private Flight plannedFlight;
+	private boolean isFinalized = false;
+	private boolean isAdjustable = true;
 	private List<FlightAdjustableMethod> adjustableMethod = new ArrayList<FlightAdjustableMethod> ();
 	public int getFlightId() {
 		return flightId;
@@ -154,6 +156,18 @@ public class Flight implements Cloneable {
 	}
 	public List<FlightAdjustableMethod> getAdjustableMethod() {
 		return adjustableMethod;
+	}
+	public boolean isFinalized() {
+		return isFinalized;
+	}
+	public void setFinalized(boolean isFinalized) {
+		this.isFinalized = isFinalized;
+	}
+	public boolean isAdjustable() {
+		return isAdjustable;
+	}
+	public void setAdjustable(boolean isAdjustable) {
+		this.isAdjustable = isAdjustable;
 	}
 
 
