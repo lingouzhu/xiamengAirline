@@ -528,15 +528,9 @@ public class XiaMengAirlineSolution implements Cloneable {
 		try {
 			for (Aircraft aAir : airList) {
 				if (!aAir.isCancel()) {
-					if (aAir.getAlternativeAircraft() != null)
-						// if already there, it is because setup by cancel
-						// cancel will be merged anyway, therefore reset it
-						// again.
-						aAir.setAlternativeAircraft(null);
 					aAir.adjustment(this);
 				} else {
-					if (aAir.getAlternativeAircraft() == null)
-						aAir.setAlternativeAircraft(aAir.clone());
+					aAir.setAlternativeAircraft(aAir.clone());
 				}
 			}
 		} catch (Exception ex) {

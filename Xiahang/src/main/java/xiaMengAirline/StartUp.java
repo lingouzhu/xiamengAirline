@@ -22,7 +22,7 @@ import xiaMengAirline.utils.InitData;
 
 public class StartUp {
 
-	final public static long iterLength = 2L;
+	final public static long iterLength = 1L;
 	final public static long preiterLength = 10L;
 	final public static long postiterLength = 5L;
 	final public static int preQueueSize = 15;
@@ -147,7 +147,7 @@ public class StartUp {
 		try {
 			long startTime = System.currentTimeMillis();
 			// Step1, Load all data & initialize
-			String initDatafile = "XiahangData.xlsx";
+			String initDatafile = "XiahangData20170809.xlsx";
 
 			InitData.initData(initDatafile);
 
