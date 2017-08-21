@@ -616,7 +616,7 @@ public class SingleAircraftSearch {
 			adjustable = true;
 		}
 		if (adjustable) {
-			for (int i = thisFlightIndex + 1; i < originalFlights.size(); i++) {
+			for (int i = thisFlightIndex + 1; i < originalFlights.size() - 1; i++) {
 				Flight nextFlight = originalFlights.get(i).clone();
 				AirPort destAirport = nextFlight.getSourceAirPort();
 				Flight aNewFlight = newFlight.clone();
