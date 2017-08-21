@@ -1,10 +1,10 @@
 package xiaMengAirline.evaluator;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.commons.lang3.tuple.Triple;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 
 /**
@@ -12,164 +12,47 @@ import java.util.*;
  */
 public class ResultEvaluator implements Cloneable{
 
-    //定义输入数据结构
-    private Map<String, Flight> flightMap = new HashMap<>();
-    private Map<String, List<Flight>> airLineMap = new HashMap<>();
-    private Map<String, List<AirplaneLimitation>> airplaneLimitationMap = new HashMap<>();
-    private Map<String, List<AirportClose>> airportCloseMap = new HashMap<>();
-    private List<Scene> sceneList = new ArrayList<>();
-    private Map<String, TravelTime> travelTimeMap = new HashMap<>();
-    private Map<String, Long> flightIntervalTimeMap = new HashMap<>();
-    private Set<String> domesticAirportSet = new HashSet<>();               //国内机场集合，用于控制调机
-    private Map<String, String> airplaneStartAirportMap = new HashMap<>();  //飞机起始机场映射表，用于限定飞机起始机场，判断飞机是否空飞
-    private Map<String, Integer> endAirportMap = new HashMap<>();           //结束机场统计，用于实现基地平衡
-
+    //定义输入数据集
+    private InputData inputData;
+    
     //定义结果数据结构
     private Map<String, List<ResultFlight>> resultAirLineMap;
     private Map<String, ResultFlight> resultFlightMap;
 
+    public InputData getInputData() {
+        return inputData;
+    }
+
+    public Map<String, List<ResultFlight>> getResultAirLineMap() {
+        return resultAirLineMap;
+    }
+
+    public Map<String, ResultFlight> getResultFlightMap() {
+        return resultFlightMap;
+    }
+
     /**
-     * 目标函数值 = 参数1*调机航班数 + 参数2*取消航班数 + 参数3*机型发生变化的航班数 +参数4*联程拉直航班对的个数 +参数5*航班总延误时间（小时） +参数6*航班总提前时间（小时）
-     * + 参数7 * 非可行标识（0-1变量） + 参数8 * 违背约束数量 。
+     *   目标函数值 = p1*调机空飞航班数 + p2*取消航班数 + p3*机型发生变化的航班数 + p4*换飞机数量 + p5*联程拉直航班的个数 + p6*航班总延误时间（小时） + p7*航班总提前时间（小时）
+     *   + p8*取消旅客人数 +p9*延迟旅客人数 +p10*签转延误旅客人数
+     *   + p11*非可行标识（0-1变量） + p12*违背约束数量 。
      */
-    private int emptyFlightNum = 0;              //调机航班数
-    private double cancelFlightNum = 0;          //取消航班数量
-    private double flightTypeChangeNum = 0;      //机型发生变化的航班数量
-    private double connectFlightStraightenNum = 0;  //联程拉直航班对的个数
-    private double totalFlightDelayHours = 0.0;  //航班总延误时间（小时）
-    private double totalFlightAheadHours = 0.0;  //航班总提前时间（小时）
-    private boolean isFeasible = true;           //可行标识
-    private int constraintViolationNum = 0;      //违背约束的次数
+    private double emptyFlightScore = 0.0;              //调机航班惩罚值
+    private double cancelFlightScore = 0.0;             //取消航班惩罚值
+    private double flightTypeChangeScore= 0.0;          //机型发生变化的航班惩罚值
+    private double swapFlightScore = 0.0;               //换飞机的航班惩罚值
+    private double connectFlightStraightenScore = 0.0;  //联程拉直航班对惩罚值
+    private double totalFlightDelayScore = 0.0;         //航班总延误惩罚值
+    private double totalFlightAheadScore = 0.0;         //航班总提前惩罚值
+    private double passengerCancelScore = 0.0;          //旅客取消的惩罚值
+    private double passengerDelayScore = 0.0;           //正常旅客延误的惩罚值
+    private double signChangePassengerDelayScore = 0.0; //签转旅客延误的惩罚值
+    private boolean isFeasible = true;                  //可行标识
+    private int constraintViolationNum = 0;             //违背约束的次数
 
 
     public ResultEvaluator(InputStream inputStream){
         //读取输入数据
-        readInputData(inputStream);
-        //设置联程航班标识
-        Iterator<String> iterator = airLineMap.keySet().iterator();
-        while(iterator.hasNext()){
-            String airplaneId = iterator.next();
-            List<Flight> flightList = airLineMap.get(airplaneId);
-            Collections.sort(flightList);
-            airplaneStartAirportMap.put(airplaneId, flightList.get(0).getStartAirport());
-            for(int index = 1; index < flightList.size(); ++ index){
-                Flight preFlight = flightList.get(index - 1);
-                Flight flight = flightList.get(index);
-                if(preFlight.getFlightNo().equals(flight.getFlightNo())){
-                    preFlight.setConnected(flight.getFlightId());
-                    flight.setConnected(preFlight.getFlightId());
-                }
-                flightIntervalTimeMap.put(preFlight.getFlightId() + "#" + flight.getFlightId(),
-                        flight.getStartDateTime().getTime() - preFlight.getEndDateTime().getTime());
-            }
-            String endAirport = flightList.get(flightList.size() - 1).getEndAirport();
-            if(endAirportMap.containsKey(endAirport)){
-                endAirportMap.put(endAirport, endAirportMap.get(endAirport) + 1);
-            }
-            else{
-                endAirportMap.put(endAirport, 1);
-            }
-        }
-    }
-
-    /**
-     * 读取输入数据集，将数据进行整理，方便约束检测，结果评分
-     * @param inputStream
-     */
-    private void readInputData(InputStream inputStream){
-        try {
-            XSSFWorkbook workBook = new XSSFWorkbook(inputStream);
-
-            //读取航班信息
-            XSSFSheet flightSheet = workBook.getSheet("航班");
-            Iterator<Row> rowIterator = flightSheet.iterator();
-            while(rowIterator.hasNext()){
-                Row row = rowIterator.next();
-                if(row.getRowNum() == 0)
-                    continue;
-                Flight flight = new Flight(row);
-                flightMap.put(flight.getFlightId(), flight);
-                if(airLineMap.containsKey(flight.getAirplaneId())){
-                    airLineMap.get(flight.getAirplaneId()).add(flight);
-                }
-                else {
-                    List<Flight> flightList = new ArrayList<>();
-                    flightList.add(flight);
-                    airLineMap.put(flight.getAirplaneId(), flightList);
-                }
-                if(flight.isDomestic()){
-                    domesticAirportSet.add(flight.getStartAirport());
-                    domesticAirportSet.add(flight.getEndAirport());
-                }
-            }
-
-            //读取航线-飞机限制信息
-            XSSFSheet airplaneLimitSheet = workBook.getSheet("航线-飞机限制");
-            rowIterator = airplaneLimitSheet.iterator();
-            while(rowIterator.hasNext()){
-                Row row = rowIterator.next();
-                if(row.getRowNum() == 0)
-                    continue;
-                AirplaneLimitation airplaneLimitation = new AirplaneLimitation(row);
-                String key = airplaneLimitation.getStartAirport() + "#" + airplaneLimitation.getEndAirport();
-                if(airplaneLimitationMap.containsKey(key))
-                    airplaneLimitationMap.get(key).add(airplaneLimitation);
-                else {
-                    List<AirplaneLimitation> airplaneLimitationList = new ArrayList<>();
-                    airplaneLimitationList.add(airplaneLimitation);
-                    airplaneLimitationMap.put(key, airplaneLimitationList);
-                }
-            }
-
-            //读取机场关闭限制信息
-            XSSFSheet airportCloseSheet = workBook.getSheet("机场关闭限制");
-            rowIterator = airportCloseSheet.iterator();
-            while(rowIterator.hasNext()){
-                Row row = rowIterator.next();
-                if(row.getRowNum() == 0)
-                    continue;
-                AirportClose airportClose = new AirportClose(row);
-                String key = airportClose.getAirport();
-                if(airportCloseMap.containsKey(key))
-                    airportCloseMap.get(key).add(airportClose);
-                else {
-                    List<AirportClose> airportCloseList = new ArrayList<>();
-                    airportCloseList.add(airportClose);
-                    airportCloseMap.put(key, airportCloseList);
-                }
-            }
-
-            //读取故障信息
-            XSSFSheet typhoonSceneSheet = workBook.getSheet("台风场景");
-            rowIterator = typhoonSceneSheet.iterator();
-            while(rowIterator.hasNext()){
-                Row row = rowIterator.next();
-                if(row.getRowNum() == 0)
-                    continue;
-                Scene scene = new Scene(row);
-                sceneList.add(scene);
-            }
-
-            //读取飞行时间信息
-            XSSFSheet travelTimeSheet = workBook.getSheet("飞行时间");
-            rowIterator = travelTimeSheet.iterator();
-            while(rowIterator.hasNext()){
-                Row row = rowIterator.next();
-                if(row.getRowNum() == 0)
-                    continue;
-                TravelTime travelTime = new TravelTime(row);
-                String key = travelTime.getAirplaneType() + "#"
-                        + travelTime.getStartAirport() + "#"
-                        + travelTime.getEndAirport();
-                travelTimeMap.put(key, travelTime);
-            }
-
-            //关闭excel
-            workBook.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        inputData = new InputData(inputStream);
     }
 
     /**
@@ -178,8 +61,7 @@ public class ResultEvaluator implements Cloneable{
      */
     private void readResultData(InputStream inputStream){
         try{
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream) {
-            });
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
             while((line = reader.readLine()) != null){
                 ResultFlight resultFlight = new ResultFlight(line);
@@ -195,7 +77,6 @@ public class ResultEvaluator implements Cloneable{
                 //不能存在重复航班
                 if(resultFlightMap.containsKey(resultFlight.getFlightId())){
                     constraintViolationNum += 1;
-                    System.out.println("不能存在重复航班: " + resultFlight.getFlightId());
                     isFeasible = false;
                 }
                 resultFlightMap.put(resultFlight.getFlightId(), resultFlight);
@@ -213,12 +94,16 @@ public class ResultEvaluator implements Cloneable{
     private void resetStatisticsData(){
         resultAirLineMap = new HashMap<>();
         resultFlightMap = new HashMap<>();
-        emptyFlightNum = 0;
-        cancelFlightNum = 0.0;
-        flightTypeChangeNum = 0.0;
-        connectFlightStraightenNum = 0;
-        totalFlightDelayHours = 0.0;
-        totalFlightAheadHours = 0.0;
+        emptyFlightScore = 0.0;
+        cancelFlightScore = 0.0;
+        flightTypeChangeScore = 0.0;
+        swapFlightScore = 0.0;
+        connectFlightStraightenScore = 0.0;
+        totalFlightDelayScore = 0.0;
+        totalFlightAheadScore = 0.0;
+        passengerCancelScore = 0.0;
+        passengerDelayScore = 0.0;
+        signChangePassengerDelayScore = 0.0;
         isFeasible = true;
         constraintViolationNum = 0;
     }
@@ -228,22 +113,16 @@ public class ResultEvaluator implements Cloneable{
      * @return
      */
     private double calculateScore(){
-    	System.out.println("isFeasible:" + isFeasible);
-    	System.out.println("empty:" + emptyFlightNum);
-    	System.out.println("cancel:" + cancelFlightNum);
-    	System.out.println("change:" + flightTypeChangeNum);
-    	System.out.println("connect:" + connectFlightStraightenNum);
-    	System.out.println("delay:" + totalFlightDelayHours);
-    	System.out.println("ahead:" + totalFlightAheadHours);
-    	System.out.println("constraintViolationNum:" + constraintViolationNum);
-    	
-    	
-       return emptyFlightNum * Configuration.adjustFlightParam +
-               cancelFlightNum * Configuration.cancelFlightParam +
-               flightTypeChangeNum * Configuration.flightTypeChangeParam +
-               connectFlightStraightenNum * Configuration.connectFlightStraightenParam +
-               totalFlightDelayHours * Configuration.delayFlightParam +
-               totalFlightAheadHours * Configuration.aheadFlightParam +
+       return emptyFlightScore +
+               cancelFlightScore +
+               flightTypeChangeScore +
+               swapFlightScore +
+               connectFlightStraightenScore +
+               totalFlightDelayScore +
+               totalFlightAheadScore +
+               passengerCancelScore +
+               passengerDelayScore +
+               signChangePassengerDelayScore +
                (isFeasible ? 0 : 1) * Configuration.infeasibilityPenaltyParam +
                constraintViolationNum * Configuration.constraintViolationPenaltyParam;
     }
@@ -253,28 +132,20 @@ public class ResultEvaluator implements Cloneable{
      * @return
      */
     private void globalJudgeLegalityOfResult(){
-        Set<String> originAirplaneIdSet = airLineMap.keySet();
+        Set<String> originAirplaneIdSet = inputData.getAirLineMap().keySet();
         if(!resultAirLineMap.keySet().containsAll(originAirplaneIdSet)) {
             //少一个飞机，算违背一次约束
             Iterator<String> airplaneIdIter = resultAirLineMap.keySet().iterator();
             while(airplaneIdIter.hasNext()){
                 String airplaneId = airplaneIdIter.next();
                 if(!originAirplaneIdSet.contains(airplaneId)){
-                	System.out.println("少一个飞机，算违背一次约束" + airplaneId);
                     constraintViolationNum += 1;
                 }
             }
-            System.out.println("少一个飞机，算违背一次约束1");
             isFeasible = false;
         }
-        Set<String> originFlightIdSet = flightMap.keySet();
+        Set<String> originFlightIdSet = inputData.getFlightMap().keySet();
         if(!resultFlightMap.keySet().containsAll(originFlightIdSet)) {
-        	for (String aFlight:originFlightIdSet) {
-        		if (!resultFlightMap.keySet().contains(aFlight)) {
-        			System.out.println("Missing " + aFlight);
-        			
-        		}
-        	}
             //少一个航班，算违背一次约束
             Iterator<String> flightIdIter = resultFlightMap.keySet().iterator();
             while(flightIdIter.hasNext()){
@@ -283,11 +154,9 @@ public class ResultEvaluator implements Cloneable{
                 if(resultFlight.isEmptyFly())  //过滤空飞的航班
                     continue;
                 if(!originFlightIdSet.contains(flightId)){
-                	System.out.println("少一个飞机，算违背一次约束" + flightId);
                     constraintViolationNum += 1;
                 }
             }
-            System.out.println("少一个飞机，算违背一次约束2");
             isFeasible = false;
         }
     }
@@ -304,13 +173,12 @@ public class ResultEvaluator implements Cloneable{
             String startAirport = newFlight.getStartAirport();
             String endAirport = newFlight.getEndAirport();
             String airplaneId = newFlight.getAirplaneId();
-            String airplaneType = airLineMap.get(newFlight.getAirplaneId()).get(0).getAirplaneType();
-            Flight originFlight = flightMap.get(newFlight.getFlightId());
+            String airplaneType = inputData.getAirLineMap().get(newFlight.getAirplaneId()).get(0).getAirplaneType();
+            Flight originFlight = inputData.getFlightMap().get(newFlight.getFlightId());
             //判断第一个航班的起飞机场必须与飞机的初始起飞机场一致
             if(index == 0){
-                if(!airplaneStartAirportMap.get(airplaneId).equals(startAirport)){
+                if(!inputData.getAirplaneStartAirportMap().get(airplaneId).equals(startAirport)){
                     constraintViolationNum += 1;
-                    System.out.println("判断第一个航班的起飞机场必须与飞机的初始起飞机场一致 filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
@@ -320,44 +188,40 @@ public class ResultEvaluator implements Cloneable{
                 //首先判断联程航班拉直的方式是否有效
                 if(!originFlight.isConnected()) {
                     constraintViolationNum += 1;
-                    System.out.println("首先判断联程航班拉直的方式是否有效 filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                     continue;//联程航班拉直后，发现该航班是非联程航班，直接下一轮判断
                 }
                 String nextFlightId = originFlight.getConnectedFlightId();
-                Flight nextFlight = flightMap.get(nextFlightId);
+                Flight nextFlight = inputData.getFlightMap().get(nextFlightId);
                 //联程航班拉直后，第一个航班的降落机场等于联程下一个航班的降落机场
                 if(!startAirport.equals(originFlight.getStartAirport())
                         || !endAirport.equals(nextFlight.getEndAirport())
                         || endAirport.equals(originFlight.getEndAirport())) {
                     constraintViolationNum += 1;
-                    System.out.println("联程航班拉直后，第一个航班的降落机场等于联程下一个航班的降落机场  filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 //判断调整后的飞行时间
                 long travelTime = originFlight.getEndDateTime().getTime() - originFlight.getStartDateTime().getTime()
                         + nextFlight.getEndDateTime().getTime() - nextFlight.getStartDateTime().getTime();
                 String travelTimeKey = airplaneType + "#" + startAirport + "#" + endAirport;
-                if(travelTimeMap.containsKey(travelTimeKey)) {
-                   travelTime = travelTimeMap.get(travelTimeKey).getTravelTime();
+                if(inputData.getTravelTimeMap().containsKey(travelTimeKey)) {
+                   travelTime = inputData.getTravelTimeMap().get(travelTimeKey).getTravelTime();
                 }
                 if(newFlight.getEndDateTime().getTime() - newFlight.getStartDateTime().getTime()
                         !=  travelTime) {
                     constraintViolationNum += 1;
-                    System.out.println("判断调整后的飞行时间  filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 if(!originFlight.isDomestic() || !nextFlight.isDomestic()
                         || !resultFlightMap.get(nextFlightId).isCancel()){  //联程拉直航班必须为国内航班，且后一个航班必须取消
                     constraintViolationNum += 1;
-                    System.out.println("联程拉直航班必须为国内航班，且后一个航班必须取消  filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 //当且仅当中间机场受影响时可拉直航班
                 //（只判断起飞限制和降落限制，因为停机限制其实就是起飞限制和降落限制的交集，所以不用判断停机限制）
                 boolean affectFlag = false;
-                for(int i = 0; i < sceneList.size(); ++i){
-                    Scene scene = sceneList.get(i);
+                for(int i = 0; i < inputData.getSceneList().size(); ++i){
+                    Scene scene = inputData.getSceneList().get(i);
                     if(scene.isEndInScene(originFlight.getFlightId(),
                             originFlight.getAirplaneId(),
                             originFlight.getEndAirport(),
@@ -375,7 +239,6 @@ public class ResultEvaluator implements Cloneable{
                 }
                 if(!affectFlag){
                     constraintViolationNum += 1;
-                    System.out.println("当且仅当中间机场受影响时可拉直航班  filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
@@ -383,90 +246,118 @@ public class ResultEvaluator implements Cloneable{
                if(newFlight.getEndDateTime().getTime() - newFlight.getStartDateTime().getTime()
                        != originFlight.getEndDateTime().getTime() - originFlight.getStartDateTime().getTime()) {
                    constraintViolationNum += 1;
-                   System.out.println("判断普通航班 飞行时间  filghtID: " + newFlight.getFlightId());
                    isFeasible = false;
                }
                if(!startAirport.equals(originFlight.getStartAirport())
                        || !endAirport.equals(originFlight.getEndAirport())) {
                    constraintViolationNum += 1;
-                   System.out.println("判断普通航班  启停机场  filghtID: " + newFlight.getFlightId());
                    isFeasible = false;
                }
             }
             else {  //判断调机（空飞）航班
                 String travelTimeKey = airplaneType + "#" + startAirport + "#" + endAirport;
-                if(!travelTimeMap.containsKey(travelTimeKey)) {
+                if(!inputData.getTravelTimeMap().containsKey(travelTimeKey)) {
                     constraintViolationNum += 1;
-                    System.out.println("判断调机（空飞）航班 飞行时间存在  filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 else{
                     if(newFlight.getEndDateTime().getTime() - newFlight.getStartDateTime().getTime()
-                            != travelTimeMap.get(travelTimeKey).getTravelTime()) {
+                            != inputData.getTravelTimeMap().get(travelTimeKey).getTravelTime()) {
                         constraintViolationNum += 1;
-                        System.out.println("判断调机（空飞）航班 飞行时间长度 filghtID: " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
                 //只允许国内机场才能调机
-                if(!(domesticAirportSet.contains(startAirport) && domesticAirportSet.contains(endAirport))){
+                if(!(inputData.getDomesticAirportSet().contains(startAirport) && inputData.getDomesticAirportSet().contains(endAirport))){
                     constraintViolationNum += 1;
-                    System.out.println("只允许国内机场才能调机  filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
 
             //判断飞机限制
             String airportPair = startAirport + "#" + endAirport;
-            if(airplaneLimitationMap.containsKey(airportPair)){
-                List<AirplaneLimitation> airplaneLimitationList = airplaneLimitationMap.get(airportPair);
+            if(inputData.getAirplaneLimitationMap().containsKey(airportPair)){
+                List<AirplaneLimitation> airplaneLimitationList = inputData.getAirplaneLimitationMap().get(airportPair);
                 for(int i = 0; i < airplaneLimitationList.size(); ++ i){
                     if(airplaneLimitationList.get(i).getAirplaneId().equals(airplaneId)) {
                         constraintViolationNum += 1;
-                        System.out.println("判断飞机限制  filghtID: " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
             }
             //判断机场关闭限制
-            if(airportCloseMap.containsKey(startAirport)){
-                List<AirportClose> airportCloseList = airportCloseMap.get(startAirport);
+            if(inputData.getAirportCloseMap().containsKey(startAirport)){
+                List<AirportClose> airportCloseList = inputData.getAirportCloseMap().get(startAirport);
                 for(int i = 0; i < airportCloseList.size(); ++ i){
                     if(airportCloseList.get(i).isClosed(newFlight.getStartDateTime().getTime())) {
                         constraintViolationNum += 1;
-                        System.out.println("判断机场关闭限制  起飞 filghtID: " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
             }
-            if(airportCloseMap.containsKey(endAirport)){
-                List<AirportClose> airportCloseList = airportCloseMap.get(endAirport);
+            if(inputData.getAirportCloseMap().containsKey(endAirport)){
+                List<AirportClose> airportCloseList = inputData.getAirportCloseMap().get(endAirport);
                 for(int i = 0; i < airportCloseList.size(); ++ i){
                     if(airportCloseList.get(i).isClosed(newFlight.getEndDateTime().getTime())) {
                         constraintViolationNum += 1;
-                        System.out.println("判断机场关闭限制 降落  filghtID: " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
             }
             //判断台风场景限制(起飞和降落限制)
-            for(int i = 0; i < sceneList.size(); ++i){
-                Scene scene = sceneList.get(i);
+            for(int i = 0; i < inputData.getSceneList().size(); ++i){
+                Scene scene = inputData.getSceneList().get(i);
                 if(scene.isInScene(flightId, airplaneId, startAirport, endAirport, newFlight.getStartDateTime(), newFlight.getEndDateTime())) {
                     constraintViolationNum += 1;
-                    System.out.println("判断台风场景限制(起飞和降落限制) filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
 
-            //如果联程航班两段都不取消，那么两段必须使用同一架飞机
+            //如果联程航班两段都不取消，那么两段必须使用同一架飞机，并且继续联程
             if(!newFlight.isEmptyFly() && originFlight.isConnected()){
                 String nextFlightId = originFlight.getConnectedFlightId();
-                if(!resultFlightMap.get(nextFlightId).isCancel() //联程航班没有取消
-                        && !newFlight.getAirplaneId().equals(resultFlightMap.get(nextFlightId).getAirplaneId())){ //但是使用了不同的飞机
+                if(!resultFlightMap.get(nextFlightId).isCancel()){ //联程航班没有取消
+                    if(!newFlight.getAirplaneId().equals(resultFlightMap.get(nextFlightId).getAirplaneId())) { //但是使用了不同的飞机
+                        constraintViolationNum += 1;
+                        isFeasible = false;
+                    }
+                    else{
+                        if(originFlight.isConnectedPrePart()){//当前航班为联程航班前段部分
+                            if(index + 1 >= airLine.size() || !airLine.get(index + 1).getFlightId().equals(nextFlightId)){
+                                constraintViolationNum += 1;
+                                isFeasible = false;
+                            }
+                        }
+                        else {//当前航班为联程航班后段部分
+                            if(index - 1 < 0 || !airLine.get(index - 1).getFlightId().equals(nextFlightId)){
+                                constraintViolationNum += 1;
+                                isFeasible = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //判断恢复窗口限制
+            if(!newFlight.isEmptyFly() && !inputData.getAdjustTimeWindow().isInAdjustTimeWindow(originFlight.getStartDateTime().getTime())){
+                if(!newFlight.getStartAirport().equals(originFlight.getStartAirport())
+                        || !newFlight.getEndAirport().equals(originFlight.getEndAirport())
+                        || !newFlight.getStartDateTime().equals(originFlight.getStartDateTime())
+                        || !newFlight.getEndDateTime().equals(originFlight.getEndDateTime())
+                        || !newFlight.getAirplaneId().equals(originFlight.getAirplaneId())
+                        || newFlight.isCancel()
+                        || newFlight.isEmptyFly()
+                        || newFlight.isStraighten()
+                        || newFlight.isSignChange()){
                     constraintViolationNum += 1;
-                    System.out.println("如果联程航班两段都不取消，那么两段必须使用同一架飞机  filghtID: " + newFlight.getFlightId());
                     isFeasible = false;
+                }
+                if(originFlight.isConnected()){//如果是联程航班，联程航班不能取消
+                    String nextFlightId = originFlight.getConnectedFlightId();
+                    if(resultFlightMap.get(nextFlightId).isCancel()) {
+                        constraintViolationNum += 1;
+                        isFeasible = false;
+                    }
                 }
             }
 
@@ -476,53 +367,510 @@ public class ResultEvaluator implements Cloneable{
                 //判断航站衔接约束
                if(!preNewResultFlight.getEndAirport().equals(newFlight.getStartAirport())){
                    constraintViolationNum += 1;
-                   System.out.println("进行前后两个航班的约束判断  filghtID: " + newFlight.getFlightId());
                    isFeasible = false;
                    continue;
                }
                 //判断间隔时间
                String flightIntervalTimeKey = preNewResultFlight.getFlightId() + "#" + newFlight.getFlightId();
                long intervalTime = Configuration.maxIntervalTime;
-               if(flightIntervalTimeMap.containsKey(flightIntervalTimeKey)){
-                  if(intervalTime > flightIntervalTimeMap.get(flightIntervalTimeKey))
-                      intervalTime = flightIntervalTimeMap.get(flightIntervalTimeKey);
+               if(inputData.getFlightIntervalTimeMap().containsKey(flightIntervalTimeKey)){
+                  if(intervalTime > inputData.getFlightIntervalTimeMap().get(flightIntervalTimeKey))
+                      intervalTime = inputData.getFlightIntervalTimeMap().get(flightIntervalTimeKey);
                }
                if(newFlight.getStartDateTime().getTime() < preNewResultFlight.getEndDateTime().getTime()
                        || newFlight.getStartDateTime().getTime() - preNewResultFlight.getEndDateTime().getTime() < intervalTime){
                    constraintViolationNum += 1;
-                   System.out.println("判断间隔时间  filghtID: " + newFlight.getFlightId());
                    isFeasible = false;
-               }else {
-                   //判断台风场景限制(停机限制)
-                   for (int i = 0; i < sceneList.size(); ++i) {
-                       Scene scene = sceneList.get(i);
-                       Date earliestStartDate = new Date(preNewResultFlight.getEndDateTime().getTime()); //以免引起困惑，从飞机降落时间开始判断停机
-                       if (scene.isStopInScene(flightId, airplaneId, startAirport, earliestStartDate, newFlight.getStartDateTime())) {
-                           constraintViolationNum += 1;
-                           System.out.println("判断台风场景限制(停机限制)  filghtID: " + newFlight.getFlightId());
-                           isFeasible = false;
-                       }
-                   }
                }
+            }
+        }
+    }
 
+    /**
+     * 统计空飞、机型变换、换飞机、航班提前、航班延误的惩罚值
+     * @param airLine
+     */
+    private void statisticFlightIndex(List<ResultFlight> airLine){
+        for(int index = 0; index < airLine.size(); ++ index){
+            ResultFlight newFlight = airLine.get(index);
+            Flight originFlight = inputData.getFlightMap().get(newFlight.getFlightId());
+            //统计空飞的惩罚值
+            if(newFlight.isEmptyFly()){
+                emptyFlightScore += Configuration.getAdjustFlightParam();
+                continue;
+            }
+            //统计机型发生变化的惩罚值
+            String newAirplaneType = inputData.getAirLineMap().get(newFlight.getAirplaneId()).get(0).getAirplaneType();
+            if(!newAirplaneType.equals(originFlight.getAirplaneType())){
+                flightTypeChangeScore += originFlight.getImportRatio() * Configuration.getFlightTypeChangeParam(originFlight.getAirplaneType(), newAirplaneType);
+            }
+            //统计换飞机的惩罚值
+            if(!newFlight.getAirplaneId().equals(originFlight.getAirplaneId())){
+                swapFlightScore += originFlight.getImportRatio() * Configuration.getSwapFlightParam(originFlight.getStartDateTime().getTime());
+            }
+            //统计联程航班拉直的惩罚值（重要系数选择两者之和）
+            if(newFlight.isStraighten()){
+                connectFlightStraightenScore += originFlight.getImportRatio() * Configuration.getConnectFlightStraightenParam();
+                //同时还要加上后置航班的重要系数
+                //首先判断联程航班拉直的方式是否有效
+                if(!originFlight.isConnected()) {
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                    continue;//联程航班拉直后，发现该航班是非联程航班，直接下一轮判断
+                }
+                String nextFlightId = originFlight.getConnectedFlightId();
+                Flight nextFlight = inputData.getFlightMap().get(nextFlightId);
+                connectFlightStraightenScore += nextFlight.getImportRatio() * Configuration.getConnectFlightStraightenParam();
+            }
+            //统计航班总延误惩罚值或者总提前惩罚值
+            long timeOffset = newFlight.getStartDateTime().getTime() - originFlight.getStartDateTime().getTime();
+            if(timeOffset > 0){
+                boolean isDomestic = originFlight.isDomestic();
+                if(isDomestic && timeOffset > Configuration.maxDomesticDelayTime){   //延迟时间不能超过赛题限制
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                }
+                else if((!isDomestic) && timeOffset > Configuration.maxAbroadDelayTime){
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                }
+                double delayHour = 1.0 * timeOffset / 1000 / 60 / 60;
+                totalFlightDelayScore += originFlight.getImportRatio() * delayHour * Configuration.getDelayFlightParam();
+            }
+            else if(timeOffset < 0){
+                if(-1 * timeOffset > Configuration.maxAheadTime){   //提前时间不能超过赛题限制
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                }
+                if(!originFlight.isDomestic()){  //必须为国内航班才能提前
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                }
+                //仅针对在受影响的起飞时间段，受影响的机场起飞的航班
+                boolean affectFlag = false;
+                for(int i = 0; i < inputData.getSceneList().size(); ++i){
+                    Scene scene = inputData.getSceneList().get(i);
+                    if(scene.isStartInScene(originFlight.getFlightId(),
+                            originFlight.getAirplaneId(),
+                            originFlight.getStartAirport(),
+                            originFlight.getStartDateTime())){
+                        affectFlag = true;
+                        break;
+                    }
+                }
+                if(!affectFlag){
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                }
+                double aheadHour = -1.0 * timeOffset / 1000 / 60 / 60;
+                totalFlightAheadScore += originFlight.getImportRatio() * aheadHour * Configuration.getAheadFlightParam();
+            }
+        }
+    }
+
+    /**
+     * 中转旅客的人员调整
+     * @param resultFlight
+     * @param passTransInfo
+     * @return
+     */
+    private void adjustTransferFlight(ResultFlight resultFlight, Map<String, List<Triple<Integer, Integer, Long>>> passTransInfo){
+        String flightId = resultFlight.getFlightId();
+        if(inputData.getTransferInInfoMap().containsKey(flightId)){
+            Map<String, TransferLimitation> transferInInfoMap = inputData.getTransferInInfoMap().get(flightId);
+            Iterator<String> iter = transferInInfoMap.keySet().iterator();
+            while(iter.hasNext()){
+                String outFlightId = iter.next();
+                TransferLimitation transferLimitation = transferInInfoMap.get(outFlightId);
+                ResultFlight transferRF = resultFlightMap.get(outFlightId);
+                if(transferRF.getStartDateTime().getTime() - resultFlight.getEndDateTime().getTime()
+                        < transferLimitation.getMinTransferTime()) {
+                    //中转失败，则从下一个航班删除正常旅客数量（数据中保证了转旅客数量不大于正常旅客数量）
+                    //记录签转旅客情况，用于后面统计
+                    passTransInfo.get(outFlightId).add(Triple.of(2, transferLimitation.getTransferPassNum(), 0L));
+                }
+            }
+        }
+    }
+
+    /**
+     * 中转旅客的人员取消
+     * @param resultFlight
+     * @param passTransInfo
+     * @return
+     */
+    private void cancelTransferFlight(ResultFlight resultFlight, Map<String, List<Triple<Integer, Integer, Long>>> passTransInfo){
+        String flightId = resultFlight.getFlightId();
+        if(inputData.getTransferInInfoMap().containsKey(flightId)){
+            Map<String, TransferLimitation> transferInInfoMap = inputData.getTransferInInfoMap().get(flightId);
+            Iterator<String> iter = transferInInfoMap.keySet().iterator();
+            while(iter.hasNext()){
+                String outFlightId = iter.next();
+                TransferLimitation transferLimitation = transferInInfoMap.get(outFlightId);
+                //记录签转旅客情况，用于后面统计
+                passTransInfo.get(outFlightId).add(Triple.of(1, transferLimitation.getTransferPassNum(), 0L));
+            }
+        }
+    }
+
+
+    /**
+     * 获得指定航班指定类型操作的旅客取消数量
+     * @param flightId
+     * @param passTransInfo
+     * @param type
+     * @return
+     */
+    private int getPassengerNum(String flightId, Map<String, List<Triple<Integer, Integer, Long>>> passTransInfo, int type){
+         int num = 0;
+         if(passTransInfo.containsKey(flightId)){
+             List<Triple<Integer, Integer, Long>> operationList = passTransInfo.get(flightId);
+             for(int index = 0; index < operationList.size(); ++index){
+                 if(operationList.get(index).getLeft().equals(type)){
+                     num += operationList.get(index).getMiddle();
+                 }
+             }
+         }
+         return num;
+    }
+
+    /**
+     * 获得签转旅客的延迟开销
+     * @param flightId
+     * @param passTransInfo
+     * @return
+     */
+    private double getSignChangePassengerDelayCost(String flightId, Map<String, List<Triple<Integer, Integer, Long>>> passTransInfo){
+        double delayCost = 0.0;
+        if(passTransInfo.containsKey(flightId)){
+            List<Triple<Integer, Integer, Long>> operationList = passTransInfo.get(flightId);
+            for(int index = 0; index < operationList.size(); ++index){
+                if(operationList.get(index).getLeft().equals(3)){
+                    double delayHour = 1.0 * operationList.get(index).getRight() / 1000 / 60 / 60;
+                    if(delayHour < 0){//以防违背约束后，时间差为负数，导致结果分数异常
+                        delayHour = 0.0;
+                    }
+                    delayCost += operationList.get(index).getMiddle() * Configuration.getSignChangePassengerDelayParam(delayHour);
+                }
+            }
+        }
+        return delayCost;
+    }
+
+    /**
+     * 对签转的旅客进行合法性检查，并且记录签转情况
+     *
+     * @param resultFlight
+     * @param passTransInfo
+     * @return
+     */
+    private void judgeLegalityOfSignChange(ResultFlight resultFlight, Map<String, List<Triple<Integer, Integer, Long>>> passTransInfo){
+        String flightId = resultFlight.getFlightId();
+        Map<String, Flight> originFlightMap = inputData.getFlightMap();
+        Flight originFlight = originFlightMap.get(flightId);
+        //判断签转的合理性
+        Map<String, Integer> signChangePassInfoOfFlight = resultFlight.getSignChangePassInfo();
+        int totalSignChangePassNum = 0;
+        Iterator<String> iter = signChangePassInfoOfFlight.keySet().iterator();
+        while (iter.hasNext()) {
+            String signChangeFlightId = iter.next();
+            ResultFlight signChangeResultFlight = resultFlightMap.get(signChangeFlightId);
+            if (signChangeResultFlight.isCancel()) { //接受签转旅客的航班不能取消
+                constraintViolationNum += 1;
+                isFeasible = false;
+            }
+            if(signChangeResultFlight.getStartDateTime().getTime()
+                    < originFlight.getStartDateTime().getTime()){ //签转旅客只能延误
+                constraintViolationNum += 1;
+                isFeasible = false;
+            }
+            if(!signChangeResultFlight.getStartAirport().equals(originFlight.getStartAirport())
+                    || !signChangeResultFlight.getEndAirport().equals(originFlight.getEndAirport())){ //签转航班要与原航班的起飞降落机场一致
+                constraintViolationNum += 1;
+                isFeasible = false;
+            }
+            if(signChangeResultFlight.getSignChangePassInfo().size() > 0){//接受签转旅客的航班不能签转旅客到其他航班
+                constraintViolationNum += 1;
+                isFeasible = false;
+            }
+            totalSignChangePassNum += signChangePassInfoOfFlight.get(signChangeFlightId);
+            //记录签转旅客情况，用于后面统计
+            Triple signTranInfo = Triple.of(3,
+                    signChangePassInfoOfFlight.get(signChangeFlightId),
+                    signChangeResultFlight.getStartDateTime().getTime() - originFlight.getStartDateTime().getTime());
+            passTransInfo.get(signChangeFlightId).add(signTranInfo);
+        }
+        //记录签转旅客情况，用于后面统计
+        passTransInfo.get(flightId).add(Triple.of(0, totalSignChangePassNum, 0L));
+
+        //判断签转原因的合理性以及签转数量的合理性
+        if(resultFlight.isCancel()) { //航班取消签转, 包含普通航班取消和联程拉直航班取消（只能签转普通旅客）
+            //获得中转到当前航班的取消旅客数量
+            int transferCancelPassNum =  getPassengerNum(flightId, passTransInfo, 1);
+            if(totalSignChangePassNum > originFlight.getNormalPassengerNum() - transferCancelPassNum){//签转旅客数量不能大于剩余的普通旅客数量
+                constraintViolationNum += 1;
+                isFeasible = false;
+            }
+        }
+        else{//执行航班签转（中转失败、换飞机、机型变化、航班拉直、超售）
+            boolean signChangeLegalityFlag = false;
+            int availableSignChangePassNum = 0;
+            int totalPassengerNum = originFlight.getPassengerNum() + originFlight.getConnectPassengerNum();
+            //获得中转到当前航班的取消旅客数量
+            int transferCancelPassNum =  getPassengerNum(flightId, passTransInfo, 1);
+            totalPassengerNum -= transferCancelPassNum;
+            //获得中转失败的旅客数量
+            int transferFailPassNum =  getPassengerNum(flightId, passTransInfo, 2);
+            availableSignChangePassNum += transferFailPassNum;
+            if(transferFailPassNum > 0){ //中转失败
+                signChangeLegalityFlag = true;
+                totalPassengerNum -= transferFailPassNum;
+            }
+            if(resultFlight.isStraighten()){ //如果航班拉直
+                totalPassengerNum = originFlight.getConnectPassengerNum();
+                signChangeLegalityFlag = true;
+                availableSignChangePassNum = originFlight.getNormalPassengerNum() - transferCancelPassNum;
+            }
+            else if(originFlight.isConnected()){//如果是没有拉直的联程航班
+                String nextFlightId = originFlight.getConnectedFlightId();
+                if(resultFlightMap.get(nextFlightId).isCancel()) { //联程航班取消
+                    totalPassengerNum -= originFlight.getConnectPassengerNum();
+                }
+            }
+            int seatNum = inputData.getAirLineMap().get(resultFlight.getAirplaneId()).get(0).getSeatNum();
+            if(totalPassengerNum > seatNum){//换飞机、机型变化、超售（其实就是乘客数量大于座位数量）
+                signChangeLegalityFlag = true;
+                availableSignChangePassNum += (totalPassengerNum - seatNum);
+            }
+            if(!signChangeLegalityFlag){
+                constraintViolationNum += 1;
+                isFeasible = false;
+            }
+            if(totalSignChangePassNum > availableSignChangePassNum){//签转旅客数量不能大于可以签转的旅客数量
+                constraintViolationNum += 1;
+                isFeasible = false;
+            }
+        }
+    }
+
+    /**
+     * 统计旅客的取消、普通延误、签转延误
+     */
+    private void statisticPassengerIndex(){
+        Map<String, Flight> originFlightMap = inputData.getFlightMap();
+        //记录签转旅客情况
+        // (航班ID，Array(标识(0:旅客签转出去, 1:中转进来的旅客取消, 2:中转失败的旅客, 3:旅客签转进来 )，旅客数量，延误时长))
+        Map<String, List<Triple<Integer, Integer, Long>>> passTransInfo = new HashMap<>();
+        //获取结果航班List，并且按照时间进行排序
+        List<ResultFlight> resultFlightList = new ArrayList<>();
+        resultFlightList.addAll(resultFlightMap.values());
+        Collections.sort(resultFlightList);
+
+        //初始化旅客流转情况数据
+        Iterator<ResultFlight> iter = resultFlightList.iterator();
+        while(iter.hasNext()){
+            ResultFlight resultFlight = iter.next();
+            if(resultFlight.isEmptyFly())
+                continue;
+            passTransInfo.put(resultFlight.getFlightId(), new ArrayList<>());
+        }
+        //第一步中转旅客的调整
+        for(int index = 0; index < resultFlightList.size(); ++index) {
+            ResultFlight resultFlight = resultFlightList.get(index);
+            //调机航班上没有旅客
+            if (resultFlight.isEmptyFly()) {
+                continue;
+            }
+            if(resultFlight.isCancel() || resultFlight.isStraighten()) { //航班取消 + 拉直航班
+                //中转旅客的人员取消
+                cancelTransferFlight(resultFlight, passTransInfo);
+            }
+            else {//执行航班
+                //中转旅客的人员调整
+                adjustTransferFlight(resultFlight, passTransInfo);
+            }
+        }
+        //第二步判断签转的原因是否合理
+        for(int index = 0; index < resultFlightList.size(); ++index){
+            ResultFlight resultFlight = resultFlightList.get(index);
+            String flightId = resultFlight.getFlightId();
+            //调机航班不允许签转
+            if(resultFlight.isEmptyFly()){
+                continue;
+            }
+            Flight originFlight = originFlightMap.get(flightId);
+            //判断是否在调整窗口范围内
+            if(!inputData.getAdjustTimeWindow().isInAdjustTimeWindow(originFlight.getStartDateTime().getTime())){//处于非调整窗口
+                if(resultFlight.isSignChange() || resultFlight.isCancel() || resultFlight.isStraighten()){  //处于非调整窗口内的航班不能进行转签、不能取消、不能拉直
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                }
+            }
+            else{//处于调整窗口
+                if(resultFlight.isSignChange()){//对存在旅客签转的航班进行合法性检查
+                    judgeLegalityOfSignChange(resultFlight, passTransInfo);
+                }
+            }
+        }
+        //第三步统计每个航班的旅客组成，以及cost计算
+        for(int index = 0; index < resultFlightList.size(); ++index){
+            ResultFlight resultFlight = resultFlightList.get(index);
+            String flightId = resultFlight.getFlightId();
+            //调机航班不允许签转
+            if(resultFlight.isEmptyFly()){
+                continue;
+            }
+            Flight originFlight = originFlightMap.get(flightId);
+            //判断是否在调整窗口范围内
+            if(!inputData.getAdjustTimeWindow().isInAdjustTimeWindow(originFlight.getStartDateTime().getTime())){//处于非调整窗口
+                //非调整窗口内航班不能调整，超售部分直接取消，且只取消普通旅客，对后面航班没有影响
+                if(originFlight.getPassengerNum() + originFlight.getConnectPassengerNum() > originFlight.getSeatNum()){
+                   passengerCancelScore += (originFlight.getPassengerNum() + originFlight.getConnectPassengerNum() - originFlight.getSeatNum())//以防违背约束后，人数差为负数，导致结果分数异常
+                           * Configuration.getCancelPassengerParam();
+                }
+            }
+            else{//处于调整窗口
+                int totalSignOutChangePassNum =  getPassengerNum(flightId, passTransInfo, 0);
+                int totalSignInChangePassNum =  getPassengerNum(flightId, passTransInfo, 3);
+                if(resultFlight.isCancel()){
+                    //获得取消旅客的cost
+                    if(originFlight.isConnected() && originFlight.isConnectedPrePart()
+                            && originFlight.getPassengerNum() + originFlight.getConnectPassengerNum() - totalSignOutChangePassNum > 0){//以防违背约束后，人数差为负数，导致结果分数异常
+                        //如果取消的是联程航班的前部分，则没有拉直，需要统计联程旅客取消人数
+                        passengerCancelScore += (originFlight.getPassengerNum() + originFlight.getConnectPassengerNum() - totalSignOutChangePassNum)
+                                * Configuration.getCancelPassengerParam();
+                    }
+                    else{
+                        if(originFlight.getPassengerNum() - totalSignOutChangePassNum > 0) {//以防违背约束后，人数差为负数，导致结果分数异常
+                            passengerCancelScore += (originFlight.getPassengerNum() - totalSignOutChangePassNum)
+                                    * Configuration.getCancelPassengerParam();
+                        }
+                    }
+                }
+                else if(resultFlight.isStraighten()){
+                    passengerCancelScore += (originFlight.getPassengerNum() - totalSignOutChangePassNum)
+                            * Configuration.getCancelPassengerParam();
+                    int seatNum = inputData.getAirLineMap().get(resultFlight.getAirplaneId()).get(0).getSeatNum();
+                    if(originFlight.getConnectPassengerNum() + totalSignInChangePassNum > seatNum){//签转旅客到某航班，必须满足该航班的座位数限制
+                        constraintViolationNum += 1;
+                        isFeasible = false;
+                    }
+                }
+                else{
+                    int totalPassengerNum = originFlight.getPassengerNum() + originFlight.getConnectPassengerNum();
+                    int totalCancelPassenger = 0;
+                    //获得中转到当前航班的取消旅客数量
+                    int transferCancelPassNum =  getPassengerNum(flightId, passTransInfo, 1);
+                    totalPassengerNum -= transferCancelPassNum;
+                    totalCancelPassenger += transferCancelPassNum;
+                    //获得中转失败的旅客数量
+                    int transferFailPassNum =  getPassengerNum(flightId, passTransInfo, 2);
+                    if(transferFailPassNum > 0){ //中转失败
+                        totalPassengerNum -= transferFailPassNum;
+                        totalCancelPassenger += transferFailPassNum;
+                    }
+                    if(originFlight.isConnected()){//如果是没有拉直的联程航班
+                        String nextFlightId = originFlight.getConnectedFlightId();
+                        if(resultFlightMap.get(nextFlightId).isCancel()) { //联程航班取消
+                            totalPassengerNum -= originFlight.getConnectPassengerNum();
+                            if(originFlight.isConnectedPrePart()){
+                                totalCancelPassenger += originFlight.getConnectPassengerNum();
+                            }
+                        }
+                    }
+                    int seatNum = inputData.getAirLineMap().get(resultFlight.getAirplaneId()).get(0).getSeatNum();
+                    if(totalPassengerNum > seatNum){//换飞机、机型变化、超售（其实就是乘客数量大于座位数量）
+                        int overSeatNum = totalPassengerNum - seatNum;
+                        totalPassengerNum -= overSeatNum;
+                        totalCancelPassenger += overSeatNum;
+                    }
+                    if(totalSignOutChangePassNum <= totalCancelPassenger){//签转旅客数量不能大于可以取消的旅客数量
+                        passengerCancelScore += (totalCancelPassenger - totalSignOutChangePassNum)
+                                * Configuration.getCancelPassengerParam();
+                    }
+                    double delayHour = 1.0 * (resultFlight.getStartDateTime().getTime() - originFlight.getStartDateTime().getTime()) / 1000 / 60 / 60;
+                    if(totalPassengerNum > 0 && delayHour > 0.0) {
+                        passengerDelayScore += totalPassengerNum * Configuration.getNormalPassengerDelayParam(delayHour);
+                    }
+                    if(totalPassengerNum + totalSignInChangePassNum > seatNum){//签转旅客到某航班，必须满足该航班的座位数限制
+                        constraintViolationNum += 1;
+                        isFeasible = false;
+                    }
+                }
+                //获得签转旅客的延迟开销
+                signChangePassengerDelayScore += getSignChangePassengerDelayCost(flightId, passTransInfo);
+            }
+        }
+    }
+
+    /**
+     * 全局判断单位时间容量限制
+     */
+    private void globalJudgeCapacityLimitationOfResult(){
+        Set<String> affectedAirportSet = inputData.getAffectedAirportSet();
+        Map<String, List<Long>> affectedAirportTimeListMap = new HashMap<>();
+        Iterator<String> iter = affectedAirportSet.iterator();
+        while(iter.hasNext()){
+            String airport = iter.next();
+            affectedAirportTimeListMap.put(airport, new ArrayList<>());
+        }
+        Iterator<String> iterator = resultAirLineMap.keySet().iterator();
+        while(iterator.hasNext()) {
+            String airplaneId = iterator.next();
+            List<ResultFlight> resultFlightList = resultAirLineMap.get(airplaneId);
+            for(int index = 0; index < resultFlightList.size(); ++index){
+                ResultFlight resultFlight = resultFlightList.get(index);
+                if(affectedAirportSet.contains(resultFlight.getStartAirport())){
+                    affectedAirportTimeListMap.get(resultFlight.getStartAirport()).add(resultFlight.getStartDateTime().getTime());
+                }
+                if(affectedAirportSet.contains(resultFlight.getEndAirport())){
+                    affectedAirportTimeListMap.get(resultFlight.getEndAirport()).add(resultFlight.getEndDateTime().getTime());
+                }
+            }
+        }
+        //判断单位时间容量限制
+        iter = affectedAirportSet.iterator();
+        while(iter.hasNext()){
+            String airport = iter.next();
+            List<Long> timeList = affectedAirportTimeListMap.get(airport);
+            if(!inputData.getCapacityLimitation().isSatisfyCapacityLimitation(timeList)){
+                constraintViolationNum += 1;
+                isFeasible = false;
             }
         }
     }
 
     /**
      * 全局判断基地平衡
-     * @param newEndAirportMap
      */
-    private void globalJudgeBaseBalanceOfResult(Map<String, Integer> newEndAirportMap){
+    private void globalJudgeBaseBalanceOfResult(){
+        //统计飞机结束任务时，机场停的飞机次数
+        Map<String, Integer> newEndAirportMap = new HashMap<>();
+        Iterator<String> iterator = resultAirLineMap.keySet().iterator();
+        while(iterator.hasNext()) {
+            String airplaneId = iterator.next();
+            List<ResultFlight> resultFlightList = resultAirLineMap.get(airplaneId);
+            //记录每个飞机结束时的机场分布，用于判断基地平衡
+            if(resultFlightList.size() > 0) {
+                String endAirport = resultFlightList.get(resultFlightList.size() - 1).getEndAirport();
+                String newAirplaneType = inputData.getAirLineMap().get(resultFlightList.get(0).getAirplaneId()).get(0).getAirplaneType();
+                String key = endAirport + "#" + newAirplaneType;
+                if (newEndAirportMap.containsKey(key)) {
+                    newEndAirportMap.put(key, newEndAirportMap.get(key) + 1);
+                } else {
+                    newEndAirportMap.put(key, 1);
+                }
+            }
+        }
         int totalLandNum = 0;
-        Iterator<String> endAirportIter = endAirportMap.keySet().iterator();
+        Iterator<String> endAirportIter = inputData.getEndAirportMap().keySet().iterator();
         while(endAirportIter.hasNext()){
-            String endAirport = endAirportIter.next();
-            int landNum = endAirportMap.get(endAirport);
+            String key = endAirportIter.next();
+            int landNum = inputData.getEndAirportMap().get(key);
             totalLandNum += landNum;
             int newLandNum = 0;
-            if(newEndAirportMap.containsKey(endAirport)){
-                newLandNum = newEndAirportMap.get(endAirport);
+            if(newEndAirportMap.containsKey(key)){
+                newLandNum = newEndAirportMap.get(key);
             }
             if(landNum > newLandNum){
                 totalLandNum -= newLandNum;
@@ -533,8 +881,51 @@ public class ResultEvaluator implements Cloneable{
         }
         if(totalLandNum > 0){
             constraintViolationNum += totalLandNum;
-            System.out.println("全局判断基地平衡   ");
             isFeasible = false;
+        }
+    }
+
+    /**
+     * 判断停机位数量限制
+     */
+    private void globalJudgeStopAirplaneNumLimitationOfResult(){
+        Set<String> stopAirportSet = inputData.getStopAirportSet();
+        Map<String, Integer> stopAirportNumMap = new HashMap<>();
+        Iterator<String> iter = stopAirportSet.iterator();
+        while(iter.hasNext()){
+            String airport = iter.next();
+            stopAirportNumMap.put(airport, 0);
+        }
+        Iterator<String> iterator = resultAirLineMap.keySet().iterator();
+        while(iterator.hasNext()) {
+            String airplaneId = iterator.next();
+            List<ResultFlight> resultFlightList = resultAirLineMap.get(airplaneId);
+            for(int index = 0; index < resultFlightList.size(); ++ index) {
+                ResultFlight newFlight = resultFlightList.get(index);
+                //进行前后两个航班的约束判断
+                if(index > 0){
+                    ResultFlight preNewResultFlight = resultFlightList.get(index - 1);
+                    //判断台风场景限制(停机限制)
+                    for (int i = 0; i < inputData.getSceneList().size(); ++i) {
+                        Scene scene = inputData.getSceneList().get(i);
+                        Date earliestStartDate = new Date(preNewResultFlight.getEndDateTime().getTime());
+                        if (scene.isStopInScene(newFlight.getStartAirport(), earliestStartDate, newFlight.getStartDateTime())) {
+                            stopAirportNumMap.put(newFlight.getStartAirport(), stopAirportNumMap.get(newFlight.getStartAirport()) + 1);
+                        }
+                    }
+                }
+            }
+        }
+        //判断停机位数量限制
+        for (int i = 0; i < inputData.getSceneList().size(); ++i) {
+            Scene scene = inputData.getSceneList().get(i);
+            if(scene.getType().equals(AffectType.STOPPING)){
+                int num = stopAirportNumMap.get(scene.getAirport());
+                if(num > scene.getStopAirplaneNum()){
+                    constraintViolationNum += 1;
+                    isFeasible = false;
+                }
+            }
         }
     }
 
@@ -544,134 +935,62 @@ public class ResultEvaluator implements Cloneable{
      * @return
      */
     public double runEvaluation(InputStream inputStream){
-//    	System.out.println("step1 isFeasible: " + isFeasible);
         //重置结果数据集
         resetStatisticsData();
         //读取结果数据
         readResultData(inputStream);
         //全局判断结果的合法性，结果数据中是否包含全部的飞机ID, 航班ID
         globalJudgeLegalityOfResult();
-//        System.out.println("step2 isFeasible: " + isFeasible);
+
         //统计各项指标
         Iterator<String> iterator = resultAirLineMap.keySet().iterator();
-        //统计飞机结束任务时，机场停的飞机次数
-        Map<String, Integer> newEndAirportMap = new HashMap<>();
         while(iterator.hasNext()){
             String airplaneId = iterator.next();
             List<ResultFlight> resultFlightList = resultAirLineMap.get(airplaneId);
             for(int index = resultFlightList.size() - 1; index >= 0; -- index){
                 ResultFlight rf = resultFlightList.get(index);
-                Flight originFlight = flightMap.get(rf.getFlightId());
+                Flight originFlight = inputData.getFlightMap().get(rf.getFlightId());
                 //统计取消航班，并且删除取消航班
                 if(rf.isCancel()){
                     if(!rf.isStraighten())  //如果不是联程拉直导致取消的航班，才能计算取消权重
-                       cancelFlightNum += originFlight.getImportRatio();
+                        cancelFlightScore += originFlight.getImportRatio() * Configuration.getCancelFlightParam();
                     else {
-                    	ResultFlight connectedFlight = resultFlightMap.get(originFlight.getConnectedFlightId());
+                        ResultFlight connectedFlight = resultFlightMap.get(originFlight.getConnectedFlightId());
                         if(connectedFlight.isCancel() || !originFlight.isConnected()){//如果是联程拉直导致取消的航班,判断是其否是联程航班，并且判断联程航班是否取消
                             constraintViolationNum += 1;
-                            System.out.println("如果是联程拉直导致取消的航班,判断是其否是联程航班，并且判断联程航班是否取消  filghtID: " + rf.getFlightId());
                             isFeasible = false;
                         }
+                    }
+                    if(!inputData.getAdjustTimeWindow().isInAdjustTimeWindow(originFlight.getStartDateTime().getTime())){//非调整窗口内的航班不能取消
+                        constraintViolationNum += 1;
+                        isFeasible = false;
                     }
                     resultFlightList.remove(index);
                 }
             }
             //对处理后的结果按时间从小到大进行排序
             Collections.sort(resultFlightList);
+
             //判断航线的合理性
             judgeLegalityOfAirLine(resultFlightList);
-//            System.out.println("step3 isFeasible: " + isFeasible);
+
             //统计其他指标
-            for(int index = 0; index < resultFlightList.size(); ++ index){
-                ResultFlight newFlight = resultFlightList.get(index);
-                Flight originFlight = flightMap.get(newFlight.getFlightId());
-                //统计空飞的数量
-                if(newFlight.isEmptyFly()){
-                    emptyFlightNum += 1;
-                    continue;
-                }
-                //统计机型发生变化的航班数量
-                String newAirplaneType = airLineMap.get(newFlight.getAirplaneId()).get(0).getAirplaneType();
-                if(!newAirplaneType.equals(originFlight.getAirplaneType())){
-                    flightTypeChangeNum += originFlight.getImportRatio();
-                }
-                //统计联程航班拉直的数量（重要系数选择两者之和）
-                if(newFlight.isStraighten()){
-                    connectFlightStraightenNum += originFlight.getImportRatio();
-                    //同时还要加上后置航班的重要系数
-                    //首先判断联程航班拉直的方式是否有效
-                    if(!originFlight.isConnected()) {
-                        constraintViolationNum += 1;
-                        System.out.println("首先判断联程航班拉直的方式是否有效  filghtID: " + newFlight.getFlightId());
-                        isFeasible = false;
-                        continue;//联程航班拉直后，发现该航班是非联程航班，直接下一轮判断
-                    }
-                    String nextFlightId = originFlight.getConnectedFlightId();
-                    Flight nextFlight = flightMap.get(nextFlightId);
-                    connectFlightStraightenNum += nextFlight.getImportRatio();
-                }
-                //统计航班总延误时间或者总提前时间（小时）
-                long timeOffset = newFlight.getStartDateTime().getTime() - originFlight.getStartDateTime().getTime();
-                if(timeOffset > 0){
-                    boolean isDomestic = originFlight.isDomestic();
-                    if(isDomestic && timeOffset > Configuration.maxDomesticDelayTime){   //延迟时间不能超过赛题限制
-                        constraintViolationNum += 1;
-                        System.out.println("延迟时间不能超过赛题限制 国内  filghtID: " + newFlight.getFlightId());
-                        isFeasible = false;
-                    }
-                    else if((!isDomestic) && timeOffset > Configuration.maxAbroadDelayTime){
-                        constraintViolationNum += 1;
-                        System.out.println("延迟时间不能超过赛题限制 国际  filghtID: " + newFlight.getFlightId());
-                        isFeasible = false;
-                    }
-                    totalFlightDelayHours += (1.0 * originFlight.getImportRatio() * timeOffset / 1000 / 60 / 60);
-                }
-                else if(timeOffset < 0){
-                    if(-1 * timeOffset > Configuration.maxAheadTime){   //提前时间不能超过赛题限制
-                        constraintViolationNum += 1;
-                        System.out.println("提前时间不能超过赛题限制 国内  filghtID: " + newFlight.getFlightId());
-                        isFeasible = false;
-                    }
-                    if(!originFlight.isDomestic()){  //必须为国内航班才能提前
-                        constraintViolationNum += 1;
-                        System.out.println("提前时间不能超过赛题限制 国际  filghtID: " + newFlight.getFlightId());
-                        isFeasible = false;
-                    }
-                    //仅针对在受影响的起飞时间段，受影响的机场起飞的航班
-                    boolean affectFlag = false;
-                    for(int i = 0; i < sceneList.size(); ++i){
-                        Scene scene = sceneList.get(i);
-                        if(scene.isStartInScene(originFlight.getFlightId(),
-                                originFlight.getAirplaneId(),
-                                originFlight.getStartAirport(),
-                                originFlight.getStartDateTime())){
-                            affectFlag = true;
-                            break;
-                        }
-                    }
-                    if(!affectFlag){
-                        constraintViolationNum += 1;
-                        System.out.println("仅针对在受影响的起飞时间段，受影响的机场起飞的航班  filghtID: " + newFlight.getFlightId());
-                        isFeasible = false;
-                    }
-                    totalFlightAheadHours += (-1.0 * originFlight.getImportRatio() * timeOffset / 1000 / 60 / 60);
-                }
-            }
-            
-            if(resultFlightList.size() > 0) {
-                String endAirport = resultFlightList.get(resultFlightList.size() - 1).getEndAirport();
-                if (newEndAirportMap.containsKey(endAirport)) {
-                    newEndAirportMap.put(endAirport, newEndAirportMap.get(endAirport) + 1);
-                } else {
-                    newEndAirportMap.put(endAirport, 1);
-                }
-            }
+            statisticFlightIndex(resultFlightList);
         }
-//        System.out.println("step4 isFeasible: " + isFeasible);
+
+        /**
+         * 按照前面的步骤处理后，每一条航线中已经删除取消的航班，并且按时间排从小到大排序
+         */
         //判断基地平衡
-        globalJudgeBaseBalanceOfResult(newEndAirportMap);
-//        System.out.println("step5 isFeasible: " + isFeasible);
+        globalJudgeBaseBalanceOfResult();
+        //全局判断单位时间容量限制
+        globalJudgeCapacityLimitationOfResult();
+        //全局判断停机位数量限制
+        globalJudgeStopAirplaneNumLimitationOfResult();
+
+        //统计旅客的取消、延误、签转延误
+        statisticPassengerIndex();
+
         return calculateScore();
     }
 

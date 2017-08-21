@@ -30,17 +30,31 @@ public class Flight implements Comparable{
     private String airplaneId;
     //机型
     private String airplaneType;
+    //旅客数
+    private int passengerNum;
+    //联程旅客数
+    private int connectPassengerNum;
+    //座位数
+    private int seatNum;
     //重要系数
     private float importRatio;
 
+    //飞行时间
+    private long travelTime;
     //是否是联程航班
     private boolean isConnected = false;
+    //联程航班位置
+    private boolean isConnectedPrePart;
     //联程航班后置航班
     private String connectedFlightId;
 
-    public void setConnected(String connectedFlightId) {
+    //普通旅客数量
+    private int normalPassengerNum;
+
+    public void setConnected(String connectedFlightId, boolean loc) {
         isConnected = true;
         this.connectedFlightId = connectedFlightId;
+        this.isConnectedPrePart = loc;
     }
 
     public boolean isConnected() {
@@ -95,10 +109,38 @@ public class Flight implements Comparable{
         return importRatio;
     }
 
+    public long getTravelTime() {
+        return travelTime;
+    }
+
+    public int getPassengerNum() {
+        return passengerNum;
+    }
+
+    public int getConnectPassengerNum() {
+        return connectPassengerNum;
+    }
+
+    public int getSeatNum() {
+        return seatNum;
+    }
+
+    public boolean isConnectedPrePart() {
+        return isConnectedPrePart;
+    }
+
+    public int getNormalPassengerNum() {
+        return normalPassengerNum;
+    }
+
+    public void setNormalPassengerNum(int normalPassengerNum) {
+        this.normalPassengerNum = normalPassengerNum;
+    }
+
     //构造函数
     public Flight(Row row){
-        if(row.getPhysicalNumberOfCells() != 11){
-            throw new RuntimeException("航班信息的数据列数错误，不等于11项！");
+        if(row.getPhysicalNumberOfCells() != 14){
+            throw new RuntimeException("航班信息的数据列数错误，不等于14项！");
         }
         DataFormatter df = new DataFormatter();
         flightId = df.formatCellValue(row.getCell(0));
@@ -111,7 +153,11 @@ public class Flight implements Comparable{
         endDateTime = row.getCell(7).getDateCellValue();
         airplaneId = df.formatCellValue(row.getCell(8));
         airplaneType = df.formatCellValue(row.getCell(9));
-        importRatio = Float.parseFloat(df.formatCellValue(row.getCell(10)));
+        passengerNum = Integer.parseInt(df.formatCellValue(row.getCell(10)));
+        connectPassengerNum = Integer.parseInt(df.formatCellValue(row.getCell(11)));
+        seatNum = Integer.parseInt(df.formatCellValue(row.getCell(12)));
+        importRatio = Float.parseFloat(df.formatCellValue(row.getCell(13)));
+        travelTime = endDateTime.getTime() - startDateTime.getTime();
     }
 
     @Override
@@ -128,24 +174,5 @@ public class Flight implements Comparable{
         } else {
             return this.airplaneId.compareTo(other.airplaneId);
         }
-    }
-
-    /**
-     * 打印航班信息，用于生成baseline结果
-     * @param cancelFlag
-     * @param straightenFlag
-     * @param emptyFlag
-     */
-    public String printFlight(int cancelFlag, int straightenFlag, int emptyFlag){
-        String str = flightId + ","
-                + startAirport + ","
-                + endAirport + ","
-                + Utils.timeStampToString(startDateTime.getTime()) + ","
-                + Utils.timeStampToString(endDateTime.getTime()) + ","
-                + airplaneId + ","
-                + cancelFlag + ","
-                + straightenFlag + ","
-                + emptyFlag + "\n";
-        return str;
     }
 }
