@@ -1146,6 +1146,9 @@ public class SingleAircraftSearch {
 	 * @return
 	 */
 	public boolean isValidParking(Date arrivalTime, Date departureTime, AirPort airport){
+		if (airport.getId().equals("25")) {
+			return true;
+		}
 		if (arrivalTime != null && arrivalTime != null) {
 			for (AirPortClose aClose : airport.getCloseSchedule()) {
 				if (arrivalTime.compareTo(aClose.getStartTime()) <= 0
