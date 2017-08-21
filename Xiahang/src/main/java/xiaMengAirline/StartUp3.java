@@ -150,9 +150,12 @@ public class StartUp3 {
 			InitData.initData(initDatafile);
 
 			LocalSearch2 localEngine = new LocalSearch2();
+			
+			
 
 			// Step2, construct initial solution & validate it
 			XiaMengAirlineSolution initialSolution = InitData.originalSolution.getBestSolution();
+		
 			XiaMengAirlineSolution initialOutput = initialSolution.reConstruct2();
 			initialOutput.refreshCost(true);
 			initialSolution.setCost(initialOutput.getCost());
