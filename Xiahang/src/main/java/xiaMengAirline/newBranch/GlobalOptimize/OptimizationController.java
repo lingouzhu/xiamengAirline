@@ -12,13 +12,12 @@ import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.Flight;
 import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
 import xiaMengAirline.newBranch.BasicObject.Exception.InvaildSolution;
-import xiaMengAirline.newBranch.BasicObject.Exception.InvaildSolution.PhaseType;
 import xiaMengAirline.newBranch.BusinessDomain.BusinessDomainController;
 import xiaMengAirline.newBranch.BusinessDomain.XiaMengSolutionValidation;
 import xiaMengAirline.newBranch.LocalOptimize.LocalOptimizationController;
 
 public class OptimizationController {
-	private RestrictedCandidcateList aRCL;
+	private RestrictedCandidateList aRCL = new RestrictedCandidateList();
 	private OptimizerStragety aStragety = null;
 	
 	public void constructSolutionSet (XiaMengAirlineSolution aRawSolution) throws CloneNotSupportedException, InvaildSolution {
@@ -58,41 +57,35 @@ public class OptimizationController {
 		
 		//step2a, fit regular flights
 		LocalOptimizationController localController = new LocalOptimizationController();
-		XiaMengAirlineSolution fittedSolutions = localController.fitRegularFlights(solutionVersion1, regularFlights);
+		XiaMengAirlineSolution solutionVersion2 = localController.fitRegularFlights(solutionVersion1, regularFlights);
 		
 		
 		//step2b, merge cancel queue
-		XiaMengAirlineSolution solutionVersion2 = fittedSolutions;
 		solutionVersion2.setVersion("2");
-		
-		XiaMengAirlineSolution solutionImpactedPart = new XiaMengAirlineSolution();
-		solutionImpactedPart.setVersion("2.1");
 		for (Aircraft aAir:impactedAirList) {
-			Aircraft airInSolution = solutionImpactedPart.getCancelAircraft(aAir.getId(), aAir.getType(), true);
+			Aircraft airInSolution = solutionVersion2.getCancelAircraft(aAir.getId(), aAir.getType(), true);
 			airInSolution.getFlightChain().addAll(aAir.getFlightChain());
+			airInSolution.sortFlights();
 		}
-		if (!solutionVersion2.mergeUpdatedSolution(solutionImpactedPart))
-			throw new InvaildSolution(solutionVersion2, "fail to merge impacted list into version 2", PhaseType.PICKUP_FLIGHTS);
-		XiaMengAirlineSolution solutionVersion3 = solutionVersion2;
-		aValidator.validate(solutionVersion3);
-		solutionVersion3.refreshCost(true);
+		aValidator.validate(solutionVersion2);
+		solutionVersion2.refreshCost(true);
 		cal = Calendar.getInstance();
 		endTime = System.currentTimeMillis();
 		mins = (endTime - StartupPhase2.startTime) / (1000 * 60);
-		System.out.println(solutionVersion3.getVersion() + " consumed ... " + mins);
+		System.out.println(solutionVersion2.getVersion() + " consumed ... " + mins);
 		System.out.println(dateFormat.format(cal));
-		solutionVersion3.getaCost().generateOutput(dateFormat.format(cal) + "_" + String.valueOf(mins));		
+		solutionVersion2.getaCost().generateOutput(dateFormat.format(cal) + "_" + String.valueOf(mins));		
 		
 		//step3, Iterative for exchange 
-		//step3a, 
-		
-		//step3b, iterative for better solution
-		IterativeSingleMethod aSingleDriver = new IterativeSingleMethod();
-		List<Aircraft> driver = aSingleDriver.getDrivesForIterative(fittedSolutions.get(1));
-		XiaMengAirlineSolution aBetterSolution;
+		//IterativeSingleMethod aSingleDriver = new IterativeSingleMethod();
+		IterativeCancelledBatchMethod aBatchDriver = new IterativeCancelledBatchMethod();
+		aBatchDriver.setupIterationStragety(aStragety);
+		aBatchDriver.setupIterationContent(solutionVersion2);
 		GlobalOptimizer exchangeOptimzer = new GlobalSearchExchange();
+		exchangeOptimzer.setupIterativeDriver(aBatchDriver);
+		XiaMengAirlineSolution aBetterSolution = solutionVersion2;
 		for (int i=0; i< aStragety.getNumberOfIter();i++) {
-			aBetterSolution = exchangeOptimzer.discoverBetterSolution(driver, aBetterSolution);
+			aBetterSolution = exchangeOptimzer.discoverBetterSolution(aBetterSolution);
 		}
 		
 		

@@ -20,7 +20,7 @@ public class LocalOptimizationController {
 	 * @param regularFlights
 	 * 			all flights are not impacted by typhoon, need be arrange for a best fit          
 	 * @return new airline solution. The solution shall contain two parts,
-	 * 			The first part contains the fitting on the initialized solution, with aircraft flagged as isFinalized = true, if no further adjust required.
+	 * 			The first part contains the fitting on the initialized solution, with aircraft/flights flagged as isFinalized = true, if no further adjust required.
 	 * 			The second part contains unfinished aircrafts.
 	 * 			if flights cannot be processed, put into cancel list organized by original planned aircraft. 
 	 */

@@ -6,6 +6,9 @@ import xiaMengAirline.newBranch.BasicObject.Aircraft;
 import xiaMengAirline.newBranch.BasicObject.XiaMengAirlineSolution;
 
 public interface IterativeMethod {
-	List<Aircraft> getDrivesForIterative (XiaMengAirlineSolution aSolution);
+	public List<Aircraft> getNextDriveForIterative ();
+	public void setupIterationContent (XiaMengAirlineSolution aSolution);
+	public void setupIterationStragety (OptimizerStragety aStragety);
+	public int getCurrentIterationNumber ();
 
 }

@@ -197,8 +197,22 @@ public class XiaMengAirlineSolution  implements Cloneable {
 		
 		return true;
 	}
+	
+	public List<Aircraft> getAllAircrafts () {
+		List<Aircraft> retAirList = new ArrayList<Aircraft> (normalSchedule.values());
+		retAirList.addAll(new ArrayList<Aircraft> (cancelledSchedule.values()));
+		return retAirList;
+	}
 
 
+	public Aircraft getAircraft(String id, String type, boolean isCancel, boolean autoGenerate) {
+		if (!isCancel)
+			return getAircraft(id, type, autoGenerate);
+		else
+			return getCancelAircraft(id,type,autoGenerate);
+		
+	}
+	
 	public Aircraft getAircraft(String id, String type, boolean autoGenerate) {
 		String aKey = id;
 		if (normalSchedule.containsKey(aKey)) {
@@ -334,6 +348,5 @@ public class XiaMengAirlineSolution  implements Cloneable {
 		this.passerngerDropOutList = passerngerDropOutList;
 	}
 	
-
 
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import xiaMengAirline.newBranch.BusinessDomain.FlightAdjustableMethod;
+import xiaMengAirline.newBranch.BusinessDomain.FlightAdjustableMethod.FlightAdjustMethodType;
+import xiaMengAirline.newBranch.BusinessDomain.FlightAdjustableMethod.FlightAdjustType;
 
 public class Flight implements Cloneable {
 	private static final Logger logger = Logger.getLogger(Flight.class);
@@ -168,6 +170,21 @@ public class Flight implements Cloneable {
 	}
 	public void setAdjustable(boolean isAdjustable) {
 		this.isAdjustable = isAdjustable;
+	}
+	
+	public boolean adjustFlight (XiaMengAirlineSolution context, FlightAdjustMethodType methodType) {
+		for (FlightAdjustableMethod aMethod:adjustableMethod) {
+			boolean isSucccesful = false;
+			switch (methodType) {
+			case CANCEL:
+				isSucccesful = aMethod.cancelFlight(context);
+			default:
+				isSucccesful = false;
+			}
+			if (!isSucccesful)
+				return false;
+		}
+		return true;
 	}
 
 

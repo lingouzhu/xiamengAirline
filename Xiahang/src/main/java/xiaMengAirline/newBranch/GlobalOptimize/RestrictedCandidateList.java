@@ -1,5 +1,5 @@
 package xiaMengAirline.newBranch.GlobalOptimize;
 
-public class RestrictedCandidcateList {
+public class RestrictedCandidateList {
 
 }

@@ -4,6 +4,7 @@ public class OptimizerStragety {
 	private int numberOfSolution;
 	private int impactEdge;
 	private int numberOfIter;
+	private int batchSize;
 	
 	public int getNumberOfSolution() {
 		return numberOfSolution;
@@ -22,6 +23,12 @@ public class OptimizerStragety {
 	}
 	public void setNumberOfIter(int numberOfIter) {
 		this.numberOfIter = numberOfIter;
+	}
+	public int getBatchSize() {
+		return batchSize;
+	}
+	public void setBatchSize(int batchSize) {
+		this.batchSize = batchSize;
 	}
 	
 	
