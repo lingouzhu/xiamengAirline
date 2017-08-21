@@ -28,6 +28,7 @@ public class Flight implements Cloneable {
 	private Flight plannedFlight;
 	private int numberOfPassenger;
 	private int numberOfJoinedPassenger;
+	private boolean isAdjustable = true;
 	
 	public int getFlightId() {
 		return flightId;
@@ -186,6 +187,12 @@ public class Flight implements Cloneable {
 	}
 	public void setNumberOfJoinedPassenger(int numberOfJoinedPassenger) {
 		this.numberOfJoinedPassenger = numberOfJoinedPassenger;
+	}
+	public boolean isAdjustable() {
+		return isAdjustable;
+	}
+	public void setAdjustable(boolean isAdjustable) {
+		this.isAdjustable = isAdjustable;
 	}
 
 
