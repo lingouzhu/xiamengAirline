@@ -1008,7 +1008,7 @@ public class ResultEvaluator implements Cloneable{
                     }
                     if(!inputData.getAdjustTimeWindow().isInAdjustTimeWindow(originFlight.getStartDateTime().getTime())){//非调整窗口内的航班不能取消
                         constraintViolationNum += 1;
-                        System.out.println("非调整窗口内的航班不能取消 : " + constraintViolationNum);
+                        System.out.println("非调整窗口内的航班不能取消 : " + originFlight.getFlightId());
                         isFeasible = false;
                     }
                     resultFlightList.remove(index);
