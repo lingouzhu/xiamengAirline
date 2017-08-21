@@ -41,7 +41,7 @@ public class InitDataTest {
 		// Step1, Load all data & initialize
 		File file=new File(".");
 	    System.out.println("Current Working Directory: " + file.getAbsolutePath());
-		String initDatafile = "XiahangData.xlsx";
+		String initDatafile = "XiahangData20170809.xlsx";
 		InitData.initData(initDatafile);
 	}
 
@@ -59,7 +59,7 @@ public class InitDataTest {
 		Flight f15 = air50.getFlightByFlightId(15);
 		assertEquals(Utils.stringFormatToTime2("05/05/2017 07:30:00"), f15.getDepartureTime());
 		assertEquals(Utils.stringFormatToTime2("05/05/2017  10:25:00"), f15.getArrivalTime());
-		assertEquals(new BigDecimal(1.74).setScale(2, BigDecimal.ROUND_HALF_UP), f15.getImpCoe());
+		assertEquals(new BigDecimal(1.00).setScale(2, BigDecimal.ROUND_HALF_UP), f15.getImpCoe());
 		assertEquals(false,f15.isInternationalFlight());
 		assertEquals(349, f15.getSchdNo());
 		assertEquals("50", f15.getPlannedAir().getId());
@@ -67,10 +67,14 @@ public class InitDataTest {
 		assertEquals(15,f15.getPlannedFlight().getFlightId());
 		assertEquals("50",f15.getSourceAirPort().getId());
 		assertEquals("72", f15.getDesintationAirport().getId());
+		assertEquals(135, f15.getNumberOfPassenger());
+		
 		
 		//joined flight
 		Aircraft air122 = InitData.originalSolution.getAircraft("122", "2", false,false).clone();
 		Flight f1918 = air122.getFlightByFlightId(1918);
+		assertEquals(26, f1918.getNumberOfJoinedPassenger());
+		assertEquals(183, air122.getNumberOfSeats());
 		int anotherF = InitData.jointFlightMap.get(f1918.getFlightId()).getFlightId();
 		assertEquals(1920, anotherF);
 		Flight f1920 = air122.getFlightByFlightId(1920);
@@ -82,6 +86,7 @@ public class InitDataTest {
 		
 		//airport close
 		AirPort port6 = InitData.airportList.getAirport("6");
+		assertEquals(true, port6.isInternational());
 		List<RegularAirPortClose> regClose = port6.getRegularCloseSchedule();
 		assertEquals("00:00:00", regClose.get(0).getCloseTime());
 		assertEquals("06:00:00", regClose.get(0).getOpenTime());

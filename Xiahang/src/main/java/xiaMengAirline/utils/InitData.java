@@ -282,7 +282,7 @@ public class InitData {
 				
 				String airPortId = String.valueOf((int)row.getCell(0).getNumericCellValue());
 				AirPort aAirport = airportList.getAirport(airPortId);
-				aAirport.setInternational(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
+				aAirport.setInternational(Utils.interToBoolean(String.valueOf((int)row.getCell(1).getNumericCellValue())));
 			}
 			
 		} catch (Exception e) {
