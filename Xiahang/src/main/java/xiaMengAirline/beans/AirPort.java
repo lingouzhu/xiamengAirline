@@ -9,6 +9,7 @@ import java.util.List;
 
 public class AirPort {
 	private String id;
+	private boolean isInternational;
 	private List<AirPortClose> closeSchedule = new ArrayList<AirPortClose>();
 	private List<RegularAirPortClose> regularCloseSchedule = new ArrayList<RegularAirPortClose>();
 
@@ -192,6 +193,14 @@ public class AirPort {
 
 	public void addRegularCloseSchedule(RegularAirPortClose aRegularCloseSchedule) {
 		regularCloseSchedule.add(aRegularCloseSchedule);
+	}
+
+	public boolean isInternational() {
+		return isInternational;
+	}
+
+	public void setInternational(boolean isInternational) {
+		this.isInternational = isInternational;
 	}
 
 }

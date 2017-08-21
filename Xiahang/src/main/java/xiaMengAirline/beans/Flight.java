@@ -26,6 +26,8 @@ public class Flight implements Cloneable {
 	private Aircraft assignedAir;
 	private Aircraft plannedAir;
 	private Flight plannedFlight;
+	private int numberOfPassenger;
+	private int numberOfJoinedPassenger;
 	
 	public int getFlightId() {
 		return flightId;
@@ -172,6 +174,18 @@ public class Flight implements Cloneable {
 		else
 			return GroundingTime;
 		
+	}
+	public int getNumberOfPassenger() {
+		return numberOfPassenger;
+	}
+	public void setNumberOfPassenger(int numberOfPassenger) {
+		this.numberOfPassenger = numberOfPassenger;
+	}
+	public int getNumberOfJoinedPassenger() {
+		return numberOfJoinedPassenger;
+	}
+	public void setNumberOfJoinedPassenger(int numberOfJoinedPassenger) {
+		this.numberOfJoinedPassenger = numberOfJoinedPassenger;
 	}
 
 

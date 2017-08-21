@@ -26,6 +26,7 @@ public class Aircraft implements Cloneable {
 	final static public int INTERNATIONAL_MAXIMUM_DELAY_TIME = 36; // HOUR
 	private String id;
 	private String type;
+	private int numberOfSeats;
 	private List<Flight> flightChain = new ArrayList<Flight>();
 	private boolean isCancel = false;
 	private List<Flight> dropOutList = new ArrayList<Flight>();
@@ -653,6 +654,14 @@ public class Aircraft implements Cloneable {
 
 	public void setAlternativeAircraft(Aircraft alternativeAircraft) {
 		this.alternativeAircraft = alternativeAircraft;
+	}
+
+	public int getNumberOfSeats() {
+		return numberOfSeats;
+	}
+
+	public void setNumberOfSeats(int numberOfSeats) {
+		this.numberOfSeats = numberOfSeats;
 	}
 	
 

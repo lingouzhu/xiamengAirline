@@ -29,7 +29,7 @@ public class Utils {
     }
 	
 	public static boolean interToBoolean(String str) {  
-		if ("国内".equals(str)) {
+		if ("国内".equals(str) || str.equals("1")) {
 			return false;
 		} else {
 			return true;

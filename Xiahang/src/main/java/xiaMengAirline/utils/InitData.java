@@ -104,11 +104,19 @@ public class InitData {
 				
 				String airId = String.valueOf((int)row.getCell(8).getNumericCellValue());
 				String airType = String.valueOf((int)row.getCell(9).getNumericCellValue());
+			
 				
 				Aircraft aAir = originalSolution.getAircraft(airId, airType, false, true);
 				
+				int numberOfPassenger = (int)row.getCell(10).getNumericCellValue();
+				aFlight.setNumberOfPassenger(numberOfPassenger);
+				int numberOfJoinedPassenger = (int)row.getCell(11).getNumericCellValue();
+				aFlight.setNumberOfJoinedPassenger(numberOfJoinedPassenger);
+				int numberOfSeats = (int)row.getCell(12).getNumericCellValue();
+				aAir.setNumberOfSeats(numberOfSeats);
+				
 				//aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()));
-				aFlight.setImpCoe(new BigDecimal(row.getCell(10).getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
+				aFlight.setImpCoe(new BigDecimal(row.getCell(13).getNumericCellValue()).setScale(2, BigDecimal.ROUND_HALF_UP));
 				aFlight.setAssignedAir(aAir);
 				Aircraft aPlannedAir = aAir.clone();
 				aPlannedAir.clear();
@@ -263,7 +271,19 @@ public class InitData {
 			}
 			
 			 
-			
+			//*****************************************************************************************//*
+			Sheet airportSheet = wb.getSheet("机场");  
+			cnt = 0;
+			for (Row row : airportSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				
+				String airPortId = String.valueOf((int)row.getCell(0).getNumericCellValue());
+				AirPort aAirport = airportList.getAirport(airPortId);
+				aAirport.setInternational(Utils.interToBoolean(row.getCell(2).getStringCellValue()));
+			}
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
