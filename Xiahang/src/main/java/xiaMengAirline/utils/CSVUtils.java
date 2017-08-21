@@ -113,12 +113,12 @@ public class CSVUtils {
     		output = flight.getFlightId() + "," + flight.getPlannedFlight().getSourceAirPort().getId() + ","
         			+ flight.getPlannedFlight().getDesintationAirport().getId() + "," + Utils.timeFormatter2(flight.getPlannedFlight().getDepartureTime()) 
         			+  "," + Utils.timeFormatter2(flight.getPlannedFlight().getArrivalTime()) + "," + flight.getPlannedAir().getId() + "," 
-        			+ isCancel + ","+ isStretch + ","+ isEmpty;
+        			+ isCancel + ","+ isStretch + ","+ isEmpty + "," + "0" + "," + "";
     	} else {
     		output = flight.getFlightId() + "," + flight.getSourceAirPort().getId() + ","
         			+ flight.getDesintationAirport().getId() + "," + Utils.timeFormatter2(flight.getDepartureTime()) 
         			+  "," + Utils.timeFormatter2(flight.getArrivalTime()) + "," + airID + "," 
-        			+ isCancel + ","+ isStretch + ","+ isEmpty;
+        			+ isCancel + ","+ isStretch + ","+ isEmpty + "," + "0" + "," + "";
     	}
     	
     	return output;
