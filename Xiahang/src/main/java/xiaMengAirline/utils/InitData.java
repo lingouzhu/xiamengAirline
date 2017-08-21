@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,10 @@ public class InitData {
 				
 		try {
 			
+			Date startTime = Utils.stringFormatToTime2("06/05/2017 06:00:00");
+			Date endTime = Utils.stringFormatToTime2("09/05/2017 00:00:00");
+			
+			
 			InputStream stream = new FileInputStream(initDatafile);  
 			Workbook wb = new XSSFWorkbook(stream);  
 			
@@ -101,6 +106,12 @@ public class InitData {
 				
 				aFlight.setDepartureTime(row.getCell(6).getDateCellValue());
 				aFlight.setArrivalTime(row.getCell(7).getDateCellValue());
+				
+				//process adjustable
+				if (aFlight.getDepartureTime().before(startTime)
+						|| (aFlight.getDepartureTime().after(endTime)))
+					aFlight.setAdjustable(false);
+
 				
 				String airId = String.valueOf((int)row.getCell(8).getNumericCellValue());
 				String airType = String.valueOf((int)row.getCell(9).getNumericCellValue());
