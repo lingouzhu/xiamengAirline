@@ -222,7 +222,8 @@ public class SingleAircraftSearch {
 						}
 					}
 					// try stretch
-					if (stretchable && getJointFlightPosition(newFlight) == 1) {
+					if (stretchable && getJointFlightPosition(newFlight) == 1 && 
+							!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
 						ArrayList<Flight> newFlightList =  new ArrayList<Flight>();
 						newFlightList.add(newFlight);
 						openJointFlightNode(newFlight, newFlightList);
@@ -277,7 +278,8 @@ public class SingleAircraftSearch {
 					}
 				}
 				// try stretch
-				if (stretchable && getJointFlightPosition(newFlight) == 1) {
+				if (stretchable && getJointFlightPosition(newFlight) == 1 && 
+						!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
 					ArrayList<Flight> newFlightList =  new ArrayList<Flight>();
 					newFlightList.add(newFlight);
 					openJointFlightNode(newFlight, newFlightList);
@@ -395,7 +397,8 @@ public class SingleAircraftSearch {
 							}
 						}
 						// try stretch
-						if (stretchable && getJointFlightPosition(newFlight) == 1) {
+						if (stretchable && getJointFlightPosition(newFlight) == 1 && 
+								!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
 							ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 							aNewFlightChain.remove(aNewFlightChain.size() - 1);
 							aNewFlightChain.add(newFlight);
@@ -461,7 +464,8 @@ public class SingleAircraftSearch {
 						}
 					}
 					// try stretch
-					if (stretchable && getJointFlightPosition(newFlight) == 1) {
+					if (stretchable && getJointFlightPosition(newFlight) == 1 && 
+							!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
 						ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 						aNewFlightChain.remove(aNewFlightChain.size() - 1);
 						aNewFlightChain.add(newFlight);
@@ -616,7 +620,7 @@ public class SingleAircraftSearch {
 			adjustable = true;
 		}
 		if (adjustable) {
-			for (int i = thisFlightIndex + 1; i < originalFlights.size(); i++) {
+			for (int i = thisFlightIndex + 1; i < originalFlights.size() - 1; i++) {
 				Flight nextFlight = originalFlights.get(i).clone();
 				AirPort destAirport = nextFlight.getSourceAirPort();
 				Flight aNewFlight = newFlight.clone();
