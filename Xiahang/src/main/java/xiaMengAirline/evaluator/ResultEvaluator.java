@@ -77,6 +77,7 @@ public class ResultEvaluator implements Cloneable{
                 //不能存在重复航班
                 if(resultFlightMap.containsKey(resultFlight.getFlightId())){
                     constraintViolationNum += 1;
+                    System.out.println("不能存在重复航班: " + constraintViolationNum);
                     isFeasible = false;
                 }
                 resultFlightMap.put(resultFlight.getFlightId(), resultFlight);
@@ -142,6 +143,7 @@ public class ResultEvaluator implements Cloneable{
                     constraintViolationNum += 1;
                 }
             }
+            System.out.println("少飞机: " + constraintViolationNum);
             isFeasible = false;
         }
         Set<String> originFlightIdSet = inputData.getFlightMap().keySet();
@@ -157,6 +159,7 @@ public class ResultEvaluator implements Cloneable{
                     constraintViolationNum += 1;
                 }
             }
+            System.out.println("少航班 : " + constraintViolationNum);
             isFeasible = false;
         }
     }
@@ -179,6 +182,7 @@ public class ResultEvaluator implements Cloneable{
             if(index == 0){
                 if(!inputData.getAirplaneStartAirportMap().get(airplaneId).equals(startAirport)){
                     constraintViolationNum += 1;
+                    System.out.println("判断第一个航班的起飞机场必须与飞机的初始起飞机场一致: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
@@ -188,6 +192,7 @@ public class ResultEvaluator implements Cloneable{
                 //首先判断联程航班拉直的方式是否有效
                 if(!originFlight.isConnected()) {
                     constraintViolationNum += 1;
+                    System.out.println("判断联程航班拉直的方式是否有效: " + newFlight.getFlightId());
                     isFeasible = false;
                     continue;//联程航班拉直后，发现该航班是非联程航班，直接下一轮判断
                 }
@@ -198,6 +203,7 @@ public class ResultEvaluator implements Cloneable{
                         || !endAirport.equals(nextFlight.getEndAirport())
                         || endAirport.equals(originFlight.getEndAirport())) {
                     constraintViolationNum += 1;
+                    System.out.println("联程航班拉直后，第一个航班的降落机场等于联程下一个航班的降落机场 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 //判断调整后的飞行时间
@@ -210,11 +216,13 @@ public class ResultEvaluator implements Cloneable{
                 if(newFlight.getEndDateTime().getTime() - newFlight.getStartDateTime().getTime()
                         !=  travelTime) {
                     constraintViolationNum += 1;
+                    System.out.println("判断调整后的飞行时间 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 if(!originFlight.isDomestic() || !nextFlight.isDomestic()
                         || !resultFlightMap.get(nextFlightId).isCancel()){  //联程拉直航班必须为国内航班，且后一个航班必须取消
                     constraintViolationNum += 1;
+                    System.out.println("联程拉直航班必须为国内航班，且后一个航班必须取消 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 //当且仅当中间机场受影响时可拉直航班
@@ -239,6 +247,7 @@ public class ResultEvaluator implements Cloneable{
                 }
                 if(!affectFlag){
                     constraintViolationNum += 1;
+                    System.out.println("当且仅当中间机场受影响时可拉直航班 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
@@ -246,11 +255,13 @@ public class ResultEvaluator implements Cloneable{
                if(newFlight.getEndDateTime().getTime() - newFlight.getStartDateTime().getTime()
                        != originFlight.getEndDateTime().getTime() - originFlight.getStartDateTime().getTime()) {
                    constraintViolationNum += 1;
+                   System.out.println("判断普通航班 飞行时间 : " + newFlight.getFlightId());
                    isFeasible = false;
                }
                if(!startAirport.equals(originFlight.getStartAirport())
                        || !endAirport.equals(originFlight.getEndAirport())) {
                    constraintViolationNum += 1;
+                   System.out.println("判断普通航班 起降机场 : " + newFlight.getFlightId());
                    isFeasible = false;
                }
             }
@@ -258,18 +269,21 @@ public class ResultEvaluator implements Cloneable{
                 String travelTimeKey = airplaneType + "#" + startAirport + "#" + endAirport;
                 if(!inputData.getTravelTimeMap().containsKey(travelTimeKey)) {
                     constraintViolationNum += 1;
+                    System.out.println("判断调机（空飞）航班   不能调机 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 else{
                     if(newFlight.getEndDateTime().getTime() - newFlight.getStartDateTime().getTime()
                             != inputData.getTravelTimeMap().get(travelTimeKey).getTravelTime()) {
                         constraintViolationNum += 1;
+                        System.out.println("判断调机（空飞）航班   飞机时间不对: " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
                 //只允许国内机场才能调机
                 if(!(inputData.getDomesticAirportSet().contains(startAirport) && inputData.getDomesticAirportSet().contains(endAirport))){
                     constraintViolationNum += 1;
+                    System.out.println("只允许国内机场才能调机: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
@@ -281,6 +295,7 @@ public class ResultEvaluator implements Cloneable{
                 for(int i = 0; i < airplaneLimitationList.size(); ++ i){
                     if(airplaneLimitationList.get(i).getAirplaneId().equals(airplaneId)) {
                         constraintViolationNum += 1;
+                        System.out.println("判断飞机限制 : " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
@@ -291,6 +306,7 @@ public class ResultEvaluator implements Cloneable{
                 for(int i = 0; i < airportCloseList.size(); ++ i){
                     if(airportCloseList.get(i).isClosed(newFlight.getStartDateTime().getTime())) {
                         constraintViolationNum += 1;
+                        System.out.println("判断机场关闭限制 起飞 : " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
@@ -300,6 +316,7 @@ public class ResultEvaluator implements Cloneable{
                 for(int i = 0; i < airportCloseList.size(); ++ i){
                     if(airportCloseList.get(i).isClosed(newFlight.getEndDateTime().getTime())) {
                         constraintViolationNum += 1;
+                        System.out.println("判断机场关闭限制 降落: " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
@@ -309,6 +326,7 @@ public class ResultEvaluator implements Cloneable{
                 Scene scene = inputData.getSceneList().get(i);
                 if(scene.isInScene(flightId, airplaneId, startAirport, endAirport, newFlight.getStartDateTime(), newFlight.getEndDateTime())) {
                     constraintViolationNum += 1;
+                    System.out.println("判断台风场景限制(起飞和降落限制) : " +  newFlight.getFlightId());
                     isFeasible = false;
                 }
             }
@@ -319,18 +337,21 @@ public class ResultEvaluator implements Cloneable{
                 if(!resultFlightMap.get(nextFlightId).isCancel()){ //联程航班没有取消
                     if(!newFlight.getAirplaneId().equals(resultFlightMap.get(nextFlightId).getAirplaneId())) { //但是使用了不同的飞机
                         constraintViolationNum += 1;
+                        System.out.println("如果联程航班两段都不取消，那么两段必须使用同一架飞机，并且继续联程 使用了不同的飞机 : " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                     else{
                         if(originFlight.isConnectedPrePart()){//当前航班为联程航班前段部分
                             if(index + 1 >= airLine.size() || !airLine.get(index + 1).getFlightId().equals(nextFlightId)){
                                 constraintViolationNum += 1;
+                                System.out.println("前航班为联程航班前段部分 : " + newFlight.getFlightId());
                                 isFeasible = false;
                             }
                         }
                         else {//当前航班为联程航班后段部分
                             if(index - 1 < 0 || !airLine.get(index - 1).getFlightId().equals(nextFlightId)){
                                 constraintViolationNum += 1;
+                                System.out.println("当前航班为联程航班后段部分 : " + newFlight.getFlightId());
                                 isFeasible = false;
                             }
                         }
@@ -350,12 +371,14 @@ public class ResultEvaluator implements Cloneable{
                         || newFlight.isStraighten()
                         || newFlight.isSignChange()){
                     constraintViolationNum += 1;
+                    System.out.println("恢复窗口限制: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 if(originFlight.isConnected()){//如果是联程航班，联程航班不能取消
                     String nextFlightId = originFlight.getConnectedFlightId();
                     if(resultFlightMap.get(nextFlightId).isCancel()) {
                         constraintViolationNum += 1;
+                        System.out.println("如果是联程航班，联程航班不能取消 : " + newFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
@@ -367,6 +390,7 @@ public class ResultEvaluator implements Cloneable{
                 //判断航站衔接约束
                if(!preNewResultFlight.getEndAirport().equals(newFlight.getStartAirport())){
                    constraintViolationNum += 1;
+                   System.out.println("判断航站衔接约束 : " + newFlight.getFlightId());
                    isFeasible = false;
                    continue;
                }
@@ -380,6 +404,7 @@ public class ResultEvaluator implements Cloneable{
                if(newFlight.getStartDateTime().getTime() < preNewResultFlight.getEndDateTime().getTime()
                        || newFlight.getStartDateTime().getTime() - preNewResultFlight.getEndDateTime().getTime() < intervalTime){
                    constraintViolationNum += 1;
+                   System.out.println("判断间隔时间: " + newFlight.getFlightId());
                    isFeasible = false;
                }
             }
@@ -415,6 +440,7 @@ public class ResultEvaluator implements Cloneable{
                 //首先判断联程航班拉直的方式是否有效
                 if(!originFlight.isConnected()) {
                     constraintViolationNum += 1;
+                    System.out.println("判断联程航班拉直的方式是否有效 : " + newFlight.getFlightId());
                     isFeasible = false;
                     continue;//联程航班拉直后，发现该航班是非联程航班，直接下一轮判断
                 }
@@ -428,10 +454,12 @@ public class ResultEvaluator implements Cloneable{
                 boolean isDomestic = originFlight.isDomestic();
                 if(isDomestic && timeOffset > Configuration.maxDomesticDelayTime){   //延迟时间不能超过赛题限制
                     constraintViolationNum += 1;
+                    System.out.println("延迟时间不能超过赛题限制 国内 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 else if((!isDomestic) && timeOffset > Configuration.maxAbroadDelayTime){
                     constraintViolationNum += 1;
+                    System.out.println("延迟时间不能超过赛题限制 国际 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 double delayHour = 1.0 * timeOffset / 1000 / 60 / 60;
@@ -440,10 +468,12 @@ public class ResultEvaluator implements Cloneable{
             else if(timeOffset < 0){
                 if(-1 * timeOffset > Configuration.maxAheadTime){   //提前时间不能超过赛题限制
                     constraintViolationNum += 1;
+                    System.out.println("提前时间不能超过赛题限制 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 if(!originFlight.isDomestic()){  //必须为国内航班才能提前
                     constraintViolationNum += 1;
+                    System.out.println("必须为国内航班才能提前: " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 //仅针对在受影响的起飞时间段，受影响的机场起飞的航班
@@ -460,6 +490,7 @@ public class ResultEvaluator implements Cloneable{
                 }
                 if(!affectFlag){
                     constraintViolationNum += 1;
+                    System.out.println("仅针对在受影响的起飞时间段，受影响的机场起飞的航班 : " + newFlight.getFlightId());
                     isFeasible = false;
                 }
                 double aheadHour = -1.0 * timeOffset / 1000 / 60 / 60;
@@ -577,20 +608,24 @@ public class ResultEvaluator implements Cloneable{
             ResultFlight signChangeResultFlight = resultFlightMap.get(signChangeFlightId);
             if (signChangeResultFlight.isCancel()) { //接受签转旅客的航班不能取消
                 constraintViolationNum += 1;
+                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
                 isFeasible = false;
             }
             if(signChangeResultFlight.getStartDateTime().getTime()
                     < originFlight.getStartDateTime().getTime()){ //签转旅客只能延误
                 constraintViolationNum += 1;
+                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
                 isFeasible = false;
             }
             if(!signChangeResultFlight.getStartAirport().equals(originFlight.getStartAirport())
                     || !signChangeResultFlight.getEndAirport().equals(originFlight.getEndAirport())){ //签转航班要与原航班的起飞降落机场一致
                 constraintViolationNum += 1;
+                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
                 isFeasible = false;
             }
             if(signChangeResultFlight.getSignChangePassInfo().size() > 0){//接受签转旅客的航班不能签转旅客到其他航班
                 constraintViolationNum += 1;
+                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
                 isFeasible = false;
             }
             totalSignChangePassNum += signChangePassInfoOfFlight.get(signChangeFlightId);
@@ -609,6 +644,7 @@ public class ResultEvaluator implements Cloneable{
             int transferCancelPassNum =  getPassengerNum(flightId, passTransInfo, 1);
             if(totalSignChangePassNum > originFlight.getNormalPassengerNum() - transferCancelPassNum){//签转旅客数量不能大于剩余的普通旅客数量
                 constraintViolationNum += 1;
+                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
                 isFeasible = false;
             }
         }
@@ -644,10 +680,12 @@ public class ResultEvaluator implements Cloneable{
             }
             if(!signChangeLegalityFlag){
                 constraintViolationNum += 1;
+                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
                 isFeasible = false;
             }
             if(totalSignChangePassNum > availableSignChangePassNum){//签转旅客数量不能大于可以签转的旅客数量
                 constraintViolationNum += 1;
+                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
                 isFeasible = false;
             }
         }
@@ -703,6 +741,7 @@ public class ResultEvaluator implements Cloneable{
             if(!inputData.getAdjustTimeWindow().isInAdjustTimeWindow(originFlight.getStartDateTime().getTime())){//处于非调整窗口
                 if(resultFlight.isSignChange() || resultFlight.isCancel() || resultFlight.isStraighten()){  //处于非调整窗口内的航班不能进行转签、不能取消、不能拉直
                     constraintViolationNum += 1;
+                    System.out.println("处于非调整窗口内的航班不能进行转签: " + resultFlight.getFlightId());
                     isFeasible = false;
                 }
             }
@@ -753,6 +792,7 @@ public class ResultEvaluator implements Cloneable{
                     int seatNum = inputData.getAirLineMap().get(resultFlight.getAirplaneId()).get(0).getSeatNum();
                     if(originFlight.getConnectPassengerNum() + totalSignInChangePassNum > seatNum){//签转旅客到某航班，必须满足该航班的座位数限制
                         constraintViolationNum += 1;
+                        System.out.println("签转旅客到某航班，必须满足该航班的座位数限制 : " + originFlight.getFlightId());
                         isFeasible = false;
                     }
                 }
@@ -794,6 +834,7 @@ public class ResultEvaluator implements Cloneable{
                     }
                     if(totalPassengerNum + totalSignInChangePassNum > seatNum){//签转旅客到某航班，必须满足该航班的座位数限制
                         constraintViolationNum += 1;
+                        System.out.println("签转旅客到某航班，必须满足该航班的座位数限制 : ");
                         isFeasible = false;
                     }
                 }
@@ -835,6 +876,7 @@ public class ResultEvaluator implements Cloneable{
             List<Long> timeList = affectedAirportTimeListMap.get(airport);
             if(!inputData.getCapacityLimitation().isSatisfyCapacityLimitation(timeList)){
                 constraintViolationNum += 1;
+                System.out.println("全局判断单位时间容量限制 : " + constraintViolationNum);
                 isFeasible = false;
             }
         }
@@ -881,6 +923,7 @@ public class ResultEvaluator implements Cloneable{
         }
         if(totalLandNum > 0){
             constraintViolationNum += totalLandNum;
+            System.out.println("全局判断基地平衡 : " + constraintViolationNum);
             isFeasible = false;
         }
     }
@@ -923,6 +966,7 @@ public class ResultEvaluator implements Cloneable{
                 int num = stopAirportNumMap.get(scene.getAirport());
                 if(num > scene.getStopAirplaneNum()){
                     constraintViolationNum += 1;
+                    System.out.println("判断停机位数量限制 : " + constraintViolationNum);
                     isFeasible = false;
                 }
             }
@@ -958,11 +1002,13 @@ public class ResultEvaluator implements Cloneable{
                         ResultFlight connectedFlight = resultFlightMap.get(originFlight.getConnectedFlightId());
                         if(connectedFlight.isCancel() || !originFlight.isConnected()){//如果是联程拉直导致取消的航班,判断是其否是联程航班，并且判断联程航班是否取消
                             constraintViolationNum += 1;
+                            System.out.println("如果是联程拉直导致取消的航班,判断是其否是联程航班，并且判断联程航班是否取消 : " + connectedFlight.getFlightId());
                             isFeasible = false;
                         }
                     }
                     if(!inputData.getAdjustTimeWindow().isInAdjustTimeWindow(originFlight.getStartDateTime().getTime())){//非调整窗口内的航班不能取消
                         constraintViolationNum += 1;
+                        System.out.println("非调整窗口内的航班不能取消 : " + constraintViolationNum);
                         isFeasible = false;
                     }
                     resultFlightList.remove(index);
