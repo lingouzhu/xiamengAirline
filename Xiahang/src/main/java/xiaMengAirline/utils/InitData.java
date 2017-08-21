@@ -174,20 +174,21 @@ public class InitData {
 						jointFlightMap.put(aFlight.getFlightId(),null);
 					}
 					
-					if (!aFlight.isInternationalFlight()) {
-						String sourceAirport = aFlight.getSourceAirPort().getId();
-						String destAirport = aFlight.getDesintationAirport().getId();
-						if (!domesticAirportList.contains(sourceAirport)) {
-							domesticAirportList.add(sourceAirport);
-						}
-						if (!domesticAirportList.contains(destAirport)) {
-							domesticAirportList.add(destAirport);
-						}
-					}
+//					if (!aFlight.isInternationalFlight()) {
+//						String sourceAirport = aFlight.getSourceAirPort().getId();
+//						String destAirport = aFlight.getDesintationAirport().getId();
+//						if (!domesticAirportList.contains(sourceAirport)) {
+//							domesticAirportList.add(sourceAirport);
+//						}
+//						if (!domesticAirportList.contains(destAirport)) {
+//							domesticAirportList.add(destAirport);
+//						}
+//					}
 					
 				}
 				
 			}
+			
 			
 //			List<Aircraft> scheduleCheck = new ArrayList<Aircraft> ( originalSolution.getSchedule().values());
 //			for (Aircraft aAir:scheduleCheck) {
@@ -290,8 +291,12 @@ public class InitData {
 					cnt++;
 					continue;
 				}
+				String airPortId =  String.valueOf((int)row.getCell(0).getNumericCellValue());
+				String domestic =  String.valueOf((int)row.getCell(1).getNumericCellValue());
 				
-				String airPortId = String.valueOf((int)row.getCell(0).getNumericCellValue());
+				if ("1".equals(domestic)) {
+					domesticAirportList.add(airPortId);
+				}
 				AirPort aAirport = airportList.getAirport(airPortId);
 				aAirport.setInternational(Utils.interToBoolean(String.valueOf((int)row.getCell(1).getNumericCellValue())));
 			}
