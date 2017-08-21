@@ -10,22 +10,22 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.backup.beans.AirPortBackup;
-import xiaMengAirline.backup.beans.AircraftBackup;
-import xiaMengAirline.backup.beans.FlightBackup;
-import xiaMengAirline.backup.beans.XiaMengAirlineSolutionBackup;
-import xiaMengAirline.backup.utils.InitDataBackup;
-import xiaMengAirline.backup.utils.UtilsBackup;
+import xiaMengAirline.beans.AirPort;
+import xiaMengAirline.beans.Aircraft;
+import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.utils.InitData;
+import xiaMengAirline.utils.Utils;
 
 public class XiaMengAirlineSolutionTest {
 	
-	AircraftBackup air1 = new AircraftBackup();
+	Aircraft air1 = new Aircraft();
 	
-	AircraftBackup air2 = new AircraftBackup();
+	Aircraft air2 = new Aircraft();
 
 	@Before
 	public void setUp() throws Exception {
-		InitDataBackup.plannedMaxFligthId = 1000;
+		InitData.plannedMaxFligthId = 1000;
 //		Flight fligt1 = createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"), 
 //				Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01"));
 //		
@@ -36,12 +36,12 @@ public class XiaMengAirlineSolutionTest {
 //		InitData.jointFlightMap.put(fligt2.getFlightId(), null);
 //		
 		// delay 1 hour 100 
-		List<FlightBackup> flightChain = new ArrayList<FlightBackup>();
-		flightChain.add(createFlight(101, "001", "002", "002", UtilsBackup.timeStr2date("2017-01-01 10:00:00"), 
-				UtilsBackup.timeStr2date("2017-01-01 9:00:00"), "1" , new BigDecimal("1"), 201, UtilsBackup.dateStr2date("2017-01-01")));
+		List<Flight> flightChain = new ArrayList<Flight>();
+		flightChain.add(createFlight(101, "001", "002", "002", Utils.timeStr2date("2017-01-01 10:00:00"), 
+				Utils.timeStr2date("2017-01-01 9:00:00"), "1" , new BigDecimal("1"), 201, Utils.dateStr2date("2017-01-01")));
 		// joint 5000
-		flightChain.add(createFlight(10001, "002", "004", "003", UtilsBackup.timeStr2date("2017-01-01 10:00:00"), 
-				UtilsBackup.timeStr2date("2017-01-01 10:00:00"), "1" , new BigDecimal("1"), 202, UtilsBackup.dateStr2date("2017-01-01")));
+		flightChain.add(createFlight(10001, "002", "004", "003", Utils.timeStr2date("2017-01-01 10:00:00"), 
+				Utils.timeStr2date("2017-01-01 10:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
 		
 
 		
@@ -69,14 +69,14 @@ public class XiaMengAirlineSolutionTest {
 		air1.setId("1");
 		air1.setType("1");
 		
-		List<FlightBackup> flightChain2 = new ArrayList<FlightBackup>();
+		List<Flight> flightChain2 = new ArrayList<Flight>();
 		
 		// cancel 1000
-		flightChain2.add(createFlight(102, "002", "003", "003", UtilsBackup.timeStr2date("2017-01-01 13:00:00"), 
-				UtilsBackup.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, UtilsBackup.dateStr2date("2017-01-01")));
+		flightChain2.add(createFlight(102, "002", "003", "003", Utils.timeStr2date("2017-01-01 13:00:00"), 
+				Utils.timeStr2date("2017-01-01 13:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
 		// cancel 1000
-		flightChain2.add(createFlight(103, "003", "004", "004", UtilsBackup.timeStr2date("2017-01-01 18:00:00"), 
-				UtilsBackup.timeStr2date("2017-01-01 18:00:00"), "1" , new BigDecimal("1"), 202, UtilsBackup.dateStr2date("2017-01-01")));
+		flightChain2.add(createFlight(103, "003", "004", "004", Utils.timeStr2date("2017-01-01 18:00:00"), 
+				Utils.timeStr2date("2017-01-01 18:00:00"), "1" , new BigDecimal("1"), 202, Utils.dateStr2date("2017-01-01")));
 		
 //		flightChain2.add(createFlight(201, "001", "002", "002", Utils.timeStr2date("2017-01-01 10:00:00"), 
 //				Utils.timeStr2date("2017-01-01 9:00:00"), "1" , new BigDecimal("1"), 201, Utils.dateStr2date("2017-01-01")));
@@ -86,27 +86,27 @@ public class XiaMengAirlineSolutionTest {
 		air2.setType("1");
 	}
 	
-	private FlightBackup createFlight(int flightId, String srcPort, String destPort, String planneddestPort,
+	private Flight createFlight(int flightId, String srcPort, String destPort, String planneddestPort,
 			Date depTime, Date plannedDepTime, String plannedAirType, BigDecimal impCoe, int schdNo, Date scheDate) {
-		FlightBackup flight = new FlightBackup();
+		Flight flight = new Flight();
 		try {
 		
 			flight.setFlightId(flightId);
-			AirPortBackup aAirport = InitDataBackup.airportList.getAirport(srcPort);
-			AirPortBackup bAirport = InitDataBackup.airportList.getAirport(destPort);
-			AirPortBackup pAirport = InitDataBackup.airportList.getAirport(planneddestPort);
+			AirPort aAirport = InitData.airportList.getAirport(srcPort);
+			AirPort bAirport = InitData.airportList.getAirport(destPort);
+			AirPort pAirport = InitData.airportList.getAirport(planneddestPort);
 			flight.setSourceAirPort(aAirport);
 			flight.setDesintationAirport(bAirport);
 			
 			flight.setDepartureTime(depTime);
-			flight.setArrivalTime(UtilsBackup.addMinutes(depTime, 60));
+			flight.setArrivalTime(Utils.addMinutes(depTime, 60));
 		
 			flight.setPlannedFlight(flight.clone());
 			
 			flight.getPlannedFlight().setDesintationAirport(pAirport);
 			flight.getPlannedFlight().setDepartureTime(plannedDepTime);
 			
-			AircraftBackup plannedAir = new AircraftBackup();
+			Aircraft plannedAir = new Aircraft();
 			plannedAir.setType(plannedAirType);
 			plannedAir.setId("10");
 			flight.setPlannedAir(plannedAir);
@@ -129,14 +129,14 @@ public class XiaMengAirlineSolutionTest {
 
 	@Test
 	public void testGetAircraft() throws CloneNotSupportedException {
-		XiaMengAirlineSolutionBackup aSolution = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution aSolution = new XiaMengAirlineSolution();
 		aSolution.replaceOrAddNewAircraft(air1);
 		aSolution.replaceOrAddNewAircraft(air2);
 		
-		AircraftBackup aAir = aSolution.getAircraft("1", "1", false, false);
+		Aircraft aAir = aSolution.getAircraft("1", "1", false, false);
 		assertEquals("1", aAir.getId());
 		
-		XiaMengAirlineSolutionBackup bestSolution = aSolution.clone();
+		XiaMengAirlineSolution bestSolution = aSolution.clone();
 		aAir = bestSolution.getAircraft("1", "1", false, false);
 		assertEquals("1", aAir.getId());
 	}

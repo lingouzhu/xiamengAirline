@@ -13,9 +13,9 @@ import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.junit.Before;
 import org.junit.Test;
 
-import xiaMengAirline.backup.beans.RestrictedCandidateListBackup;
-import xiaMengAirline.backup.beans.XiaMengAirlineSolutionBackup;
-import xiaMengAirline.backup.utils.InitDataBackup;
+import xiaMengAirline.beans.RestrictedCandidateList;
+import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.utils.InitData;
 
 import static org.junit.Assert.*;
 
@@ -23,33 +23,33 @@ public class RestrictedCandidateListTest {
 
 	@Before
 	public void setUp() throws Exception {
-		RestrictedCandidateListBackup.maxBestSolutions = 3;
+		RestrictedCandidateList.maxBestSolutions = 3;
 	}
 
 	@Test
 	public void testAddSolution() throws CloneNotSupportedException {
-		XiaMengAirlineSolutionBackup sol1 = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution sol1 = new XiaMengAirlineSolution();
 		sol1.setCost(new BigDecimal(100));
 
-		XiaMengAirlineSolutionBackup sol2 = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution sol2 = new XiaMengAirlineSolution();
 		sol2.setCost(new BigDecimal(200));
 
-		XiaMengAirlineSolutionBackup sol3 = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution sol3 = new XiaMengAirlineSolution();
 		sol3.setCost(new BigDecimal(150));
 
-		XiaMengAirlineSolutionBackup sol4 = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution sol4 = new XiaMengAirlineSolution();
 		sol4.setCost(new BigDecimal(250));
 
-		XiaMengAirlineSolutionBackup sol5 = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution sol5 = new XiaMengAirlineSolution();
 		sol5.setCost(new BigDecimal(50));
 
-		XiaMengAirlineSolutionBackup sol6 = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution sol6 = new XiaMengAirlineSolution();
 		sol6.setCost(new BigDecimal(100));
 
-		XiaMengAirlineSolutionBackup sol7 = new XiaMengAirlineSolutionBackup();
+		XiaMengAirlineSolution sol7 = new XiaMengAirlineSolution();
 		sol7.setCost(new BigDecimal(70));
 
-		RestrictedCandidateListBackup rcl = new RestrictedCandidateListBackup();
+		RestrictedCandidateList rcl = new RestrictedCandidateList();
 		rcl.addSolution(sol1);
 		assertEquals(100, rcl.getHighestCost().longValue());
 		assertEquals(100, rcl.getLowestCost().longValue());
@@ -112,7 +112,7 @@ public class RestrictedCandidateListTest {
 			int noOfSelected = 1;
 			List<String> airBatch = new ArrayList<String>();
 			while (noOfSelected <= 3 && checkSList.size() > 0) {
-				String air1 = checkSList.remove(InitDataBackup.rndNumbers.nextInt(checkSList.size()));
+				String air1 = checkSList.remove(InitData.rndNumbers.nextInt(checkSList.size()));
 				airBatch.add(air1);
 				noOfSelected++;
 			}
@@ -158,7 +158,7 @@ public class RestrictedCandidateListTest {
 				boolean isImproved = false;
 				while (!isImproved && air2CheckList.size() >= 1) {
 					// randomly select 2nd air
-					String air2 = air2CheckList.remove(InitDataBackup.rndNumbers.nextInt(air2CheckList.size()));
+					String air2 = air2CheckList.remove(InitData.rndNumbers.nextInt(air2CheckList.size()));
 
 					System.out.println("Processing second air " + air2);
 					String aItem = air2.substring(0, air2.indexOf('_'));
