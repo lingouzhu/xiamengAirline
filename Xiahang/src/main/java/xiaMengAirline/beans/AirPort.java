@@ -5,13 +5,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AirPort {
 	private String id;
 	private boolean isInternational;
 	private List<AirPortClose> closeSchedule = new ArrayList<AirPortClose>();
 	private List<RegularAirPortClose> regularCloseSchedule = new ArrayList<RegularAirPortClose>();
+	private Map<String, Integer> takeoffCapability = new HashMap<String, Integer> ();
+	private Map<String, Integer> landingCapability = new HashMap<String, Integer> ();
 
 	public String getId() {
 		return id;
@@ -202,5 +206,23 @@ public class AirPort {
 	public void setInternational(boolean isInternational) {
 		this.isInternational = isInternational;
 	}
+
+	public Map<String, Integer> getTakeoffCapability() {
+		return takeoffCapability;
+	}
+
+	public void setTakeoffCapability(Map<String, Integer> takeoffCapability) {
+		this.takeoffCapability = takeoffCapability;
+	}
+
+	public Map<String, Integer> getLandingCapability() {
+		return landingCapability;
+	}
+
+	public void setLandingCapability(Map<String, Integer> landingCapability) {
+		this.landingCapability = landingCapability;
+	}
+
+
 
 }

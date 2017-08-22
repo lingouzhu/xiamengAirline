@@ -7,6 +7,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -41,7 +42,7 @@ public class InitDataTest {
 		// Step1, Load all data & initialize
 		File file=new File(".");
 	    System.out.println("Current Working Directory: " + file.getAbsolutePath());
-		String initDatafile = "XiahangData20170809.xlsx";
+		String initDatafile = "XiahangData20170814.xlsx";
 		InitData.initData(initDatafile);
 	}
 
@@ -54,6 +55,33 @@ public class InitDataTest {
 		//check air
 		assertEquals("50",air50.getId());
 		assertEquals(false, air50.isCancel());
+		
+		AirPort port50 = InitData.airportList.getAirport("50");
+		Date testdate = Utils.stringFormatToTime2("05/05/2017 07:36:00");
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, true, false));
+		testdate = Utils.stringFormatToTime2("06/05/2017 15:03:00");
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		testdate = Utils.stringFormatToTime2("06/05/2017 15:04:00");
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		testdate = Utils.stringFormatToTime2("06/05/2017 15:02:00");
+		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, true));
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		
+		testdate = Utils.stringFormatToTime2("07/05/2017 18:53:00");
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		testdate = Utils.stringFormatToTime2("07/05/2017 18:54:00");
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		testdate = Utils.stringFormatToTime2("07/05/2017 18:52:00");
+		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		
+		testdate = Utils.stringFormatToTime2("07/05/2017 18:53:00");
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, false, false, false));
+		testdate = Utils.stringFormatToTime2("07/05/2017 18:54:00");
+		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, false, false, false));
+		testdate = Utils.stringFormatToTime2("07/05/2017 18:52:00");
+		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, false, false, false));
 		
 		//check flight
 		Flight f15 = air50.getFlightByFlightId(15);
@@ -108,17 +136,17 @@ public class InitDataTest {
 		List<AirPortClose> taiFengList = aAirport.getCloseSchedule();
 		
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 14:00:00"), taiFengList.get(0).getStartTime());
-		assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), taiFengList.get(0).getEndTime());
+		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), taiFengList.get(0).getEndTime());
 		assertEquals(false, taiFengList.get(0).isAllowForLanding());
 		assertEquals(true, taiFengList.get(0).isAllowForTakeoff());
 		
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 16:00:00"), taiFengList.get(1).getStartTime());
-		assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), taiFengList.get(1).getEndTime());
+		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), taiFengList.get(1).getEndTime());
 		assertEquals(true, taiFengList.get(1).isAllowForLanding());
 		assertEquals(false, taiFengList.get(1).isAllowForTakeoff());
 		
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 16:00:00"), taiFengList.get(2).getStartTime());
-		assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), taiFengList.get(2).getEndTime());
+		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), taiFengList.get(2).getEndTime());
 		assertEquals(0, taiFengList.get(2).getMaximumParking());
 
 		//flight duration
@@ -146,8 +174,8 @@ public class InitDataTest {
 			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -206,8 +234,8 @@ public class InitDataTest {
 			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -228,8 +256,8 @@ public class InitDataTest {
 			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -250,8 +278,8 @@ public class InitDataTest {
 			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -272,8 +300,8 @@ public class InitDataTest {
 			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -325,8 +353,8 @@ public class InitDataTest {
 			System.out.println(e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -369,8 +397,8 @@ public class InitDataTest {
 			System.out.println("AirportNotAcceptArrivalTim e" + e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -395,8 +423,8 @@ public class InitDataTest {
 			System.out.println("AirportNotAcceptArrivalTim e" + e.getaFlight().getFlightId() + " From " + e.getaFlight().getSourceAirPort().getId() 
 					+ " To " + e.getaFlight().getDesintationAirport().getId()
 					+ " Avaialble time " + e.getAvailableTime().getArrivalTime() +" " + e.getAvailableTime().getDepartureTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:00:00"), e.getAvailableTime().getArrivalTime());
-			assertEquals(Utils.stringFormatToTime2("07/05/2017 19:50:00"), e.getAvailableTime().getDepartureTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), e.getAvailableTime().getArrivalTime());
+			assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), e.getAvailableTime().getDepartureTime());
 		} catch (FlightDurationNotFound e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

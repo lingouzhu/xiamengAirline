@@ -1,6 +1,5 @@
 package xiaMengAirline.utils;
 
-
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,163 +12,162 @@ import java.util.List;
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.collections4.comparators.ComparableComparator;
+import org.openqa.selenium.internal.seleniumemulation.IsChecked;
 
+import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 
 public class Utils {
 
-
-	public static boolean isEmpty(String str) {  
+	public static boolean isEmpty(String str) {
 		if (str == null || "".equals(str)) {
 			return true;
 		} else {
 			return false;
 		}
-    }
-	
-	public static boolean interToBoolean(String str) {  
+	}
+
+	public static boolean interToBoolean(String str) {
 		if ("国内".equals(str) || str.equals("1")) {
 			return false;
 		} else {
 			return true;
 		}
-    }
-	
-	public static BigDecimal strToBigDecimal(String str) {  
+	}
+
+	public static BigDecimal strToBigDecimal(String str) {
 		if (str == null || "".equals(str)) {
 			return new BigDecimal("1");
 		} else {
 			return new BigDecimal(str);
 		}
-    }
-	
-	public static String dateFormatter(Date date) {  
+	}
+
+	public static String dateFormatter(Date date) {
 		String result = "";
-		
+
 		if (date != null) {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 			result = formatter.format(date);
-			
+
 		}
 		return result;
-    }
-	
-	public static Date stringFormatToTime2(String aDate) throws ParseException {  
+	}
+
+	public static Date stringFormatToTime2(String aDate) throws ParseException {
 		Date result;
-		
+
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		result = formatter.parse(aDate);
-			
+
 		return result;
-    }
-	
-	public static String timeFormatToString2(Date date) {  
+	}
+
+	public static String timeFormatToString2(Date date) {
 		String result = "";
-		
+
 		if (date != null) {
 			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 			result = formatter.format(date);
-			
+
 		}
 		return result;
-    }
-	
-	public static String timeFormatter(Date date) {  
+	}
+
+	public static String timeFormatter(Date date) {
 		String result = "";
-		
+
 		if (date != null) {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			result = formatter.format(date);
-			
+
 		}
 		return result;
-    }
-	
-	public static String timeFormatter2(Date date) {  
+	}
+
+	public static String timeFormatter2(Date date) {
 		String result = "";
-		
+
 		if (date != null) {
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			result = formatter.format(date);
-			
+
 		}
 		return result;
-    }
-	
-	
-	public static Date timeStr2date(String str) {  
+	}
+
+	public static Date timeStr2date(String str) {
 		Date date = null;
 		try {
 			if (str != null) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 				date = sdf.parse(str);
 			}
 		} catch (ParseException e) {
-				// TODO Auto-generated catch block
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 		return date;
-    }
-	
-	
-	public static Date dateStr2date(String str) {  
+	}
+
+	public static Date dateStr2date(String str) {
 		Date date = null;
 		try {
 			if (str != null) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");  
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				date = sdf.parse(str);
 			}
 		} catch (ParseException e) {
-				// TODO Auto-generated catch block
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 		return date;
-    }
-	
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> void sort(List<T> list, String fieldName, boolean asc) {
-        Comparator<?> mycmp = ComparableComparator.INSTANCE;
-        mycmp = ComparatorUtils.nullLowComparator(mycmp); // 允许null
-        if (!asc) {
-            mycmp = ComparatorUtils.reversedComparator(mycmp); // 逆序
-        }
-        Collections.sort(list, new BeanComparator(fieldName, mycmp));
-    }
-	
-	public static BigDecimal hoursBetweenTime(Date date1, Date date2) {  
+		Comparator<?> mycmp = ComparableComparator.INSTANCE;
+		mycmp = ComparatorUtils.nullLowComparator(mycmp); // 允许null
+		if (!asc) {
+			mycmp = ComparatorUtils.reversedComparator(mycmp); // 逆序
+		}
+		Collections.sort(list, new BeanComparator(fieldName, mycmp));
+	}
+
+	public static BigDecimal hoursBetweenTime(Date date1, Date date2) {
 		BigDecimal diff = new BigDecimal(date1.getTime() - date2.getTime());
-		BigDecimal hours = diff.divide(new BigDecimal(1000* 60 * 60), 5, BigDecimal.ROUND_HALF_UP);
-		
+		BigDecimal hours = diff.divide(new BigDecimal(1000 * 60 * 60), 5, BigDecimal.ROUND_HALF_UP);
+
 		return hours;
-    }
-	
-	public static BigDecimal minutiesBetweenTime(Date date1, Date date2) {  
-		
+	}
+
+	public static BigDecimal minutiesBetweenTime(Date date1, Date date2) {
+
 		BigDecimal diff = new BigDecimal(date1.getTime() - date2.getTime());
 		BigDecimal mins = diff.divide(new BigDecimal(1000 * 60), 5, BigDecimal.ROUND_HALF_UP);
-		
+
 		return mins;
-    }
-	
-	public static Date addMinutes (Date aDate, int minutes) {
-		Calendar cl = Calendar. getInstance();
-	    cl.setTime(aDate);
-	    cl.add(Calendar.MINUTE, (int) minutes);
-	    return cl.getTime();
 	}
-	
+
+	public static Date addMinutes(Date aDate, int minutes) {
+		Calendar cl = Calendar.getInstance();
+		cl.setTime(aDate);
+		cl.add(Calendar.MINUTE, (int) minutes);
+		return cl.getTime();
+	}
+
 	public static BigDecimal calCostbyAir(Aircraft orgAir, Aircraft newAir) {
-		
+
 		BigDecimal cost = new BigDecimal("0");
 		// org air
 		for (int i = 0; i < orgAir.getFlightChain().size(); i++) {
-			
+
 			Flight orgFlight = orgAir.getFlightChain().get(i);
 			boolean existFlg = false;
 			// new air
 			for (int j = 0; j < newAir.getFlightChain().size(); j++) {
-				
+
 				Flight newFlight = newAir.getFlightChain().get(j);
 				// empty
 				if (i == 0 && newFlight.getFlightId() > InitData.plannedMaxFligthId) {
@@ -180,42 +178,121 @@ public class Utils {
 					existFlg = true;
 					// delay or move up
 					if (!orgFlight.getDepartureTime().equals(newFlight.getDepartureTime())) {
-						BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(), orgFlight.getDepartureTime());
-						
-						if (hourDiff.signum() == -1){
-							cost = cost.add(new BigDecimal("150").multiply(hourDiff.abs()).multiply(orgFlight.getImpCoe()));
+						BigDecimal hourDiff = Utils.hoursBetweenTime(newFlight.getDepartureTime(),
+								orgFlight.getDepartureTime());
+
+						if (hourDiff.signum() == -1) {
+							cost = cost.add(
+									new BigDecimal("150").multiply(hourDiff.abs()).multiply(orgFlight.getImpCoe()));
 						} else {
-							cost = cost.add(new BigDecimal("100").multiply(hourDiff.abs()).multiply(orgFlight.getImpCoe()));
+							cost = cost.add(
+									new BigDecimal("100").multiply(hourDiff.abs()).multiply(orgFlight.getImpCoe()));
 						}
 					}
 					// joint stretch
 					if (InitData.jointFlightMap.get(newFlight.getFlightId()) != null) {
-						if (!newFlight.getDesintationAirport().getId().equals((orgFlight.getDesintationAirport().getId()))) {
+						if (!newFlight.getDesintationAirport().getId()
+								.equals((orgFlight.getDesintationAirport().getId()))) {
 							Flight nextFlight = InitData.jointFlightMap.get(newFlight.getFlightId());
-							
+
 							cost = cost.add(new BigDecimal("750").multiply(newFlight.getImpCoe()));
 							cost = cost.add(new BigDecimal("750").multiply(nextFlight.getImpCoe()));
-							
+
 						}
-						
+
 					}
-					
-				} 
+
+				}
 			}
-			
+
 			// cancel
 			if (!existFlg) {
 				// not 2nd of joint flight
-				if (!InitData.jointFlightMap.containsKey(orgFlight.getFlightId()) || InitData.jointFlightMap.get(orgFlight.getFlightId()) != null) {
+				if (!InitData.jointFlightMap.containsKey(orgFlight.getFlightId())
+						|| InitData.jointFlightMap.get(orgFlight.getFlightId()) != null) {
 					cost = cost.add(new BigDecimal("1000").multiply(orgFlight.getImpCoe()));
 				}
 			}
-			
+
 		}
-		
+
 		return cost;
-    }
-	
-	
-	
+	}
+
+	public static boolean checkAirportAvailablity(AirPort aAirport, Date aTime, boolean isTakeoff, boolean checkonly,
+			boolean isRelease) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(aTime);
+		int years = calendar.get(Calendar.YEAR);
+		int months = calendar.get(Calendar.MONTH) + 1;
+		int day = calendar.get(Calendar.DAY_OF_MONTH);
+		int hours = calendar.get(Calendar.HOUR_OF_DAY);
+		int minutes = calendar.get(Calendar.MINUTE);
+
+		int checkMin = minutes / 5 * 5;
+
+		String checkTime = String.valueOf(years);
+		checkTime += "-";
+		checkTime += String.format("%02d", months);
+		checkTime += "-";
+		checkTime += String.format("%02d", day);
+		checkTime += " ";
+		checkTime += String.format("%02d", hours);
+		checkTime += ":";
+		checkTime += String.format("%02d", checkMin);
+
+		System.out.println("CheckAirportAvailablity Searching key ... " + checkTime);
+
+		if (isTakeoff) {
+			if (aAirport.getTakeoffCapability().containsKey(checkTime)) {
+				int cap = aAirport.getTakeoffCapability().get(checkTime);
+				if (isRelease) {
+					cap++;
+					aAirport.getTakeoffCapability().put(checkTime, cap);
+					return true;
+				} else {
+					if (cap > 0) {
+						if (checkonly)
+							return true;
+						else {
+							cap--;
+							aAirport.getTakeoffCapability().put(checkTime, cap);
+							return true;
+						}
+					} else {
+						return false;
+					}
+				}
+
+			} else {
+				return true;
+			}
+		} else {
+			if (aAirport.getLandingCapability().containsKey(checkTime)) {
+				int cap = aAirport.getLandingCapability().get(checkTime);
+				if (isRelease) {
+					cap++;
+					aAirport.getLandingCapability().put(checkTime, cap);
+					return true;
+				} else {
+					if (cap > 0) {
+						if (checkonly)
+							return true;
+						else {
+							cap--;
+							aAirport.getLandingCapability().put(checkTime, cap);
+							return true;
+						}
+					} else {
+						return false;
+					}
+				}
+
+			} else {
+				return true;
+			}
+		}
+
+	}
+
 }

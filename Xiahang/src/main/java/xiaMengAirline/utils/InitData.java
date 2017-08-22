@@ -4,6 +4,7 @@ package xiaMengAirline.utils;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -259,6 +260,76 @@ public class InitData {
 				
 				
 				aAirport.addCloseSchedule(portCloseBean);
+				
+				
+				//create special airport recover time
+				 if (impactType.equals("起飞")) {
+					 //only allows 2 flights take-off / landing before / after
+					 String aDate = "2017-05-06 ";
+					 String startHour = "15:";
+					 int bufferStartTime = 0;
+
+					 for (int i = 1;i <= 12; i++) {
+						 String bufferStartMin = String.format("%02d", bufferStartTime);
+						 aAirport.getTakeoffCapability().put(aDate + startHour + bufferStartMin, 2);
+						 bufferStartTime += 5;
+						 
+					 }
+					 
+					 aDate = "2017-05-07 ";
+					 startHour = "17:";
+					 bufferStartTime = 0;
+
+					 for (int i = 1;i <= 12; i++) {
+						 String bufferStartMin = String.format("%02d", bufferStartTime);
+						 aAirport.getTakeoffCapability().put(aDate + startHour + bufferStartMin, 2);
+						 bufferStartTime += 5;
+						 
+					 }
+					 
+					 aDate = "2017-05-07 ";
+					 startHour = "18:";
+					 bufferStartTime = 0;
+
+					 for (int i = 1;i <= 12; i++) {
+						 String bufferStartMin = String.format("%02d", bufferStartTime);
+						 aAirport.getTakeoffCapability().put(aDate + startHour + bufferStartMin, 2);
+						 bufferStartTime += 5;
+						 
+					 }
+					 
+
+				 } 
+				 
+				//create special airport recover time
+				 if (impactType.equals("降落")) {
+					 //only allows 2 flights take-off / landing before / after
+					 String aDate = "2017-05-07 ";
+					 String startHour = "17:";
+					 int bufferStartTime = 0;
+
+					 for (int i = 1;i <= 12; i++) {
+						 String bufferStartMin = String.format("%02d", bufferStartTime);
+						 aAirport.getLandingCapability().put(aDate + startHour + bufferStartMin, 2);
+						 bufferStartTime += 5;
+						 
+					 }
+					 
+					 aDate = "2017-05-07 ";
+					 startHour = "18:";
+					 bufferStartTime = 0;
+
+					 for (int i = 1;i <= 12; i++) {
+						 String bufferStartMin = String.format("%02d", bufferStartTime);
+						 aAirport.getLandingCapability().put(aDate + startHour + bufferStartMin, 2);
+						 bufferStartTime += 5;
+						 
+					 }
+					 
+
+				 }
+				 
+				 
 				
 			}
 			
