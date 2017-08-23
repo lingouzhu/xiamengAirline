@@ -32,6 +32,7 @@ public class Aircraft implements Cloneable {
 	private List<Flight> dropOutList = new ArrayList<Flight>();
 	private boolean isUpdated = false;
 	private Aircraft alternativeAircraft = null; //alternative aircraft must be a cloned air, and assigned to one & only one its parent aircraft
+	private float cost = 0;
 
 	public String getId() {
 		return id;
@@ -281,13 +282,14 @@ public class Aircraft implements Cloneable {
 		aNew.setDropOutList(newDropList);
 		if (alternativeAircraft!=null)
 			aNew.setAlternativeAircraft(alternativeAircraft.clone());
+		aNew.cost = 0;
 		
 		return (aNew);
 	}
 
 	public void adjustment(XiaMengAirlineSolution mySolution)
 			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
-		SelfSearch selfAdjustEngine = new SelfSearch(mySolution);
+		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
 			selfAdjustEngine.adjustAircraft(this, 0, mySolution.getAircraft(id, type, true, true));
 		}
@@ -662,6 +664,14 @@ public class Aircraft implements Cloneable {
 
 	public void setNumberOfSeats(int numberOfSeats) {
 		this.numberOfSeats = numberOfSeats;
+	}
+
+	public float getCost() {
+		return cost;
+	}
+
+	public void setCost(float cost) {
+		this.cost = cost;
 	}
 	
 
