@@ -30,9 +30,8 @@ import xiaMengAirline.utils.InitData;
 
 public class SelfSearch {
 	private static final Logger logger = Logger.getLogger(SelfSearch.class);
-	private XiaMengAirlineSolution mySolution = null;
 	
-	public XiaMengAirlineSolution constructInitialSolution()
+	public XiaMengAirlineSolution constructInitialSolution(XiaMengAirlineSolution mySolution)
 			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
 		//when construct initial solution, clone a new copy
 
@@ -46,6 +45,10 @@ public class SelfSearch {
 		aNewSol.clear();
 		
 		return mySolution;
+	}
+	
+	public float adjust (Aircraft aAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
+		return 0;
 	}
 	
 	public List<Aircraft> adjustAircraft (Aircraft originalAir, int startIndex, Aircraft originalCancelAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
@@ -265,10 +268,6 @@ public class SelfSearch {
 	    return aircraftReturn;
 	}
 	
-	public SelfSearch(XiaMengAirlineSolution mySolution) {
-		super();
-		this.mySolution = mySolution;
-	}
 
 	public void print (String str){
 		logger.info(str);
@@ -561,9 +560,6 @@ public class SelfSearch {
 	}
 	
 
-	public XiaMengAirlineSolution getMySolution() {
-		return mySolution;
-	}
 
 	public Date getValidDeparture(Date departureTime, AirPort airport) throws ParseException {
 		for (AirPortClose aClose : airport.getCloseSchedule()) {
