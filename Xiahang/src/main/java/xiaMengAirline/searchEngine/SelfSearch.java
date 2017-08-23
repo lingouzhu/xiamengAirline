@@ -47,9 +47,9 @@ public class SelfSearch {
 		return mySolution;
 	}
 	
-	public float adjust (Aircraft aAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
+	public boolean adjust (Aircraft aAir) {
 		aAir.setCost(0);
-		return 0;
+		return true;
 	}
 	
 	public List<Aircraft> adjustAircraft (Aircraft originalAir, int startIndex, Aircraft originalCancelAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
