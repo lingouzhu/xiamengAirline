@@ -48,6 +48,7 @@ public class SelfSearch {
 	}
 	
 	public float adjust (Aircraft aAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
+		aAir.setCost(0);
 		return 0;
 	}
 	
