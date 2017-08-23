@@ -14,7 +14,6 @@ import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.collections4.comparators.ComparableComparator;
 import org.openqa.selenium.internal.seleniumemulation.IsChecked;
 
-import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 
@@ -217,82 +216,6 @@ public class Utils {
 		}
 
 		return cost;
-	}
-
-	public static boolean checkAirportAvailablity(AirPort aAirport, Date aTime, boolean isTakeoff, boolean checkonly,
-			boolean isRelease) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(aTime);
-		int years = calendar.get(Calendar.YEAR);
-		int months = calendar.get(Calendar.MONTH) + 1;
-		int day = calendar.get(Calendar.DAY_OF_MONTH);
-		int hours = calendar.get(Calendar.HOUR_OF_DAY);
-		int minutes = calendar.get(Calendar.MINUTE);
-
-		int checkMin = minutes / 5 * 5;
-
-		String checkTime = String.valueOf(years);
-		checkTime += "-";
-		checkTime += String.format("%02d", months);
-		checkTime += "-";
-		checkTime += String.format("%02d", day);
-		checkTime += " ";
-		checkTime += String.format("%02d", hours);
-		checkTime += ":";
-		checkTime += String.format("%02d", checkMin);
-
-		System.out.println("CheckAirportAvailablity Searching key ... " + checkTime);
-
-		if (isTakeoff) {
-			if (aAirport.getTakeoffCapability().containsKey(checkTime)) {
-				int cap = aAirport.getTakeoffCapability().get(checkTime);
-				if (isRelease) {
-					cap++;
-					aAirport.getTakeoffCapability().put(checkTime, cap);
-					return true;
-				} else {
-					if (cap > 0) {
-						if (checkonly)
-							return true;
-						else {
-							cap--;
-							aAirport.getTakeoffCapability().put(checkTime, cap);
-							return true;
-						}
-					} else {
-						return false;
-					}
-				}
-
-			} else {
-				return true;
-			}
-		} else {
-			if (aAirport.getLandingCapability().containsKey(checkTime)) {
-				int cap = aAirport.getLandingCapability().get(checkTime);
-				if (isRelease) {
-					cap++;
-					aAirport.getLandingCapability().put(checkTime, cap);
-					return true;
-				} else {
-					if (cap > 0) {
-						if (checkonly)
-							return true;
-						else {
-							cap--;
-							aAirport.getLandingCapability().put(checkTime, cap);
-							return true;
-						}
-					} else {
-						return false;
-					}
-				}
-
-			} else {
-				return true;
-			}
-		}
-
 	}
 
 }

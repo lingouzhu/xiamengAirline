@@ -30,6 +30,7 @@ import xiaMengAirline.beans.FlightTime;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.Main;
+import xiaMengAirline.searchEngine.BusinessDomain;
 import xiaMengAirline.searchEngine.LocalSearch;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.utils.InitData;
@@ -58,30 +59,30 @@ public class InitDataTest {
 		
 		AirPort port50 = InitData.airportList.getAirport("50");
 		Date testdate = Utils.stringFormatToTime2("05/05/2017 07:36:00");
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, true, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, true, true, false));
 		testdate = Utils.stringFormatToTime2("06/05/2017 15:03:00");
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
 		testdate = Utils.stringFormatToTime2("06/05/2017 15:04:00");
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
 		testdate = Utils.stringFormatToTime2("06/05/2017 15:02:00");
-		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, true));
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
-		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(false, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, true));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(false, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
 		
 		testdate = Utils.stringFormatToTime2("07/05/2017 18:53:00");
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
 		testdate = Utils.stringFormatToTime2("07/05/2017 18:54:00");
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
 		testdate = Utils.stringFormatToTime2("07/05/2017 18:52:00");
-		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, true, false, false));
+		assertEquals(false, BusinessDomain.checkAirportAvailablity(port50, testdate, true, false, false));
 		
 		testdate = Utils.stringFormatToTime2("07/05/2017 18:53:00");
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, false, false, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, false, false, false));
 		testdate = Utils.stringFormatToTime2("07/05/2017 18:54:00");
-		assertEquals(true, Utils.checkAirportAvailablity(port50, testdate, false, false, false));
+		assertEquals(true, BusinessDomain.checkAirportAvailablity(port50, testdate, false, false, false));
 		testdate = Utils.stringFormatToTime2("07/05/2017 18:52:00");
-		assertEquals(false, Utils.checkAirportAvailablity(port50, testdate, false, false, false));
+		assertEquals(false, BusinessDomain.checkAirportAvailablity(port50, testdate, false, false, false));
 		
 		//check flight
 		Flight f15 = air50.getFlightByFlightId(15);
