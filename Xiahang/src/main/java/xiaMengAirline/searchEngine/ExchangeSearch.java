@@ -540,6 +540,7 @@ public class ExchangeSearch {
 				neighboursResult.clear();
 				System.out.println("Completed batch ... " + currentBatch + " Cost: " + aSolution.getCost());
 			}
+			aBatch = aDriver.getNextDriveForIterative();
 		}
 		
 		return aSolution;
