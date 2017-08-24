@@ -15,7 +15,7 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.searchEngine.LocalSearch;
+import xiaMengAirline.searchEngine.backup.LocalSearch;
 import xiaMengAirline.utils.InitData;
 import xiaMengAirline.utils.Utils;
 

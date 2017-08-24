@@ -1,4 +1,4 @@
-package xiaMengAirline.searchEngine;
+package xiaMengAirline.searchEngine.backup;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
@@ -10,21 +10,31 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
 import xiaMengAirline.beans.RestrictedCandidateList;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.searchEngine.IterativeMethod;
 import xiaMengAirline.utils.InitData;
 
-public class LocalSearch2 {
+public class LocalSearch {
 
-	private static final Logger logger = Logger.getLogger(LocalSearch2.class);
+	private static final Logger logger = Logger.getLogger(LocalSearch.class);
+	private IterativeMethod aDriver;
+	private IterativeMethod aSelector;
 	private int BATCH_SIZE = 20;
 
 	private BigDecimal lowestScore = new BigDecimal(Long.MAX_VALUE);
+	
+	public void setupIterativeDriver(IterativeMethod aDriver) {
+		this.aDriver = aDriver;
+
+	}
+	public void setupIterativeSelector (IterativeMethod aSelector) {
+		this.aSelector = aSelector;
+	}
 
 	private XiaMengAirlineSolution buildLocalSolution(List<Aircraft> airList) {
 		XiaMengAirlineSolution aNewLocalSolution = new XiaMengAirlineSolution();
@@ -35,26 +45,6 @@ public class LocalSearch2 {
 
 	}
 	
-	private BigDecimal adjust2(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) throws CloneNotSupportedException, SolutionNotValid {
-		List<Aircraft> airList = new ArrayList<Aircraft>(newSolution.getSchedule().values());
-
-		for (Aircraft aAir : airList) {
-			if (!aAir.validate())
-				return lowestScore;
-		}
-		
-		try {
-			XiaMengAirlineSolution aBetterSolution = newSolution.getBestSolution();
-			XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct2();
-			aBetterOutput.refreshCost(false);
-			return aBetterOutput.getCost();
-		} catch (AircraftNotAdjustable ex) {
-			logger.warn("New solution is not adjustable air " + ex.getAir().getId());
-			return lowestScore;
-		}
-
-
-	}
 
 	private BigDecimal adjust(XiaMengAirlineSolution newSolution, XiaMengAirlineSolution oldSolution) throws CloneNotSupportedException, SolutionNotValid {
 		List<Aircraft> airList = new ArrayList<Aircraft>(newSolution.getSchedule().values());
@@ -63,19 +53,19 @@ public class LocalSearch2 {
 			if (!aAir.validate())
 				return lowestScore;
 		}
-		if (!newSolution.validflightNumers(oldSolution)) {
-			throw new SolutionNotValid(newSolution, "exchange");
-		}
+//		if (!newSolution.validflightNumers(oldSolution)) {
+//			throw new SolutionNotValid(newSolution, "exchange");
+//		}
 		
 
-		XiaMengAirlineSolution backup = newSolution.clone();
+//		XiaMengAirlineSolution backup = newSolution.clone();
 		if (newSolution.adjust()) {
-			if (!newSolution.validAlternativeflightNumers(oldSolution) 
-					|| !newSolution.validflightNumers(oldSolution)) {
-				backup.adjust();
-				newSolution.validAlternativeflightNumers(oldSolution);
-				throw new SolutionNotValid(newSolution, "adjust");
-			}
+//			if (!newSolution.validAlternativeflightNumers(oldSolution) 
+//					|| !newSolution.validflightNumers(oldSolution)) {
+//				backup.adjust();
+//				newSolution.validAlternativeflightNumers(oldSolution);
+//				throw new SolutionNotValid(newSolution, "adjust");
+//			}
 			return newSolution.getCost();
 		} else
 			return lowestScore;
@@ -86,12 +76,15 @@ public class LocalSearch2 {
 			throws CloneNotSupportedException, SolutionNotValid {
 		XiaMengAirlineSolution oldSolOut = oldSolution.reConstruct();
 		oldSolOut.refreshCost(false);
-		return (adjust2(newSolution, oldSolution).subtract(oldSolOut.getCost()));
+		return (adjust(newSolution, oldSolution).subtract(oldSolOut.getCost()));
 	}
 
 	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution)
 			throws CloneNotSupportedException, SolutionNotValid {
 		// build batch list for first air
+		
+		
+		
 		HashMap<Integer, List<Aircraft>> airBatchList = new HashMap<Integer, List<Aircraft>>();
 		int numberOfBatches = (int) Math.ceil((float) checkSList.size() / BATCH_SIZE);
 		for (int batchNo = 1; batchNo <= numberOfBatches; batchNo++) {
@@ -619,7 +612,7 @@ public class LocalSearch2 {
 				bestSolution = neighboursResult.selectASoluiton();
 				neighboursResult.clear();
 				System.out.println("Completed batch ... " + currentBatch + " Cost: " + bestSolution.getCost());
-				if (bestSolution.getCost().longValue() < 90 && (currentBatch % 3 == 0)) {
+				if (bestSolution.getCost().longValue() < 95 && (currentBatch % 3 == 0)) {
 					Date dNow = new Date( );
 				      SimpleDateFormat ft = 
 				      new SimpleDateFormat ("hh_mm_ss");

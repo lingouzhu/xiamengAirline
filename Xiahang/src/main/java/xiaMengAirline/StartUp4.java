@@ -16,8 +16,8 @@ import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.Main;
-import xiaMengAirline.searchEngine.LocalSearch2;
 import xiaMengAirline.searchEngine.SelfSearch;
+import xiaMengAirline.searchEngine.backup.LocalSearch2;
 import xiaMengAirline.utils.InitData;
 
 public class StartUp4 {
