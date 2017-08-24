@@ -39,7 +39,7 @@ public class OptimizationController {
 		
 		List<XiaMengAirlineSolution> selectedSolutions = new ArrayList<XiaMengAirlineSolution> ();
 		for (int i =0 ; i < aStragety.getNumberOfSolutions(); i++) {
-			selectedSolutions.add(allTopSolutions.get(InitData.rndRcl.nextInt(allTopSolutions.size())));
+			selectedSolutions.add(allTopSolutions.remove(InitData.rndRcl.nextInt(allTopSolutions.size())));
 		}
 		
 		return selectedSolutions;
