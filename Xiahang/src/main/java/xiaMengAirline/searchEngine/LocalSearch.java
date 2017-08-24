@@ -21,9 +21,19 @@ import xiaMengAirline.utils.InitData;
 public class LocalSearch {
 
 	private static final Logger logger = Logger.getLogger(LocalSearch.class);
+	private IterativeMethod aDriver;
+	private IterativeMethod aSelector;
 	private int BATCH_SIZE = 20;
 
 	private BigDecimal lowestScore = new BigDecimal(Long.MAX_VALUE);
+	
+	public void setupIterativeDriver(IterativeMethod aDriver) {
+		this.aDriver = aDriver;
+
+	}
+	public void setupIterativeSelector (IterativeMethod aSelector) {
+		this.aSelector = aSelector;
+	}
 
 	private XiaMengAirlineSolution buildLocalSolution(List<Aircraft> airList) {
 		XiaMengAirlineSolution aNewLocalSolution = new XiaMengAirlineSolution();
@@ -71,6 +81,9 @@ public class LocalSearch {
 	public XiaMengAirlineSolution buildSolution(List<Aircraft> checkSList, XiaMengAirlineSolution bestSolution)
 			throws CloneNotSupportedException, SolutionNotValid {
 		// build batch list for first air
+		
+		
+		
 		HashMap<Integer, List<Aircraft>> airBatchList = new HashMap<Integer, List<Aircraft>>();
 		int numberOfBatches = (int) Math.ceil((float) checkSList.size() / BATCH_SIZE);
 		for (int batchNo = 1; batchNo <= numberOfBatches; batchNo++) {

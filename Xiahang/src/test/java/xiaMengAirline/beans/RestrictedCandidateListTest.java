@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import xiaMengAirline.beans.RestrictedCandidateList;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.searchEngine.OptimizerStragety;
 import xiaMengAirline.utils.InitData;
 
 import static org.junit.Assert.*;
@@ -23,7 +24,6 @@ public class RestrictedCandidateListTest {
 
 	@Before
 	public void setUp() throws Exception {
-		RestrictedCandidateList.maxBestSolutions = 3;
 	}
 
 	@Test
@@ -50,6 +50,9 @@ public class RestrictedCandidateListTest {
 		sol7.setCost(new BigDecimal(70));
 
 		RestrictedCandidateList rcl = new RestrictedCandidateList();
+		OptimizerStragety aStragety = new OptimizerStragety();
+		aStragety.setMaxBestSolution(3);
+		rcl.setaStragety(aStragety);
 		rcl.addSolution(sol1);
 		assertEquals(100, rcl.getHighestCost().longValue());
 		assertEquals(100, rcl.getLowestCost().longValue());

@@ -6,15 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import xiaMengAirline.searchEngine.OptimizerStragety;
 import xiaMengAirline.utils.InitData;
 
 public class RestrictedCandidateList {
-	public static int maxBestSolutions = 10;
+	private int maxBestSolutions = 10;
 	private BigDecimal lowestCost = new BigDecimal(Long.MAX_VALUE);
 	private BigDecimal highestCost = new BigDecimal(-1);
 	private int currentLevel = 0;
 	private TreeMap<BigDecimal, List<XiaMengAirlineSolution>> bestSolutionList = new TreeMap<BigDecimal, List<XiaMengAirlineSolution>>  ();
 	private String version = "0"; //Iter_Batch
+	private OptimizerStragety aStragety;
 	
 	public boolean addSolution (XiaMengAirlineSolution aNewSolution) {
 		if (bestSolutionList.size() < maxBestSolutions) {
@@ -90,10 +92,19 @@ public class RestrictedCandidateList {
 				  allNewSolutions.addAll(entry.getValue());
 			}
 			
-			return allNewSolutions.get(InitData.rndRcl.nextInt(allNewSolutions.size())).clone();
+			return allNewSolutions.get(InitData.rndRcl.nextInt(allNewSolutions.size()));
 		} else 
 			return null;
 
+	}
+	
+	public List<XiaMengAirlineSolution> getAllSolutions () {
+		List<XiaMengAirlineSolution> allNewSolutions = new ArrayList<XiaMengAirlineSolution> ();
+		for(Map.Entry<BigDecimal, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
+			  allNewSolutions.addAll(entry.getValue());
+		}
+		
+		return allNewSolutions;
 	}
 	
 	public boolean hasSolution () {
@@ -141,6 +152,15 @@ public class RestrictedCandidateList {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public OptimizerStragety getaStragety() {
+		return aStragety;
+	}
+
+	public void setaStragety(OptimizerStragety aStragety) {
+		this.aStragety = aStragety;
+		maxBestSolutions = aStragety.getMaxBestSolution();
 	}
 
 }

@@ -3,12 +3,16 @@ package xiaMengAirline.searchEngine;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
+import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.utils.InitData;
 
 public class BusinessDomain {
+	private static final Logger logger = Logger.getLogger(BusinessDomain.class);
 	public static final int MAX_INTERNATIONAL_DELAY = 36;
 	public static final int MAX_DOMESTIC_DELAY = 24;
 	public static final int MAX_DOMESTIC_EARLIER = 6;
@@ -150,6 +154,41 @@ public class BusinessDomain {
 		
 	}
 
+	
+	public static boolean validateFlights (Aircraft oldAir1, Aircraft oldAir2, Aircraft newAir1, Aircraft newAir2) {
+		int oldSize = oldAir1.getFlightChain().size();
+		oldSize += oldAir2.getFlightChain().size();
+		int newSize = newAir1.getFlightChain().size();
+		newSize += newAir2.getFlightChain().size();
+		
+		if (oldSize != newSize)
+		{
+			logger.warn("Unmatched flight size after exchange airs: " + newAir1.getId() + ":" + newAir2.getId());
+			return false;
+		}
+		
+		if (newAir1.isCancel()) {
+			for (Flight aFlight:newAir1.getFlightChain()) {
+				if (!aFlight.isAdjustable()) {
+					logger.warn("Flight shall not adjust but cancelled after exchange air: " + newAir1.getId() + " flightId:" + aFlight.getFlightId());
+					return false;
+				}
+			}
+		}
+		
+		if (newAir2.isCancel()) {
+			for (Flight aFlight:newAir2.getFlightChain()) {
+				if (!aFlight.isAdjustable()) {
+					logger.warn("Flight shall not adjust but cancelled after exchange air: " + newAir2.getId() + " flightId:" + aFlight.getFlightId());
+					return false;
+				}
+			}
+		}
+		
+		return true;
+			
+				
+	}
 	
 	
 

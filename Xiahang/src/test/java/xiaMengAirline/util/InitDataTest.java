@@ -465,8 +465,8 @@ public class InitDataTest {
 		
 
 
-		SelfSearch selfEngine = new SelfSearch(aTest);
-		XiaMengAirlineSolution sol105 = selfEngine.constructInitialSolution();
+		SelfSearch selfEngine = new SelfSearch();
+		XiaMengAirlineSolution sol105 = selfEngine.constructInitialSolution(aTest);
 		XiaMengAirlineSolution initial105 = sol105.reConstruct();
 		initial105.refreshCost(true);
 		assertEquals(15775, initial105.getCost().longValue());
@@ -474,12 +474,12 @@ public class InitDataTest {
 		
 		
 		
-		selfEngine = new SelfSearch(InitData.originalSolution.clone());
+		selfEngine = new SelfSearch();
 		
 		
 		
 		//Step2, construct initial solution & validate it
-		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
+		XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution.clone());
 		XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 		initialOutput.refreshCost(true);
 		assertEquals(1514185, initialOutput.getCost().longValue());

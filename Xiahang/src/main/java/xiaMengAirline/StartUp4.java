@@ -151,10 +151,10 @@ public class StartUp4 {
 			InitData.initData(initDatafile);
 
 			LocalSearch2 localEngine = new LocalSearch2();
-			SelfSearch selfEngine = new SelfSearch(InitData.originalSolution.clone());
+			SelfSearch selfEngine = new SelfSearch();
 
 			// Step2, construct initial solution & validate it
-			XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution();
+			XiaMengAirlineSolution initialSolution = selfEngine.constructInitialSolution(InitData.originalSolution.clone());
 			XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
 			initialOutput.refreshCost(true);
 			initialSolution.setCost(initialOutput.getCost());
