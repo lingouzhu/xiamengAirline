@@ -1,5 +1,6 @@
 package xiaMengAirline.searchEngine;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -27,6 +28,7 @@ import xiaMengAirline.beans.FlightTime;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.utils.InitData;
+import xiaMengAirline.utils.Utils;
 
 public class SelfSearch {
 	private static final Logger logger = Logger.getLogger(SelfSearch.class);
@@ -48,8 +50,70 @@ public class SelfSearch {
 	}
 	
 	public boolean adjust (Aircraft aAir) {
-		aAir.setCost(0);
-		return true;
+		boolean validFlg = true;
+		BigDecimal cost = new BigDecimal("0");
+		boolean cancelFlg = false;
+		Date depTime = null;
+		Date arrTime = null;
+		
+		for (int i = 0; i < aAir.getFlightChain().size(); i++) {
+			Flight flight = aAir.getFlightChain().get(i);
+			
+			if (flight.isAdjustable()) {
+				
+				if (BusinessDomain.isTyphoon(flight.getSourceAirPort(), flight.getDepartureTime())
+						|| BusinessDomain.isTyphoon(flight.getDesintationAirport(), flight.getArrivalTime())) {
+					if (arrTime == null) {
+						for (AirPortClose aClose : flight.getSourceAirPort().getCloseSchedule()) {
+							if (flight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
+									&& flight.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
+								if (BusinessDomain.isTyphoon(flight.getSourceAirPort(), flight.getDepartureTime())) {
+									depTime = aClose.getEndTime();
+								} else {
+									depTime = Utils.minusMinutes(aClose.getEndTime(), Utils.minutiesBetweenTime(flight.getArrivalTime(), flight.getDepartureTime()).intValue());
+								}
+								
+							}
+						}
+						
+						if (BusinessDomain.isValidDelay(flight, depTime)) {
+							cost = cost.add(new BigDecimal("150")
+									.multiply(Utils.hoursBetweenTime(depTime, flight.getPlannedFlight().getDepartureTime()).abs())
+									.multiply(flight.getImpCoe()));
+							arrTime = flight.getArrivalTime();
+							
+						} else {
+							cancelFlg = true;
+							cost = cost.add(new BigDecimal("1000").multiply(flight.getImpCoe()));
+						}
+					} else {
+						
+						depTime = Utils.addMinutes(arrTime, 50); 
+						cost = cost.add(new BigDecimal("150")
+								.multiply(Utils.hoursBetweenTime(depTime, flight.getPlannedFlight().getDepartureTime()).abs())
+								.multiply(flight.getImpCoe()));
+						
+						
+					}
+				} 
+				
+			} else {
+				if (!flight.getPlannedAir().getId().equals(aAir.getId())) {
+					validFlg = false;
+				}
+			}
+			
+			if (i == aAir.getFlightChain().size() - 1 && !flight.getPlannedAir().getId().equals(aAir.getId())) {
+				validFlg = false;
+			}
+		}
+		
+		if (cancelFlg) {
+			cost = cost.add(new BigDecimal("5000"));
+		}
+		
+		aAir.setCost(cost.floatValue());
+		return validFlg;
 	}
 	
 	public List<Aircraft> adjustAircraft (Aircraft originalAir, int startIndex, Aircraft originalCancelAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {

@@ -155,6 +155,13 @@ public class Utils {
 		cl.add(Calendar.MINUTE, (int) minutes);
 		return cl.getTime();
 	}
+	
+	public static Date minusMinutes(Date aDate, int minutes) {
+		Calendar cl = Calendar.getInstance();
+		cl.setTime(aDate);
+		cl.add(Calendar.MINUTE, -minutes);
+		return cl.getTime();
+	}
 
 	public static BigDecimal calCostbyAir(Aircraft orgAir, Aircraft newAir) {
 
