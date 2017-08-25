@@ -89,8 +89,12 @@ public class IterativeLeastOverlappedAirports implements IterativeMethod {
 
 	@Override
 	public int getCurrentIterationNumber() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1;
+	}
+
+	@Override
+	public int getNumberOfBatches() {
+		return 1;
 	}
 
 }

@@ -11,5 +11,6 @@ public interface IterativeMethod {
 	public void setupIterationContent (XiaMengAirlineSolution aSolution);
 	public void setupIterationStragety (OptimizerStragety aStragety);
 	public int getCurrentIterationNumber ();
+	public int getNumberOfBatches ();
 
 }

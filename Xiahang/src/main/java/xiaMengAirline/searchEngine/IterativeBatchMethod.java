@@ -52,8 +52,13 @@ public class IterativeBatchMethod implements IterativeMethod {
 
 	@Override
 	public int getCurrentIterationNumber() {
-		return currentBatchNumber;
+		return currentBatchNumber - 1;
 		
+	}
+
+	@Override
+	public int getNumberOfBatches() {
+		return numberOfBatches;
 	}
 
 }

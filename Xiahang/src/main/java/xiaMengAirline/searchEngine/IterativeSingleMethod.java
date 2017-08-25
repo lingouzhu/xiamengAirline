@@ -41,4 +41,9 @@ public class IterativeSingleMethod implements IterativeMethod {
 		return 1;
 	}
 
+	@Override
+	public int getNumberOfBatches() {
+		return 1;
+	}
+
 }

@@ -31,6 +31,9 @@ import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.Main;
 import xiaMengAirline.searchEngine.BusinessDomain;
+import xiaMengAirline.searchEngine.IterativeBatchMethod;
+import xiaMengAirline.searchEngine.IterativeMethod;
+import xiaMengAirline.searchEngine.OptimizerStragety;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.searchEngine.backup.LocalSearch;
 import xiaMengAirline.utils.InitData;
@@ -469,10 +472,29 @@ public class InitDataTest {
 		air79.getFlightChain().remove(f1605);
 		air79.getFlightChain().remove(f1594);
 		
-		XiaMengAirlineSolution aBSol = aSol.getBestSolution();
+		XiaMengAirlineSolution aNewSolution = InitData.originalSolution.clone();
+		OptimizerStragety aStragety = new OptimizerStragety ();
+		aStragety.setBatchSize(50);
+		IterativeMethod aBatchDriver = new IterativeBatchMethod();
+		aBatchDriver.setupIterationStragety(aStragety);
+		aBatchDriver.setupIterationContent(aNewSolution);
+		assertEquals(3, aBatchDriver.getNumberOfBatches());
+		assertEquals(50, aBatchDriver.getNextDriveForIterative().size());
+		assertEquals(1, aBatchDriver.getCurrentIterationNumber());
+		assertEquals(50, aBatchDriver.getNextDriveForIterative().size());
+		assertEquals(2, aBatchDriver.getCurrentIterationNumber());
+		assertEquals(43, aBatchDriver.getNextDriveForIterative().size());
+		assertEquals(3, aBatchDriver.getCurrentIterationNumber());
+		assertEquals(null, aBatchDriver.getNextDriveForIterative());
+		
+		
 		
 		
 		fail("stop");
+		XiaMengAirlineSolution aBSol = aSol.getBestSolution();
+		
+		
+		
 		
 		Main main2 = new Main();
 		main2.evalutor("dataforest_985118.3490_d.csv");
