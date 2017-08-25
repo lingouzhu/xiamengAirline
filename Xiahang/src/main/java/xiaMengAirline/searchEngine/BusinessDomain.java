@@ -36,7 +36,7 @@ public class BusinessDomain {
 		
 		Calendar aCal = Calendar.getInstance();
 		aCal.setTime(aFlight.getPlannedFlight().getDepartureTime());
-		aCal.add(Calendar.HOUR, MAX_DOMESTIC_EARLIER);
+		aCal.add(Calendar.HOUR, -MAX_DOMESTIC_EARLIER);
 		
 		if (earlier.after(aCal.getTime()))
 			return true;

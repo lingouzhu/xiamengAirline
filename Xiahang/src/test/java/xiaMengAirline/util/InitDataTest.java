@@ -84,10 +84,19 @@ public class InitDataTest {
 		testdate = Utils.stringFormatToTime2("07/05/2017 18:52:00");
 		assertEquals(false, BusinessDomain.checkAirportAvailablity(port50, testdate, false, false, false));
 		
+		assertEquals(false, BusinessDomain.isTyphoon(port50, Utils.stringFormatToTime2("07/05/2017 18:52:00")));
+		assertEquals(true, BusinessDomain.isTyphoon(port50, Utils.stringFormatToTime2("06/05/2017 18:52:00")));
+		
+		
 		//check flight
 		Flight f15 = air50.getFlightByFlightId(15);
 		assertEquals(Utils.stringFormatToTime2("05/05/2017 07:30:00"), f15.getDepartureTime());
 		assertEquals(Utils.stringFormatToTime2("05/05/2017  10:25:00"), f15.getArrivalTime());
+		assertEquals(false, BusinessDomain.isValidEarlier(f15, Utils.stringFormatToTime2("05/05/2017 03:30:00"), false ));
+		assertEquals(true, BusinessDomain.isValidEarlier(f15, Utils.stringFormatToTime2("05/05/2017 03:30:00"), true ));
+		assertEquals(false, BusinessDomain.isValidEarlier(f15, Utils.stringFormatToTime2("05/05/2017 00:30:00"), true ));
+		assertEquals(true, BusinessDomain.isValidDelay(f15, Utils.stringFormatToTime2("05/05/2017 17:30:00")));
+		assertEquals(false, BusinessDomain.isValidDelay(f15, Utils.stringFormatToTime2("06/05/2017 07:31:00")));
 		assertEquals(new BigDecimal(1.00).setScale(2, BigDecimal.ROUND_HALF_UP), f15.getImpCoe());
 		assertEquals(false,f15.isInternationalFlight());
 		assertEquals(349, f15.getSchdNo());
@@ -116,6 +125,11 @@ public class InitDataTest {
 		Aircraft air109 = InitData.originalSolution.getAircraft("109", "2", false,false).clone();
 		Flight f325 = air109.getFlightByFlightId(325);
 		assertEquals(null, InitData.jointFlightMap.get(f325.getFlightId()));
+		assertEquals(false, BusinessDomain.isValidEarlier(f325, Utils.stringFormatToTime2("05/05/2017 09:00:00"), false ));
+		assertEquals(false, BusinessDomain.isValidEarlier(f325, Utils.stringFormatToTime2("05/05/2017 09:30:00"), true ));
+		assertEquals(false, BusinessDomain.isValidEarlier(f325, Utils.stringFormatToTime2("05/05/2017 00:30:00"), true ));
+		assertEquals(true, BusinessDomain.isValidDelay(f325, Utils.stringFormatToTime2("06/05/2017 15:30:00")));
+		assertEquals(false, BusinessDomain.isValidDelay(f325, Utils.stringFormatToTime2("07/05/2017 08:31:00")));
 		
 		//airport close
 		AirPort port6 = InitData.airportList.getAirport("6");
@@ -165,8 +179,8 @@ public class InitDataTest {
 		Aircraft air134 = InitData.originalSolution.getAircraft("134", "2", false, false).clone();
 		Flight f399 = air134.getFlightByFlightId(399);
 		Flight f760 = air134.getFlightByFlightId(760);
-		assertEquals(45, f399.getGroundingTime(337,399));
-		assertEquals(50, f760.getGroundingTime(57,760));
+		assertEquals(45, BusinessDomain.getGroundingTime(337,399));
+		assertEquals(50, BusinessDomain.getGroundingTime(57,760));
 		
 		Aircraft air116 = InitData.originalSolution.getAircraft("116", "2", false, false).clone();
 		try {

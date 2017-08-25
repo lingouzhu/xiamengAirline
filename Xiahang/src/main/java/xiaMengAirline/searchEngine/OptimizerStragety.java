@@ -11,6 +11,7 @@ public class OptimizerStragety {
 	private boolean abortWhenImproved;
 	private int maxBestSolution; 
 	private int numberOfSolutions;
+	private int topQueueSize;
 	
 
 	public int getNumberOfIter() {
@@ -48,6 +49,12 @@ public class OptimizerStragety {
 	}
 	public void setNumberOfSolutions(int numberOfSolutions) {
 		this.numberOfSolutions = numberOfSolutions;
+	}
+	public int getTopQueueSize() {
+		return topQueueSize;
+	}
+	public void setTopQueueSize(int topQueueSize) {
+		this.topQueueSize = topQueueSize;
 	}
 	
 	
