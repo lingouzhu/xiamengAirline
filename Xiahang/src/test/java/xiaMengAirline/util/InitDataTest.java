@@ -32,7 +32,9 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.Main;
 import xiaMengAirline.searchEngine.BusinessDomain;
 import xiaMengAirline.searchEngine.IterativeBatchMethod;
+import xiaMengAirline.searchEngine.IterativeLeastOverlappedAirports;
 import xiaMengAirline.searchEngine.IterativeMethod;
+import xiaMengAirline.searchEngine.IterativeMostOverlappedAirports;
 import xiaMengAirline.searchEngine.OptimizerStragety;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.searchEngine.backup.LocalSearch;
@@ -486,6 +488,33 @@ public class InitDataTest {
 		assertEquals(43, aBatchDriver.getNextDriveForIterative().size());
 		assertEquals(3, aBatchDriver.getCurrentIterationNumber());
 		assertEquals(null, aBatchDriver.getNextDriveForIterative());
+		
+		
+		XiaMengAirlineSolution a234Solution = new XiaMengAirlineSolution();
+		Aircraft airl2 = InitData.originalSolution.getAircraft("2", "4", false, false).clone();
+		Aircraft airl3 = InitData.originalSolution.getAircraft("3", "4", false, false).clone();
+		Aircraft airl4 = InitData.originalSolution.getAircraft("4", "4", false, false).clone();
+		a234Solution.replaceOrAddNewAircraft(airl2);
+		a234Solution.replaceOrAddNewAircraft(airl3);
+		a234Solution.replaceOrAddNewAircraft(airl4);
+		aStragety = new OptimizerStragety ();
+		aStragety.setTopQueueSize(2);
+		IterativeMethod aLeastDriver = new IterativeLeastOverlappedAirports();
+		aLeastDriver.setupIterationStragety(aStragety);
+		aLeastDriver.setupIterationContent(a234Solution);
+		List<Aircraft> aLeastList = aLeastDriver.getNextDriveForIterative();
+		assertEquals(2, aLeastList.size());
+		assertEquals("4", aLeastList.get(0).getId());
+		assertEquals("3", aLeastList.get(1).getId());
+		
+		
+		IterativeMethod aMostDriver = new IterativeMostOverlappedAirports();
+		aMostDriver.setupIterationStragety(aStragety);
+		aMostDriver.setupIterationContent(a234Solution);
+		List<Aircraft> aMostList = aMostDriver.getNextDriveForIterative();
+		assertEquals(2, aMostList.size());
+		assertEquals("3", aMostList.get(0).getId());
+		assertEquals("2", aMostList.get(1).getId());
 		
 		
 		

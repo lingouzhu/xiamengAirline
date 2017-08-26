@@ -335,10 +335,10 @@ public class Aircraft implements Cloneable {
 
 		for (Flight aFlight : flightChain) {
 			String sourceAirPortAir1 = aFlight.getSourceAirPort().getId();
+			List<MatchedFlight> matchedList = new ArrayList<MatchedFlight>();
 			for (Flight bFlight : air2.getFlightChain()) {
 				String sourceAirPortAir2 = bFlight.getSourceAirPort().getId();
 				if (sourceAirPortAir1.equals(sourceAirPortAir2)) {
-					List<MatchedFlight> matchedList = new ArrayList<MatchedFlight>();
 					for (int i = flightChain.indexOf(aFlight); i < flightChain.size(); i++) {
 						String airPortA = getFlight(i).getDesintationAirport().getId();
 						for (int j = air2.getFlightChain().indexOf(bFlight); j < air2.getFlightChain().size(); j++) {
@@ -353,14 +353,14 @@ public class Aircraft implements Cloneable {
 							}
 						}
 					}
-					if (!matchedList.isEmpty()) {
-						retMatchedList.put(aFlight, matchedList);
-					} else {
-						// means source airport overlapped but no destination
-						// overlapped
-						;
-					}
 				}
+			}
+			if (!matchedList.isEmpty()) {
+				retMatchedList.put(aFlight, matchedList);
+			} else {
+				// means source airport overlapped but no destination
+				// overlapped
+				;
 			}
 		}
 		return retMatchedList;

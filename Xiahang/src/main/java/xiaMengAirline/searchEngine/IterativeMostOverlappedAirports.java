@@ -27,6 +27,7 @@ public class IterativeMostOverlappedAirports implements IterativeMethod {
 	@Override
 	public void setupIterationContent(XiaMengAirlineSolution aSolution) {
 		List<Aircraft> airList = new ArrayList<Aircraft> (aSolution.getSchedule().values());
+		Map<String, Integer> overlappedMap = new HashMap<String, Integer>();
 		int topOverlapped = -1;
 		int bottomOverlapped = Integer.MAX_VALUE;
 		int queueSize = aStragety.getTopQueueSize();
@@ -34,12 +35,34 @@ public class IterativeMostOverlappedAirports implements IterativeMethod {
 			int numberOfOverLapped = 0;
 			for (Aircraft bAir : airList) {
 				if (!aAir.getId().equals(bAir.getId())) {
-					HashMap<Flight, List<MatchedFlight>> matchedFlights = aAir.getMatchedFlights(bAir);
-					for (Map.Entry<Flight, List<MatchedFlight>> entry : matchedFlights.entrySet()) {
-						numberOfOverLapped += entry.getValue().size();
+					int aAirId = Integer.valueOf(aAir.getId());
+					int bAirId = Integer.valueOf(bAir.getId());
+					String aKey;
+					if (aAirId > bAirId) {
+						aKey = bAir.getId();
+						aKey += "_";
+						aKey += aAir.getId();
+					} else {
+						aKey = aAir.getId();
+						aKey += "_";
+						aKey += bAir.getId();						
 					}
+					if (overlappedMap.containsKey(aKey)) {
+						numberOfOverLapped += overlappedMap.get(aKey);
+					} else {
+						HashMap<Flight, List<MatchedFlight>> matchedFlights = aAir.getMatchedFlights(bAir);
+						int nOverlappedFortheAir = 0;
+						for (Map.Entry<Flight, List<MatchedFlight>> entry : matchedFlights.entrySet()) {
+							numberOfOverLapped += entry.getValue().size();
+							nOverlappedFortheAir += entry.getValue().size();
+						}	
+						overlappedMap.put(aKey, nOverlappedFortheAir);
+					}
+					//System.out.println("air " + aAir.getId() + " air " + bAir.getId() + " value " + overlappedMap.get(aKey));
+
 				}
 			}
+			//System.out.println("air " + aAir.getId() + " total: " + numberOfOverLapped);
 
 			if (topAirList.keySet().size() < queueSize) {
 				if (topAirList.containsKey(numberOfOverLapped)) {
@@ -51,7 +74,8 @@ public class IterativeMostOverlappedAirports implements IterativeMethod {
 				}
 				if (numberOfOverLapped < bottomOverlapped) {
 					bottomOverlapped = numberOfOverLapped;
-				} else if (numberOfOverLapped > topOverlapped) {
+				} 
+				if (numberOfOverLapped > topOverlapped) {
 					topOverlapped = numberOfOverLapped;
 				}
 
@@ -64,7 +88,8 @@ public class IterativeMostOverlappedAirports implements IterativeMethod {
 					topAirList.put(numberOfOverLapped, list);
 					if (numberOfOverLapped < bottomOverlapped) {
 						bottomOverlapped = numberOfOverLapped;
-					} else if (numberOfOverLapped > topOverlapped) {
+					} 
+					if (numberOfOverLapped > topOverlapped) {
 						topOverlapped = numberOfOverLapped;
 					}
 				}
