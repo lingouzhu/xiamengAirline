@@ -18,7 +18,7 @@ public class IterativeRadomSelector implements IterativeSelector {
 
 	@Override
 	public void setupCandidateList(List<Aircraft> candList) {
-		candidateList.addAll(candidateList);
+		candidateList.addAll(candList);
 
 	}
 

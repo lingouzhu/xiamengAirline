@@ -41,6 +41,7 @@ public class ExchangeSearch {
 					aSelector = new IterativeRadomSelector();
 				aSelector.setupIterationStragety(aStragety);
 				aSelector.setupCandidateList(new ArrayList<Aircraft>(aSolution.getSchedule().values()));
+				
 
 				while (!isImproved) {
 					air2 = aSelector.selectAircraft(air1);

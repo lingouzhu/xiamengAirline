@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,6 +36,8 @@ import xiaMengAirline.searchEngine.IterativeBatchMethod;
 import xiaMengAirline.searchEngine.IterativeLeastOverlappedAirports;
 import xiaMengAirline.searchEngine.IterativeMethod;
 import xiaMengAirline.searchEngine.IterativeMostOverlappedAirports;
+import xiaMengAirline.searchEngine.IterativeRadomSelector;
+import xiaMengAirline.searchEngine.IterativeSelector;
 import xiaMengAirline.searchEngine.OptimizerStragety;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.searchEngine.backup.LocalSearch;
@@ -515,6 +518,22 @@ public class InitDataTest {
 		assertEquals(2, aMostList.size());
 		assertEquals("3", aMostList.get(0).getId());
 		assertEquals("2", aMostList.get(1).getId());
+		
+		List<Aircraft> testSelection = new ArrayList<Aircraft> ();
+		testSelection.add(air79);
+		testSelection.add(air79c);
+		testSelection.add(airl2);
+		testSelection.add(InitData.originalSolution.getAircraft("12", "2", true, true));
+		testSelection.add(airl3);
+		testSelection.add(airl4);
+		IterativeSelector aSelector = new IterativeRadomSelector();
+		aSelector.setupCandidateList(testSelection);
+		Aircraft anewAir = aSelector.selectAircraft(air79);
+		assertEquals(false,anewAir.getId() == "79");
+		anewAir = aSelector.selectAircraft(air79);
+		assertEquals(false,anewAir.getId() == "79");
+		anewAir = aSelector.selectAircraft(air79);
+		assertEquals(false,anewAir.getId() == "79");
 		
 		
 		
