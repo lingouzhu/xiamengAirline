@@ -1,6 +1,9 @@
 package xiaMengAirline.util;
 
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -12,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,14 +33,19 @@ import xiaMengAirline.beans.FlightTime;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.Main;
+import xiaMengAirline.searchEngine.AdjustmentEngine;
 import xiaMengAirline.searchEngine.BusinessDomain;
+import xiaMengAirline.searchEngine.ExchangeSearch;
 import xiaMengAirline.searchEngine.IterativeBatchMethod;
 import xiaMengAirline.searchEngine.IterativeLeastOverlappedAirports;
 import xiaMengAirline.searchEngine.IterativeMethod;
 import xiaMengAirline.searchEngine.IterativeMostOverlappedAirports;
 import xiaMengAirline.searchEngine.IterativeRadomSelector;
+import xiaMengAirline.searchEngine.IterativeSameTypeSelector;
 import xiaMengAirline.searchEngine.IterativeSelector;
+import xiaMengAirline.searchEngine.IterativeSingleMethod;
 import xiaMengAirline.searchEngine.OptimizerStragety;
+import xiaMengAirline.searchEngine.OptimizerStragety.SELECTION;
 import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.searchEngine.backup.LocalSearch;
 import xiaMengAirline.utils.InitData;
@@ -519,6 +526,14 @@ public class InitDataTest {
 		assertEquals("3", aMostList.get(0).getId());
 		assertEquals("2", aMostList.get(1).getId());
 		
+		
+		IterativeMethod aSingleDriver = new IterativeSingleMethod();
+		aSingleDriver.setupIterationStragety(aStragety);
+		aSingleDriver.setupIterationContent(a234Solution);
+		List<Aircraft> oneList = aSingleDriver.getNextDriveForIterative();
+		assertEquals(3, oneList.size());
+
+		
 		List<Aircraft> testSelection = new ArrayList<Aircraft> ();
 		testSelection.add(air79);
 		testSelection.add(air79c);
@@ -534,6 +549,43 @@ public class InitDataTest {
 		assertEquals(false,anewAir.getId() == "79");
 		anewAir = aSelector.selectAircraft(air79);
 		assertEquals(false,anewAir.getId() == "79");
+		
+		testSelection = new ArrayList<Aircraft> ();
+		testSelection.add(air79);
+		testSelection.add(air79c);
+		testSelection.add(airl2);
+		testSelection.add(InitData.originalSolution.getAircraft("12", "2", true, true));
+		testSelection.add(airl3);
+		testSelection.add(airl4);
+		aSelector = new IterativeSameTypeSelector();
+		aSelector.setupCandidateList(testSelection);
+		anewAir = aSelector.selectAircraft(air79);
+		assertThat(anewAir.getId(), anyOf(is("12"), is("4"))); 
+		anewAir = aSelector.selectAircraft(air79);
+		assertThat(anewAir.getId(), anyOf(is("12"), is("4"))); 
+		anewAir = aSelector.selectAircraft(air79);
+		assertEquals(null,anewAir);
+		
+		XiaMengAirlineSolution a23Solution = new XiaMengAirlineSolution();
+		airl2.setCost(10000);
+		airl3.setCost(10000);
+		a23Solution.replaceOrAddNewAircraft(airl2);
+		a23Solution.replaceOrAddNewAircraft(airl3);
+		a23Solution.refreshCost();
+		
+		ExchangeSearch aSearch = new ExchangeSearch();
+		AdjustmentEngine aAdjEngine = new MockedAdjustEngine();
+		IterativeMethod aDriver = new IterativeSingleMethod();
+		aStragety.setSelectionRule(SELECTION.RANDOM);
+		aStragety.setNumberOfSolutions(1);
+		aStragety.setAbortWhenImproved(false);
+		aStragety.setDebug(true);
+		aStragety.setMaxBestSolution(1);
+		aSearch.setupIterationStragety(aStragety);
+		aSearch.setupIterativeDriver(aDriver);
+		aSearch.setAdjustmentEngine(aAdjEngine);
+		@SuppressWarnings("unused")
+		XiaMengAirlineSolution aBetterSolution1 = aSearch.discoverBetterSolution(a23Solution);
 		
 		
 		

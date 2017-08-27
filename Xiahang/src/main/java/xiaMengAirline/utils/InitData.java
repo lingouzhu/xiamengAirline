@@ -51,7 +51,7 @@ public class InitData {
 	public static Map<String, Flight> firstFlightMap = new HashMap<String, Flight>();
 	
 	/** last flight*/
-	public static Map<String, Flight> lastFlightMap = new HashMap<String, Flight>();
+	public static List<Integer> lastFlightMap = new ArrayList<Integer>();
 	
 	/** flight < 50 mins*/
 	public static Map<String, Integer> specialFlightMap = new HashMap<String, Integer>();
@@ -162,7 +162,7 @@ public class InitData {
 					}
 					
 					if (i == flightList.size() - 1) {
-						lastFlightMap.put(aAir.getId(), aFlight);
+						lastFlightMap.add(aFlight.getFlightId());
 					}
 					
 					String aKey = Integer.toString(aFlight.getSchdNo());

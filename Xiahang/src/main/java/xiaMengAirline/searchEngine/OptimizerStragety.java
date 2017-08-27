@@ -12,6 +12,7 @@ public class OptimizerStragety {
 	private int maxBestSolution; 
 	private int numberOfSolutions;
 	private int topQueueSize;
+	private boolean isDebug = false;
 	
 
 	public int getNumberOfIter() {
@@ -55,6 +56,12 @@ public class OptimizerStragety {
 	}
 	public void setTopQueueSize(int topQueueSize) {
 		this.topQueueSize = topQueueSize;
+	}
+	public boolean isDebug() {
+		return isDebug;
+	}
+	public void setDebug(boolean isDebug) {
+		this.isDebug = isDebug;
 	}
 	
 	

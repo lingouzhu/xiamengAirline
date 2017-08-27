@@ -30,7 +30,7 @@ import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.utils.InitData;
 import xiaMengAirline.utils.Utils;
 
-public class SelfSearch {
+public class SelfSearch implements AdjustmentEngine {
 	private static final Logger logger = Logger.getLogger(SelfSearch.class);
 	
 	public XiaMengAirlineSolution constructInitialSolution(XiaMengAirlineSolution mySolution)
@@ -49,6 +49,7 @@ public class SelfSearch {
 		return mySolution;
 	}
 	
+	@Override
 	public boolean adjust (Aircraft aAir) {
 		boolean validFlg = true;
 		BigDecimal cost = new BigDecimal("0");

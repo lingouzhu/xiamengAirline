@@ -10,6 +10,7 @@ import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
+import xiaMengAirline.utils.Utils;
 
 public class IterativeLeastOverlappedAirports implements IterativeMethod {
 	private TreeMap<Integer, List<Aircraft>> topAirList = new TreeMap<Integer, List<Aircraft>>();
@@ -35,18 +36,8 @@ public class IterativeLeastOverlappedAirports implements IterativeMethod {
 			int numberOfOverLapped = 0;
 			for (Aircraft bAir : airList) {
 				if (!aAir.getId().equals(bAir.getId())) {
-					int aAirId = Integer.valueOf(aAir.getId());
-					int bAirId = Integer.valueOf(bAir.getId());
-					String aKey;
-					if (aAirId > bAirId) {
-						aKey = bAir.getId();
-						aKey += "_";
-						aKey += aAir.getId();
-					} else {
-						aKey = aAir.getId();
-						aKey += "_";
-						aKey += bAir.getId();						
-					}
+					String aKey = Utils.build2AirKey(aAir.getId(), bAir.getId());;
+					
 					if (overlappedMap.containsKey(aKey)) {
 						numberOfOverLapped += overlappedMap.get(aKey);
 					} else {

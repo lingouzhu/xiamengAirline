@@ -185,6 +185,13 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 	}
 
+	public void refreshCost () {
+		setCost(new BigDecimal(0));
+		List<Aircraft> airList = new ArrayList<Aircraft> (schedule.values());
+		for (Aircraft air:airList) {
+			this.cost = this.cost.add(new BigDecimal(air.getCost()));
+		}
+	}
 	public void refreshCost(BigDecimal detla) {
 		this.cost = this.cost.add(detla);
 	}
@@ -477,16 +484,16 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 						}
 
-						if (i == flightChain.size() - 1) {
-							if (!flight.getSourceAirPort().getId().equals(
-									InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
-									|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID)
-											.getPlannedFlight().getDesintationAirport().getId())) {
-								System.out.println("5.7 error wrong end airpot: flightID" + flight.getFlightId());
-								return false;
-							}
-
-						}
+//						if (i == flightChain.size() - 1) {
+//							if (!flight.getSourceAirPort().getId().equals(
+//									InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
+//									|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID)
+//											.getPlannedFlight().getDesintationAirport().getId())) {
+//								System.out.println("5.7 error wrong end airpot: flightID" + flight.getFlightId());
+//								return false;
+//							}
+//
+//						}
 
 					}
 

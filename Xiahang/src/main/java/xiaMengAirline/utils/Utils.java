@@ -224,5 +224,21 @@ public class Utils {
 
 		return cost;
 	}
+	
+	public static String build2AirKey (String air1Id, String air2Id) {
+		int aAirId = Integer.valueOf(air1Id);
+		int bAirId = Integer.valueOf(air2Id);
+		String aKey;
+		if (aAirId > bAirId) {
+			aKey = air2Id;
+			aKey += "_";
+			aKey += air1Id;
+		} else {
+			aKey = air1Id;
+			aKey += "_";
+			aKey += air2Id;						
+		}
+		return aKey;
+	}
 
 }

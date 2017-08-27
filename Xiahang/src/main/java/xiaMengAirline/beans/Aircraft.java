@@ -282,7 +282,6 @@ public class Aircraft implements Cloneable {
 		aNew.setDropOutList(newDropList);
 		if (alternativeAircraft!=null)
 			aNew.setAlternativeAircraft(alternativeAircraft.clone());
-		aNew.cost = 0;
 		
 		return (aNew);
 	}
@@ -312,10 +311,15 @@ public class Aircraft implements Cloneable {
 		HashMap<Flight, List<Flight>> retCircuitList = new HashMap<Flight, List<Flight>>();
 
 		for (Flight aFlight : flightChain) {
+			if (!aFlight.isAdjustable())
+				continue;
 			ArrayList<Flight> matchedList = new ArrayList<Flight>();
 			int currentPos = flightChain.indexOf(aFlight);
 			String currentSourceAirport = aFlight.getSourceAirPort().getId();
 			for (int j = currentPos + 1; j < flightChain.size(); j++) {
+				if (!flightChain.get(j).isAdjustable() 
+						|| InitData.lastFlightMap.contains(flightChain.get(j).getFlightId()))
+					continue;
 				String nextDestAirport = flightChain.get(j).getDesintationAirport().getId();
 				if (currentSourceAirport.equals(nextDestAirport)) {
 					matchedList.add(flightChain.get(j));
@@ -334,14 +338,24 @@ public class Aircraft implements Cloneable {
 		HashMap<Flight, List<MatchedFlight>> retMatchedList = new HashMap<Flight, List<MatchedFlight>>();
 
 		for (Flight aFlight : flightChain) {
+			if (!aFlight.isAdjustable())
+				continue;
 			String sourceAirPortAir1 = aFlight.getSourceAirPort().getId();
 			List<MatchedFlight> matchedList = new ArrayList<MatchedFlight>();
 			for (Flight bFlight : air2.getFlightChain()) {
+				if (!bFlight.isAdjustable())
+					continue;
 				String sourceAirPortAir2 = bFlight.getSourceAirPort().getId();
 				if (sourceAirPortAir1.equals(sourceAirPortAir2)) {
 					for (int i = flightChain.indexOf(aFlight); i < flightChain.size(); i++) {
+						if (!getFlight(i).isAdjustable()
+								|| InitData.lastFlightMap.contains(flightChain.get(i).getFlightId()))
+							continue;
 						String airPortA = getFlight(i).getDesintationAirport().getId();
 						for (int j = air2.getFlightChain().indexOf(bFlight); j < air2.getFlightChain().size(); j++) {
+							if (!air2.getFlight(j).isAdjustable()
+									|| InitData.lastFlightMap.contains(air2.getFlight(j).getFlightId()))
+								continue;
 							String airPortB = air2.getFlight(j).getDesintationAirport().getId();
 							if (airPortA.equals(airPortB)) {
 								MatchedFlight aMatched = new MatchedFlight();
@@ -425,13 +439,13 @@ public class Aircraft implements Cloneable {
 				
 			}
 			
-			if (i == flightChain.size() - 1) {
-				if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
-						|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
-					return false;
-				}
-				
-			}
+//			if (i == flightChain.size() - 1) {
+//				if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())
+//						|| !flight.getDesintationAirport().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getDesintationAirport().getId())) {
+//					return false;
+//				}
+//				
+//			}
 		}
 
 		return true;

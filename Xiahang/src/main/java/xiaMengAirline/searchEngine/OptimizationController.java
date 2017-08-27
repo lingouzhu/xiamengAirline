@@ -22,8 +22,6 @@ public class OptimizationController {
 		
 		//step2, iteration for exchange
 		IterativeMethod aBatchDriver = new IterativeBatchMethod();
-		aBatchDriver.setupIterationStragety(aStragety);
-		aBatchDriver.setupIterationContent(solutionVersion1);
 		ExchangeSearch aSearch = new ExchangeSearch();
 		aSearch.setupIterationStragety(aStragety);
 		aSearch.setupIterativeDriver(aBatchDriver);

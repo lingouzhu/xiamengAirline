@@ -160,7 +160,7 @@ public class RestrictedCandidateList {
 
 	public void setaStragety(OptimizerStragety aStragety) {
 		this.aStragety = aStragety;
-		maxBestSolutions = aStragety.getMaxBestSolution();
+		maxBestSolutions = this.aStragety.getMaxBestSolution();
 	}
 
 }
