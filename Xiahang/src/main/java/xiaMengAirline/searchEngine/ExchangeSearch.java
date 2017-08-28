@@ -72,15 +72,11 @@ public class ExchangeSearch {
 					// Method 1
 					// if aircraft1 flights is circuit, place it into
 					// cancellation route - Method 1
-					if (!air1.isCancel() && !isImproved) {
+					if (!air1.isCancel()) {
 						for (int uu = 0; uu <= m - 1; uu++) {
-							if (isImproved)
-								break;
 							Flight flightAir1 = air1.getFlight(uu);
 							if (circuitFlightsAir1.containsKey(flightAir1)) {
 								for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
-									if (isImproved)
-										break;
 									Aircraft newAircraft1 = air1.clone();
 									Aircraft air1Cancelled = aSolution.getAircraft(air1.getId(), air1.getType(), true,
 											true);
@@ -112,10 +108,10 @@ public class ExchangeSearch {
 									// goes better
 									if (adjustmentEngine.adjust(newAircraft1)) {
 										if (newAircraft1.getCost() < air1.getCost()) {
-											if (aStragety.isAbortWhenImproved())
-												isImproved = true;
 											if (BusinessDomain.validateFlights(air1, air1Cancelled, newAircraft1,
 													cancelledAir)) {
+												if (aStragety.isAbortWhenImproved())
+													isImproved = true;
 												XiaMengAirlineSolution aBetterSolution = aSolution.clone();
 												aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 												aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
@@ -126,7 +122,6 @@ public class ExchangeSearch {
 														"Better Solution exists! Method 1 : " + aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air1.getId());
-												isImproved = false;
 											}
 
 										}
@@ -139,17 +134,13 @@ public class ExchangeSearch {
 						}
 					}
 
-					if (!air2.isCancel() && !isImproved) {
+					if (!air2.isCancel()) {
 						for (int xx = 0; xx <= n - 1; xx++) {
-							if (isImproved)
-								break;
 							// if aircraft2 flights is circuit, place it into
 							// cancellation route - Method 2
 							Flight flightAir2 = air2.getFlight(xx);
 							if (circuitFlightsAir2.containsKey(flightAir2)) {
 								for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
-									if (isImproved)
-										break;
 									Aircraft newAircraft2 = air2.clone();
 									Aircraft air2Cancelled = aSolution.getAircraft(air2.getId(), air2.getType(), true,
 											true);
@@ -181,11 +172,10 @@ public class ExchangeSearch {
 									// goes better
 									if (adjustmentEngine.adjust(newAircraft2)) {
 										if (newAircraft2.getCost() < air2.getCost()) {
-											
-											if (aStragety.isAbortWhenImproved())
-												isImproved = true;
 											if (BusinessDomain.validateFlights(air2, air2Cancelled, newAircraft2,
 													cancelledAir)) {
+												if (aStragety.isAbortWhenImproved())
+													isImproved = true;
 												XiaMengAirlineSolution aBetterSolution = aSolution.clone();
 												aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 												aBetterSolution.replaceOrAddNewAircraft(cancelledAir);
@@ -196,7 +186,6 @@ public class ExchangeSearch {
 														"Better Solution exists! Method 2 : " + aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air2.getId());
-												isImproved = false;
 											}
 
 										}
@@ -212,11 +201,9 @@ public class ExchangeSearch {
 						// if aircraft1/aircraft2 flights same source and
 						// same destination, do exchange overlapped part -
 						// Method 3
-						if (matchedFlights.containsKey(air1.getFlight(u)) && !isImproved) {
+						if (matchedFlights.containsKey(air1.getFlight(u))) {
 							List<MatchedFlight> matchedList = matchedFlights.get(air1.getFlight(u));
 							for (MatchedFlight aMatched : matchedList) {
-								if (isImproved)
-									break;
 								Aircraft newAircraft1 = air1.clone();
 								Aircraft newAircraft2 = air2.clone();
 								Flight air1SourceFlight = newAircraft1.getFlight(aMatched.getAir1SourceFlight());
@@ -275,9 +262,9 @@ public class ExchangeSearch {
 										oldCost = oldCost + air2.getCost();
 
 									if (newCost < oldCost) {
-										if (aStragety.isAbortWhenImproved())
-											isImproved = true;
 										if (BusinessDomain.validateFlights(air1, air2, newAircraft1, newAircraft2)) {
+											if (aStragety.isAbortWhenImproved())
+												isImproved = true;
 											XiaMengAirlineSolution aBetterSolution = aSolution.clone();
 											aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -286,7 +273,6 @@ public class ExchangeSearch {
 											logger.debug("Better Solution exists! Method 3 : " + aBetterSolution.getCost());
 										} else {
 											logger.warn("Invalid aircraft after exchange " + air2.getId());
-											isImproved = false;
 										}
 
 									}
@@ -297,12 +283,10 @@ public class ExchangeSearch {
 
 						// if aircraft1 flights is circuit, insert circuit
 						// in front of flight x of aircraft2 - Method 4
-						if (!air2.isCancel() && !isImproved) {
+						if (!air2.isCancel()) {
 							Flight flightAir1 = air1.getFlight(u);
 							if (circuitFlightsAir1.containsKey(flightAir1)) {
 								for (int x = 0; x <= n - 1; x++) {
-									if (isImproved)
-										break;
 									Flight air2Flightold = air2.getFlight(x);
 									if (!air2Flightold.isAdjustable())
 										continue;
@@ -311,8 +295,6 @@ public class ExchangeSearch {
 										continue;
 									
 									for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
-										if (isImproved)
-											break;
 										Aircraft newAircraft1 = air1.clone();
 										Aircraft newAircraft2 = air2.clone();
 										Flight air1SourceFlight = newAircraft1.getFlight(u);
@@ -363,10 +345,10 @@ public class ExchangeSearch {
 												oldCost = oldCost + air2.getCost();
 
 											if (newCost < oldCost) {
-												if (aStragety.isAbortWhenImproved())
-													isImproved = true;
 												if (BusinessDomain.validateFlights(air1, air2, newAircraft1,
 														newAircraft2)) {
+													if (aStragety.isAbortWhenImproved())
+														isImproved = true;
 													XiaMengAirlineSolution aBetterSolution = aSolution.clone();
 													aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 													aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -375,7 +357,6 @@ public class ExchangeSearch {
 													neighboursResult.addSolution(aBetterSolution);
 												} else {
 													logger.warn("Invalid aircraft after exchange " + air2.getId());
-													isImproved = false;
 												}
 
 											}
@@ -389,18 +370,14 @@ public class ExchangeSearch {
 
 						// if aircraft2 flights is circuit, insert circuit
 						// in front of flight u - method 5
-						if (!air1.isCancel() && !isImproved) {
+						if (!air1.isCancel()) {
 							Flight air1FlightOld = air1.getFlight(u);
 							if (air1FlightOld.isAdjustable()) {
 								for (int x = 0; x <= n - 1; x++) {
-									if (isImproved)
-										break;
 									Flight flightAir2 = air2.getFlight(x);
 									if (circuitFlightsAir2.containsKey(flightAir2)
 											&& air1FlightOld.getSourceAirPort().getId().equals(flightAir2.getSourceAirPort().getId())) {
 										for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
-											if (isImproved)
-												break;
 											Aircraft newAircraft1 = air1.clone();
 											Aircraft newAircraft2 = air2.clone();
 											Flight air2SourceFlight = newAircraft2.getFlight(x);
@@ -451,10 +428,10 @@ public class ExchangeSearch {
 													oldCost = oldCost + air2.getCost();
 
 												if (newCost < oldCost) {
-													if (aStragety.isAbortWhenImproved())
-														isImproved = true;
 													if (BusinessDomain.validateFlights(air1, air2, newAircraft1,
 															newAircraft2)) {
+														if (aStragety.isAbortWhenImproved())
+															isImproved = true;
 														XiaMengAirlineSolution aBetterSolution = aSolution.clone();
 														aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 														aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -463,7 +440,6 @@ public class ExchangeSearch {
 														logger.debug("Better Solution exists! Method 5 : " + aBetterSolution.getCost());
 													} else {
 														logger.warn("Invalid aircraft after exchange " + air2.getId());
-														isImproved = false;
 													}
 
 												}
@@ -479,10 +455,8 @@ public class ExchangeSearch {
 
 						// if aircraft1/2 have the same source, do exchange
 						// to end - method 6
-						if (!air1.isCancel() && !air2.isCancel() && !isImproved) {
+						if (!air1.isCancel() && !air2.isCancel()) {
 							for (int x = 0; x <= n - 1; x++) {
-								if (isImproved)
-									break;
 								Flight aFlight = air1.getFlight(u);
 								Flight bFlight = air2.getFlight(x);
 								if (!aFlight.isAdjustable() || !bFlight.isAdjustable())
@@ -542,10 +516,10 @@ public class ExchangeSearch {
 											oldCost = oldCost + air2.getCost();
 
 										if (newCost < oldCost) {
-											if (aStragety.isAbortWhenImproved())
-												isImproved = true;
 											if (BusinessDomain.validateFlights(air1, air2, newAircraft1,
 													newAircraft2)) {
+												if (aStragety.isAbortWhenImproved())
+													isImproved = true;
 												XiaMengAirlineSolution aBetterSolution = aSolution.clone();
 												aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 												aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
@@ -554,7 +528,6 @@ public class ExchangeSearch {
 												logger.debug("Better Solution exists! Method 6 : " + aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air2.getId());
-												isImproved = false;
 											}
 
 										}
