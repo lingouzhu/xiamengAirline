@@ -42,8 +42,18 @@ public class SelfSearch implements AdjustmentEngine {
 			adjustAircraft(aircraft, 0, mySolution.getAircraft(aircraft.getId(), aircraft.getType(), true, true));
 		}
 		XiaMengAirlineSolution aNewSol = mySolution.reConstruct();
-		aNewSol.refreshCost(false);
-		mySolution.setCost(aNewSol.getCost());
+		
+		float cost = 0;
+		List<Aircraft> aNewairList = new ArrayList<Aircraft>(aNewSol.getSchedule().values());
+		for (Aircraft aAir : aNewairList) {
+			if (!aAir.isCancel()) {
+				this.adjust(aAir);
+				cost += aAir.getCost();
+				
+			}
+		}
+			// System.out.println("Cost Air: " + aAir.getId());
+		mySolution.setCost(new BigDecimal(String.valueOf(cost)));
 		aNewSol.clear();
 		
 		return mySolution;
