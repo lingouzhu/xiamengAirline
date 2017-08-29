@@ -51,7 +51,6 @@ public class SelfSearch implements AdjustmentEngine {
 	
 	@Override
 	public boolean adjust (Aircraft aAir) {
-		boolean validFlg = true;
 		BigDecimal cost = new BigDecimal("0");
 		boolean cancelFlg = false;
 		Date depTime = null;
@@ -59,11 +58,25 @@ public class SelfSearch implements AdjustmentEngine {
 		
 		for (int i = 0; i < aAir.getFlightChain().size(); i++) {
 			Flight flight = aAir.getFlightChain().get(i);
-			
-			if (i == aAir.getFlightChain().size() - 1 
-					&& (!flight.getPlannedAir().getType().equals(aAir.getType()) || !flight.getPlannedFlight().getDesintationAirport().getId().equals(flight.getDesintationAirport().getId()))) {
-				validFlg = false;
+			// joint flight
+			if (InitData.jointFlightMap.get(flight.getFlightId()) != null ) {
+				if (i >= aAir.getFlightChain().size() - 1) {
+					return false;
+				}
+				
+				Flight nextFlight = aAir.getFlightChain().get(i + 1);
+				
+				if (flight.getPlannedFlight().getDesintationAirport().getId().equals(flight.getDesintationAirport().getId())
+						&& InitData.jointFlightMap.get(flight.getFlightId()).getFlightId() != nextFlight.getFlightId()) {
+					return false;
+				}
 			}
+			// last flight
+			if (InitData.lastFlightMap.contains(flight.getFlightId())
+					&& (!flight.getPlannedAir().getType().equals(aAir.getType()) || !flight.getPlannedFlight().getDesintationAirport().getId().equals(flight.getDesintationAirport().getId()))) {
+				return false;
+			}
+			
 			
 			if (flight.isAdjustable()) {
 				// change air
@@ -143,7 +156,7 @@ public class SelfSearch implements AdjustmentEngine {
 				
 			} else {
 				if (!flight.getPlannedAir().getId().equals(aAir.getId())) {
-					validFlg = false;
+					return false;
 				}
 			}
 			
@@ -154,7 +167,7 @@ public class SelfSearch implements AdjustmentEngine {
 		}
 		
 		aAir.setCost(cost.floatValue());
-		return validFlg;
+		return true;
 	}
 	
 	public List<Aircraft> adjustAircraft (Aircraft originalAir, int startIndex, Aircraft originalCancelAir) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
