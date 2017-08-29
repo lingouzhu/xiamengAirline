@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -858,5 +859,78 @@ public class BusinessDomain {
 	 */
 	public static double getMinuteDifference(Date time1, Date time2){
 		return (time1.getTime() - time2.getTime()) / (1000 * 60);
+	}
+	
+public static Date getNextOpenDate(AirPort airport, Date orgDate) {
+		
+		Date openDate = null;
+		List<RegularAirPortClose> regularStartCloseSchedule = airport.getRegularCloseSchedule();
+		for (RegularAirPortClose aClose : regularStartCloseSchedule) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			String aDateC = formatter.format(orgDate);
+			String aDateO = aDateC;
+			aDateC += " ";
+			aDateC += aClose.getCloseTime();
+			aDateO += " ";
+			aDateO += aClose.getOpenTime();
+
+			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+			try {
+				Date aCloseDate = formatter2.parse(aDateC);
+				Date aOpenDate = formatter2.parse(aDateO);
+				
+				if (orgDate.after(aCloseDate)
+						&& orgDate.before(aOpenDate)) {
+					openDate = aOpenDate;
+				} else {
+					openDate = orgDate;
+				}
+				
+			} catch (ParseException e) {
+				System.out.println("normal close date error");
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		
+		return openDate;
+	}
+	
+	public static boolean isNormalClose(AirPort airport, Date orgDate) {
+		
+		boolean closeFlg = false;
+		
+		List<RegularAirPortClose> regularStartCloseSchedule = airport.getRegularCloseSchedule();
+		for (RegularAirPortClose aClose : regularStartCloseSchedule) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			String aDateC = formatter.format(orgDate);
+			String aDateO = aDateC;
+			aDateC += " ";
+			aDateC += aClose.getCloseTime();
+			aDateO += " ";
+			aDateO += aClose.getOpenTime();
+
+			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+			try {
+				Date aCloseDate = formatter2.parse(aDateC);
+				Date aOpenDate = formatter2.parse(aDateO);
+				
+				if (orgDate.after(aCloseDate)
+						&& orgDate.before(aOpenDate)) {
+					closeFlg = true;
+				}
+				
+			} catch (ParseException e) {
+				System.out.println("normal close date error");
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		
+		return closeFlg;
 	}
 }
