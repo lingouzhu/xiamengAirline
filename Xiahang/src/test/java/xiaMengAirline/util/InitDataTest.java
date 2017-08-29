@@ -587,7 +587,11 @@ public class InitDataTest {
 		@SuppressWarnings("unused")
 		XiaMengAirlineSolution aBetterSolution1 = aSearch.discoverBetterSolution(a23Solution);
 		
-		
+		SelfSearch aInitEngine = new SelfSearch();
+		aInitEngine.setaStragety(aStragety);
+		XiaMengAirlineSolution a3Solution = new XiaMengAirlineSolution();
+		a3Solution.replaceOrAddNewAircraft(airl3);
+		aInitEngine.constructInitialSolution(a3Solution);
 		
 		
 		fail("stop");

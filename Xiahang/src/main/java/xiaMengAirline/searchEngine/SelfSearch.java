@@ -20,6 +20,7 @@ import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
+import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
@@ -32,31 +33,46 @@ import xiaMengAirline.utils.Utils;
 
 public class SelfSearch implements AdjustmentEngine {
 	private static final Logger logger = Logger.getLogger(SelfSearch.class);
+	private OptimizerStragety aStragety = null;
 	
 	public XiaMengAirlineSolution constructInitialSolution(XiaMengAirlineSolution mySolution)
-			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
+			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable, SolutionNotValid {
 		//when construct initial solution, clone a new copy
+		XiaMengAirlineSolution myNewSolution = mySolution.clone();
 
-		List<Aircraft> airList = new ArrayList<Aircraft> (mySolution.getSchedule().values());
-		for (Aircraft aircraft : airList){
-			adjustAircraft(aircraft, 0, mySolution.getAircraft(aircraft.getId(), aircraft.getType(), true, true));
-		}
-		XiaMengAirlineSolution aNewSol = mySolution.reConstruct();
 		
+		
+		List<Aircraft> airList = new ArrayList<Aircraft> (myNewSolution.getSchedule().values());
 		float cost = 0;
-		List<Aircraft> aNewairList = new ArrayList<Aircraft>(aNewSol.getSchedule().values());
-		for (Aircraft aAir : aNewairList) {
-			if (!aAir.isCancel()) {
-				this.adjust(aAir);
-				cost += aAir.getCost();
+		for (Aircraft aircraft : airList){
+			if (adjust(aircraft)) {
+				logger.debug("Air " + aircraft.getId() + " adjusted with cost: " + aircraft.getCost());
+				cost += aircraft.getCost();
+			}
 				
+			else
+				throw new SolutionNotValid(myNewSolution, "constructInitialSolution");
+		}
+		
+		myNewSolution.setCost(new BigDecimal(String.valueOf(cost)));
+		logger.debug("Total intial solution cost : " + myNewSolution.getCost());
+		
+		if (aStragety.isDebug()) {
+			logger.debug("Inital solution in details:");
+			for (Aircraft aircraft : airList){
+				logger.debug("Aircraft " + aircraft.getId() + " isCanceled? " + aircraft.isCancel());
+				for (Flight aFlight:aircraft.getFlightChain()) {
+					logger.debug("Flight " + aFlight.getFlightId());
+					logger.debug("source airport " + aFlight.getSourceAirPort().getId());
+					logger.debug("dest airport" + aFlight.getDesintationAirport().getId());
+					logger.debug("departure time " + aFlight.getDepartureTime());
+					logger.debug("arrival time " + aFlight.getArrivalTime());
+				}
 			}
 		}
-			// System.out.println("Cost Air: " + aAir.getId());
-		mySolution.setCost(new BigDecimal(String.valueOf(cost)));
-		aNewSol.clear();
+
 		
-		return mySolution;
+		return myNewSolution;
 	}
 	
 	@Override
@@ -731,5 +747,13 @@ public class SelfSearch implements AdjustmentEngine {
 			}
 		}
 		return true;
+	}
+
+	public OptimizerStragety getaStragety() {
+		return aStragety;
+	}
+
+	public void setaStragety(OptimizerStragety aStragety) {
+		this.aStragety = aStragety;
 	}
 }

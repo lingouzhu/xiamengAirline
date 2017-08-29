@@ -7,6 +7,7 @@ import java.util.List;
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
+import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.utils.InitData;
 
@@ -14,7 +15,7 @@ import xiaMengAirline.utils.InitData;
 public class OptimizationController {
 	private OptimizerStragety aStragety = null;
 	
-	public List<XiaMengAirlineSolution> constructSolutionSet (XiaMengAirlineSolution aRawSolution) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
+	public List<XiaMengAirlineSolution> constructSolutionSet (XiaMengAirlineSolution aRawSolution) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable, SolutionNotValid {
 		SelfSearch selfEngine = new SelfSearch();
 		
 		//step1, construct initial solution
