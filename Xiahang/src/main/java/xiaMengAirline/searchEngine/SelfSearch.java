@@ -60,10 +60,39 @@ public class SelfSearch implements AdjustmentEngine {
 		for (int i = 0; i < aAir.getFlightChain().size(); i++) {
 			Flight flight = aAir.getFlightChain().get(i);
 			
+			if (i == aAir.getFlightChain().size() - 1 
+					&& (!flight.getPlannedAir().getType().equals(aAir.getType()) || !flight.getPlannedFlight().getDesintationAirport().getId().equals(flight.getDesintationAirport().getId()))) {
+				validFlg = false;
+			}
+			
 			if (flight.isAdjustable()) {
+				// change air
+				if (!flight.getPlannedAir().getId().equals(aAir.getId())) {
+					
+					Date changeTime = null;
+					try {
+						changeTime = Utils.stringFormatToTime2("06/06/2017 16:00:00");
+					} catch (ParseException e) {
+						System.out.println("change time error");
+						e.printStackTrace();
+						
+					}
+					
+					// change air cost
+					if (flight.getDepartureTime().after(changeTime)) {
+						cost = cost.add(new BigDecimal("5").multiply(flight.getImpCoe()));
+					} else {
+						cost = cost.add(new BigDecimal("15").multiply(flight.getImpCoe()));
+					}
+					
+					// change air type cost
+					cost = cost.add(new BigDecimal(InitData.changeAirCostMap.get(flight.getPlannedAir().getType() + "_" + aAir.getType())).multiply(flight.getImpCoe()));
+				}
 				
+				// effected flight
 				if (BusinessDomain.isTyphoon(flight.getSourceAirPort(), flight.getDepartureTime())
 						|| BusinessDomain.isTyphoon(flight.getDesintationAirport(), flight.getArrivalTime())) {
+					// First flight effected
 					if (arrTime == null) {
 						for (AirPortClose aClose : flight.getSourceAirPort().getCloseSchedule()) {
 							if (flight.getDepartureTime().compareTo(aClose.getStartTime()) > 0
@@ -77,24 +106,38 @@ public class SelfSearch implements AdjustmentEngine {
 							}
 						}
 						
-						if (BusinessDomain.isValidDelay(flight, depTime)) {
-							cost = cost.add(new BigDecimal("150")
-									.multiply(Utils.hoursBetweenTime(depTime, flight.getPlannedFlight().getDepartureTime()).abs())
-									.multiply(flight.getImpCoe()));
-							arrTime = flight.getArrivalTime();
-							
-						} else {
-							cancelFlg = true;
-							cost = cost.add(new BigDecimal("1000").multiply(flight.getImpCoe()));
-						}
+					// others
 					} else {
+						// can't keep org dep time
+						if (Utils.addMinutes(arrTime, 50).after(flight.getDepartureTime() )) {
+							// add 50 mins
+							depTime = Utils.addMinutes(arrTime, 50);
+							arrTime = Utils.addMinutes(depTime, Utils.minutiesBetweenTime(flight.getArrivalTime(), flight.getDepartureTime()).intValue());
+							// source airport close
+							if (BusinessDomain.isNormalClose(flight.getSourceAirPort(), depTime)) {
+								depTime = BusinessDomain.getNextOpenDate(flight.getSourceAirPort(), depTime);
+								arrTime = Utils.addMinutes(depTime, Utils.minutiesBetweenTime(flight.getArrivalTime(), flight.getDepartureTime()).intValue());
+							}
+							// destination airport close
+							if (BusinessDomain.isNormalClose(flight.getDesintationAirport(), arrTime)) {
+								depTime = Utils.addMinutes(BusinessDomain.getNextOpenDate(flight.getDesintationAirport(), arrTime), Utils.minutiesBetweenTime(flight.getArrivalTime(), flight.getDepartureTime()).intValue()); ;
+								arrTime = Utils.addMinutes(depTime, Utils.minutiesBetweenTime(flight.getArrivalTime(), flight.getDepartureTime()).intValue());
+							}
+							
+						}
 						
-						depTime = Utils.addMinutes(arrTime, 50); 
-						cost = cost.add(new BigDecimal("150")
+					}
+					
+					// delay
+					if (BusinessDomain.isValidDelay(flight, depTime)) {
+						cost = cost.add(new BigDecimal("100")
 								.multiply(Utils.hoursBetweenTime(depTime, flight.getPlannedFlight().getDepartureTime()).abs())
 								.multiply(flight.getImpCoe()));
-						
-						
+						arrTime = flight.getArrivalTime();
+					// cancel	
+					} else {
+						cancelFlg = true;
+						cost = cost.add(new BigDecimal("1200").multiply(flight.getImpCoe()));
 					}
 				} 
 				
@@ -104,9 +147,6 @@ public class SelfSearch implements AdjustmentEngine {
 				}
 			}
 			
-			if (i == aAir.getFlightChain().size() - 1 && !flight.getPlannedAir().getId().equals(aAir.getId())) {
-				validFlg = false;
-			}
 		}
 		
 		if (cancelFlg) {

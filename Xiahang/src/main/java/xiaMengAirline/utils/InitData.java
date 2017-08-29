@@ -65,6 +65,31 @@ public class InitData {
 	public static Random rndNumbers = new Random();
 	public static Random rndRcl = new Random();
 
+	/** flight < 50 mins*/
+	public static HashMap<String, Double > changeAirCostMap = new HashMap<String, Double>(){{  
+	      put("1_1", 0.0);
+	      put("1_2", 0.5);   
+	      put("1_3", 1.5);   
+	      put("1_4", 1.5);   
+	      
+	      put("2_1", 0.0);   
+	      put("2_2", 0.0);   
+	      put("2_3", 1.5);   
+	      put("2_4", 1.5);   
+	      
+	      put("3_1", 2.0);   
+	      put("3_2", 2.0);   
+	      put("3_3", 0.0);   
+	      put("3_4", 2.0);   
+	      
+	      put("4_1", 4.0);   
+	      put("4_2", 4.0);   
+	      put("4_3", 2.0);   
+	      put("4_4", 0.0);   
+	      
+	      
+	      
+	}};
 	
 	public static void initData(String initDatafile) {
 				

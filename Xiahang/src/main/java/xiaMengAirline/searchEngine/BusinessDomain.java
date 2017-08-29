@@ -1,7 +1,10 @@
 package xiaMengAirline.searchEngine;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -9,7 +12,9 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
+import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.utils.InitData;
+import xiaMengAirline.utils.Utils;
 
 public class BusinessDomain {
 	private static final Logger logger = Logger.getLogger(BusinessDomain.class);
@@ -190,6 +195,91 @@ public class BusinessDomain {
 				
 	}
 	
+	
+	public static Date getTyphoonOpenDate(AirPort airport) {
+		
+		Date openDate = null;
+		for (AirPortClose aClose : airport.getCloseSchedule()) {
+			openDate = aClose.getEndTime();
+			
+		}
+		
+		return openDate;
+	}
+	
+	
+	public static Date getNextOpenDate(AirPort airport, Date orgDate) {
+		
+		Date openDate = null;
+		List<RegularAirPortClose> regularStartCloseSchedule = airport.getRegularCloseSchedule();
+		for (RegularAirPortClose aClose : regularStartCloseSchedule) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			String aDateC = formatter.format(orgDate);
+			String aDateO = aDateC;
+			aDateC += " ";
+			aDateC += aClose.getCloseTime();
+			aDateO += " ";
+			aDateO += aClose.getOpenTime();
+
+			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+			try {
+				Date aCloseDate = formatter2.parse(aDateC);
+				Date aOpenDate = formatter2.parse(aDateO);
+				
+				if (orgDate.after(aCloseDate)
+						&& orgDate.before(aOpenDate)) {
+					openDate = aOpenDate;
+				} else {
+					openDate = orgDate;
+				}
+				
+			} catch (ParseException e) {
+				System.out.println("normal close date error");
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		
+		return openDate;
+	}
+	
+	public static boolean isNormalClose(AirPort airport, Date orgDate) {
+		
+		boolean closeFlg = false;
+		
+		List<RegularAirPortClose> regularStartCloseSchedule = airport.getRegularCloseSchedule();
+		for (RegularAirPortClose aClose : regularStartCloseSchedule) {
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+			String aDateC = formatter.format(orgDate);
+			String aDateO = aDateC;
+			aDateC += " ";
+			aDateC += aClose.getCloseTime();
+			aDateO += " ";
+			aDateO += aClose.getOpenTime();
+
+			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+			try {
+				Date aCloseDate = formatter2.parse(aDateC);
+				Date aOpenDate = formatter2.parse(aDateO);
+				
+				if (orgDate.after(aCloseDate)
+						&& orgDate.before(aOpenDate)) {
+					closeFlg = true;
+				}
+				
+			} catch (ParseException e) {
+				System.out.println("normal close date error");
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		
+		return closeFlg;
+	}
 	
 
 }
