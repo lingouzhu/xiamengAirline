@@ -99,7 +99,7 @@ public class SelfSearch implements AdjustmentEngine {
 					}
 					
 					// change air type cost
-					cost = cost.add(new BigDecimal(InitData.changeAirCostMap.get(flight.getPlannedAir().getType() + "_" + aAir.getType())).multiply(flight.getImpCoe()));
+					cost = cost.add(new BigDecimal(InitData.changeAirCostMap.get(flight.getPlannedAir().getType() + "_" + aAir.getType())).multiply(new BigDecimal("500")).multiply(flight.getImpCoe()));
 				}
 				
 				// effected flight

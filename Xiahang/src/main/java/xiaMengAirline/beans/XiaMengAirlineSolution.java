@@ -2,6 +2,7 @@ package xiaMengAirline.beans;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -94,7 +95,27 @@ public class XiaMengAirlineSolution implements Cloneable {
 						boolean isChanged = false;
 						boolean isStretch = false;
 						if (!newFlight.getPlannedAir().getType().equals(aAir.getType())) {
-							cost = cost.add(new BigDecimal("1000").multiply(newFlight.getImpCoe()));
+							
+							Date changeTime = null;
+							try {
+								changeTime = Utils.stringFormatToTime2("06/06/2017 16:00:00");
+							} catch (ParseException e) {
+								System.out.println("change time error");
+								e.printStackTrace();
+								
+							}
+							
+							// change air cost
+							if (newFlight.getDepartureTime().after(changeTime)) {
+								cost = cost.add(new BigDecimal("5").multiply(newFlight.getImpCoe()));
+							} else {
+								cost = cost.add(new BigDecimal("15").multiply(newFlight.getImpCoe()));
+							}
+							
+							
+							cost = cost.add(new BigDecimal(InitData.changeAirCostMap.get(newFlight.getPlannedAir().getType() + "_" + aAir.getType()))
+									.multiply(new BigDecimal("500")).multiply(newFlight.getImpCoe()));
+							
 							isChanged = true;
 							change++;
 						}
@@ -154,7 +175,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 						continue;
 					}
 					cancel = cancel.add(cancelFlight.getImpCoe());
-					cost = cost.add(new BigDecimal("1000").multiply(cancelFlight.getImpCoe()));
+					cost = cost.add(new BigDecimal("1200").multiply(cancelFlight.getImpCoe()));
 					if (refreshOut) {
 						outputList.add(CSVUtils.flight2Output(cancelFlight, aAir.getId(), "1", "0", "0"));
 					}
