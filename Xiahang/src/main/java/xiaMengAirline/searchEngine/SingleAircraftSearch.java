@@ -51,30 +51,6 @@ public class SingleAircraftSearch {
 			throw new AircraftNotAdjustable(originalAircraft);
 		}
 		
-		if (originalAircraft.getId().equals("3")) {
-			ArrayList<Flight> bestList = new ArrayList<Flight>();
-			ArrayList<Flight> cancelList = new ArrayList<Flight>();
-			bestList.add(originalFlights.get(0).clone());
-			bestList.add(originalFlights.get(3).clone());
-			bestList.add(originalFlights.get(4).clone());
-			bestList.add(originalFlights.get(5).clone());
-			bestList.add(originalFlights.get(6).clone());
-			cancelList.add(originalFlights.get(1).clone());
-			cancelList.add(originalFlights.get(2).clone());
-			Aircraft normalAircraft = originalAircraft.clone();
-			normalAircraft.setAlternativeAircraft(null);
-			normalAircraft.setFlightChain(bestList);
-			Aircraft cancelAircraft = originalAircraft.clone();
-			cancelAircraft.setCancel(true);
-			cancelAircraft.setAlternativeAircraft(null);
-			cancelAircraft.setFlightChain(cancelList);
-			
-			ArrayList<Aircraft> returnList = new ArrayList<Aircraft>();
-			returnList.add(normalAircraft);
-			returnList.add(cancelAircraft);
-			return returnList;
-		}
-		
 		boolean started = false;
 		boolean finished = false;
 		// loop to open all solutions
@@ -176,14 +152,14 @@ public class SingleAircraftSearch {
 		Flight thisFlight = originalFlights.get(0).clone();
 		// try earlier departure
 		if (thisFlight.isAdjustable()) {
-			Date earlyDepTime = getPossibleEarlierDepartureTime(thisFlight, thisFlight.getSourceAirPort(), false, null);
+			Date earlyDepTime = BusinessDomain.getPossibleEarlierDepartureTime(thisFlight, thisFlight.getSourceAirPort(), false, null);
 			if (earlyDepTime != null && !thisFlight.isInternationalFlight()) {
 				if (earlyDepTime.compareTo(thisFlight.getDepartureTime()) != 0){
 					boolean stretchable = false;
 					Flight newFlight = thisFlight.clone();
 					newFlight.setDepartureTime(earlyDepTime);
-					newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, earlyDepTime));
-					Date adjustedArrival = getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
+					newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, earlyDepTime, originalAircraft));
+					Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
 					if (adjustedArrival != null){
 						if (adjustedArrival.compareTo(newFlight.getArrivalTime()) == 0){
 							//ok open next
@@ -193,15 +169,15 @@ public class SingleAircraftSearch {
 							insertPathToOpenList(aNewFlightChain);
 							stretchable = true;
 						} else {
-							Date newDeparture = getDepartureTimeByArrivalTime(newFlight, adjustedArrival);
-							if (!isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
+							Date newDeparture = BusinessDomain.getDepartureTimeByArrivalTime(newFlight, adjustedArrival, originalAircraft);
+							if (!BusinessDomain.isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
 								newFlight.setDepartureTime(newDeparture);
-								if (isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
-									Date newTempDelayDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, null);
+								if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
+									Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, null);
 									if (newTempDelayDep != null){
 										newFlight.setDepartureTime(newTempDelayDep);
-										newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newTempDelayDep));
-										if (!isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
+										newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newTempDelayDep, originalAircraft));
+										if (!BusinessDomain.isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
 											ArrayList<Flight> aNewFlightChain = new ArrayList<Flight>();
 											aNewFlightChain.add(newFlight);
 											aNewFlightChain.add(originalFlights.get(1).clone());
@@ -222,8 +198,8 @@ public class SingleAircraftSearch {
 						}
 					}
 					// try stretch
-					if (stretchable && getJointFlightPosition(newFlight) == 1 && 
-							!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
+					if (stretchable && BusinessDomain.getJointFlightPosition(newFlight) == 1 && 
+							!newFlight.isInternationalFlight() && !BusinessDomain.getJointFlight(newFlight).isInternationalFlight()) {
 						ArrayList<Flight> newFlightList =  new ArrayList<Flight>();
 						newFlightList.add(newFlight);
 						openJointFlightNode(newFlight, newFlightList);
@@ -232,13 +208,13 @@ public class SingleAircraftSearch {
 			}
 			
 			// try delay departure
-			Date delayDepTime = getPossibleDelayDeparture(thisFlight, thisFlight.getSourceAirPort(), true, null);
+			Date delayDepTime = BusinessDomain.getPossibleDelayDeparture(thisFlight, thisFlight.getSourceAirPort(), true, null);
 			if (delayDepTime != null) {
 				boolean stretchable = false;
 				Flight newFlight = thisFlight.clone();
 				newFlight.setDepartureTime(delayDepTime);
-				newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, delayDepTime));
-				Date adjustedArrival = getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
+				newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, delayDepTime, originalAircraft));
+				Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
 				if (adjustedArrival != null){
 					if (adjustedArrival.compareTo(newFlight.getArrivalTime()) == 0){
 						//ok open next
@@ -249,15 +225,15 @@ public class SingleAircraftSearch {
 						stretchable = true;
 					} else {
 						
-						Date newDeparture = getDepartureTimeByArrivalTime(newFlight, adjustedArrival);
-						if (!isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
+						Date newDeparture = BusinessDomain.getDepartureTimeByArrivalTime(newFlight, adjustedArrival, originalAircraft);
+						if (!BusinessDomain.isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
 							newFlight.setDepartureTime(newDeparture);
-							if (isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
-								Date newTempDelayDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, null);
+							if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
+								Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, null);
 								if (newTempDelayDep != null){
 									newFlight.setDepartureTime(newTempDelayDep);
-									newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newTempDelayDep));
-									if (!isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
+									newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newTempDelayDep, originalAircraft));
+									if (!BusinessDomain.isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
 										ArrayList<Flight> aNewFlightChain = new ArrayList<Flight>();
 										aNewFlightChain.add(newFlight);
 										aNewFlightChain.add(originalFlights.get(1).clone());
@@ -278,8 +254,8 @@ public class SingleAircraftSearch {
 					}
 				}
 				// try stretch
-				if (stretchable && getJointFlightPosition(newFlight) == 1 && 
-						!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
+				if (stretchable && BusinessDomain.getJointFlightPosition(newFlight) == 1 && 
+						!newFlight.isInternationalFlight() && !BusinessDomain.getJointFlight(newFlight).isInternationalFlight()) {
 					ArrayList<Flight> newFlightList =  new ArrayList<Flight>();
 					newFlightList.add(newFlight);
 					openJointFlightNode(newFlight, newFlightList);
@@ -310,7 +286,7 @@ public class SingleAircraftSearch {
 	public void openNextNode(ArrayList<Flight> oldFlights) throws ParseException, FlightDurationNotFound, CloneNotSupportedException {
 		Flight thisFlight = oldFlights.get(oldFlights.size() - 1);
 		Flight lastFlight = oldFlights.get(oldFlights.size() - 2);
-		int thisFlightIndex = getFlightIndexByFlightId(thisFlight.getFlightId());
+		int thisFlightIndex = BusinessDomain.getFlightIndexByFlightId(thisFlight.getFlightId(), originalFlights);
 		int nextFlightIndex = thisFlightIndex + 1;
 		if (thisFlight.isAdjustable()) {
 			// track back
@@ -318,19 +294,19 @@ public class SingleAircraftSearch {
 			for (int i = oldFlights.size() - 2; i >= 0; i--){
 				Flight trackFlight = optimizedFlightList.get(i);
 				Flight nextFlight = optimizedFlightList.get(i + 1);
-				if (!isNewFlight(trackFlight)){
-					if (getPlannedDeparture(trackFlight).after(trackFlight.getDepartureTime())) {
+				if (!BusinessDomain.isNewFlight(trackFlight)){
+					if (BusinessDomain.getPlannedDeparture(trackFlight).after(trackFlight.getDepartureTime())) {
 						Date currentDeparture = trackFlight.getDepartureTime();
 						Date nextFlightDeparture = nextFlight.getDepartureTime();
-						int groundingTimeBetween = getGroundingTime(trackFlight, nextFlight);
+						int groundingTimeBetween = BusinessDomain.getGroundingTime(trackFlight, nextFlight);
 						Date trackFlightTempArrival = addMinutes(nextFlightDeparture, -groundingTimeBetween);
 						// get minimum departure time of track flight
-						Date trackFlightTempDeparture = getDepartureTimeByArrivalTime(trackFlight, trackFlightTempArrival);
+						Date trackFlightTempDeparture = BusinessDomain.getDepartureTimeByArrivalTime(trackFlight, trackFlightTempArrival, originalAircraft);
 						trackFlightTempDeparture = currentDeparture.before(trackFlightTempDeparture) ? trackFlightTempDeparture : currentDeparture;
 						// airport close start time
-						Date closeStartTime = getAirportDepartureCloseStart(trackFlight.getSourceAirPort());
+						Date closeStartTime = BusinessDomain.getAirportDepartureCloseStart(trackFlight.getSourceAirPort());
 						trackFlight.setDepartureTime(trackFlightTempDeparture.before(closeStartTime) ? trackFlightTempDeparture : closeStartTime);
-						trackFlight.setArrivalTime(getArrivalTimeByDepartureTime(trackFlight, trackFlightTempDeparture.before(closeStartTime) ? trackFlightTempDeparture : closeStartTime));
+						trackFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(trackFlight, trackFlightTempDeparture.before(closeStartTime) ? trackFlightTempDeparture : closeStartTime, originalAircraft));
 					}
 				}
 			}
@@ -341,18 +317,18 @@ public class SingleAircraftSearch {
 			if (nextFlightIndex < originalFlights.size()) {
 				// adjust this flight by early departure, delay, stretch and cancel
 				// try early departure
-				Date earlyDepTime = getPossibleEarlierDepartureTime(thisFlight, thisFlight.getSourceAirPort(), false, lastFlight);
+				Date earlyDepTime = BusinessDomain.getPossibleEarlierDepartureTime(thisFlight, thisFlight.getSourceAirPort(), false, lastFlight);
 				if (earlyDepTime != null && !thisFlight.isInternationalFlight()) {
 					if (earlyDepTime.compareTo(thisFlight.getDepartureTime()) != 0){
 						boolean stretchable = false;
 						Flight newFlight = thisFlight.clone();
 						newFlight.setDepartureTime(earlyDepTime);
-						newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, earlyDepTime));
-						Date adjustedArrival = getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
+						newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, earlyDepTime, originalAircraft));
+						Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
 						if (adjustedArrival != null){
 							if (adjustedArrival.compareTo(newFlight.getArrivalTime()) == 0){
 								//ok open next
-								if (isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
+								if (BusinessDomain.isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
 									ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 									aNewFlightChain.remove(aNewFlightChain.size() - 1);
 									aNewFlightChain.add(newFlight);
@@ -361,16 +337,16 @@ public class SingleAircraftSearch {
 									stretchable = true;
 								}
 							} else {
-								Date newDeparture = getDepartureTimeByArrivalTime(newFlight, adjustedArrival);
-								if (!isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
+								Date newDeparture = BusinessDomain.getDepartureTimeByArrivalTime(newFlight, adjustedArrival, originalAircraft);
+								if (!BusinessDomain.isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
 									newFlight.setDepartureTime(newDeparture);
-									if (isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
-										Date newTempDelayDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
+									if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
+										Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
 										if (newTempDelayDep != null){
 											newFlight.setDepartureTime(newTempDelayDep);
-											newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newTempDelayDep));
-											if (!isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
-												if (isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
+											newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newTempDelayDep, originalAircraft));
+											if (!BusinessDomain.isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
+												if (BusinessDomain.isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
 													ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 													aNewFlightChain.remove(aNewFlightChain.size() - 1);
 													aNewFlightChain.add(newFlight);
@@ -384,7 +360,7 @@ public class SingleAircraftSearch {
 									} else {
 										//ok open next
 										newFlight.setArrivalTime(adjustedArrival);
-										if (isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
+										if (BusinessDomain.isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
 											ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 											aNewFlightChain.remove(aNewFlightChain.size() - 1);
 											aNewFlightChain.add(newFlight);
@@ -397,8 +373,8 @@ public class SingleAircraftSearch {
 							}
 						}
 						// try stretch
-						if (stretchable && getJointFlightPosition(newFlight) == 1 && 
-								!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
+						if (stretchable && BusinessDomain.getJointFlightPosition(newFlight) == 1 && 
+								!newFlight.isInternationalFlight() && !BusinessDomain.getJointFlight(newFlight).isInternationalFlight()) {
 							ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 							aNewFlightChain.remove(aNewFlightChain.size() - 1);
 							aNewFlightChain.add(newFlight);
@@ -408,18 +384,18 @@ public class SingleAircraftSearch {
 				}
 				
 				// try delay
-				Date delayDepTime = getPossibleDelayDeparture(thisFlightOpt, thisFlightOpt.getSourceAirPort(), false, lastFlightOpt);
+				Date delayDepTime = BusinessDomain.getPossibleDelayDeparture(thisFlightOpt, thisFlightOpt.getSourceAirPort(), false, lastFlightOpt);
 				if (delayDepTime != null) {
 					boolean stretchable = false;
 					Flight newFlight = thisFlightOpt.clone();
 
 					newFlight.setDepartureTime(delayDepTime);
-					newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, delayDepTime));
-					Date adjustedArrival = getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
+					newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, delayDepTime, originalAircraft));
+					Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
 					if (adjustedArrival != null){
 						if (adjustedArrival.compareTo(newFlight.getArrivalTime()) == 0){
 							//ok open next
-							if (isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
+							if (BusinessDomain.isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
 								ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 								aNewFlightChain.remove(aNewFlightChain.size() - 1);
 								aNewFlightChain.add(newFlight);
@@ -429,16 +405,16 @@ public class SingleAircraftSearch {
 							}
 							
 						} else {
-							Date newDeparture = getDepartureTimeByArrivalTime(newFlight, adjustedArrival);
-							if (!isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
+							Date newDeparture = BusinessDomain.getDepartureTimeByArrivalTime(newFlight, adjustedArrival, originalAircraft);
+							if (!BusinessDomain.isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
 								newFlight.setDepartureTime(newDeparture);
-								if (isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
-									Date newTempDelayDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlightOpt);
+								if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
+									Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlightOpt);
 									if (newTempDelayDep != null){
 										newFlight.setDepartureTime(newTempDelayDep);
-										newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newTempDelayDep));
-										if (!isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
-											if (isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
+										newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newTempDelayDep, originalAircraft));
+										if (!BusinessDomain.isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
+											if (BusinessDomain.isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
 												ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 												aNewFlightChain.remove(aNewFlightChain.size() - 1);
 												aNewFlightChain.add(newFlight);
@@ -451,7 +427,7 @@ public class SingleAircraftSearch {
 								} else {
 									//ok open next
 									newFlight.setArrivalTime(adjustedArrival);
-									if (isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
+									if (BusinessDomain.isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
 										ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 										aNewFlightChain.remove(aNewFlightChain.size() - 1);
 										aNewFlightChain.add(newFlight);
@@ -464,8 +440,8 @@ public class SingleAircraftSearch {
 						}
 					}
 					// try stretch
-					if (stretchable && getJointFlightPosition(newFlight) == 1 && 
-							!newFlight.isInternationalFlight() && !getJointFlight(newFlight).isInternationalFlight()) {
+					if (stretchable && BusinessDomain.getJointFlightPosition(newFlight) == 1 && 
+							!newFlight.isInternationalFlight() && !BusinessDomain.getJointFlight(newFlight).isInternationalFlight()) {
 						ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 						aNewFlightChain.remove(aNewFlightChain.size() - 1);
 						aNewFlightChain.add(newFlight);
@@ -481,33 +457,33 @@ public class SingleAircraftSearch {
 			} else {
 				// last flight is loaded
 				// try early departure
-				Date earlyDepTime = getPossibleEarlierDepartureTime(thisFlight, thisFlight.getSourceAirPort(), false, lastFlight);
+				Date earlyDepTime = BusinessDomain.getPossibleEarlierDepartureTime(thisFlight, thisFlight.getSourceAirPort(), false, lastFlight);
 				if (earlyDepTime != null && !thisFlight.isInternationalFlight()) {
 					Flight newFlight = thisFlight.clone();
 					if (earlyDepTime.compareTo(thisFlight.getDepartureTime()) != 0){
 						newFlight.setDepartureTime(earlyDepTime);
-						newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, earlyDepTime));
-						Date adjustedArrival = getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
+						newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, earlyDepTime, originalAircraft));
+						Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
 						if (adjustedArrival != null){
 							if (adjustedArrival.compareTo(newFlight.getArrivalTime()) == 0){
 								//ok open next
-								if (isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
+								if (BusinessDomain.isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
 									ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 									aNewFlightChain.remove(aNewFlightChain.size() - 1);
 									aNewFlightChain.add(newFlight);
 									finishedArrayList.add(aNewFlightChain);
 								}
 							} else {
-								Date newDeparture = getDepartureTimeByArrivalTime(newFlight, adjustedArrival);
-								if (!isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
+								Date newDeparture = BusinessDomain.getDepartureTimeByArrivalTime(newFlight, adjustedArrival, originalAircraft);
+								if (!BusinessDomain.isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
 									newFlight.setDepartureTime(newDeparture);
-									if (isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
-										Date newTempDelayDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
+									if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
+										Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
 										if (newTempDelayDep != null){
 											newFlight.setDepartureTime(newTempDelayDep);
-											newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newTempDelayDep));
-											if (!isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
-												if (isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
+											newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newTempDelayDep, originalAircraft));
+											if (!BusinessDomain.isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
+												if (BusinessDomain.isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
 													ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 													aNewFlightChain.remove(aNewFlightChain.size() - 1);
 													aNewFlightChain.add(newFlight);
@@ -518,7 +494,7 @@ public class SingleAircraftSearch {
 									} else {
 										//ok open next
 										newFlight.setArrivalTime(adjustedArrival);
-										if (isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
+										if (BusinessDomain.isValidParking(lastFlight.getArrivalTime(), newFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
 											ArrayList<Flight> aNewFlightChain = cloneList(oldFlights);
 											aNewFlightChain.remove(aNewFlightChain.size() - 1);
 											aNewFlightChain.add(newFlight);
@@ -532,33 +508,33 @@ public class SingleAircraftSearch {
 				}
 				
 				// try delay
-				Date delayDepTime = getPossibleDelayDeparture(thisFlightOpt, thisFlightOpt.getSourceAirPort(), false, lastFlightOpt);
+				Date delayDepTime = BusinessDomain.getPossibleDelayDeparture(thisFlightOpt, thisFlightOpt.getSourceAirPort(), false, lastFlightOpt);
 				if (delayDepTime != null) {
 					Flight newFlight = thisFlightOpt.clone();
 					newFlight.setDepartureTime(delayDepTime);
 					
-					newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, delayDepTime));
-					Date adjustedArrival = getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
+					newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, delayDepTime, originalAircraft));
+					Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
 					if (adjustedArrival != null){
 						if (adjustedArrival.compareTo(newFlight.getArrivalTime()) == 0){
 							//ok open next
-							if (isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
+							if (BusinessDomain.isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
 								ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 								aNewFlightChain.remove(aNewFlightChain.size() - 1);
 								aNewFlightChain.add(newFlight);
 								finishedArrayList.add(aNewFlightChain);
 							}
 						} else {
-							Date newDeparture = getDepartureTimeByArrivalTime(newFlight, adjustedArrival);
-							if (!isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
+							Date newDeparture = BusinessDomain.getDepartureTimeByArrivalTime(newFlight, adjustedArrival, originalAircraft);
+							if (!BusinessDomain.isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
 								newFlight.setDepartureTime(newDeparture);
-								if (isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
-									Date newTempDelayDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlightOpt);
+								if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
+									Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlightOpt);
 									if (newTempDelayDep != null){
 										newFlight.setDepartureTime(newTempDelayDep);
-										newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newTempDelayDep));
-										if (!isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
-											if (isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
+										newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newTempDelayDep, originalAircraft));
+										if (!BusinessDomain.isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
+											if (BusinessDomain.isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
 												ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 												aNewFlightChain.remove(aNewFlightChain.size() - 1);
 												aNewFlightChain.add(newFlight);
@@ -569,7 +545,7 @@ public class SingleAircraftSearch {
 								} else {
 									//ok open next
 									newFlight.setArrivalTime(adjustedArrival);
-									if (isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
+									if (BusinessDomain.isValidParking(lastFlightOpt.getArrivalTime(), newFlight.getDepartureTime(), lastFlightOpt.getDesintationAirport())){
 										ArrayList<Flight> aNewFlightChain = cloneList(optimizedFlightList);
 										aNewFlightChain.remove(aNewFlightChain.size() - 1);
 										aNewFlightChain.add(newFlight);
@@ -591,26 +567,26 @@ public class SingleAircraftSearch {
 	
 	
 	public void openCancelFlightNode(Flight origFlight, ArrayList<Flight> origFlightList) throws CloneNotSupportedException, ParseException, FlightDurationNotFound {
-		int thisFlightIndex = getFlightIndexByFlightId(origFlight.getFlightId());
+		int thisFlightIndex = BusinessDomain.getFlightIndexByFlightId(origFlight.getFlightId(), originalFlights);
 		Flight lastFlight = origFlightList.size() > 1 ? origFlightList.get(origFlightList.size() - 2) : null;
 		ArrayList<Flight> flightChain = cloneList(origFlightList);
 		flightChain.remove(flightChain.size() - 1);
 		boolean adjustable = false;
 		
 		Flight newFlight = origFlight.clone();
-		newFlight.setFlightId(getNextFlightId());
+		newFlight.setFlightId(BusinessDomain.getNextFlightId());
 		newFlight.setPlannedFlight(null);;
 		if (thisFlightIndex > 0) {
 			boolean newFlag = false;
 			for (Flight flight : flightChain){
-				if (isNewFlight(flight)){
+				if (BusinessDomain.isNewFlight(flight)){
 					newFlag = true;
 				}
 			}
 			if (!newFlag){
-				Date depTime = addMinutes(lastFlight.getArrivalTime(), getGroundingTime(lastFlight, newFlight));
+				Date depTime = addMinutes(lastFlight.getArrivalTime(), BusinessDomain.getGroundingTime(lastFlight, newFlight));
 				newFlight.setDepartureTime(depTime);
-				Date adjustedDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
+				Date adjustedDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
 				if (adjustedDep != null) {
 					adjustable = true;
 					newFlight.setDepartureTime(adjustedDep);
@@ -630,7 +606,7 @@ public class SingleAircraftSearch {
 						if (aNewFlight.getFlightId() == 1340){
 							
 						}
-						if (!isValidParking(lastFlight.getArrivalTime(), nextFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
+						if (!BusinessDomain.isValidParking(lastFlight.getArrivalTime(), nextFlight.getDepartureTime(), lastFlight.getDesintationAirport())){
 							continue;
 						} else {
 							ArrayList<Flight> aNewFlightChain = cloneList(flightChain);
@@ -642,44 +618,44 @@ public class SingleAircraftSearch {
 				}
 				
 				// international flight is not eligible
-				if (isInternational(aNewFlight.getSourceAirPort().getId(), destAirport.getId())){
+				if (BusinessDomain.isInternational(aNewFlight.getSourceAirPort().getId(), destAirport.getId())){
 					continue;
 				}
 				
 				// aircraft constraint
-				if (!isEligibalAircraft(aNewFlight.getAssignedAir(), aNewFlight.getSourceAirPort(), destAirport)){
+				if (!BusinessDomain.isEligibalAircraft(aNewFlight.getAssignedAir(), aNewFlight.getSourceAirPort(), destAirport)){
 					continue;
 				}
 
-				long flightTime = getFlightTime(aNewFlight.getSourceAirPort().getId(), destAirport.getId(), aNewFlight.getAssignedAir());
+				long flightTime = BusinessDomain.getFlightTime(aNewFlight.getSourceAirPort().getId(), destAirport.getId(), aNewFlight.getAssignedAir());
 				if (flightTime > 0){
 					aNewFlight.setDesintationAirport(nextFlight.getSourceAirPort());
-					aNewFlight.setArrivalTime(getArrivalTimeByDepartureTime(aNewFlight, aNewFlight.getDepartureTime()));
-					Date adjustedArrival = getPossibleArrivalTime(aNewFlight, aNewFlight.getDesintationAirport());
+					aNewFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(aNewFlight, aNewFlight.getDepartureTime(), originalAircraft));
+					Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(aNewFlight, aNewFlight.getDesintationAirport());
 					if (adjustedArrival != null){
 						if (adjustedArrival.compareTo(aNewFlight.getArrivalTime()) == 0){
 							//ok open next
 							ArrayList<Flight> aNewFlightChain = cloneList(flightChain);
 							aNewFlightChain.add(aNewFlight);
 							aNewFlightChain.add(nextFlight);
-							if (!isValidParking(aNewFlight.getArrivalTime(), nextFlight.getDepartureTime(), aNewFlight.getDesintationAirport())){
+							if (!BusinessDomain.isValidParking(aNewFlight.getArrivalTime(), nextFlight.getDepartureTime(), aNewFlight.getDesintationAirport())){
 								continue;
 							}
 							insertPathToOpenList(aNewFlightChain);
 						} else {
 							Date newDeparture = addMinutes(adjustedArrival, -flightTime);
-							if (!isDepTimeAffected(newDeparture, aNewFlight.getSourceAirPort())){
+							if (!BusinessDomain.isDepTimeAffected(newDeparture, aNewFlight.getSourceAirPort())){
 								aNewFlight.setDepartureTime(newDeparture);
-								if (isDepTimeAffectedByNormal(newDeparture, aNewFlight.getSourceAirPort())){
-									Date newTempDelayDep = getPossibleDelayDeparture(aNewFlight, aNewFlight.getSourceAirPort(), false, lastFlight);
+								if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, aNewFlight.getSourceAirPort())){
+									Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(aNewFlight, aNewFlight.getSourceAirPort(), false, lastFlight);
 									if (newTempDelayDep != null){
 										aNewFlight.setDepartureTime(newTempDelayDep);
-										aNewFlight.setArrivalTime(getArrivalTimeByDepartureTime(aNewFlight, newTempDelayDep));
-										if (!isArvTimeAffected(aNewFlight.getArrivalTime(), aNewFlight.getDesintationAirport())){
+										aNewFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(aNewFlight, newTempDelayDep, originalAircraft));
+										if (!BusinessDomain.isArvTimeAffected(aNewFlight.getArrivalTime(), aNewFlight.getDesintationAirport())){
 											ArrayList<Flight> aNewFlightChain = cloneList(flightChain);
 											aNewFlightChain.add(aNewFlight);
 											aNewFlightChain.add(nextFlight);
-											if (!isValidParking(aNewFlight.getArrivalTime(), nextFlight.getDepartureTime(), aNewFlight.getDesintationAirport())){
+											if (!BusinessDomain.isValidParking(aNewFlight.getArrivalTime(), nextFlight.getDepartureTime(), aNewFlight.getDesintationAirport())){
 												continue;
 											}
 											insertPathToOpenList(aNewFlightChain);
@@ -691,7 +667,7 @@ public class SingleAircraftSearch {
 									ArrayList<Flight> aNewFlightChain = cloneList(flightChain);
 									aNewFlightChain.add(aNewFlight);
 									aNewFlightChain.add(nextFlight);
-									if (!isValidParking(aNewFlight.getArrivalTime(), nextFlight.getDepartureTime(), aNewFlight.getDesintationAirport())){
+									if (!BusinessDomain.isValidParking(aNewFlight.getArrivalTime(), nextFlight.getDepartureTime(), aNewFlight.getDesintationAirport())){
 										continue;
 									}
 									insertPathToOpenList(aNewFlightChain);
@@ -715,22 +691,22 @@ public class SingleAircraftSearch {
 	 * @throws AircraftNotAdjustable 
 	 */
 	public void openJointFlightNode(Flight originalFlight, ArrayList<Flight> origFlightChain) throws CloneNotSupportedException, FlightDurationNotFound, ParseException{
-		Flight jointFlight = getJointFlight(originalFlight);
+		Flight jointFlight = BusinessDomain.getJointFlight(originalFlight);
 		Flight lastFlight = origFlightChain.size() > 1 ? origFlightChain.get(origFlightChain.size() - 2) : null;
 		ArrayList<Flight> flightChain = cloneList(origFlightChain);
 		flightChain.remove(flightChain.size() - 1);
-		if (isAffected(jointFlight) == 1) {
+		if (BusinessDomain.isAffected(jointFlight) == 1) {
 			// departure time is affected
 			Flight newFlight = originalFlight.clone();
 			newFlight.setDesintationAirport(jointFlight.getDesintationAirport());
-			newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newFlight.getDepartureTime()));
-			Date adjustedArrival = getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
+			newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newFlight.getDepartureTime(), originalAircraft));
+			Date adjustedArrival = BusinessDomain.getPossibleArrivalTime(newFlight, newFlight.getDesintationAirport());
 			if (adjustedArrival != null){
 				if (adjustedArrival.compareTo(newFlight.getArrivalTime()) == 0){
 					//ok open next
 					flightChain.add(newFlight);
 					// get next node
-					int jointFlightIndex = getFlightIndexByFlightId(jointFlight.getFlightId());
+					int jointFlightIndex = BusinessDomain.getFlightIndexByFlightId(jointFlight.getFlightId(), originalFlights);
 					if (jointFlightIndex > originalFlights.size() - 2) {
 						finishedArrayList.add(flightChain);
 					} else {
@@ -739,18 +715,18 @@ public class SingleAircraftSearch {
 						insertPathToOpenList(flightChain);
 					}
 				} else {
-					Date newDeparture = getDepartureTimeByArrivalTime(newFlight, adjustedArrival);
-					if (!isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
+					Date newDeparture = BusinessDomain.getDepartureTimeByArrivalTime(newFlight, adjustedArrival, originalAircraft);
+					if (!BusinessDomain.isDepTimeAffected(newDeparture, newFlight.getSourceAirPort())){
 						newFlight.setDepartureTime(newDeparture);
-						if (isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
-							Date newTempDelayDep = getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
+						if (BusinessDomain.isDepTimeAffectedByNormal(newDeparture, newFlight.getSourceAirPort())){
+							Date newTempDelayDep = BusinessDomain.getPossibleDelayDeparture(newFlight, newFlight.getSourceAirPort(), false, lastFlight);
 							if (newTempDelayDep != null){
 								newFlight.setDepartureTime(newTempDelayDep);
-								newFlight.setArrivalTime(getArrivalTimeByDepartureTime(newFlight, newTempDelayDep));
-								if (!isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
+								newFlight.setArrivalTime(BusinessDomain.getArrivalTimeByDepartureTime(newFlight, newTempDelayDep, originalAircraft));
+								if (!BusinessDomain.isArvTimeAffected(newFlight.getArrivalTime(), newFlight.getDesintationAirport())){
 									flightChain.add(newFlight);
 									// get next node
-									int jointFlightIndex = getFlightIndexByFlightId(jointFlight.getFlightId());
+									int jointFlightIndex = BusinessDomain.getFlightIndexByFlightId(jointFlight.getFlightId(), originalFlights);
 									if (jointFlightIndex > originalFlights.size() - 2) {
 										finishedArrayList.add(flightChain);
 									} else {
@@ -765,7 +741,7 @@ public class SingleAircraftSearch {
 							newFlight.setArrivalTime(adjustedArrival);
 							flightChain.add(newFlight);
 							// get next node
-							int jointFlightIndex = getFlightIndexByFlightId(jointFlight.getFlightId());
+							int jointFlightIndex = BusinessDomain.getFlightIndexByFlightId(jointFlight.getFlightId(), originalFlights);
 							if (jointFlightIndex > originalFlights.size() - 2) {
 								finishedArrayList.add(flightChain);
 							} else {
@@ -782,599 +758,7 @@ public class SingleAircraftSearch {
 	
 	// method utility
 	
-	/**
-	 * if a departure time is in the error time range
-	 * @param depTime
-	 * @param airport
-	 * @return
-	 */
-	public boolean isDepTimeAffected(Date depTime, AirPort airport) {
-		for (AirPortClose aClose : airport.getCloseSchedule()) {
-			if (!aClose.isAllowForTakeoff()) {
-				if (depTime.after(aClose.getStartTime())
-						&& depTime.before(aClose.getEndTime())) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 	
-	/**
-	 * if a arrival time is in the error time range
-	 * @param arvTime
-	 * @param airport
-	 * @return
-	 */
-	public boolean isArvTimeAffected(Date arvTime, AirPort airport) {
-		for (AirPortClose aClose : airport.getCloseSchedule()) {
-			if (arvTime.after(aClose.getStartTime())
-					&& arvTime.before(aClose.getEndTime())) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	
-	public boolean isDepTimeAffectedByNormal(Date depTime, AirPort airport) throws ParseException{
-		for (RegularAirPortClose aClose : airport.getRegularCloseSchedule()) {
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			String aDateC = formatter.format(depTime);
-			String aDateO = aDateC;
-			aDateC += " ";
-			aDateC += aClose.getCloseTime();
-			aDateO += " ";
-			aDateO += aClose.getOpenTime();
-			
-			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			
-			Date aCloseDate = formatter2.parse(aDateC);
-			Date aOpenDate = formatter2.parse(aDateO);
-			
-			if (depTime.after(aCloseDate)
-					&& depTime.before(aOpenDate)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * departure time is eligible to set earlier.
-	 * @param depTime
-	 * @param airport
-	 * @return
-	 */
-	public boolean isEarlyDeparturePossible(Date depTime, AirPort airport) {
-		for (AirPortClose aClose : airport.getCloseSchedule()) {
-			if (!aClose.isAllowForTakeoff()) {
-				if (depTime.after(aClose.getStartTime())
-						&& depTime.before(addMinutes(aClose.getStartTime(), 360))) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * get next valid arrival time
-	 * @param flight
-	 * @param airport
-	 * @return
-	 * @throws ParseException
-	 */
-	public Date getPossibleArrivalTime(Flight flight, AirPort airport) throws ParseException{
-		for (AirPortClose aClose : airport.getCloseSchedule()) {
-			if (flight.getArrivalTime().after(aClose.getStartTime())
-					&& flight.getArrivalTime().before(aClose.getEndTime())) {
-				if (isNewFlight(flight)){
-					return aClose.getEndTime();
-				} else {
-					if (isValidDelay(getPlannedArrival(flight), aClose.getEndTime(), flight.isInternationalFlight())){
-						return aClose.getEndTime();
-					} else {
-						return null;
-					}
-				}
-			}
-		}
-		for (RegularAirPortClose aClose : airport.getRegularCloseSchedule()) {
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			String aDateC = formatter.format(flight.getArrivalTime());
-			String aDateO = aDateC;
-			aDateC += " ";
-			aDateC += aClose.getCloseTime();
-			aDateO += " ";
-			aDateO += aClose.getOpenTime();
-			
-			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			
-			Date aCloseDate = formatter2.parse(aDateC);
-			Date aOpenDate = formatter2.parse(aDateO);
-			
-			if (flight.getArrivalTime().after(aCloseDate)
-					&& flight.getArrivalTime().before(aOpenDate)) {
-				if (isNewFlight(flight)){
-					return aOpenDate;
-				} else {
-					if (isValidDelay(getPlannedDeparture(flight), aOpenDate, flight.isInternationalFlight())){
-						return aOpenDate;
-					} else {
-						return null;
-					}
-				}
-			}
-		} 
-		return (Date) flight.getArrivalTime().clone();
-	}
-	
-	/**
-	 * attempt delay the flight
-	 * @param flight
-	 * @param airport
-	 * @return
-	 * @throws ParseException 
-	 */
-	public Date getPossibleDelayDeparture(Flight flight, AirPort airport, boolean isFirstFlight, Flight lastFlight) throws ParseException {
-		Date tempDepTime = null;
-		if (lastFlight != null){
-			Date shiftDeparture = addMinutes(lastFlight.getArrivalTime(), getGroundingTime(lastFlight, flight));
-			tempDepTime = shiftDeparture.before(flight.getDepartureTime()) ? flight.getDepartureTime() : shiftDeparture;
-		} else {
-			tempDepTime = flight.getDepartureTime();
-		}
-		for (AirPortClose aClose : airport.getCloseSchedule()) {
-			if (!aClose.isAllowForTakeoff()) {
-				if (tempDepTime.after(aClose.getStartTime())
-						&& tempDepTime.before(aClose.getEndTime())) {
-					if (isFirstFlight) {
-						if (isNewFlight(flight)){
-							return aClose.getEndTime();
-						} else {
-							if (isValidDelay(getPlannedDeparture(flight), aClose.getEndTime(), flight.isInternationalFlight())){
-								return aClose.getEndTime();
-							} else {
-								return null;
-							}
-						}
-						
-					} else {
-						return null;
-					}
-				}
-			}
-		}
-		for (RegularAirPortClose aClose : airport.getRegularCloseSchedule()) {
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			String aDateC = formatter.format(tempDepTime);
-			String aDateO = aDateC;
-			aDateC += " ";
-			aDateC += aClose.getCloseTime();
-			aDateO += " ";
-			aDateO += aClose.getOpenTime();
-			
-			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			
-			Date aCloseDate = formatter2.parse(aDateC);
-			Date aOpenDate = formatter2.parse(aDateO);
-			
-			if (tempDepTime.after(aCloseDate)
-					&& tempDepTime.before(aOpenDate)) {
-				if (isNewFlight(flight)){
-					return aOpenDate;
-				} else {
-					if (isValidDelay(getPlannedDeparture(flight), aOpenDate, flight.isInternationalFlight())){
-						return aOpenDate;
-					} else {
-						return null;
-					}
-				}
-			}
-		} 
-		return (Date) tempDepTime.clone();
-		// need to check parking somewhere
-	}
-	
-	/** 
-	 * check if this flight is able to departure earlier. 
-	 * @return if possible return the time, otherwise return null
-	 * @throws ParseException 
-	 */
-	public Date getPossibleEarlierDepartureTime(Flight flight, AirPort airport, boolean hasEarlyLimit, Flight lastFlight) throws ParseException {
-		if (lastFlight != null) {
-			// not the first flight
-			if (getPlannedDeparture(flight).before(lastFlight.getArrivalTime())){
-				return null;
-			}
-			for (AirPortClose aClose : airport.getCloseSchedule()) {
-				if (!aClose.isAllowForTakeoff()) {
-					if (isNewFlight(flight)){
-						if (flight.getDepartureTime().after(aClose.getStartTime())
-								&& flight.getDepartureTime().before(aClose.getStartTime())) {
-							Date tempDep = addMinutes(lastFlight.getArrivalTime(), Flight.getGroundingTime(lastFlight.getFlightId(), flight.getFlightId()));
-							if (tempDep.after(aClose.getStartTime())) {
-								return null;
-							} else {
-								return tempDep;
-							}
-						}
-					} else {
-						if (getPlannedDeparture(flight).after(aClose.getStartTime())
-								&& getPlannedDeparture(flight).before(addMinutes(aClose.getStartTime(), 360))) {
-							Date tempDep = addMinutes(lastFlight.getArrivalTime(), Flight.getGroundingTime(lastFlight.getFlightId(), flight.getFlightId()));
-							if (tempDep.after(aClose.getStartTime())) {
-								return null;
-							} else {
-								if (!hasEarlyLimit) {
-									Date tempDep2 = addMinutes(getPlannedDeparture(flight), -360);
-									return tempDep.before(tempDep2) ? tempDep2 : tempDep;
-								} else {
-									return aClose.getStartTime();
-								}
-							}
-						} else {
-							if (flight.getDepartureTime().after(addMinutes(aClose.getStartTime(), 360))
-									&& flight.getDepartureTime().before(aClose.getStartTime())) {
-								return null;
-							}
-						}
-					}
-				}
-			}
-		} else {
-			// is the first flight
-			for (AirPortClose aClose : airport.getCloseSchedule()) {
-				if (!aClose.isAllowForTakeoff()) {
-					if (isNewFlight(flight)){
-						if (flight.getDepartureTime().after(aClose.getStartTime())
-								&& flight.getDepartureTime().before(aClose.getStartTime())) {
-							// decide later
-							return aClose.getStartTime();
-						}
-					} else {
-						if (getPlannedDeparture(flight).after(aClose.getStartTime())
-								&& getPlannedDeparture(flight).before(addMinutes(aClose.getStartTime(), 360))) {
-							if (!hasEarlyLimit) {
-								Date tempDep = addMinutes(getPlannedDeparture(flight), -360);
-								return tempDep;
-							} else {
-								return aClose.getStartTime();
-							}
-						} else {
-							if (flight.getDepartureTime().after(addMinutes(aClose.getStartTime(), 360))
-									&& flight.getDepartureTime().before(aClose.getStartTime())) {
-								return null;
-							}
-						}
-					}
-				}
-			}
-		}
-		for (RegularAirPortClose aClose : airport.getRegularCloseSchedule()) {
-			SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-			String aDateC = formatter.format(flight.getDepartureTime());
-			String aDateO = aDateC;
-			aDateC += " ";
-			aDateC += aClose.getCloseTime();
-			aDateO += " ";
-			aDateO += aClose.getOpenTime();
-			
-			SimpleDateFormat formatter2 = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			
-			Date aCloseDate = formatter2.parse(aDateC);
-			Date aOpenDate = formatter2.parse(aDateO);
-			
-			if (flight.getDepartureTime().after(aCloseDate)
-					&& flight.getDepartureTime().before(aOpenDate)) {
-				if (lastFlight != null) {
-					// not the first flight
-					if (isNewFlight(flight)){
-						Date tempDep = addMinutes(lastFlight.getArrivalTime(), Flight.getGroundingTime(lastFlight.getFlightId(), flight.getFlightId()));
-						if (tempDep.after(aCloseDate)) {
-							return null;
-						} else {
-							return tempDep;
-						}
-					} else {
-						return null;
-					}
-				} else {
-					// the first flight
-					if (isNewFlight(flight)){
-						// decide later
-						return aCloseDate;
-					} else {
-						return null;
-					}
-				}
-			}
-		} 
-		return (Date) flight.getDepartureTime().clone();
-	}
-	
-	
-	public Date getAirportDepartureCloseStart(AirPort airport){
-		for (AirPortClose aClose : airport.getCloseSchedule()) {
-			if (!aClose.isAllowForTakeoff()) {
-				return aClose.getStartTime();
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * get flight time between two airports
-	 * @param airport1Id
-	 * @param airport2Id
-	 * @param aircraft
-	 * @return
-	 */
-	public long getFlightTime(String airport1Id, String airport2Id, Aircraft aircraft){
-		String searchKey = aircraft.getType();
-		searchKey += "_";
-		searchKey += airport1Id;
-		searchKey += "_";
-		searchKey += airport2Id;
-		
-		if (InitData.fightDurationMap.containsKey(searchKey)){
-			long flightTime = InitData.fightDurationMap.get(searchKey);
-			return flightTime;
-		}else{
-			return 0;
-		}
-		
-	}
-	
-	/**
-	 * the airline is international
-	 * @param airport1
-	 * @param airport2
-	 * @return
-	 */
-	public boolean isInternational(String airport1, String airport2){
-		if (InitData.domesticAirportList.contains(airport1) && InitData.domesticAirportList.contains(airport2)){
-			return false;
-		}
-		return true;
-	}
-	
-	/**
-	 * the airline is valid
-	 * @param aircraft
-	 * @param sourceAir
-	 * @param destAir
-	 * @return
-	 */
-	public boolean isEligibalAircraft(Aircraft aircraft, AirPort sourceAir, AirPort destAir){
-		String searchKey = aircraft.getId() + "_" + sourceAir.getId() + "_" + destAir.getId();
-		return InitData.airLimitationList.contains(searchKey) ? false : true;
-	}
-	
-	/**
-	 * check if the flight delay is valid
-	 * @param planTime
-	 * @param adjustTime
-	 * @param isInternational
-	 * @return
-	 */
-	public boolean isValidDelay(Date planTime, Date adjustTime, boolean isInternational){
-		if (getMinuteDifference(adjustTime, planTime) > (isInternational ? Aircraft.INTERNATIONAL_MAXIMUM_DELAY_TIME*60: Aircraft.DOMESTIC_MAXIMUM_DELAY_TIME*60)){
-			return false;
-		}
-		
-		return true;
-	}
-	
-	/** 
-	 * get flight index in the original flight chain by flight id
-	 * @param aFlightId
-	 * @return
-	 */
-	public int getFlightIndexByFlightId(int aFlightId) {
-		for (int i = 0; i < originalFlights.size(); i++) {
-			if (originalFlights.get(i).getFlightId() == aFlightId)
-				return i;
-		}
-		return -1;
-	}
-	
-	/**
-	 * check if the aircraft parking is valid
-	 * @param arrivalTime
-	 * @param departureTime
-	 * @param airport
-	 * @return
-	 */
-	public boolean isValidParking(Date arrivalTime, Date departureTime, AirPort airport){
-		if (airport.getId().equals("25")) {
-			return true;
-		}
-		if (arrivalTime != null && arrivalTime != null) {
-			for (AirPortClose aClose : airport.getCloseSchedule()) {
-				if (arrivalTime.compareTo(aClose.getStartTime()) <= 0
-						&& departureTime.compareTo(aClose.getEndTime()) >= 0) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * get original arrival time
-	 * @param flight
-	 * @return
-	 */
-	public Date getPlannedArrival(Flight flight){
-		return flight.getPlannedFlight().getArrivalTime();
-	}
-	
-	/**
-	 * get original departure time
-	 * @param flight
-	 * @return
-	 */
-	public Date getPlannedDeparture(Flight flight){
-		return flight.getPlannedFlight().getDepartureTime();
-	}
-	
-	/**
-	 * get grounding time between two flights
-	 * @param flight1
-	 * @param flight2
-	 * @return
-	 */
-	public int getGroundingTime(Flight flight1, Flight flight2) {
-		return Flight.getGroundingTime(flight1.getFlightId(), flight2.getFlightId());
-	}
-	
-	/**
-	 * compress the departure time of next flight
-	 * @param lastFlight
-	 * @param thisFlight
-	 * @return
-	 */
-	public Date getCompressedDeparture(Flight lastFlight, Flight thisFlight) {
-		Date thisPlannedDeparture = getPlannedDeparture(thisFlight);
-		Date thisShiftedDeparture = addMinutes(lastFlight.getArrivalTime(), getGroundingTime(lastFlight, thisFlight));
-		return thisPlannedDeparture.before(thisShiftedDeparture) ? thisPlannedDeparture : thisShiftedDeparture;
-	}
-	
-	/**
-	 * a flight is a new flight
-	 * @param flight
-	 * @return
-	 */
-	public boolean isNewFlight(Flight flight) {
-		return flight.getFlightId() > InitData.plannedMaxFligthId;
-	}
-	
-	/**
-	 * if a flight is joint flight
-	 * @param flight
-	 * @return joint flight position
-	 */
-	public int getJointFlightPosition(Flight flight){
-		if (InitData.jointFlightMap.keySet().contains(flight.getFlightId())) {
-			if (InitData.jointFlightMap.get(flight.getFlightId()) != null) {
-				return 1;
-			} else {
-				return 2;
-			}
-		}
-		return 0;
-	}
-	
-	/**
-	 * get joint flight
-	 * @param flight
-	 * @return
-	 */
-	public Flight getJointFlight(Flight flight){
-		return InitData.jointFlightMap.get(flight.getFlightId());
-	}
-	
-	/**
-	 * get how this flight is affected
-	 * @param flight
-	 * @return 1 departure, 2 arrival, 0 no
-	 */
-	public int isAffected(Flight flight) {
-		for (AirPortClose aClose : flight.getSourceAirPort().getCloseSchedule()) {
-			if (!aClose.isAllowForTakeoff()) {
-				if (flight.getDepartureTime().after(aClose.getStartTime())
-						&& flight.getDepartureTime().before(aClose.getEndTime())) {
-					return 1;
-				}
-			}
-		}
-		for (AirPortClose aClose : flight.getDesintationAirport().getCloseSchedule()) {
-			if (flight.getArrivalTime().after(aClose.getStartTime())
-					&& flight.getArrivalTime().before(aClose.getEndTime())) {
-				return 2;
-			}
-		}
-		return 0;
-	}
-	
-	/**
-	 *  get next flight id
-	 * @return
-	 */
-	public int getNextFlightId(){
-		int maxFlightId = InitData.maxFligthId;
-		InitData.maxFligthId = maxFlightId + 1;
-		return maxFlightId + 1;
-	}
-	
-	/**
-	 * get new departure time by new arrival time
-	 * @param flight
-	 * @param newArrivalTime
-	 * @return
-	 */
-	public Date getDepartureTimeByArrivalTime(Flight flight, Date newArrivalTime) {
-		if (flight.getPlannedAir() != null){
-			if (getJointFlightPosition(flight) == 1){
-				if (!flight.getDesintationAirport().getId().equals(flight.getPlannedFlight().getDesintationAirport().getId())){
-					long flightTime = getFlightTime(flight.getSourceAirPort().getId(), flight.getDesintationAirport().getId(), originalAircraft);
-					if (flightTime > 0){
-						return addMinutes(newArrivalTime, -flightTime);
-					} else {
-						int flightTime1 = (int) getMinuteDifference(getPlannedArrival(flight), getPlannedDeparture(flight));
-						int flightTime2 = (int) getMinuteDifference(getPlannedArrival(getJointFlight(flight)), getPlannedDeparture(getJointFlight(flight)));
-						int timeTotal = flightTime1 + flightTime2;
-						return addMinutes(newArrivalTime, -timeTotal); 
-					}
-				} else {
-					int flightTime = (int) getMinuteDifference(getPlannedArrival(flight), getPlannedDeparture(flight));
-					return addMinutes(newArrivalTime, -flightTime);
-				}
-			} else {
-				int flightTime = (int) getMinuteDifference(getPlannedArrival(flight), getPlannedDeparture(flight));
-				return addMinutes(newArrivalTime, -flightTime);
-			}
-		} else {
-			long flightTime = getFlightTime(flight.getSourceAirPort().getId(), flight.getDesintationAirport().getId(), originalAircraft);
-			if (flightTime > 0){
-				return addMinutes(newArrivalTime, -flightTime);
-			}
-		}
-		return null;
-	}
-	
-	
-	public Date getArrivalTimeByDepartureTime(Flight flight, Date newDepartureTime){
-		if (!isNewFlight(flight)){
-			if (getJointFlightPosition(flight) == 1){
-				if (!flight.getDesintationAirport().getId().equals(flight.getPlannedFlight().getDesintationAirport().getId())){
-					long flightTime = getFlightTime(flight.getSourceAirPort().getId(), flight.getDesintationAirport().getId(), originalAircraft);
-					if (flightTime > 0){
-						return addMinutes(newDepartureTime, flightTime);
-					} else {
-						int flightTime1 = (int) getMinuteDifference(getPlannedArrival(flight), getPlannedDeparture(flight));
-						int flightTime2 = (int) getMinuteDifference(getPlannedArrival(getJointFlight(flight)), getPlannedDeparture(getJointFlight(flight)));
-						int timeTotal = flightTime1 + flightTime2;
-						return addMinutes(newDepartureTime, timeTotal); 
-					}
-				} else {
-					int flightTime = (int) getMinuteDifference(getPlannedArrival(flight), getPlannedDeparture(flight));
-					return addMinutes(newDepartureTime, flightTime);
-				}
-			} else {
-				int flightTime = (int) getMinuteDifference(getPlannedArrival(flight), getPlannedDeparture(flight));
-				return addMinutes(newDepartureTime, flightTime);
-			}
-		} else {
-			long flightTime = getFlightTime(flight.getSourceAirPort().getId(), flight.getDesintationAirport().getId(), originalAircraft);
-			if (flightTime > 0){
-				return addMinutes(newDepartureTime, flightTime);
-			}
-		}
-		return null;
-	}
 	
 	/**
 	 * insert into open list
@@ -1473,7 +857,7 @@ public class SingleAircraftSearch {
 				
 				Flight newFlight = newAir.get(j);
 				// empty
-				if (i == 0 && isNewFlight(newFlight)) {
+				if (i == 0 && BusinessDomain.isNewFlight(newFlight)) {
 					cost = cost.add(new BigDecimal("5000"));
 				}
 				// exist
