@@ -30,6 +30,29 @@ public class Flight implements Cloneable {
 	private int numberOfJoinedPassenger;
 	private boolean isAdjustable = true;
 	
+	private boolean isCancel = false;
+	private String isTransfer = "0";
+	private String transferInfo = "";
+	private int seatNum;
+	
+	public int getSeatNum() {
+		return seatNum;
+	}
+	public void setSeatNum(int seatNum) {
+		this.seatNum = seatNum;
+	}
+	public boolean isCancel() {
+		return isCancel;
+	}
+	public void setCancel(boolean isCancel) {
+		this.isCancel = isCancel;
+	}
+	public String getTransferInfo() {
+		return transferInfo;
+	}
+	public void setTransferInfo(String transferInfo) {
+		this.transferInfo = transferInfo;
+	}
 	public int getFlightId() {
 		return flightId;
 	}
@@ -193,6 +216,12 @@ public class Flight implements Cloneable {
 	}
 	public void setAdjustable(boolean isAdjustable) {
 		this.isAdjustable = isAdjustable;
+	}
+	public String getIsTransfer() {
+		return isTransfer;
+	}
+	public void setIsTransfer(String isTransfer) {
+		this.isTransfer = isTransfer;
 	}
 
 
