@@ -22,6 +22,16 @@ public class BusinessDomain {
 	public static final int MAX_INTERNATIONAL_DELAY = 36;
 	public static final int MAX_DOMESTIC_DELAY = 24;
 	public static final int MAX_DOMESTIC_EARLIER = 6;
+	
+	public static boolean isValidConnectedForJoin (Flight firstFlight, Flight secondFlight) {
+		if (firstFlight.isInternationalFlight() || secondFlight.isInternationalFlight())
+			return false;
+		
+		if (isAffected(firstFlight) != 0)
+			return true;
+		else
+			return false;
+	}
 	public static boolean isValidDelay(Flight aFlight, Date delay) {
 		Calendar aCal = Calendar.getInstance();
 		aCal.setTime(aFlight.getPlannedFlight().getDepartureTime());
@@ -36,7 +46,8 @@ public class BusinessDomain {
 			return false;
 	}
 	
-	public static boolean isValidEarlier(Flight aFlight, Date earlier, boolean isTyphoon) {
+	
+	public static boolean isValidEarlier(Flight aFlight, boolean isTyphoon) {
 		if (!isTyphoon || aFlight.isInternationalFlight())
 			return false;
 		
@@ -44,7 +55,7 @@ public class BusinessDomain {
 		aCal.setTime(aFlight.getPlannedFlight().getDepartureTime());
 		aCal.add(Calendar.HOUR, -MAX_DOMESTIC_EARLIER);
 		
-		if (earlier.after(aCal.getTime()))
+		if (aFlight.getDepartureTime().after(aCal.getTime()))
 			return true;
 		else
 			return false;
