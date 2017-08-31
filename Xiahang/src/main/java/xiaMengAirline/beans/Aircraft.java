@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
+import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.searchEngine.SelfSearch;
@@ -290,7 +291,12 @@ public class Aircraft implements Cloneable {
 			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable {
 		SelfSearch selfAdjustEngine = new SelfSearch();
 		if (!isCancel) {
-			selfAdjustEngine.adjustAircraft(this, 0, mySolution.getAircraft(id, type, true, true));
+			try {
+				selfAdjustEngine.adjustAircraft(this, 0, mySolution.getAircraft(id, type, true, true));
+			} catch (AirportNotAcceptDepartureTime2 e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -491,13 +497,14 @@ public class Aircraft implements Cloneable {
 	 *             exception contains two objects, flight (Flight), where the
 	 *             problem flight is at the flight chain
 	 * @throws AirportNotAvailable
+	 * @throws AirportNotAcceptDepartureTime2 
 	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
 	 *      caused by typhoon
 	 * @see RequestTime
 	 */
 
 	public boolean adjustFlightTime(int startPosition) throws ParseException, AirportNotAcceptArrivalTime,
-			FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable {
+			FlightDurationNotFound, AirportNotAcceptDepartureTime, AirportNotAvailable, AirportNotAcceptDepartureTime2 {
 		boolean isChanged = false;
 		Flight currentFlight = null;
 		Flight nextFlight = null;

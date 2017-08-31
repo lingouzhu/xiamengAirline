@@ -192,6 +192,15 @@ public class BusinessDomain {
 				
 	}
 	
+	public static boolean isValidFlightPath (Aircraft air, Flight aFlight) {
+		if (InitData.airLimitationList.contains(air.getId() + "_" + aFlight.getSourceAirPort().getId() 
+				+ "_" + aFlight.getDesintationAirport().getId())) {
+			logger.warn("5.2 error air limit: flightID" + aFlight.getFlightId());
+			return false;
+		}
+		return true;
+	}
+	
 	
 	// methods to be adjusted
 	/**
@@ -833,6 +842,20 @@ public class BusinessDomain {
 			}
 		}
 	}
+	
+	/** 
+	 * add minutes to date
+	 * @param date
+	 * @param minutes
+	 * @return
+	 */
+	public static Date addHours(Date date, int hours){
+		Calendar cal = Calendar.getInstance();
+	    cal.setTime(date);
+	    cal.add(Calendar.HOUR, hours);
+	    return cal.getTime();
+	}
+	
 	
 	/** 
 	 * add minutes to date

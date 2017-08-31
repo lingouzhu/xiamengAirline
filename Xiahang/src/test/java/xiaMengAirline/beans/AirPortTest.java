@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
+import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.AirPort;
@@ -475,7 +476,7 @@ public class AirPortTest {
 
 	@Test
 	public void testRequestAirport() throws CloneNotSupportedException, ParseException, FlightDurationNotFound,
-			AirportNotAcceptDepartureTime, AirportNotAvailable {
+			AirportNotAcceptDepartureTime, AirportNotAvailable, AirportNotAcceptDepartureTime2 {
 		AirPortClose portCloseBean = new AirPortClose();
 		String airPortId = "49";
 		AirPort aAirport = InitData.airportList.getAirport(airPortId);

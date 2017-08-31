@@ -49,5 +49,9 @@ public class CostDomain {
 	public static BigDecimal connectedFlightCost () {
 		return new BigDecimal("750");
 	}
+	
+	public static BigDecimal emptyFlightCost () {
+		return new BigDecimal("5000");
+	}
 
 }

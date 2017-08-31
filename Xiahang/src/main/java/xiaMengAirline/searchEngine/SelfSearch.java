@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
+import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.Exception.SolutionNotValid;
@@ -29,6 +30,7 @@ import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.RequestTime;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.utils.InitData;
+import xiaMengAirline.utils.Utils;
 
 public class SelfSearch implements AdjustmentEngine {
 	private static final Logger logger = Logger.getLogger(SelfSearch.class);
@@ -77,7 +79,7 @@ public class SelfSearch implements AdjustmentEngine {
 	@Override
 	public boolean adjust(Aircraft orgAir, Aircraft itsCancelled) throws CloneNotSupportedException, ParseException {
 		BigDecimal cost = new BigDecimal("0");
-		boolean cancelFlg = false;
+		int lastAdjustablePos = -1;
 
 		// check if adjustable in cancel
 		for (Flight aFlight : itsCancelled.getFlightChain()) {
@@ -86,7 +88,7 @@ public class SelfSearch implements AdjustmentEngine {
 						+ " flightId:" + aFlight.getFlightId());
 				return false;
 			}
-			cost.add(CostDomain.cancelCost(aFlight));
+			cost = cost.add(CostDomain.cancelCost(aFlight));
 		}
 
 		Aircraft altAir = orgAir;
@@ -95,17 +97,33 @@ public class SelfSearch implements AdjustmentEngine {
 
 			Flight flight = altAir.getFlightChain().get(i);
 			if (!flight.isAdjustable()) {
+
 				if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
 					return false;
 				}
+
+				if (lastAdjustablePos + 1 != i)
+					return false;
+				lastAdjustablePos = i;
 			} else {
-				
+
+				// first flight
+				if (i == 0)
+					return false;
+
 				// last flight
 				if (InitData.lastFlightMap.contains(flight.getFlightId())
 						&& (!flight.getPlannedAir().getType().equals(altAir.getType()) || !flight.getPlannedFlight()
 								.getDesintationAirport().getId().equals(flight.getDesintationAirport().getId()))) {
 					return false;
 				}
+
+				// I dont adjust & cost last flight
+				if (i == altAir.getFlightChain().size() - 1)
+					continue;
+
+				if (!BusinessDomain.isValidFlightPath(altAir, flight))
+					return false;
 
 				// we set up schedule from the previous flight
 
@@ -143,54 +161,52 @@ public class SelfSearch implements AdjustmentEngine {
 
 				} else if (joinPos == 2) {
 					// if 2nd flight of join
-					// if flight already first
-					if (i == 0)
-						return false;
-
-					//if first joined already setup, its my turn
+					// if first joined already setup, its my turn
 					// then check if 1st joined prev to him
 					Flight prevFlight = altAir.getFlight(i - 1);
-					if (prevFlight.isFirstJoined() 
-							&& flight.isSecondJoined()) {
+					if (prevFlight.isFirstJoined() && flight.isSecondJoined()) {
 						if (prevFlight.isCanceled()) {
-							//1st flight already cancelled
+							// 1st flight already cancelled
 							flight.setCanceled(false);
 							flight.setFirstJoined(false);
 							flight.setSecondJoined(false);
 						} else if (flight.isCanceled()) {
-							//2nd flight already processed & cancelled as connected flight
-							//already costed
-								continue;
+							// 2nd flight already processed & cancelled as
+							// connected flight
+							// already costed
+							continue;
 						} else {
-							//2nd flight still valid join
+							// 2nd flight still valid join
 							flight.setCanceled(false);
 							flight.setSecondJoined(true);
-							flight.setFirstJoined(false);								
+							flight.setFirstJoined(false);
 						}
 
 					} else {
-						//it sounds first joined already cancelled
+						// it sounds first joined already cancelled
 						if (BusinessDomain.getJointFlight(prevFlight).getFlightId() != flight.getFlightId()) {
-							// if 1st flight not there, then it shall be cancelled
+							// if 1st flight not there, then it shall be
+							// cancelled
 							if (!itsCancelled.hasFlight(prevFlight))
 								return false;
 							else {
-								//1st flight already cancelled
+								// 1st flight already cancelled
 								flight.setCanceled(false);
 								flight.setFirstJoined(false);
 								flight.setSecondJoined(false);
 							}
-														
+
 						} else {
-							//then 1st flight must be cancelled
-							logger.warn("Joined flight looks strage " + prevFlight.getFlightId() + " : " + flight.getFlightId());
+							// then 1st flight must be cancelled
+							logger.warn("Joined flight looks strage " + prevFlight.getFlightId() + " : "
+									+ flight.getFlightId());
 							flight.setCanceled(false);
 							flight.setFirstJoined(false);
 							flight.setSecondJoined(false);
 						}
 					}
 				} else {
-					//reset normal flights
+					// reset normal flights
 					flight.setCanceled(false);
 					flight.setFirstJoined(false);
 					flight.setSecondJoined(false);
@@ -201,14 +217,8 @@ public class SelfSearch implements AdjustmentEngine {
 				// original schedule
 				Flight prevFligt = null;
 				Date initialArrivalTime = null;
-				if (i == 0) {
-					// To do: this might be issue, first flight adjustable?
-					logger.warn("First flight is adjustable " + flight.getFlightId());
-					continue;
-				} else if (i == 1 || !altAir.getFlight(i - 1).isAdjustable()) {
-					prevFligt = altAir.getFlight(i - 1);
-					initialArrivalTime = altAir.getFlight(i - 1).getArrivalTime();
-				}
+				prevFligt = altAir.getFlight(i - 1);
+				initialArrivalTime = altAir.getFlight(i - 1).getArrivalTime();
 
 				int currentGroundingTime = BusinessDomain.getGroundingTime(prevFligt, flight);
 				Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
@@ -218,7 +228,7 @@ public class SelfSearch implements AdjustmentEngine {
 				} else {
 					// we need see how long we like grounding, I dont want to
 					// ground too long to impact others
-					Date newDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, aStragety.getMaxGrounding());
+					Date newDepartureTime = BusinessDomain.addHours(initialArrivalTime, aStragety.getMaxGrounding());
 					if (newDepartureTime.before(earliestDepartureTime))
 						selectedDepartureTime = earliestDepartureTime;
 					else if (newDepartureTime.after(flight.getPlannedFlight().getDepartureTime())) {
@@ -226,51 +236,52 @@ public class SelfSearch implements AdjustmentEngine {
 					} else
 						selectedDepartureTime = newDepartureTime;
 				}
+
 				// check if this departure time feasible
 				RequestTime myRequest = new RequestTime();
 				myRequest.setArrivalTime(null);
 				myRequest.setDepartureTime(selectedDepartureTime);
-				RequestTime feasibleRequest = prevFligt.getDesintationAirport().requestAirport(myRequest,
-						currentGroundingTime);
-				if (feasibleRequest != null) {
-					// let's try suggested time
-					flight.setDepartureTime(feasibleRequest.getDepartureTime());
-					
+				RequestTime feasibleRequest;
+				try {
+					feasibleRequest = flight.getSourceAirPort().requestAirport(myRequest, currentGroundingTime);
+					if (feasibleRequest != null) {
+						// let's try suggested time
+						flight.setDepartureTime(feasibleRequest.getDepartureTime());
+					} else {
+						// accepted
+						flight.setDepartureTime(selectedDepartureTime);
+					}
 					try {
 						flight.setArrivalTime(flight.calcuateNextArrivalTime());
 					} catch (FlightDurationNotFound e) {
 						logger.warn("Unable to find flight duration for " + flight.getFlightId());
 						return false;
 					}
-				} else {
-					// accepted
-					flight.setDepartureTime(selectedDepartureTime);
-					try {
-						flight.setArrivalTime(flight.calcuateNextArrivalTime());
-					} catch (FlightDurationNotFound e) {
-						logger.warn("Unable to find flight duration for " + flight.getFlightId());
-						return false;
+					// cancel if not valid move
+					boolean isTyphoon = false;
+					if (feasibleRequest != null) {
+						isTyphoon = feasibleRequest.isIsTyphoon();
 					}
-				}
-				// cancel if not valid move
-				boolean isTyphoon = false;
-				if (feasibleRequest != null) {
-					isTyphoon = feasibleRequest.isIsTyphoon();
-				}
-				if (flight.getDepartureTime().before(flight.getPlannedFlight().getDepartureTime())) {
-					if (BusinessDomain.isValidEarlier(flight, isTyphoon)) {
-						// all good, let it be
-						;
+					if (flight.getDepartureTime().before(flight.getPlannedFlight().getDepartureTime())) {
+						if (BusinessDomain.isValidEarlier(flight, isTyphoon)) {
+							// all good, let it be
+							;
+						} else {
+							flight.setCanceled(true);
+						}
 					} else {
-						flight.setCanceled(true);
+						if (BusinessDomain.isValidDelay(flight)) {
+							// all good, let it be
+							;
+						} else {
+							flight.setCanceled(true);
+						}
 					}
-				} else {
-					if (BusinessDomain.isValidDelay(flight)) {
-						// all good, let it be
-						;
-					} else {
-						flight.setCanceled(true);
-					}
+				} catch (AirportNotAcceptDepartureTime2 e1) {
+					logger.debug("Airport not acepts departure, airport " + e1.getAirport().getId() + " flight "
+							+ flight.getFlightId() + " departure time "
+							+ Utils.timeFormatter2(e1.getPlannedDeparture()));
+					flight.setCanceled(true);
 				}
 
 				// now continue on arrival time
@@ -280,71 +291,75 @@ public class SelfSearch implements AdjustmentEngine {
 					myRequest = new RequestTime();
 					myRequest.setArrivalTime(flight.getArrivalTime());
 					myRequest.setDepartureTime(null);
-					feasibleRequest = flight.getDesintationAirport().requestAirport(myRequest, currentGroundingTime);
-					if (feasibleRequest != null) {
-						// how about joined option?
-						// if first join, then we can cancel the 2nd join
-						if (flight.isFirstJoined() && nextFlight.isSecondJoined()) {
-							// check if we can count it as connect flight cost
-							if (BusinessDomain.isValidConnectedForJoin(flight, nextFlight)) {
-								// now check if new airport works fine
-								nextFlight.setCanceled(true);
-								flight.setDesintationAirport(nextFlight.getDesintationAirport());
-								try {
-									flight.calcuateNextArrivalTime();
-								} catch (FlightDurationNotFound e) {
-									logger.warn("Unable to find flight duration for " + flight.getFlightId());
-									return false;
-								}
-								myRequest = new RequestTime();
-								myRequest.setArrivalTime(flight.getArrivalTime());
-								myRequest.setDepartureTime(null);
-								feasibleRequest = flight.getDesintationAirport().requestAirport(myRequest,
-										Flight.GroundingTime);
-								if (feasibleRequest != null) {
-									// To do, maybe we can try his suggestion again
+					try {
+						feasibleRequest = flight.getDesintationAirport().requestAirport(myRequest,
+								currentGroundingTime);
+						if (feasibleRequest != null) {
+							// how about joined option?
+							// if first join, then we can cancel the 2nd join
+							if (flight.isFirstJoined() && nextFlight.isSecondJoined()) {
+								// check if we can count it as connect flight
+								// cost
+								if (BusinessDomain.isValidConnectedForJoin(flight, nextFlight)) {
+									// now check if new airport works fine
+									nextFlight.setCanceled(true);
+									flight.setDesintationAirport(nextFlight.getDesintationAirport());
+									try {
+										flight.calcuateNextArrivalTime();
+									} catch (FlightDurationNotFound e) {
+										logger.warn("Unable to find flight duration for " + flight.getFlightId());
+										return false;
+									}
+									myRequest = new RequestTime();
+									myRequest.setArrivalTime(flight.getArrivalTime());
+									myRequest.setDepartureTime(null);
+									feasibleRequest = flight.getDesintationAirport().requestAirport(myRequest,
+											Flight.GroundingTime);
+									if (feasibleRequest != null) {
+										// To do, maybe we can try his
+										// suggestion, that requires reverse calculation of departure time
+										flight.setCanceled(true);
+									}
+								} else
 									flight.setCanceled(true);
-								} 
-							} else
+							} else {
 								flight.setCanceled(true);
-						} else {
-							flight.setCanceled(true);
+							}
 						}
-					}					
-				}
-
-
-				// now cost it
-				if (flight.isCanceled()) {
-					cost.add(CostDomain.cancelCost(flight));
-					cancelFlg = true;
-				}
-					
-				else {
-					//delay cost
-					if (flight.getDepartureTime().after(flight.getPlannedFlight().getDepartureTime()))
-						cost.add(CostDomain.delayCost(flight));
-					else
-						cost.add(CostDomain.earlierCost(flight));
-					// change air
-					if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
-						cost.add(CostDomain.changeAirCost(flight));
+					} catch (AirportNotAcceptDepartureTime2 e1) {
+						logger.warn(" Not possible to have AirportNotAcceptDepartureTime2 " + e1.getAirport().getId()
+								+ " flight " + flight.getFlightId());
+						flight.setCanceled(true);
 					}
-					//connect flight cost
-					if (flight.isFirstJoined() && !flight.isCanceled()) {
-						Flight nextFlight = altAir.getFlight(i + 1);
-						if (nextFlight.isCanceled() && nextFlight.isSecondJoined()) {
-							cost.add(CostDomain.connectedFlightCost());
-						}
+
+				}
+			}
+
+			// now cost it
+			if (flight.isCanceled()) {
+				cost = cost.add(CostDomain.cancelCost(flight));
+				cost = cost.add(CostDomain.emptyFlightCost());
+			}
+
+			else {
+				// delay cost
+				if (flight.getDepartureTime().after(flight.getPlannedFlight().getDepartureTime()))
+					cost = cost.add(CostDomain.delayCost(flight));
+				else
+					cost = cost.add(CostDomain.earlierCost(flight));
+				// change air
+				if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
+					cost = cost.add(CostDomain.changeAirCost(flight));
+				}
+				// connect flight cost
+				if (flight.isFirstJoined() && !flight.isCanceled()) {
+					Flight nextFlight = altAir.getFlight(i + 1);
+					if (nextFlight.isCanceled() && nextFlight.isSecondJoined()) {
+						cost = cost.add(CostDomain.connectedFlightCost());
 					}
 				}
 			}
-		}
 
-			
-
-		if (cancelFlg || !itsCancelled.getFlightChain().isEmpty()) {
-			cost = cost.add(new BigDecimal("5000"));
 		}
 
 		altAir.setCost(cost.floatValue());
@@ -353,7 +368,7 @@ public class SelfSearch implements AdjustmentEngine {
 
 	public List<Aircraft> adjustAircraft(Aircraft originalAir, int startIndex, Aircraft originalCancelAir)
 			throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable,
-			AircraftNotAdjustable {
+			AircraftNotAdjustable, AirportNotAcceptDepartureTime2 {
 		Aircraft thisAc = originalAir.clone();
 		// original cancel air
 		Aircraft thisAcCancel = originalCancelAir.clone();
@@ -586,7 +601,7 @@ public class SelfSearch implements AdjustmentEngine {
 
 	// cancel a flight
 	public Aircraft cancelFlight(Aircraft aircraft, Aircraft aircraftCancel, int flightIndex)
-			throws FlightDurationNotFound, CloneNotSupportedException, ParseException {
+			throws FlightDurationNotFound, CloneNotSupportedException, ParseException, AirportNotAcceptDepartureTime2 {
 		List<Flight> flights = aircraft.getFlightChain();
 		Flight thisFlight = flights.get(flightIndex);
 		Flight newFlight = new Flight();
@@ -655,7 +670,7 @@ public class SelfSearch implements AdjustmentEngine {
 
 	// create new flight
 	public HashMap<Integer, Flight> createNewFlight(Flight prototypeFlight, int flightPosition, Aircraft aircraft)
-			throws FlightDurationNotFound, CloneNotSupportedException, ParseException {
+			throws FlightDurationNotFound, CloneNotSupportedException, ParseException, AirportNotAcceptDepartureTime2 {
 		HashMap<Integer, Flight> newIndexAndFlight = createEligibalFlight(aircraft.getFlightChain(), flightPosition,
 				aircraft, prototypeFlight);
 		if (newIndexAndFlight != null) {
@@ -674,7 +689,7 @@ public class SelfSearch implements AdjustmentEngine {
 
 	// get next normal airport
 	public HashMap<Integer, Flight> createEligibalFlight(List<Flight> flightChain, int currentFlightIndex, Aircraft ac,
-			Flight newFlight) throws CloneNotSupportedException, ParseException {
+			Flight newFlight) throws CloneNotSupportedException, ParseException, AirportNotAcceptDepartureTime2 {
 		Flight thisFlight = newFlight;
 		for (int i = currentFlightIndex + 1; i < flightChain.size(); i++) {
 			Flight nextFlight = flightChain.get(i);
