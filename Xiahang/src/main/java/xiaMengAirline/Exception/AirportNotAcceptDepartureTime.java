@@ -1,11 +1,11 @@
 package xiaMengAirline.Exception;
 
 import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.FlightTime;
+import xiaMengAirline.beans.RequestTime;
 
 public class AirportNotAcceptDepartureTime extends Exception {
 	private Flight aFlight;
-	private FlightTime availableTime;
+	private RequestTime availableTime;
 	private String casue;
 	public Flight getaFlight() {
 		return aFlight;
@@ -13,13 +13,13 @@ public class AirportNotAcceptDepartureTime extends Exception {
 	public void setaFlight(Flight aFlight) {
 		this.aFlight = aFlight;
 	}
-	public FlightTime getAvailableTime() {
+	public RequestTime getAvailableTime() {
 		return availableTime;
 	}
-	public void setAvailableTime(FlightTime availableTime) {
+	public void setAvailableTime(RequestTime availableTime) {
 		this.availableTime = availableTime;
 	}
-	public AirportNotAcceptDepartureTime(Flight aFlight, FlightTime availableTime, String cause) {
+	public AirportNotAcceptDepartureTime(Flight aFlight, RequestTime availableTime, String cause) {
 		super();
 		this.aFlight = aFlight;
 		this.availableTime = availableTime;

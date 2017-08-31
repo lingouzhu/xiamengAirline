@@ -13,6 +13,7 @@ public class OptimizerStragety {
 	private int numberOfSolutions;
 	private int topQueueSize;
 	private boolean isDebug = false;
+	private long maxGrounding;
 	
 
 	public int getNumberOfIter() {
@@ -62,6 +63,13 @@ public class OptimizerStragety {
 	}
 	public void setDebug(boolean isDebug) {
 		this.isDebug = isDebug;
+	}
+
+	public long getMaxGrounding() {
+		return maxGrounding;
+	}
+	public void setMaxGrounding(long maxGrounding) {
+		this.maxGrounding = maxGrounding;
 	}
 	
 	

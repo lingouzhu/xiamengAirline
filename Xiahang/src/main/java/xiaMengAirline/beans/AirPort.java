@@ -29,15 +29,15 @@ public class AirPort {
 		return id.equals(anotherAirport.getId());
 	}
 
-	public FlightTime requestAirport(FlightTime requestTime, int groundingTime) throws ParseException {
+	public RequestTime requestAirport(RequestTime requestTime, int groundingTime) throws ParseException {
 		// check airport events first
-		FlightTime retFlightTime = null;
+		RequestTime retFlightTime = null;
 		for (AirPortClose aClose : closeSchedule) {
-			if (requestTime.getArrivalTime().compareTo(aClose.getStartTime()) > 0
+			if (requestTime.getArrivalTime() != null && requestTime.getArrivalTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getArrivalTime().compareTo(aClose.getEndTime()) < 0) {
 				if ((aClose.getAllocatedParking() == 0) || (!aClose.isAllowForLanding())) {
 					if (retFlightTime == null)
-						retFlightTime = new FlightTime();
+						retFlightTime = new RequestTime();
 					retFlightTime.setArrivalTime(aClose.getEndTime());
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aClose.getEndTime());
@@ -58,7 +58,7 @@ public class AirPort {
 					&& requestTime.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
 				if (retFlightTime == null) {
 					if (!aClose.isAllowForTakeoff()) {
-						retFlightTime = new FlightTime();
+						retFlightTime = new RequestTime();
 						// check if enough grounding time
 						Calendar cl = Calendar.getInstance();
 						cl.setTime(requestTime.getArrivalTime());
@@ -84,7 +84,7 @@ public class AirPort {
 					&& !aClose.isAllowForTakeoff()
 					&& (aClose.getAllocatedParking() == 0)
 					) {
-				retFlightTime = new FlightTime();
+				retFlightTime = new RequestTime();
 				// check if enough grounding time
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(requestTime.getArrivalTime());
@@ -128,7 +128,7 @@ public class AirPort {
 				Date aOpenDate = formatter2.parse(aDateO);
 
 				if (requestTime.getArrivalTime().after(aCloseDate) && requestTime.getArrivalTime().before(aOpenDate)) {
-					retFlightTime = new FlightTime();
+					retFlightTime = new RequestTime();
 					retFlightTime.setArrivalTime(aOpenDate);
 					Calendar cl = Calendar.getInstance();
 					cl.setTime(aOpenDate);
@@ -155,7 +155,7 @@ public class AirPort {
 
 					if (requestTime.getDepartureTime() != null && requestTime.getDepartureTime().after(dCloseDate)
 							&& requestTime.getDepartureTime().before(dOpenDate)) {
-						retFlightTime = new FlightTime();
+						retFlightTime = new RequestTime();
 						retFlightTime.setArrivalTime(requestTime.getArrivalTime());
 						Calendar cl = Calendar.getInstance();
 						cl.setTime(requestTime.getArrivalTime());

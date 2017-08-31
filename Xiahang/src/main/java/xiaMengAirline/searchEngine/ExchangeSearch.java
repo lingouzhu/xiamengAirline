@@ -1,6 +1,7 @@
 package xiaMengAirline.searchEngine;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,7 @@ public class ExchangeSearch {
 	private RestrictedCandidateList neighboursResult = null;
 
 	public XiaMengAirlineSolution discoverBetterSolution(XiaMengAirlineSolution aSolution)
-			throws CloneNotSupportedException {
+			throws CloneNotSupportedException, ParseException {
 		aDriver.setupIterationStragety(aStragety);
 		aDriver.setupIterationContent(aSolution);
 		List<Aircraft> aBatch = aDriver.getNextDriveForIterative();
@@ -36,7 +37,7 @@ public class ExchangeSearch {
 
 			System.out.println("Processing batch ... " + currentBatch);
 			logger.debug("Processing batch ... " + currentBatch);
-			List<String> processedList = new ArrayList<String> ();
+			List<String> processedList = new ArrayList<String>();
 			for (Aircraft air1 : aBatch) {
 				logger.debug("Processing first air " + air1.getId());
 				boolean isImproved = false;
@@ -54,13 +55,12 @@ public class ExchangeSearch {
 						logger.debug("Completed air ... " + air1.getId() + " on batch " + currentBatch);
 						break;
 					}
-					
+
 					String aKey = Utils.build2AirKey(air1.getId(), air2.getId());
 					if (processedList.contains(aKey))
 						continue;
 					else
 						processedList.add(aKey);
-
 
 					HashMap<Flight, List<Flight>> circuitFlightsAir1 = air1.getCircuitFlights();
 					HashMap<Flight, List<Flight>> circuitFlightsAir2 = air2.getCircuitFlights();
@@ -100,13 +100,12 @@ public class ExchangeSearch {
 											logger.debug("Air cancelled " + cancelledAir.getId() + " flight "
 													+ aF.getFlightId());
 										}
-										logger.debug("Method 1 Complete exchange...");	
+										logger.debug("Method 1 Complete exchange...");
 									}
-									
 
 									// only update solution when new change
 									// goes better
-									if (adjustmentEngine.adjust(newAircraft1)) {
+									if (adjustmentEngine.adjust(newAircraft1, cancelledAir)) {
 										if (newAircraft1.getCost() < air1.getCost()) {
 											if (BusinessDomain.validateFlights(air1, air1Cancelled, newAircraft1,
 													cancelledAir)) {
@@ -118,8 +117,8 @@ public class ExchangeSearch {
 												aBetterSolution.refreshCost(
 														new BigDecimal(newAircraft1.getCost() - air1.getCost()));
 												neighboursResult.addSolution(aBetterSolution);
-												logger.debug(
-														"Better Solution exists! Method 1 : " + aBetterSolution.getCost());
+												logger.debug("Better Solution exists! Method 1 : "
+														+ aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air1.getId());
 											}
@@ -157,20 +156,20 @@ public class ExchangeSearch {
 										logger.debug("Method 2 After exchange ...");
 										List<Flight> updateList1 = newAircraft2.getFlightChain();
 										for (Flight aF : updateList1) {
-											logger.debug("Air " + newAircraft2.getId() + " Flights: " + aF.getFlightId());
+											logger.debug(
+													"Air " + newAircraft2.getId() + " Flights: " + aF.getFlightId());
 										}
 										List<Flight> updateList2 = cancelledAir.getFlightChain();
 										for (Flight aF : updateList2) {
 											logger.debug("Air cancelled " + cancelledAir.getId() + " Flights: "
 													+ aF.getFlightId());
 										}
-										logger.debug("Method 2 Complete exchange...");										
+										logger.debug("Method 2 Complete exchange...");
 									}
-
 
 									// only update solution when new change
 									// goes better
-									if (adjustmentEngine.adjust(newAircraft2)) {
+									if (adjustmentEngine.adjust(newAircraft2, cancelledAir)) {
 										if (newAircraft2.getCost() < air2.getCost()) {
 											if (BusinessDomain.validateFlights(air2, air2Cancelled, newAircraft2,
 													cancelledAir)) {
@@ -182,8 +181,8 @@ public class ExchangeSearch {
 												aBetterSolution.refreshCost(
 														new BigDecimal(newAircraft2.getCost() - air2.getCost()));
 												neighboursResult.addSolution(aBetterSolution);
-												logger.debug(
-														"Better Solution exists! Method 2 : " + aBetterSolution.getCost());
+												logger.debug("Better Solution exists! Method 2 : "
+														+ aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air2.getId());
 											}
@@ -210,10 +209,8 @@ public class ExchangeSearch {
 								Flight air1DestFlight = newAircraft1.getFlight(aMatched.getAir1DestFlight());
 								Flight air2SourceFlight = newAircraft2.getFlight(aMatched.getAir2SourceFlight());
 								Flight air2DestFlight = newAircraft2.getFlight(aMatched.getAir2DestFlight());
-								if (!air1SourceFlight.isAdjustable() 
-										|| !air1DestFlight.isAdjustable()
-										|| !air2SourceFlight.isAdjustable()
-										|| !air2DestFlight.isAdjustable())
+								if (!air1SourceFlight.isAdjustable() || !air1DestFlight.isAdjustable()
+										|| !air2SourceFlight.isAdjustable() || !air2DestFlight.isAdjustable())
 									continue;
 
 								newAircraft1.insertFlightChain(air2, air2.getFlight(aMatched.getAir2SourceFlight()),
@@ -228,30 +225,48 @@ public class ExchangeSearch {
 									logger.debug("Method 3 After exchange...");
 									List<Flight> updateList1 = newAircraft1.getFlightChain();
 									for (Flight aF : updateList1) {
-										logger.debug("Air " + newAircraft1.getId() + "isCancel " + newAircraft1.isCancel()
-												+ " flight " + aF.getFlightId());
+										logger.debug("Air " + newAircraft1.getId() + "isCancel "
+												+ newAircraft1.isCancel() + " flight " + aF.getFlightId());
 									}
 									List<Flight> updateList2 = newAircraft2.getFlightChain();
 									for (Flight aF : updateList2) {
-										logger.debug("Air " + newAircraft2.getId() + "isCancel " + newAircraft2.isCancel()
-												+ " flight " + aF.getFlightId());
+										logger.debug("Air " + newAircraft2.getId() + "isCancel "
+												+ newAircraft2.isCancel() + " flight " + aF.getFlightId());
 									}
-									logger.debug("Method 3 Complete exchange...");									
+									logger.debug("Method 3 Complete exchange...");
 								}
-
 
 								// only update solution when new change
 								// goes better
 								boolean adjustResult = true;
 								float newCost = 0;
-								if (!newAircraft1.isCancel()) {
-									adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft1);
-									newCost += newAircraft1.getCost();
+								Aircraft normalAir = null;
+								Aircraft cancelAir = null;
+								if (newAircraft1.isCancel()) {
+									normalAir = newAircraft1;
+									cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+											true);
+								} else {
+									cancelAir = newAircraft1;
+									normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+											false);
 								}
+								adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+								newCost += normalAir.getCost();
 
-								if (!newAircraft2.isCancel() && adjustResult) {
-									adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft2);
-									newCost += newAircraft2.getCost();
+								if (adjustResult) {
+									if (newAircraft2.isCancel()) {
+										normalAir = newAircraft2;
+										cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+												true);
+									} else {
+										cancelAir = newAircraft2;
+										normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+												false);
+									}
+
+									adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+									newCost += normalAir.getCost();
 								}
 
 								if (adjustResult) {
@@ -270,7 +285,8 @@ public class ExchangeSearch {
 											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 											aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
 											neighboursResult.addSolution(aBetterSolution);
-											logger.debug("Better Solution exists! Method 3 : " + aBetterSolution.getCost());
+											logger.debug(
+													"Better Solution exists! Method 3 : " + aBetterSolution.getCost());
 										} else {
 											logger.warn("Invalid aircraft after exchange " + air2.getId());
 										}
@@ -290,10 +306,11 @@ public class ExchangeSearch {
 									Flight air2Flightold = air2.getFlight(x);
 									if (!air2Flightold.isAdjustable())
 										continue;
-									
-									if (!flightAir1.getSourceAirPort().getId().equals(air2Flightold.getSourceAirPort().getId()))
+
+									if (!flightAir1.getSourceAirPort().getId()
+											.equals(air2Flightold.getSourceAirPort().getId()))
 										continue;
-									
+
 									for (Flight destFlight : circuitFlightsAir1.get(flightAir1)) {
 										Aircraft newAircraft1 = air1.clone();
 										Aircraft newAircraft2 = air2.clone();
@@ -301,7 +318,6 @@ public class ExchangeSearch {
 										Flight air1DestFlight = newAircraft1
 												.getFlight(air1.getFlightChain().indexOf(destFlight));
 										Flight air2Flight = newAircraft2.getFlight(x);
-										
 
 										newAircraft2.insertFlightChain(air1, flightAir1, destFlight, air2Flight, true);
 										newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
@@ -318,25 +334,43 @@ public class ExchangeSearch {
 												logger.debug(
 														"Air " + newAircraft2.getId() + "Flights: " + aF.getFlightId());
 											}
-											logger.debug("Method 4 Complete exchange ...");											
+											logger.debug("Method 4 Complete exchange ...");
 										}
-
 
 										// only update solution when new
 										// change
 										// goes better
 										boolean adjustResult = true;
 										float newCost = 0;
-										if (!newAircraft1.isCancel()) {
-											adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft1);
-											newCost += newAircraft1.getCost();
+										Aircraft normalAir = null;
+										Aircraft cancelAir = null;
+										if (newAircraft1.isCancel()) {
+											normalAir = newAircraft1;
+											cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+													true);
+										} else {
+											cancelAir = newAircraft1;
+											normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+													false);
 										}
+										adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+										newCost += normalAir.getCost();
 
-										if (!newAircraft2.isCancel() && adjustResult) {
-											adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft2);
-											newCost += newAircraft2.getCost();
+										if (adjustResult) {
+											if (newAircraft2.isCancel()) {
+												normalAir = newAircraft2;
+												cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+														true);
+											} else {
+												cancelAir = newAircraft2;
+												normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+														false);
+											}
+
+											adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+											newCost += normalAir.getCost();
 										}
-
+										
 										if (adjustResult) {
 											float oldCost = 0;
 											if (!air1.isCancel())
@@ -353,7 +387,8 @@ public class ExchangeSearch {
 													aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 													aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 													aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
-													logger.debug("Better Solution exists! Method 4 : " + aBetterSolution.getCost());
+													logger.debug("Better Solution exists! Method 4 : "
+															+ aBetterSolution.getCost());
 													neighboursResult.addSolution(aBetterSolution);
 												} else {
 													logger.warn("Invalid aircraft after exchange " + air2.getId());
@@ -375,8 +410,8 @@ public class ExchangeSearch {
 							if (air1FlightOld.isAdjustable()) {
 								for (int x = 0; x <= n - 1; x++) {
 									Flight flightAir2 = air2.getFlight(x);
-									if (circuitFlightsAir2.containsKey(flightAir2)
-											&& air1FlightOld.getSourceAirPort().getId().equals(flightAir2.getSourceAirPort().getId())) {
+									if (circuitFlightsAir2.containsKey(flightAir2) && air1FlightOld.getSourceAirPort()
+											.getId().equals(flightAir2.getSourceAirPort().getId())) {
 										for (Flight destFlight : circuitFlightsAir2.get(flightAir2)) {
 											Aircraft newAircraft1 = air1.clone();
 											Aircraft newAircraft2 = air2.clone();
@@ -384,40 +419,58 @@ public class ExchangeSearch {
 											Flight air2DestFlight = newAircraft2
 													.getFlight(air2.getFlightChain().indexOf(destFlight));
 											Flight air1Flight = newAircraft1.getFlight(u);
-											
 
-											newAircraft1.insertFlightChain(air2, flightAir2, destFlight, air1Flight, true);
+											newAircraft1.insertFlightChain(air2, flightAir2, destFlight, air1Flight,
+													true);
 											newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
 
 											if (aStragety.isDebug()) {
 												logger.debug("Method 5 After exchange ...");
 												List<Flight> updateList1 = newAircraft1.getFlightChain();
 												for (Flight aF : updateList1) {
-													logger.debug(
-															"Air " + newAircraft1.getId() + " Flights:" + aF.getFlightId());
+													logger.debug("Air " + newAircraft1.getId() + " Flights:"
+															+ aF.getFlightId());
 												}
 												List<Flight> updateList2 = newAircraft2.getFlightChain();
 												for (Flight aF : updateList2) {
-													logger.debug(
-															"Air " + newAircraft2.getId() + " Flights:" + aF.getFlightId());
+													logger.debug("Air " + newAircraft2.getId() + " Flights:"
+															+ aF.getFlightId());
 												}
-												logger.debug("Method 5 Complete exchange ...");											
+												logger.debug("Method 5 Complete exchange ...");
 											}
-
 
 											// only update solution when new
 											// change
 											// goes better
 											boolean adjustResult = true;
 											float newCost = 0;
-											if (!newAircraft1.isCancel()) {
-												adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft1);
-												newCost += newAircraft1.getCost();
+											Aircraft normalAir = null;
+											Aircraft cancelAir = null;
+											if (newAircraft1.isCancel()) {
+												normalAir = newAircraft1;
+												cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+														true);
+											} else {
+												cancelAir = newAircraft1;
+												normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+														false);
 											}
+											adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+											newCost += normalAir.getCost();
 
-											if (!newAircraft2.isCancel() && adjustResult) {
-												adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft2);
-												newCost += newAircraft2.getCost();
+											if (adjustResult) {
+												if (newAircraft2.isCancel()) {
+													normalAir = newAircraft2;
+													cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+															true);
+												} else {
+													cancelAir = newAircraft2;
+													normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+															false);
+												}
+
+												adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+												newCost += normalAir.getCost();
 											}
 
 											if (adjustResult) {
@@ -437,7 +490,8 @@ public class ExchangeSearch {
 														aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 														aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
 														neighboursResult.addSolution(aBetterSolution);
-														logger.debug("Better Solution exists! Method 5 : " + aBetterSolution.getCost());
+														logger.debug("Better Solution exists! Method 5 : "
+																+ aBetterSolution.getCost());
 													} else {
 														logger.warn("Invalid aircraft after exchange " + air2.getId());
 													}
@@ -448,7 +502,7 @@ public class ExchangeSearch {
 										}
 
 									}
-								}								
+								}
 							}
 
 						}
@@ -471,7 +525,6 @@ public class ExchangeSearch {
 											.getFlight(newAircraft1.getFlightChain().size() - 1);
 									Flight air2DestFlight = newAircraft2
 											.getFlight(newAircraft2.getFlightChain().size() - 1);
-									
 
 									newAircraft1.insertFlightChain(air2, bFlight,
 											air2.getFlight(air2.getFlightChain().size() - 1), air1Flight, true);
@@ -484,29 +537,50 @@ public class ExchangeSearch {
 										logger.debug("Method 6 After exchange ...");
 										List<Flight> updateList1 = newAircraft1.getFlightChain();
 										for (Flight aF : updateList1) {
-											logger.debug("Air " + newAircraft1.getId() + " Flights: " + aF.getFlightId());
+											logger.debug(
+													"Air " + newAircraft1.getId() + " Flights: " + aF.getFlightId());
 										}
 										List<Flight> updateList2 = newAircraft2.getFlightChain();
 										for (Flight aF : updateList2) {
-											logger.debug("Air " + newAircraft2.getId() + " Flights: " + aF.getFlightId());
+											logger.debug(
+													"Air " + newAircraft2.getId() + " Flights: " + aF.getFlightId());
 										}
-										logger.debug("Method 6 Complete exchange ...");										
+										logger.debug("Method 6 Complete exchange ...");
 									}
-
 
 									// only update solution when new change
 									// goes better
 									boolean adjustResult = true;
 									float newCost = 0;
-									if (!newAircraft1.isCancel()) {
-										adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft1);
-										newCost += newAircraft1.getCost();
+									Aircraft normalAir = null;
+									Aircraft cancelAir = null;
+									if (newAircraft1.isCancel()) {
+										normalAir = newAircraft1;
+										cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+												true);
+									} else {
+										cancelAir = newAircraft1;
+										normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+												false);
 									}
+									adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+									newCost += normalAir.getCost();
 
-									if (!newAircraft2.isCancel() && adjustResult) {
-										adjustResult = adjustResult && adjustmentEngine.adjust(newAircraft2);
-										newCost += newAircraft2.getCost();
+									if (adjustResult) {
+										if (newAircraft2.isCancel()) {
+											normalAir = newAircraft2;
+											cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
+													true);
+										} else {
+											cancelAir = newAircraft2;
+											normalAir = aSolution.getAircraft(cancelAir.getId(), cancelAir.getType(), false,
+													false);
+										}
+
+										adjustResult = adjustResult && adjustmentEngine.adjust(normalAir, cancelAir);
+										newCost += normalAir.getCost();
 									}
+									
 
 									if (adjustResult) {
 										float oldCost = 0;
@@ -525,7 +599,8 @@ public class ExchangeSearch {
 												aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 												aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
 												neighboursResult.addSolution(aBetterSolution);
-												logger.debug("Better Solution exists! Method 6 : " + aBetterSolution.getCost());
+												logger.debug("Better Solution exists! Method 6 : "
+														+ aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air2.getId());
 											}

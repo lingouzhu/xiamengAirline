@@ -29,7 +29,7 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.FlightTime;
+import xiaMengAirline.beans.RequestTime;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.Main;
@@ -104,14 +104,19 @@ public class InitDataTest {
 		
 		
 		//check flight
-		Flight f15 = air50.getFlightByFlightId(15);
+		Flight f15 = air50.getFlightByFlightId(15).clone();
 		assertEquals(Utils.stringFormatToTime2("05/05/2017 07:30:00"), f15.getDepartureTime());
 		assertEquals(Utils.stringFormatToTime2("05/05/2017  10:25:00"), f15.getArrivalTime());
-		assertEquals(false, BusinessDomain.isValidEarlier(f15, Utils.stringFormatToTime2("05/05/2017 03:30:00"), false ));
-		assertEquals(true, BusinessDomain.isValidEarlier(f15, Utils.stringFormatToTime2("05/05/2017 03:30:00"), true ));
-		assertEquals(false, BusinessDomain.isValidEarlier(f15, Utils.stringFormatToTime2("05/05/2017 00:30:00"), true ));
-		assertEquals(true, BusinessDomain.isValidDelay(f15, Utils.stringFormatToTime2("05/05/2017 17:30:00")));
-		assertEquals(false, BusinessDomain.isValidDelay(f15, Utils.stringFormatToTime2("06/05/2017 07:31:00")));
+		f15.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 03:30:00"));
+		assertEquals(false, BusinessDomain.isValidEarlier(f15, false ));
+		f15.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 03:30:00"));
+		assertEquals(true, BusinessDomain.isValidEarlier(f15,true ));
+		f15.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 00:30:00"));
+		assertEquals(false, BusinessDomain.isValidEarlier(f15,true ));
+		f15.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 17:30:00"));
+		assertEquals(true, BusinessDomain.isValidDelay(f15 ));
+		f15.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 07:31:00"));
+		assertEquals(false, BusinessDomain.isValidDelay(f15));
 		assertEquals(new BigDecimal(1.00).setScale(2, BigDecimal.ROUND_HALF_UP), f15.getImpCoe());
 		assertEquals(false,f15.isInternationalFlight());
 		assertEquals(349, f15.getSchdNo());
@@ -138,13 +143,18 @@ public class InitDataTest {
 		assertEquals(null, InitData.jointFlightMap.get(f1920.getFlightId()));
 		
 		Aircraft air109 = InitData.originalSolution.getAircraft("109", "2", false,false).clone();
-		Flight f325 = air109.getFlightByFlightId(325);
+		Flight f325 = air109.getFlightByFlightId(325).clone();
 		assertEquals(null, InitData.jointFlightMap.get(f325.getFlightId()));
-		assertEquals(false, BusinessDomain.isValidEarlier(f325, Utils.stringFormatToTime2("05/05/2017 09:00:00"), false ));
-		assertEquals(false, BusinessDomain.isValidEarlier(f325, Utils.stringFormatToTime2("05/05/2017 09:30:00"), true ));
-		assertEquals(false, BusinessDomain.isValidEarlier(f325, Utils.stringFormatToTime2("05/05/2017 00:30:00"), true ));
-		assertEquals(true, BusinessDomain.isValidDelay(f325, Utils.stringFormatToTime2("06/05/2017 15:30:00")));
-		assertEquals(false, BusinessDomain.isValidDelay(f325, Utils.stringFormatToTime2("07/05/2017 08:31:00")));
+		f325.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 09:00:00"));
+		assertEquals(false, BusinessDomain.isValidEarlier(f325, false ));
+		f325.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 09:30:00"));
+		assertEquals(false, BusinessDomain.isValidEarlier(f325,true ));
+		f325.setDepartureTime(Utils.stringFormatToTime2("05/05/2017 00:30:00"));
+		assertEquals(false, BusinessDomain.isValidEarlier(f325, true ));
+		f325.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 15:30:00"));
+		assertEquals(true, BusinessDomain.isValidDelay(f325));
+		f325.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 08:31:00"));
+		assertEquals(false, BusinessDomain.isValidDelay(f325));
 		
 		//airport close
 		AirPort port6 = InitData.airportList.getAirport("6");
@@ -248,7 +258,7 @@ public class InitDataTest {
 		}
 		
 		AirPort port49 = InitData.airportList.getAirport("49");
-		FlightTime aReq = new FlightTime();
+		RequestTime aReq = new RequestTime();
 		aReq.setArrivalTime(Utils.stringFormatToTime2("05/05/2017 23:35:00"));
 		aReq.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 00:25:00"));
 		aReq = port49.requestAirport(aReq, 50);

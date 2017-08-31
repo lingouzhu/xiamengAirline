@@ -24,6 +24,9 @@ public class BusinessDomain {
 	public static final int MAX_DOMESTIC_EARLIER = 6;
 	
 	public static boolean isValidConnectedForJoin (Flight firstFlight, Flight secondFlight) {
+		if (getJointFlight(firstFlight) != secondFlight)
+			return false;
+		
 		if (firstFlight.isInternationalFlight() || secondFlight.isInternationalFlight())
 			return false;
 		
@@ -32,7 +35,7 @@ public class BusinessDomain {
 		else
 			return false;
 	}
-	public static boolean isValidDelay(Flight aFlight, Date delay) {
+	public static boolean isValidDelay(Flight aFlight) {
 		Calendar aCal = Calendar.getInstance();
 		aCal.setTime(aFlight.getPlannedFlight().getDepartureTime());
 		if (aFlight.isInternationalFlight()) {
@@ -40,7 +43,7 @@ public class BusinessDomain {
 		} else
 			aCal.add(Calendar.HOUR, MAX_DOMESTIC_DELAY);
 		
-		if (delay.before(aCal.getTime()))
+		if (aFlight.getDepartureTime().before(aCal.getTime()))
 			return true;
 		else
 			return false;
@@ -182,24 +185,6 @@ public class BusinessDomain {
 		{
 			logger.warn("Unmatched flight size after exchange airs: " + newAir1.getId() + ":" + newAir2.getId());
 			return false;
-		}
-		
-		if (newAir1.isCancel()) {
-			for (Flight aFlight:newAir1.getFlightChain()) {
-				if (!aFlight.isAdjustable()) {
-					logger.warn("Flight shall not adjust but cancelled after exchange air: " + newAir1.getId() + " flightId:" + aFlight.getFlightId());
-					return false;
-				}
-			}
-		}
-		
-		if (newAir2.isCancel()) {
-			for (Flight aFlight:newAir2.getFlightChain()) {
-				if (!aFlight.isAdjustable()) {
-					logger.warn("Flight shall not adjust but cancelled after exchange air: " + newAir2.getId() + " flightId:" + aFlight.getFlightId());
-					return false;
-				}
-			}
 		}
 		
 		return true;

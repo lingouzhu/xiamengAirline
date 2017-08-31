@@ -21,7 +21,7 @@ import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
-import xiaMengAirline.beans.FlightTime;
+import xiaMengAirline.beans.RequestTime;
 import xiaMengAirline.beans.MatchedFlight;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
@@ -505,16 +505,16 @@ public class AirPortTest {
 		aAirport.addRegularCloseSchedule(normalCloseBean);
 
 		// normal
-		FlightTime aTime = new FlightTime();
+		RequestTime aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("03/05/2017 14:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("03/05/2017 20:00:00"));
 
-		FlightTime rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
+		RequestTime rightTime = aAirport.requestAirport(aTime, Flight.GroundingTime);
 
 		assertEquals(null, rightTime);
 
 		// normal
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("08/05/2017 14:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("08/05/2017 20:00:00"));
 
@@ -523,7 +523,7 @@ public class AirPortTest {
 		assertEquals(null, rightTime);
 
 		// arrival-dep in event
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 18:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 22:00:00"));
 
@@ -536,7 +536,7 @@ public class AirPortTest {
 		assertEquals(true, rightTime.isIsTyphoon());
 
 		// arrival close to airport open, dep > grounding time
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 16:30:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 20:00:00"));
 
@@ -548,7 +548,7 @@ public class AirPortTest {
 		assertEquals("07/05/2017 20:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
 
 		// arrival close to airport open, dep < grounding time
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 16:30:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 17:30:00"));
 
@@ -560,7 +560,7 @@ public class AirPortTest {
 		assertEquals("07/05/2017 17:50:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
 
 		// arrival out, dep in airport event, gap > grounding time
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 10:00:00"));
 
@@ -571,7 +571,7 @@ public class AirPortTest {
 
 		// arrival in landing-off period, dep in airport event, gap > grounding
 		// time
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:59:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 10:00:00"));
 
@@ -583,7 +583,7 @@ public class AirPortTest {
 		// arrival in landing-off period, dep in airport event, gap > grounding,
 		// departure earlier
 		// time
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("06/05/2017 13:59:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 15:00:00"));
 
@@ -592,7 +592,7 @@ public class AirPortTest {
 		assertEquals(null, rightTime);
 
 		// arrival in normal close period, enough gap
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 01:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 15:00:00"));
 
@@ -602,7 +602,7 @@ public class AirPortTest {
 		assertEquals("26/05/2017 15:00:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
 
 		// arrival in normal close period, small gap
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 01:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 06:20:00"));
 
@@ -613,7 +613,7 @@ public class AirPortTest {
 		assertEquals(false, rightTime.isIsTyphoon());
 
 		// arrival in normal close period, dep in range, enough gap
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 00:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 03:20:00"));
 
@@ -623,7 +623,7 @@ public class AirPortTest {
 		assertEquals("26/05/2017 06:10:00", Utils.timeFormatToString2(rightTime.getDepartureTime()));
 
 		// arrival in next to close period, dep out range,
-		aTime = new FlightTime();
+		aTime = new RequestTime();
 		aTime.setArrivalTime(Utils.stringFormatToTime2("26/05/2017 00:00:00"));
 		aTime.setDepartureTime(Utils.stringFormatToTime2("26/05/2017 06:15:00"));
 

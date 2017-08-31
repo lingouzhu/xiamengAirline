@@ -479,7 +479,7 @@ public class Aircraft implements Cloneable {
 	 *                (Flight), where the problem flight is at the flight chain
 	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
 	 *      caused by typhoon
-	 * @see FlightTime
+	 * @see RequestTime
 	 * @exception FlightDurationNotFound
 	 *                - the flight duration is not found, means flight not
 	 *                allowed. This exception contains two objects, theFlight
@@ -493,7 +493,7 @@ public class Aircraft implements Cloneable {
 	 * @throws AirportNotAvailable
 	 * @see Flight availableTime (FlightTime), suggested arr/dep by airport, if
 	 *      caused by typhoon
-	 * @see FlightTime
+	 * @see RequestTime
 	 */
 
 	public boolean adjustFlightTime(int startPosition) throws ParseException, AirportNotAcceptArrivalTime,
@@ -509,13 +509,13 @@ public class Aircraft implements Cloneable {
 				cl.setTime(currentFlight.getArrivalTime());
 				int plannedGroundingTime = Flight.getGroundingTime(currentFlight.getFlightId(), nextFlight.getFlightId());
 				cl.add(Calendar.MINUTE, plannedGroundingTime);
-				FlightTime aScheduledTime = new FlightTime();
+				RequestTime aScheduledTime = new RequestTime();
 				aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
 				if (cl.getTime().before(nextFlight.getPlannedFlight().getDepartureTime()))
 					aScheduledTime.setDepartureTime(nextFlight.getPlannedFlight().getDepartureTime());
 				else
 					aScheduledTime.setDepartureTime(cl.getTime());
-				FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
+				RequestTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
 						plannedGroundingTime);
 				if (newFlightTime != null) {
 					if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
@@ -601,11 +601,11 @@ public class Aircraft implements Cloneable {
 		}
 		
 		//check if last flight can arrive destination?
-		FlightTime aScheduledTime = new FlightTime();
+		RequestTime aScheduledTime = new RequestTime();
 		aScheduledTime.setArrivalTime(currentFlight.getArrivalTime());
 		aScheduledTime.setDepartureTime(null);
 
-		FlightTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
+		RequestTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
 				Flight.getGroundingTime(currentFlight.getFlightId(), -1));
 		
 		if (newFlightTime != null) {

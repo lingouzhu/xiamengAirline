@@ -29,6 +29,10 @@ public class Flight implements Cloneable {
 	private int numberOfPassenger;
 	private int numberOfJoinedPassenger;
 	private boolean isAdjustable = true;
+	//this flag is just for "virtual" cancel, the real output shall move flight into cancel queue
+	private boolean isCanceled = false;  
+	private boolean isFirstJoined = false; //only used in adjustment
+	private boolean isSecondJoined = false; //only used in adjustment
 	
 	public int getFlightId() {
 		return flightId;
@@ -193,6 +197,25 @@ public class Flight implements Cloneable {
 	}
 	public void setAdjustable(boolean isAdjustable) {
 		this.isAdjustable = isAdjustable;
+	}
+
+	public boolean isCanceled() {
+		return isCanceled;
+	}
+	public void setCanceled(boolean isCanceled) {
+		this.isCanceled = isCanceled;
+	}
+	public boolean isFirstJoined() {
+		return isFirstJoined;
+	}
+	public void setFirstJoined(boolean isJoined) {
+		this.isFirstJoined = isJoined;
+	}
+	public boolean isSecondJoined() {
+		return isSecondJoined;
+	}
+	public void setSecondJoined(boolean isSecondJoined) {
+		this.isSecondJoined = isSecondJoined;
 	}
 
 
