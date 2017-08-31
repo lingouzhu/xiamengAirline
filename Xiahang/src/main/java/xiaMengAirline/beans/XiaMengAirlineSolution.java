@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -22,6 +23,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 	private BigDecimal cost = new BigDecimal("0");
 	private String strCost = "";
 	private HashMap<String, Aircraft> schedule = new HashMap<String, Aircraft>();
+	private HashMap<String, List<Flight>> flightInfoForPassenger = new HashMap<String, List<Flight>>();
 
 	private List<String> outputList = new ArrayList<String>();
 
@@ -89,7 +91,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 						cost = cost.add(new BigDecimal("5000"));
 						empty++;
 						if (refreshOut) {
-							outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "1"));
+							outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "1", "0", ""));
 						}
 					} else {
 						boolean isChanged = false;
@@ -151,8 +153,8 @@ public class XiaMengAirlineSolution implements Cloneable {
 								connect = connect.add(nextFlight.getImpCoe());
 								isStretch = true;
 								if (refreshOut) {
-									outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "1", "0"));
-									outputList.add(CSVUtils.flight2Output(nextFlight, aAir.getId(), "1", "1", "0"));
+									outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "1", "0", newFlight.getIsTransfer(), newFlight.getTransferInfo()));
+									outputList.add(CSVUtils.flight2Output(nextFlight, aAir.getId(), "1", "1", "0", newFlight.getIsTransfer(), newFlight.getTransferInfo()));
 								}
 
 							}
@@ -161,7 +163,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 						if (refreshOut && !isStretch) {
 							if (refreshOut) {
-								outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "0"));
+								outputList.add(CSVUtils.flight2Output(newFlight, aAir.getId(), "0", "0", "0", newFlight.getIsTransfer(), newFlight.getTransferInfo()));
 							}
 						}
 					}
@@ -177,7 +179,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 					cancel = cancel.add(cancelFlight.getImpCoe());
 					cost = cost.add(new BigDecimal("1200").multiply(cancelFlight.getImpCoe()));
 					if (refreshOut) {
-						outputList.add(CSVUtils.flight2Output(cancelFlight, aAir.getId(), "1", "0", "0"));
+						outputList.add(CSVUtils.flight2Output(cancelFlight, aAir.getId(), "1", "0", "0", cancelFlight.getIsTransfer(), cancelFlight.getTransferInfo()));
 					}
 
 				}
@@ -206,6 +208,141 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 	}
 
+	
+	public void refreshPassenger() {
+		
+		// init passenger data
+		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		for (Aircraft aAir : airList) {
+			if (!aAir.isCancel()) {
+				for (Flight flight : aAir.getFlightChain()) {
+					flight.setSeatNum(aAir.getNumberOfSeats());
+					if (flightInfoForPassenger.get(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport()) != null ) {
+						List<Flight> flightList = new ArrayList<Flight>();
+						flightList.add(flight);
+						flightInfoForPassenger.put(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport().getId(), flightList);
+					} else {
+						flightInfoForPassenger.get(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport().getId()).add(flight);
+					}
+					
+				}
+				
+			} else {
+				for (Flight flight : aAir.getFlightChain()) {
+					flight.setCancel(true);
+					if (flightInfoForPassenger.get(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport()) != null ) {
+						List<Flight> flightList = new ArrayList<Flight>();
+						flightList.add(flight);
+						flightInfoForPassenger.put(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport().getId(), flightList);
+					} else {
+						flightInfoForPassenger.get(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport().getId()).add(flight);
+					}
+					
+				}
+			}
+		}
+		
+		
+		
+		// sort flight desc
+		for (String key : flightInfoForPassenger.keySet()) {
+			List<Flight> flightList = flightInfoForPassenger.get(key);
+			List<FlightWithEmptySeat> emptyList = new ArrayList<FlightWithEmptySeat>();
+			Utils.sort(flightList, "departureTime", false);
+			
+			for (Flight flight : flightList) {
+				// adjustable and not new flight
+				if (flight.isAdjustable() && flight.getFlightId() < InitData.plannedMaxFligthId) {
+					// not cancel
+					if (!flight.isCancel()) {
+						if (flight.getDesintationAirport().getId().equals(flight.getPlannedFlight().getDesintationAirport().getId())) {
+							if (flight.getNumberOfJoinedPassenger() < flight.getSeatNum()) {
+								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfJoinedPassenger()));
+							}
+						} else {
+							if (flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() <= flight.getSeatNum()) {
+								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfPassenger() - flight.getNumberOfJoinedPassenger()));
+							} else {
+								int overPNo = flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() - flight.getSeatNum();
+								
+								for (int i = emptyList.size() - 1; i > 0; i--) {
+									FlightWithEmptySeat flightWithEmptySeat = emptyList.get(i);
+									// with empty seat
+									if (flightWithEmptySeat.getEmptySeatNo() > 0) {
+										if (flightWithEmptySeat.getEmptySeatNo() >= overPNo) {
+											flightWithEmptySeat.setEmptySeatNo(flightWithEmptySeat.getEmptySeatNo() - overPNo);
+											flight.setIsTransfer("1");
+											flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + String.valueOf(overPNo));
+											break;
+										} else {
+											flight.setIsTransfer("1");
+											flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + String.valueOf(overPNo - flightWithEmptySeat.getEmptySeatNo()));
+											
+											overPNo = overPNo - flightWithEmptySeat.getEmptySeatNo();
+											flightWithEmptySeat.setEmptySeatNo(0);
+											
+										}
+										
+									}
+									
+								}
+								
+							}
+						}
+						
+					} else {
+
+						int overPNo = flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger();
+						
+						for (int i = emptyList.size() - 1; i > 0; i--) {
+							FlightWithEmptySeat flightWithEmptySeat = emptyList.get(i);
+							// with empty seat
+							if (flightWithEmptySeat.getEmptySeatNo() > 0) {
+								if (flightWithEmptySeat.getEmptySeatNo() >= overPNo) {
+									flightWithEmptySeat.setEmptySeatNo(flightWithEmptySeat.getEmptySeatNo() - overPNo);
+									flight.setIsTransfer("1");
+									flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + String.valueOf(overPNo));
+									break;
+								} else {
+									flight.setIsTransfer("1");
+									flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + String.valueOf(overPNo - flightWithEmptySeat.getEmptySeatNo()));
+									
+									overPNo = overPNo - flightWithEmptySeat.getEmptySeatNo();
+									flightWithEmptySeat.setEmptySeatNo(0);
+									
+								}
+								
+							}
+							
+						}
+						
+					
+					}
+					
+					
+				}
+				
+			}
+			
+		}
+		
+		
+		
+	}
+	
+	
+	public Flight getFlightByFlightId(int aFlightId) {
+		
+		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		for (Aircraft aAir : airList) {
+			for (Flight flight : aAir.getFlightChain()) {
+				if (flight.getFlightId() == aFlightId)
+					return flight;
+			}	
+		}
+		return null;
+	}
+	
 	public void refreshCost () {
 		setCost(new BigDecimal(0));
 		List<Aircraft> airList = new ArrayList<Aircraft> (schedule.values());

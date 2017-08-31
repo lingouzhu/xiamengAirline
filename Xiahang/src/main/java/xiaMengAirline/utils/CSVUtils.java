@@ -106,19 +106,19 @@ public class CSVUtils {
     }
     
     
-    public static String flight2Output(Flight flight, String airID, String isCancel, String isStretch, String isEmpty) {
+    public static String flight2Output(Flight flight, String airID, String isCancel, String isStretch, String isEmpty, String isTransfer, String transferInfo) {
     	
     	String output = "";
     	if ("1".equals(isCancel)) {
     		output = flight.getFlightId() + "," + flight.getPlannedFlight().getSourceAirPort().getId() + ","
         			+ flight.getPlannedFlight().getDesintationAirport().getId() + "," + Utils.timeFormatter2(flight.getPlannedFlight().getDepartureTime()) 
         			+  "," + Utils.timeFormatter2(flight.getPlannedFlight().getArrivalTime()) + "," + flight.getPlannedAir().getId() + "," 
-        			+ isCancel + ","+ isStretch + ","+ isEmpty + "," + "0" + "," + "";
+        			+ isCancel + ","+ isStretch + ","+ isEmpty + "," + isTransfer + "," + transferInfo.replaceFirst("&", "");
     	} else {
     		output = flight.getFlightId() + "," + flight.getSourceAirPort().getId() + ","
         			+ flight.getDesintationAirport().getId() + "," + Utils.timeFormatter2(flight.getDepartureTime()) 
         			+  "," + Utils.timeFormatter2(flight.getArrivalTime()) + "," + airID + "," 
-        			+ isCancel + ","+ isStretch + ","+ isEmpty + "," + "0" + "," + "";
+        			+ isCancel + ","+ isStretch + ","+ isEmpty + "," + isTransfer + "," + transferInfo.replaceFirst("&", "");
     	}
     	
     	return output;
