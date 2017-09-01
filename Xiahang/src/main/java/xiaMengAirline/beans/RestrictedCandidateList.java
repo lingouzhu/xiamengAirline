@@ -91,6 +91,7 @@ public class RestrictedCandidateList {
 			for(Map.Entry<BigDecimal, List<XiaMengAirlineSolution>> entry : bestSolutionList.entrySet()) {
 				  allNewSolutions.addAll(entry.getValue());
 			}
+
 			
 			return allNewSolutions.get(InitData.rndRcl.nextInt(allNewSolutions.size()));
 		} else 

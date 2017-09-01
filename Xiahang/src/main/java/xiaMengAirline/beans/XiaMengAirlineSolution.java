@@ -922,4 +922,21 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 		return bestSolution;
 	}
+	
+	public void printOutSolution () {
+		List<Aircraft> airList = new ArrayList<Aircraft>(getSchedule().values());
+		
+		logger.debug("solution in details:");
+		for (Aircraft aircraft : airList) {
+			logger.debug("Aircraft " + aircraft.getId() + " isCanceled? " + aircraft.isCancel());
+			for (Flight aFlight : aircraft.getFlightChain()) {
+				logger.debug("Flight " + aFlight.getFlightId());
+				logger.debug("isCancelled? " + aircraft.isCancel());
+				logger.debug("source airport " + aFlight.getSourceAirPort().getId());
+				logger.debug("dest airport" + aFlight.getDesintationAirport().getId());
+				logger.debug("departure time " + aFlight.getDepartureTime());
+				logger.debug("arrival time " + aFlight.getArrivalTime());
+			}
+		}
+	}
 }

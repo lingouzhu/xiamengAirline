@@ -18,6 +18,7 @@ import java.util.TreeMap;
 import org.junit.Before;
 import org.junit.Test;
 
+
 import xiaMengAirline.StartUp;
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
@@ -516,6 +517,7 @@ public class InitDataTest {
 		Aircraft airl2 = InitData.originalSolution.getAircraft("2", "4", false, false).clone();
 		Aircraft airl3 = InitData.originalSolution.getAircraft("3", "4", false, false).clone();
 		Aircraft airl4 = InitData.originalSolution.getAircraft("4", "4", false, false).clone();
+		Aircraft airl69 = InitData.originalSolution.getAircraft("69", "2", false, false).clone();
 		a234Solution.replaceOrAddNewAircraft(airl2);
 		a234Solution.replaceOrAddNewAircraft(airl3);
 		a234Solution.replaceOrAddNewAircraft(airl4);
@@ -578,33 +580,36 @@ public class InitDataTest {
 		anewAir = aSelector.selectAircraft(air79);
 		assertEquals(null,anewAir);
 		
-		XiaMengAirlineSolution a23Solution = new XiaMengAirlineSolution();
-		airl2.setCost(10000);
-		airl3.setCost(10000);
-		a23Solution.replaceOrAddNewAircraft(airl2);
-		a23Solution.replaceOrAddNewAircraft(airl3);
-		a23Solution.refreshCost();
-		
-		ExchangeSearch aSearch = new ExchangeSearch();
-		AdjustmentEngine aAdjEngine = new MockedAdjustEngine();
-		IterativeMethod aDriver = new IterativeSingleMethod();
+		SelfSearch aInitEngine = new SelfSearch();
 		aStragety.setSelectionRule(SELECTION.RANDOM);
 		aStragety.setNumberOfSolutions(1);
 		aStragety.setAbortWhenImproved(false);
 		aStragety.setDebug(true);
 		aStragety.setMaxBestSolution(1);
-		aSearch.setupIterationStragety(aStragety);
-		aSearch.setupIterativeDriver(aDriver);
-		aSearch.setAdjustmentEngine(aAdjEngine);
-		@SuppressWarnings("unused")
-		XiaMengAirlineSolution aBetterSolution1 = aSearch.discoverBetterSolution(a23Solution);
-		
-		SelfSearch aInitEngine = new SelfSearch();
 		aStragety.setMaxGrounding(24);
 		aInitEngine.setaStragety(aStragety);
 		XiaMengAirlineSolution a3Solution = new XiaMengAirlineSolution();
-		a3Solution.replaceOrAddNewAircraft(airl1);
+		a3Solution.replaceOrAddNewAircraft(airl69);
 		aInitEngine.constructInitialSolution(a3Solution);
+		
+		XiaMengAirlineSolution a23Solution = new XiaMengAirlineSolution();
+		a23Solution.replaceOrAddNewAircraft(airl2);
+		a23Solution.replaceOrAddNewAircraft(airl3);
+		
+		ExchangeSearch aSearch = new ExchangeSearch();
+		SelfSearch aAdjEngine = new SelfSearch();
+		aAdjEngine.setaStragety(aStragety);
+		
+		IterativeMethod aDriver = new IterativeSingleMethod();
+		aSearch.setupIterationStragety(aStragety);
+		aSearch.setupIterativeDriver(aDriver);
+		aSearch.setAdjustmentEngine(aAdjEngine);
+		XiaMengAirlineSolution aBetterSolution1 = aAdjEngine.constructInitialSolution(a23Solution);
+		aBetterSolution1.printOutSolution();
+		aBetterSolution1 = aSearch.discoverBetterSolution(aBetterSolution1);
+		aBetterSolution1.printOutSolution();
+		
+
 		
 		
 		fail("stop");

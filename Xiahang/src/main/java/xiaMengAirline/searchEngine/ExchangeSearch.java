@@ -25,14 +25,14 @@ public class ExchangeSearch {
 
 	public XiaMengAirlineSolution discoverBetterSolution(XiaMengAirlineSolution aSolution)
 			throws CloneNotSupportedException, ParseException {
+		neighboursResult = new RestrictedCandidateList();
+		neighboursResult.setaStragety(aStragety);
 		aDriver.setupIterationStragety(aStragety);
 		aDriver.setupIterationContent(aSolution);
 		List<Aircraft> aBatch = aDriver.getNextDriveForIterative();
 		IterativeSelector aSelector = null;
 
 		while (aBatch != null) {
-			neighboursResult = new RestrictedCandidateList();
-			neighboursResult.setaStragety(aStragety);
 			int currentBatch = aDriver.getCurrentIterationNumber();
 
 			System.out.println("Processing batch ... " + currentBatch);
@@ -242,7 +242,7 @@ public class ExchangeSearch {
 								float newCost = 0;
 								Aircraft normalAir = null;
 								Aircraft cancelAir = null;
-								if (newAircraft1.isCancel()) {
+								if (!newAircraft1.isCancel()) {
 									normalAir = newAircraft1;
 									cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 											true);
@@ -255,7 +255,7 @@ public class ExchangeSearch {
 								newCost += normalAir.getCost();
 
 								if (adjustResult) {
-									if (newAircraft2.isCancel()) {
+									if (!newAircraft2.isCancel()) {
 										normalAir = newAircraft2;
 										cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 												true);
@@ -344,7 +344,7 @@ public class ExchangeSearch {
 										float newCost = 0;
 										Aircraft normalAir = null;
 										Aircraft cancelAir = null;
-										if (newAircraft1.isCancel()) {
+										if (!newAircraft1.isCancel()) {
 											normalAir = newAircraft1;
 											cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 													true);
@@ -357,7 +357,7 @@ public class ExchangeSearch {
 										newCost += normalAir.getCost();
 
 										if (adjustResult) {
-											if (newAircraft2.isCancel()) {
+											if (!newAircraft2.isCancel()) {
 												normalAir = newAircraft2;
 												cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 														true);
@@ -446,7 +446,7 @@ public class ExchangeSearch {
 											float newCost = 0;
 											Aircraft normalAir = null;
 											Aircraft cancelAir = null;
-											if (newAircraft1.isCancel()) {
+											if (!newAircraft1.isCancel()) {
 												normalAir = newAircraft1;
 												cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 														true);
@@ -459,7 +459,7 @@ public class ExchangeSearch {
 											newCost += normalAir.getCost();
 
 											if (adjustResult) {
-												if (newAircraft2.isCancel()) {
+												if (!newAircraft2.isCancel()) {
 													normalAir = newAircraft2;
 													cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 															true);
@@ -554,7 +554,7 @@ public class ExchangeSearch {
 									float newCost = 0;
 									Aircraft normalAir = null;
 									Aircraft cancelAir = null;
-									if (newAircraft1.isCancel()) {
+									if (!newAircraft1.isCancel()) {
 										normalAir = newAircraft1;
 										cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 												true);
@@ -567,7 +567,7 @@ public class ExchangeSearch {
 									newCost += normalAir.getCost();
 
 									if (adjustResult) {
-										if (newAircraft2.isCancel()) {
+										if (!newAircraft2.isCancel()) {
 											normalAir = newAircraft2;
 											cancelAir = aSolution.getAircraft(normalAir.getId(), normalAir.getType(), true,
 													true);
@@ -620,7 +620,6 @@ public class ExchangeSearch {
 			}
 			if (neighboursResult.hasSolution()) {
 				aSolution = neighboursResult.selectASoluiton();
-				neighboursResult.clear();
 				System.out.println("Completed batch ... " + currentBatch + " Cost: " + aSolution.getCost());
 			}
 			aBatch = aDriver.getNextDriveForIterative();
