@@ -36,7 +36,7 @@ public class IterativeLeastOverlappedAirports implements IterativeMethod {
 			int numberOfOverLapped = 0;
 			for (Aircraft bAir : airList) {
 				if (!aAir.getId().equals(bAir.getId())) {
-					String aKey = Utils.build2AirKey(aAir.getId(), bAir.getId());;
+					String aKey = Utils.build2AirKey(aAir.getId(), aAir.isCancel(), bAir.getId(), bAir.isCancel());;
 					
 					if (overlappedMap.containsKey(aKey)) {
 						numberOfOverLapped += overlappedMap.get(aKey);

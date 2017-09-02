@@ -33,7 +33,7 @@ public class AirPort {
 		return id.equals(anotherAirport.getId());
 	}
 
-	public RequestTime requestAirport(RequestTime requestTime, int groundingTime)
+	public RequestTime requestAirport(RequestTime requestTime, int groundingTime, boolean ignoreParking)
 			throws ParseException, AirportNotAcceptDepartureTime2 {
 		// check airport events first
 		RequestTime retFlightTime = null;
@@ -41,7 +41,7 @@ public class AirPort {
 			if (requestTime.getArrivalTime() != null
 					&& requestTime.getArrivalTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getArrivalTime().compareTo(aClose.getEndTime()) < 0) {
-				if ((aClose.getMaximumParking() == 0) || (!aClose.isAllowForLanding())) {
+				if ((!ignoreParking && aClose.getMaximumParking() == 0) || (!aClose.isAllowForLanding())) {
 					if (retFlightTime == null)
 						retFlightTime = new RequestTime();
 					retFlightTime.setArrivalTime(aClose.getEndTime());
@@ -62,7 +62,7 @@ public class AirPort {
 			if (requestTime.getDepartureTime() != null
 					&& requestTime.getDepartureTime().compareTo(aClose.getStartTime()) > 0
 					&& requestTime.getDepartureTime().compareTo(aClose.getEndTime()) < 0) {
-				if (aClose.getMaximumParking() == 0)
+				if (!ignoreParking && aClose.getMaximumParking() == 0)
 					throw new AirportNotAcceptDepartureTime2(requestTime.getDepartureTime(), "No Parking", this);
 				if (retFlightTime == null) {
 					if (!aClose.isAllowForTakeoff()) {

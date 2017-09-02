@@ -138,12 +138,14 @@ public class Aircraft implements Cloneable {
 	 *            specify the location of current flight chain. Flight will be
 	 *            inserted before this position
 	 * @return none
+	 * @throws CloneNotSupportedException 
 	 */
-	public void insertFlightChain(Aircraft sourceAircraft, List<Integer> addFlights, int position) {
+	public void insertFlightChain(Aircraft sourceAircraft, List<Integer> addFlights, int position) throws CloneNotSupportedException {
 		List<Flight> newFlights = new ArrayList<Flight>();
 		for (int anAdd : addFlights) {
-			sourceAircraft.getFlight(anAdd).setAssignedAir(this);
-			newFlights.add(sourceAircraft.getFlight(anAdd));
+			Flight movingFlight = sourceAircraft.getFlight(anAdd).clone();
+			movingFlight.setAssignedAir(this);
+			newFlights.add(movingFlight);
 		}
 		this.flightChain.addAll(position, newFlights);
 	}
@@ -166,16 +168,18 @@ public class Aircraft implements Cloneable {
 	 * @param isBefore,
 	 *            is inserted before the insertFlight or after
 	 * @return none
+	 * @throws CloneNotSupportedException 
 	 */
 	public void insertFlightChain(Aircraft sourceAircraft, Flight startFlight, Flight endFlight, Flight insertFlight,
-			boolean isBefore) {
+			boolean isBefore) throws CloneNotSupportedException {
 		List<Flight> newFlights = new ArrayList<Flight>();
 		int addFlightStartPosition = sourceAircraft.getFlightChain().indexOf(startFlight);
 		int addFlightEndPosition = sourceAircraft.getFlightChain().indexOf(endFlight);
 		int insertFlightPosition = this.flightChain.indexOf(insertFlight);
 		for (int i = addFlightStartPosition; i <= addFlightEndPosition; i++) {
-			sourceAircraft.getFlight(i).setAssignedAir(this);
-			newFlights.add(sourceAircraft.getFlight(i));
+			Flight movingFlight = sourceAircraft.getFlight(i).clone();
+			movingFlight.setAssignedAir(this);
+			newFlights.add(movingFlight);
 		}
 		if (insertFlight != null) {
 			if (isBefore)
@@ -523,7 +527,7 @@ public class Aircraft implements Cloneable {
 				else
 					aScheduledTime.setDepartureTime(cl.getTime());
 				RequestTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
-						plannedGroundingTime);
+						plannedGroundingTime, false);
 				if (newFlightTime != null) {
 					if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {
 						throw new AirportNotAcceptArrivalTime(currentFlight, newFlightTime);
@@ -613,7 +617,7 @@ public class Aircraft implements Cloneable {
 		aScheduledTime.setDepartureTime(null);
 
 		RequestTime newFlightTime = currentFlight.getDesintationAirport().requestAirport(aScheduledTime,
-				Flight.getGroundingTime(currentFlight.getFlightId(), -1));
+				Flight.getGroundingTime(currentFlight.getFlightId(), -1), false);
 		
 		if (newFlightTime != null) {
 			if (aScheduledTime.getArrivalTime().compareTo(newFlightTime.getArrivalTime()) != 0) {

@@ -225,18 +225,38 @@ public class Utils {
 		return cost;
 	}
 	
-	public static String build2AirKey (String air1Id, String air2Id) {
+	public static String build2AirKey (String air1Id, boolean isAir1Cancelled, String air2Id, boolean isAir2Cancelled) {
 		int aAirId = Integer.valueOf(air1Id);
 		int bAirId = Integer.valueOf(air2Id);
 		String aKey;
 		if (aAirId > bAirId) {
 			aKey = air2Id;
 			aKey += "_";
+			if (isAir2Cancelled)
+				aKey += "#CANCEL";
+			else
+				aKey += "#NORMAL";
+			aKey += "_";
 			aKey += air1Id;
+			aKey += "_";
+			if (isAir1Cancelled)
+				aKey += "#CANCEL";
+			else
+				aKey += "#NORMAL";
 		} else {
 			aKey = air1Id;
 			aKey += "_";
-			aKey += air2Id;						
+			if (isAir1Cancelled)
+				aKey += "#CANCEL";
+			else
+				aKey += "#NORMAL";
+			aKey += "_";
+			aKey += air2Id;
+			aKey += "_";
+			if (isAir2Cancelled)
+				aKey += "#CANCEL";
+			else
+				aKey += "#NORMAL";
 		}
 		return aKey;
 	}

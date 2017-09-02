@@ -56,7 +56,7 @@ public class ExchangeSearch {
 						break;
 					}
 
-					String aKey = Utils.build2AirKey(air1.getId(), air2.getId());
+					String aKey = Utils.build2AirKey(air1.getId(), air1.isCancel(), air2.getId(), air2.isCancel());
 					if (processedList.contains(aKey))
 						continue;
 					else

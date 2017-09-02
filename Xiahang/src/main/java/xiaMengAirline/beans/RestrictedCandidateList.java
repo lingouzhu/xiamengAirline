@@ -6,10 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
+
 import xiaMengAirline.searchEngine.OptimizerStragety;
+import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.utils.InitData;
 
 public class RestrictedCandidateList {
+	private static final Logger logger = Logger.getLogger(RestrictedCandidateList.class);
 	private int maxBestSolutions = 10;
 	private BigDecimal lowestCost = new BigDecimal(Long.MAX_VALUE);
 	private BigDecimal highestCost = new BigDecimal(-1);
@@ -93,7 +97,10 @@ public class RestrictedCandidateList {
 			}
 
 			
-			return allNewSolutions.get(InitData.rndRcl.nextInt(allNewSolutions.size()));
+			int selectedNumber = InitData.rndRcl.nextInt(allNewSolutions.size());
+			logger.debug("Selected solution: " + selectedNumber);
+			
+			return allNewSolutions.get(selectedNumber);
 		} else 
 			return null;
 

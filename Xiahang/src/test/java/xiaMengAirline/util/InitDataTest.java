@@ -263,7 +263,7 @@ public class InitDataTest {
 		RequestTime aReq = new RequestTime();
 		aReq.setArrivalTime(Utils.stringFormatToTime2("05/05/2017 23:35:00"));
 		aReq.setDepartureTime(Utils.stringFormatToTime2("06/05/2017 00:25:00"));
-		aReq = port49.requestAirport(aReq, 50);
+		aReq = port49.requestAirport(aReq, 50, false);
 		assertEquals(Utils.stringFormatToTime2("06/05/2017 06:10:00"), aReq.getDepartureTime());
 		
 		
@@ -580,36 +580,65 @@ public class InitDataTest {
 		anewAir = aSelector.selectAircraft(air79);
 		assertEquals(null,anewAir);
 		
-		SelfSearch aInitEngine = new SelfSearch();
+		Aircraft airl2Test = airl2.clone();
+		Aircraft airl3Test = airl3.clone();
+		Flight f557 = airl3Test.getFlightByFlightId(557);
+		Flight f737 = airl3Test.getFlightByFlightId(737);
+		Flight f734 = airl2Test.getFlightByFlightId(734);
+		Flight f747 = airl2Test.getFlightByFlightId(747);
+		airl2Test.insertFlightChain(airl3Test, f557, f737, f734, false);
+		airl3Test.removeFlightChain(f557, f737);
+		assertEquals(null, airl3Test.getFlightByFlightId(737));
+		SelfSearch aAdjEngine = new SelfSearch();
 		aStragety.setSelectionRule(SELECTION.RANDOM);
 		aStragety.setNumberOfSolutions(1);
 		aStragety.setAbortWhenImproved(false);
 		aStragety.setDebug(true);
-		aStragety.setMaxBestSolution(1);
-		aStragety.setMaxGrounding(24);
+		aStragety.setMaxBestSolution(50);
+		aStragety.setMaxGrounding(48);
+		aAdjEngine.setaStragety(aStragety);
+		boolean isAdjusted = aAdjEngine.adjust(airl2Test, new Aircraft());
+		BusinessDomain.printOutAircraft(airl2Test);
+		assertEquals(true, isAdjusted);
+		assertEquals(false, f557.isCanceled());
+		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), airl2Test.getFlightByFlightId(737).getDepartureTime());
+		
+		f557.setCancel(false);
+		isAdjusted = BusinessDomain.calcuateDepartureTimebyArrival(f734, f557, Utils.stringFormatToTime2("07/05/2017 17:00:00"), 48, false);
+		assertEquals(true, isAdjusted);
+		
+		
+
+		SelfSearch aInitEngine = new SelfSearch();
+		
 		aInitEngine.setaStragety(aStragety);
 		XiaMengAirlineSolution a3Solution = new XiaMengAirlineSolution();
 		a3Solution.replaceOrAddNewAircraft(airl69);
 		aInitEngine.constructInitialSolution(a3Solution);
+					
 		
 		XiaMengAirlineSolution a23Solution = new XiaMengAirlineSolution();
+		//a23Solution.replaceOrAddNewAircraft(airl4);
 		a23Solution.replaceOrAddNewAircraft(airl2);
 		a23Solution.replaceOrAddNewAircraft(airl3);
-		
 		ExchangeSearch aSearch = new ExchangeSearch();
-		SelfSearch aAdjEngine = new SelfSearch();
-		aAdjEngine.setaStragety(aStragety);
+		
 		
 		IterativeMethod aDriver = new IterativeSingleMethod();
 		aSearch.setupIterationStragety(aStragety);
 		aSearch.setupIterativeDriver(aDriver);
 		aSearch.setAdjustmentEngine(aAdjEngine);
+		aStragety.setMaxGrounding(48);
+		aStragety.setDebug(true);
+		aStragety.setIgnoreParking(false);
+		aStragety.setMaxBestSolution(50);
+		aStragety.setAbortWhenImproved(false);
 		XiaMengAirlineSolution aBetterSolution1 = aAdjEngine.constructInitialSolution(a23Solution);
 		aBetterSolution1.printOutSolution();
-		aBetterSolution1 = aSearch.discoverBetterSolution(aBetterSolution1);
-		aBetterSolution1.printOutSolution();
-		
-
+		for (int i = 0; i < 2;i++) {
+			aBetterSolution1 = aSearch.discoverBetterSolution(aBetterSolution1);
+			aBetterSolution1.printOutSolution();
+		}
 		
 		
 		fail("stop");

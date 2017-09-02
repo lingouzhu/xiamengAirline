@@ -14,6 +14,7 @@ public class OptimizerStragety {
 	private int topQueueSize;
 	private boolean isDebug = false;
 	private int maxGrounding;
+	private boolean ignoreParking = false;
 	
 
 	public int getNumberOfIter() {
@@ -70,6 +71,12 @@ public class OptimizerStragety {
 	}
 	public void setMaxGrounding(int maxGrounding) {
 		this.maxGrounding = maxGrounding;
+	}
+	public boolean isIgnoreParking() {
+		return ignoreParking;
+	}
+	public void setIgnoreParking(boolean ignoreParking) {
+		this.ignoreParking = ignoreParking;
 	}
 	
 	

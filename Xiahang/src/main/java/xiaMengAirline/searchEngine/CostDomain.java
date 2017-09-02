@@ -46,8 +46,8 @@ public class CostDomain {
 				.multiply(aFlight.getImpCoe());
 	}
 	
-	public static BigDecimal connectedFlightCost () {
-		return new BigDecimal("750");
+	public static BigDecimal connectedFlightCost (Flight aFlight) {
+		return new BigDecimal("750").multiply(aFlight.getImpCoe());
 	}
 	
 	public static BigDecimal emptyFlightCost () {
