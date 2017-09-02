@@ -7,11 +7,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import scala.Array;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
@@ -176,23 +177,6 @@ public class BusinessDomain {
 			return Flight.GroundingTime;
 
 	}
-	
-	public static boolean validateDuplicatedFlight (XiaMengAirlineSolution aSolution) {
-		List<Aircraft> airList = new ArrayList<Aircraft> (aSolution.getSchedule().values());
-		Map<Integer, Flight> flightMap = new HashMap<Integer, Flight> ();
-		for (Aircraft air:airList) {
-			for (Flight aFlight:air.getFlightChain()) {
-				if (flightMap.containsKey(aFlight.getFlightId())) {
-					logger.error("Duplicated flight flightId: " + aFlight.getFlightId());
-					logger.error(" first flight: air-" + air.getId());
-					logger.error(" second flight: air-" + flightMap.get(aFlight.getFlightId()).getAssignedAir().getId());
-					return false;
-				} else
-					flightMap.put(aFlight.getFlightId(), aFlight);
-			}
-		}
-		return true;
-	}
 
 	public static boolean validateFlights(Aircraft oldAir1, Aircraft oldAir2, Aircraft newAir1, Aircraft newAir2) {
 		int oldSize = oldAir1.getFlightChain().size();
@@ -301,16 +285,18 @@ public class BusinessDomain {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static Date getPossibleArrivalTime(Flight flight, AirPort airport) throws ParseException {
+	public static Date getPossibleArrivalTime(Flight flight, AirPort airport, 
+			HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload) throws ParseException {
 		for (AirPortClose aClose : airport.getCloseSchedule()) {
 			if (flight.getArrivalTime().after(aClose.getStartTime())
 					&& flight.getArrivalTime().before(aClose.getEndTime())) {
 				if (isNewFlight(flight)) {
-					return addMinutes(aClose.getEndTime(), 125);
+					int timePoint = getNextEmptyTimePoint(timeload, airport, flight.getFlightId());
+					return addMinutes(aClose.getEndTime(), timePoint * 5);
 				} else {
 					if (isValidDelay(getPlannedArrival(flight), aClose.getEndTime(), flight.isInternationalFlight())) {
 						return getPossibleLoadTime(airport, aClose.getEndTime(), getPlannedArrival(flight),
-								flight.isInternationalFlight(), false, false);
+								flight.isInternationalFlight(), timeload, flight.getFlightId());
 					} else {
 						return null;
 					}
@@ -355,7 +341,7 @@ public class BusinessDomain {
 	 * @throws ParseException
 	 */
 	public static Date getPossibleDelayDeparture(Flight flight, AirPort airport, boolean isFirstFlight,
-			Flight lastFlight) throws ParseException {
+			Flight lastFlight, HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload) throws ParseException {
 		Date tempDepTime = null;
 		if (lastFlight != null) {
 			Date shiftDeparture = addMinutes(lastFlight.getArrivalTime(), getGroundingTime(lastFlight, flight));
@@ -368,12 +354,13 @@ public class BusinessDomain {
 				if (tempDepTime.after(aClose.getStartTime()) && tempDepTime.before(aClose.getEndTime())) {
 					if (isFirstFlight) {
 						if (isNewFlight(flight)) {
-							return addMinutes(aClose.getEndTime(), 125);
+							int timePoint = getNextEmptyTimePoint(timeload, airport, flight.getFlightId());
+							return addMinutes(aClose.getEndTime(), timePoint * 5);
 						} else {
 							if (isValidDelay(getPlannedDeparture(flight), aClose.getEndTime(),
 									flight.isInternationalFlight())) {
 								return getPossibleLoadTime(airport, aClose.getEndTime(), getPlannedDeparture(flight),
-										flight.isInternationalFlight(), true, false);
+										flight.isInternationalFlight(), timeload, flight.getFlightId());
 							} else {
 								return null;
 							}
@@ -842,52 +829,140 @@ public class BusinessDomain {
 		}
 		return null;
 	}
-
-	private static HashMap<String, int[]> timeload = new HashMap<String, int[]>();
-
-	public static Date getPossibleLoadTime(AirPort airport, Date time, Date planTime, boolean isInternational,
-			boolean isDep, boolean isEarly) {
-		if (isDep) {
-			if (isEarly) {
-				String airportId = airport.getId();
-				if (timeload.containsKey(airportId)) {
-					int load = timeload.get(airportId)[0];
-					Date rtTime = addMinutes(time, -5 * load);
-					timeload.get(airportId)[0]++;
-					return rtTime;
-				} else {
-					return time;
-				}
-			} else {
-				String airportId = airport.getId();
-				if (timeload.containsKey(airportId)) {
-					int load = timeload.get(airportId)[1];
-					if (isValidDelay(planTime, addMinutes(time, 125), isInternational)) {
-						return addMinutes(time, 125);
+	
+	public static int getNextEmptyTimePoint(HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload, AirPort airport, int flightId) {
+		int startTimePoint = 7;
+		boolean done = false;
+		while (!done) {
+			if (timeload.containsKey(airport.getId())) {
+				if (timeload.get(airport.getId()).containsKey(startTimePoint)) {
+					if (timeload.get(airport.getId()).get(startTimePoint).size() > 1) {
+						startTimePoint++;
 					} else {
-						Date rtTime = addMinutes(time, 5 * load);
-						timeload.get(airportId)[1]++;
-						return null;
+						timeload.get(airport.getId()).get(startTimePoint).add(flightId);
+						return startTimePoint;
 					}
 				} else {
-					return time;
-				}
-			}
-		} else {
-			String airportId = airport.getId();
-			if (timeload.containsKey(airportId)) {
-				int load = timeload.get(airportId)[1];
-				if (isValidDelay(planTime, addMinutes(time, 125), isInternational)) {
-					return addMinutes(time, 125);
-				} else {
-					Date rtTime = addMinutes(time, 5 * load);
-					timeload.get(airportId)[1]++;
-					return null;
+					ArrayList<Integer> flightList = new ArrayList<Integer>();
+					flightList.add(flightId);
+					timeload.get(airport.getId()).put(startTimePoint, flightList);
+					return startTimePoint;
 				}
 			} else {
-				return time;
+				ArrayList<Integer> flightList = new ArrayList<Integer>();
+				flightList.add(flightId);
+				HashMap<Integer, ArrayList<Integer>> timeMap = new HashMap<Integer, ArrayList<Integer>>();
+				timeMap.put(startTimePoint, flightList);
+				return startTimePoint;
 			}
 		}
+		return startTimePoint;
+	}
+
+	public static Date getPossibleLoadTime(AirPort airport, Date AirportClosetime, Date planTime, boolean isInternational,
+			HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload, int flightId) {
+		int startTimePoint = 7;
+		boolean done = false;
+		while (!done) {
+			if (startTimePoint > 23) {
+				Date delayTime = BusinessDomain.addHours(AirportClosetime, startTimePoint * 5);
+				if (BusinessDomain.isValidDelay(planTime, delayTime, isInternational)) {
+					return delayTime;
+				}
+			}
+			
+			if (timeload.containsKey(airport.getId())) {
+				if (timeload.get(airport.getId()).containsKey(startTimePoint)) {
+					if (timeload.get(airport.getId()).get(startTimePoint).size() > 1) {
+						startTimePoint++;
+					} else {
+						Date possibleTime = BusinessDomain.addHours(AirportClosetime, startTimePoint * 5);
+						if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+							timeload.get(airport.getId()).get(startTimePoint).add(flightId);
+							return possibleTime;
+						} else {
+							for (int i = 6; i > 0; i--) {
+								if (timeload.get(airport.getId()).containsKey(i)) {
+									if (timeload.get(airport.getId()).get(i).size() > 1) {
+										continue;
+									} else {
+										possibleTime = BusinessDomain.addHours(AirportClosetime, i * 5);
+										if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+											timeload.get(airport.getId()).get(startTimePoint).add(flightId);
+											return possibleTime;
+										}
+									}
+								} else {
+									possibleTime = BusinessDomain.addHours(AirportClosetime, i * 5);
+									if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+										ArrayList<Integer> flightList = new ArrayList<Integer>();
+										flightList.add(flightId);
+										timeload.get(airport.getId()).put(i, flightList);
+										return possibleTime;
+									}
+								}
+							}
+							return null;
+						}
+					}
+				} else {
+					Date possibleTime = BusinessDomain.addHours(AirportClosetime, startTimePoint * 5);
+					if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+						ArrayList<Integer> flightList = new ArrayList<Integer>();
+						flightList.add(flightId);
+						timeload.get(airport.getId()).put(startTimePoint, flightList);
+						return possibleTime;
+					} else {
+						for (int i = 6; i > 0; i--) {
+							if (timeload.get(airport.getId()).containsKey(i)) {
+								if (timeload.get(airport.getId()).get(i).size() > 1) {
+									continue;
+								} else {
+									possibleTime = BusinessDomain.addHours(AirportClosetime, i * 5);
+									if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+										timeload.get(airport.getId()).get(startTimePoint).add(flightId);
+										return possibleTime;
+									}
+								}
+							} else {
+								possibleTime = BusinessDomain.addHours(AirportClosetime, i * 5);
+								if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+									ArrayList<Integer> flightList = new ArrayList<Integer>();
+									flightList.add(flightId);
+									timeload.get(airport.getId()).put(i, flightList);
+									return possibleTime;
+								}
+							}
+						}
+						return null;
+					}
+				}
+			} else {
+				Date possibleTime = BusinessDomain.addHours(AirportClosetime, startTimePoint * 5);
+				if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+					ArrayList<Integer> flightList = new ArrayList<Integer>();
+					flightList.add(flightId);
+					HashMap<Integer, ArrayList<Integer>> timeMap = new HashMap<Integer, ArrayList<Integer>>();
+					timeMap.put(startTimePoint, flightList);
+					timeload.put(airport.getId(), timeMap);
+					return possibleTime;
+				} else {
+					for (int i = 6; i > 0; i--) {
+						possibleTime = BusinessDomain.addHours(AirportClosetime, i * 5);
+						if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
+							ArrayList<Integer> flightList = new ArrayList<Integer>();
+							flightList.add(flightId);
+							HashMap<Integer, ArrayList<Integer>> timeMap = new HashMap<Integer, ArrayList<Integer>>();
+							timeMap.put(startTimePoint, flightList);
+							timeload.put(airport.getId(), timeMap);
+							return possibleTime;
+						}
+					}
+					return null;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
