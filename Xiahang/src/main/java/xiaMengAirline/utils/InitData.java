@@ -361,7 +361,21 @@ public class InitData {
 				
 			}
 			
-	
+			//****************************************中转时间限制*************************************************//*
+			Sheet transitSheet = wb.getSheet("中转时间限制");  
+			cnt = 0;
+			for (Row row : transitSheet) { 
+				if (cnt == 0) {
+					cnt++;
+					continue;
+				}
+				Transit transit = new Transit();
+				transit.setFlightID1((int)row.getCell(0).getNumericCellValue());
+				transit.setFlightID2((int)row.getCell(1).getNumericCellValue());
+				transit.setTransitMins((int)row.getCell(2).getNumericCellValue());
+				transit.setTransitPersons((int)row.getCell(3).getNumericCellValue());
+				transitList.add(transit);
+			}
 			
 			
 			//****************************************飞行时间*************************************************//*
