@@ -34,7 +34,6 @@ public class Flight implements Cloneable {
 	private boolean isFirstJoined = false; //only used in adjustment
 	private boolean isSecondJoined = false; //only used in adjustment
 	
-	private boolean isCancel = false;
 	private String isTransfer = "0";
 	private String transferInfo = "";
 	private int seatNum;
@@ -44,12 +43,6 @@ public class Flight implements Cloneable {
 	}
 	public void setSeatNum(int seatNum) {
 		this.seatNum = seatNum;
-	}
-	public boolean isCancel() {
-		return isCancel;
-	}
-	public void setCancel(boolean isCancel) {
-		this.isCancel = isCancel;
 	}
 	public String getTransferInfo() {
 		return transferInfo;

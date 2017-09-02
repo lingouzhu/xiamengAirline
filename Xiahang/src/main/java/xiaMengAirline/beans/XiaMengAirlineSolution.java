@@ -211,6 +211,8 @@ public class XiaMengAirlineSolution implements Cloneable {
 	
 	public void refreshPassenger() {
 		
+		List<String> transitFailedList = new ArrayList<String>();
+		
 		// init passenger data
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
 		for (Aircraft aAir : airList) {
@@ -229,7 +231,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 				
 			} else {
 				for (Flight flight : aAir.getFlightChain()) {
-					flight.setCancel(true);
+					flight.setCanceled(true);
 					if (flightInfoForPassenger.get(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport()) != null ) {
 						List<Flight> flightList = new ArrayList<Flight>();
 						flightList.add(flight);
@@ -242,6 +244,23 @@ public class XiaMengAirlineSolution implements Cloneable {
 			}
 		}
 		
+		// InitData.transitList
+		
+		
+		for (Transit transit : InitData.transitList) {
+			Flight flight1 = getFlightByFlightId(transit.getFlightID1());
+			Flight flight2 = getFlightByFlightId(transit.getFlightID2());
+			if (flight1.isCanceled() && !flight2.isCanceled()) {
+				System.out.println("transit failed by flight1 canceled. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId());
+				flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
+			} else if (!flight1.isCanceled() && !flight2.isCanceled()) {
+				if (Utils.minutiesBetweenTime(flight2.getDepartureTime(), flight2.getArrivalTime()).intValue() < transit.getTransitMins()) {
+					System.out.println("transit failed by limited time. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId() + ",failed person:" + transit.getTransitPersons());
+					flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
+				}
+			}
+			
+		}
 		
 		
 		// sort flight desc
@@ -254,22 +273,29 @@ public class XiaMengAirlineSolution implements Cloneable {
 				// adjustable and not new flight
 				if (flight.isAdjustable() && flight.getFlightId() < InitData.plannedMaxFligthId) {
 					// not cancel
-					if (!flight.isCancel()) {
+					if (!flight.isCanceled()) {
 						if (flight.getDesintationAirport().getId().equals(flight.getPlannedFlight().getDesintationAirport().getId())) {
 							if (flight.getNumberOfJoinedPassenger() < flight.getSeatNum()) {
-								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfJoinedPassenger()));
+								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfJoinedPassenger(), flight.getDepartureTime()));
 							}
 						} else {
 							if (flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() <= flight.getSeatNum()) {
-								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfPassenger() - flight.getNumberOfJoinedPassenger()));
+								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfPassenger() - flight.getNumberOfJoinedPassenger(), flight.getDepartureTime()));
 							} else {
-								int overPNo = flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() - flight.getSeatNum();
+								int overPNo = 0;
+								if (InitData.jointFlightMap.get(flight.getFlightId()) != null) {
+									overPNo = flight.getNumberOfPassenger() - flight.getSeatNum();
+								} else {
+									overPNo = flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() - flight.getSeatNum();
+								}
+										
 								
 								for (int i = emptyList.size() - 1; i > 0; i--) {
 									FlightWithEmptySeat flightWithEmptySeat = emptyList.get(i);
 									// with empty seat
-									if (flightWithEmptySeat.getEmptySeatNo() > 0) {
+									if (flightWithEmptySeat.getEmptySeatNo() > 0 && Utils.hoursBetweenTime(flightWithEmptySeat.getDepartureTime(), flight.getDepartureTime()).compareTo(new BigDecimal("48")) <= 0) {
 										if (flightWithEmptySeat.getEmptySeatNo() >= overPNo) {
+											// hour check + 中转
 											flightWithEmptySeat.setEmptySeatNo(flightWithEmptySeat.getEmptySeatNo() - overPNo);
 											flight.setIsTransfer("1");
 											flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + String.valueOf(overPNo));
@@ -277,7 +303,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 										} else {
 											flight.setIsTransfer("1");
 											flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + String.valueOf(overPNo - flightWithEmptySeat.getEmptySeatNo()));
-											
+											// hour check + 中转
 											overPNo = overPNo - flightWithEmptySeat.getEmptySeatNo();
 											flightWithEmptySeat.setEmptySeatNo(0);
 											
@@ -297,7 +323,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 						for (int i = emptyList.size() - 1; i > 0; i--) {
 							FlightWithEmptySeat flightWithEmptySeat = emptyList.get(i);
 							// with empty seat
-							if (flightWithEmptySeat.getEmptySeatNo() > 0) {
+							if (flightWithEmptySeat.getEmptySeatNo() > 0 && Utils.hoursBetweenTime(flightWithEmptySeat.getDepartureTime(), flight.getDepartureTime()).compareTo(new BigDecimal("48")) <= 0) {
 								if (flightWithEmptySeat.getEmptySeatNo() >= overPNo) {
 									flightWithEmptySeat.setEmptySeatNo(flightWithEmptySeat.getEmptySeatNo() - overPNo);
 									flight.setIsTransfer("1");
@@ -671,6 +697,75 @@ public class XiaMengAirlineSolution implements Cloneable {
 			this.strCost = cost.toString();
 		}
 		CSVUtils.exportCsv(new File("数据森林" + "_" + this.strCost + "_" + minutes + ".csv"), outputList);
+	}
+	
+	
+	public void generateSolutionOutput(String minutes) {
+		
+		List<String> outputSolutionList = new ArrayList<String>();
+		
+		// init solution data
+		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
+		for (Aircraft aAir : airList) {
+			if (!aAir.isCancel()) {
+				for (Flight flight : aAir.getFlightChain()) {
+					StringBuffer str = new StringBuffer();
+					str.append(flight.getFlightId());
+					str.append("," + Utils.dateFormatter(flight.getSchdDate()));
+					str.append("," + flight.isInternationalFlight());
+					str.append("," + flight.getSchdNo());
+					str.append("," + flight.getDesintationAirport().getId());
+					str.append("," + flight.getSourceAirPort().getId());
+					str.append("," + Utils.timeFormatter(flight.getDepartureTime()));
+					str.append("," + Utils.timeFormatter(flight.getArrivalTime()));
+					str.append("," + aAir.getId());
+					str.append("," + aAir.getType());
+					str.append("," + flight.getNumberOfPassenger());
+					str.append("," + flight.getNumberOfJoinedPassenger());
+					str.append("," + aAir.getNumberOfSeats());
+					str.append("," + flight.getImpCoe());
+					str.append("," + "0");
+					str.append("," + flight.getIsTransfer());
+					str.append("," + flight.getTransferInfo());
+					
+					outputSolutionList.add(str.toString());
+				}
+				
+			} else {
+				for (Flight flight : aAir.getFlightChain()) {
+					StringBuffer str = new StringBuffer();
+					str.append(flight.getFlightId());
+					str.append("," + Utils.dateFormatter(flight.getSchdDate()));
+					str.append("," + flight.isInternationalFlight());
+					str.append("," + flight.getSchdNo());
+					str.append("," + flight.getDesintationAirport().getId());
+					str.append("," + flight.getSourceAirPort().getId());
+					str.append("," + Utils.timeFormatter(flight.getDepartureTime()));
+					str.append("," + Utils.timeFormatter(flight.getArrivalTime()));
+					str.append("," + aAir.getId());
+					str.append("," + aAir.getType());
+					str.append("," + flight.getNumberOfPassenger());
+					str.append("," + flight.getNumberOfJoinedPassenger());
+					str.append("," + aAir.getNumberOfSeats());
+					str.append("," + flight.getImpCoe());
+					str.append("," + "1");
+					str.append("," + flight.getIsTransfer());
+					str.append("," + flight.getTransferInfo());
+					
+					outputSolutionList.add(str.toString());
+					
+				}
+			}
+		}
+		
+		
+		
+		if (cost.toString().length() > 11) {
+			this.strCost = cost.toString().substring(0, 11);
+		} else {
+			this.strCost = cost.toString();
+		}
+		CSVUtils.exportCsv(new File("数据森林" + "_" + this.strCost + "_" + minutes + "_solution.csv"), outputSolutionList);
 	}
 
 	public String getStrCost() {

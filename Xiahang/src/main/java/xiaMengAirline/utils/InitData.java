@@ -4,7 +4,6 @@ package xiaMengAirline.utils;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +23,7 @@ import xiaMengAirline.beans.AirPortList;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.RegularAirPortClose;
+import xiaMengAirline.beans.Transit;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 
 
@@ -65,7 +65,7 @@ public class InitData {
 	public static Random rndNumbers = new Random();
 	public static Random rndRcl = new Random();
 
-	/** flight < 50 mins*/
+	/** change air cost */
 	public static HashMap<String, Double > changeAirCostMap = new HashMap<String, Double>(){{  
 	      put("1_1", 0.0);
 	      put("1_2", 0.5);   
@@ -86,10 +86,13 @@ public class InitData {
 	      put("4_2", 4.0);   
 	      put("4_3", 2.0);   
 	      put("4_4", 0.0);   
-	      
-	      
-	      
 	}};
+	
+	/** change air cost */
+	public static List<Transit> transitList = new ArrayList<Transit>(); 
+	
+	
+	
 	
 	public static void initData(String initDatafile) {
 				
