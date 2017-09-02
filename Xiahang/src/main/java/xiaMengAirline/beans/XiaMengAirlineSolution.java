@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
@@ -36,13 +35,16 @@ public class XiaMengAirlineSolution implements Cloneable {
 	}
 
 	public XiaMengAirlineSolution clone() throws CloneNotSupportedException {
-		XiaMengAirlineSolution aNewSolution = (XiaMengAirlineSolution) super.clone();
+		XiaMengAirlineSolution aNewSolution = new XiaMengAirlineSolution();
+		aNewSolution.setCost(cost);
 		HashMap<String, Aircraft> newSchedule = new HashMap<String, Aircraft>();
 		for (String aAir : schedule.keySet()) {
 			newSchedule.put(aAir, schedule.get(aAir).clone());
 		}
+				
 		aNewSolution.setSchedule(newSchedule);
 		return aNewSolution;
+		
 	}
 
 	public void replaceOrAddNewAircraft(Aircraft aNewAircraft) {
@@ -1021,17 +1023,27 @@ public class XiaMengAirlineSolution implements Cloneable {
 	public void printOutSolution () {
 		List<Aircraft> airList = new ArrayList<Aircraft>(getSchedule().values());
 		
-		logger.debug("solution in details:");
+		logger.debug("solution in details: " + cost);
 		for (Aircraft aircraft : airList) {
 			logger.debug("Aircraft " + aircraft.getId() + " isCanceled? " + aircraft.isCancel());
 			for (Flight aFlight : aircraft.getFlightChain()) {
 				logger.debug("Flight " + aFlight.getFlightId());
-				logger.debug("isCancelled? " + aircraft.isCancel());
+				boolean isCancelled = aircraft.isCancel() || aFlight.isCanceled();
+				logger.debug("isCancelled? " + isCancelled);
 				logger.debug("source airport " + aFlight.getSourceAirPort().getId());
 				logger.debug("dest airport" + aFlight.getDesintationAirport().getId());
 				logger.debug("departure time " + aFlight.getDepartureTime());
 				logger.debug("arrival time " + aFlight.getArrivalTime());
+				logger.debug("assigned air" + aFlight.getAssignedAir().getId());
 			}
 		}
+	}
+
+	public HashMap<String, List<Flight>> getFlightInfoForPassenger() {
+		return flightInfoForPassenger;
+	}
+
+	public void setFlightInfoForPassenger(HashMap<String, List<Flight>> flightInfoForPassenger) {
+		this.flightInfoForPassenger = flightInfoForPassenger;
 	}
 }

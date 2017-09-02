@@ -1,22 +1,20 @@
 package xiaMengAirline.searchEngine;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.Exception.SolutionNotValid;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.utils.InitData;
 
 
 public class OptimizationController {
 	private OptimizerStragety aStragety = null;
 	
-	public List<XiaMengAirlineSolution> constructSolutionSet (XiaMengAirlineSolution aRawSolution) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable, SolutionNotValid {
+	public XiaMengAirlineSolution constructSolutionSet (XiaMengAirlineSolution aRawSolution) throws CloneNotSupportedException, ParseException, FlightDurationNotFound, AirportNotAvailable, AircraftNotAdjustable, SolutionNotValid {
 		SelfSearch selfEngine = new SelfSearch();
+		selfEngine.setaStragety(aStragety);
 		
 		//step1, construct initial solution
 		XiaMengAirlineSolution solutionVersion1 = selfEngine.constructInitialSolution(aRawSolution);
@@ -33,15 +31,17 @@ public class OptimizationController {
 			aBetterSolution = aSearch.discoverBetterSolution(aBetterSolution);
 		}
 		
+				
+		
 		//step3, select multiple top solutions
-		List <XiaMengAirlineSolution> allTopSolutions = aSearch.getNeighboursResult().getAllSolutions();
+//		List <XiaMengAirlineSolution> allTopSolutions = aSearch.getNeighboursResult().getAllSolutions();
+//		
+//		List<XiaMengAirlineSolution> selectedSolutions = new ArrayList<XiaMengAirlineSolution> ();
+//		for (int i =0 ; i < aStragety.getNumberOfSolutions(); i++) {
+//			selectedSolutions.add(allTopSolutions.remove(InitData.rndRcl.nextInt(allTopSolutions.size())));
+//		}
 		
-		List<XiaMengAirlineSolution> selectedSolutions = new ArrayList<XiaMengAirlineSolution> ();
-		for (int i =0 ; i < aStragety.getNumberOfSolutions(); i++) {
-			selectedSolutions.add(allTopSolutions.remove(InitData.rndRcl.nextInt(allTopSolutions.size())));
-		}
-		
-		return selectedSolutions;
+		return aBetterSolution;
 		
 		
 		

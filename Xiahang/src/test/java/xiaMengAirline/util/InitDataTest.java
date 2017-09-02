@@ -18,8 +18,6 @@ import java.util.TreeMap;
 import org.junit.Before;
 import org.junit.Test;
 
-
-import xiaMengAirline.StartUp;
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.Exception.AirportNotAcceptArrivalTime;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime;
@@ -27,6 +25,7 @@ import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.Exception.SolutionNotValid;
+import xiaMengAirline.backup.StartUp;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
@@ -603,7 +602,7 @@ public class InitDataTest {
 		assertEquals(false, f557.isCanceled());
 		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), airl2Test.getFlightByFlightId(737).getDepartureTime());
 		
-		f557.setCancel(false);
+		f557.setCanceled(false);
 		isAdjusted = BusinessDomain.calcuateDepartureTimebyArrival(f734, f557, Utils.stringFormatToTime2("07/05/2017 17:00:00"), 48, false);
 		assertEquals(true, isAdjusted);
 		

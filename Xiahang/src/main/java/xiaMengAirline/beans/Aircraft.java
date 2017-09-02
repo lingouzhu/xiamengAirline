@@ -56,8 +56,10 @@ public class Aircraft implements Cloneable {
 	}
 
 	public Flight getFlight(int position) {
-		if (position >= 0)
+		if (position >= 0) {
 			return this.flightChain.get(position);
+		}
+			
 		else
 			return null;
 
@@ -269,12 +271,16 @@ public class Aircraft implements Cloneable {
 	}
 
 	public Aircraft clone() throws CloneNotSupportedException {
-		Aircraft aNew = (Aircraft) super.clone();
+		Aircraft aNew = new Aircraft();
+		aNew.setCancel(isCancel);
+		aNew.setCost(cost);
+		aNew.setId(id);
+		aNew.setType(type);
+		aNew.setNumberOfSeats(numberOfSeats);
+		aNew.setUpdated(isUpdated);
 		List<Flight> newFlightChain = new ArrayList<Flight>();
 		for (Flight aFlight : flightChain) {
 			Flight newFlight = aFlight.clone();
-			newFlight.setPlannedFlight(aFlight.getPlannedFlight());
-			newFlight.setPlannedAir(aFlight.getPlannedAir());
 			newFlight.setAssignedAir(aNew);
 			newFlightChain.add(newFlight);
 		}
@@ -288,7 +294,7 @@ public class Aircraft implements Cloneable {
 		if (alternativeAircraft!=null)
 			aNew.setAlternativeAircraft(alternativeAircraft.clone());
 		
-		return (aNew);
+		return aNew;
 	}
 
 	public void adjustment(XiaMengAirlineSolution mySolution)

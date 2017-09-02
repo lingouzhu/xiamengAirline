@@ -4,10 +4,12 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.log4j.Logger;
 
 import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.utils.InitData;
+import xiaMengAirline.utils.Utils;
 
 public class Flight implements Cloneable {
 	private static final Logger logger = Logger.getLogger(Flight.class);
@@ -111,7 +113,28 @@ public class Flight implements Cloneable {
 	}
 	
 	public Flight clone() throws CloneNotSupportedException {
-		return (Flight) (super.clone());
+		Flight newFlight = new Flight();
+		newFlight.setArrivalTime(arrivalTime);
+		newFlight.setDepartureTime(departureTime);
+		newFlight.setDesintationAirport(desintationAirport);
+		newFlight.setFlightId(flightId);
+		newFlight.setImpCoe(impCoe);
+		newFlight.setInternationalFlight(internationalFlight);
+		newFlight.setAdjustable(isAdjustable);
+		newFlight.setFirstJoined(isFirstJoined);
+		newFlight.setSecondJoined(isSecondJoined);
+		newFlight.setTransferInfo(isTransfer);
+		newFlight.setNumberOfJoinedPassenger(numberOfJoinedPassenger);
+		newFlight.setNumberOfPassenger(numberOfPassenger);
+		newFlight.setSchdDate(schdDate);
+		newFlight.setSchdNo(schdNo);
+		newFlight.setSeatNum(seatNum);
+		newFlight.setSourceAirPort(sourceAirPort);
+		newFlight.setTransferInfo(transferInfo);
+		newFlight.setAssignedAir(null);
+		newFlight.setPlannedFlight(getPlannedFlight());
+		newFlight.setPlannedAir(getPlannedAir());
+		return newFlight;
 	}
 	
 	public Date calcuateNextArrivalTime () throws FlightDurationNotFound {

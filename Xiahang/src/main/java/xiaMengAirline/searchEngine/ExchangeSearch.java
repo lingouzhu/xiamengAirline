@@ -25,8 +25,6 @@ public class ExchangeSearch {
 
 	public XiaMengAirlineSolution discoverBetterSolution(XiaMengAirlineSolution aSolution)
 			throws CloneNotSupportedException, ParseException {
-		neighboursResult = new RestrictedCandidateList();
-		neighboursResult.setaStragety(aStragety);
 		aDriver.setupIterationStragety(aStragety);
 		aDriver.setupIterationContent(aSolution);
 		List<Aircraft> aBatch = aDriver.getNextDriveForIterative();
@@ -34,6 +32,9 @@ public class ExchangeSearch {
 
 		while (aBatch != null) {
 			int currentBatch = aDriver.getCurrentIterationNumber();
+			neighboursResult = new RestrictedCandidateList();
+			neighboursResult.setaStragety(aStragety);
+			
 
 			System.out.println("Processing batch ... " + currentBatch);
 			logger.debug("Processing batch ... " + currentBatch);
@@ -44,6 +45,9 @@ public class ExchangeSearch {
 				Aircraft air2 = null;
 				if (aStragety.getSelectionRule() == SELECTION.RANDOM)
 					aSelector = new IterativeRadomSelector();
+				else if (aStragety.getSelectionRule() == SELECTION.SAMETYPE) {
+					aSelector = new IterativeSameTypeSelector();
+				}
 				aSelector.setupIterationStragety(aStragety);
 				aSelector.setupCandidateList(new ArrayList<Aircraft>(aSolution.getSchedule().values()));
 
@@ -145,6 +149,8 @@ public class ExchangeSearch {
 											true);
 									Aircraft cancelledAir = air2Cancelled.clone();
 
+									logger.debug("Ongoing xx " + xx + " air2 " + air2.getId() + " " 
+											+ " air szie " + newAircraft2.getFlightChain().size());
 									Flight sFlight = newAircraft2.getFlight(xx);
 									Flight dFlight = newAircraft2.getFlight(air2.getFlightChain().indexOf(destFlight));
 

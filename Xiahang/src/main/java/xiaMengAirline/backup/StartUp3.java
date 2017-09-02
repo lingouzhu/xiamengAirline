@@ -1,4 +1,4 @@
-package xiaMengAirline;
+package xiaMengAirline.backup;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -16,14 +16,14 @@ import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.MatchedFlight;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.evaluator.Main;
-import xiaMengAirline.searchEngine.backup.LocalSearch;
+import xiaMengAirline.searchEngine.backup.LocalSearch2;
 import xiaMengAirline.utils.InitData;
 
-public class StartUp2 {
+public class StartUp3 {
 
-	final public static long iterLength = 0L;
-	final public static long preiterLength = 10L;
-	final public static long postiterLength = 1L;
+	final public static long iterLength = 1L;
+	final public static long preiterLength = 25L;
+	final public static long postiterLength = 5L;
 	final public static int preQueueSize = 15;
 	final public static int postQueueSize = 10;
 
@@ -146,14 +146,17 @@ public class StartUp2 {
 		try {
 			long startTime = System.currentTimeMillis();
 			// Step1, Load all data & initialize
-			String initDatafile = "XiahangData.xlsx";
+			String initDatafile = "XiahangData20170809.xlsx";
 			InitData.initData(initDatafile);
 
-			LocalSearch localEngine = new LocalSearch();
+			LocalSearch2 localEngine = new LocalSearch2();
+			
+			
 
 			// Step2, construct initial solution & validate it
 			XiaMengAirlineSolution initialSolution = InitData.originalSolution.getBestSolution();
-			XiaMengAirlineSolution initialOutput = initialSolution.reConstruct();
+		
+			XiaMengAirlineSolution initialOutput = initialSolution.reConstruct2();
 			initialOutput.refreshCost(true);
 			initialSolution.setCost(initialOutput.getCost());
 			if (initialOutput.validflightNumers3(InitData.originalSolution))
@@ -184,21 +187,24 @@ public class StartUp2 {
 				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
 				System.out.println("Pre-Iter " + i + " Cost: " + aBetterSolution.getCost());
 			}
-			XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct();
+			XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct2();
+			aBetterOutput.refreshCost(false);
+			aBetterSolution.setCost(aBetterOutput.getCost());
 			
 			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
 				System.out.println("Pass Pre-Iter!");
 			else
 				System.out.println("Failed Pre-Iter!");
-			
-			aBetterOutput.refreshCost(true);
-			aBetterOutput.generateOutput("1");
 
 			localEngine.setBATCH_SIZE(currentSize);
 			// Step3b, loop through to search optimized solutions
 			
 			for (int i = 0; i < iterLength; i++) {
 				aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
+				aBetterOutput = aBetterSolution.reConstruct2();
+				aBetterOutput.refreshCost(true);
+				aBetterSolution.setCost(aBetterOutput.getCost());
+				aBetterOutput.generateOutput("bb_" + i);
 				System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
 			}
 
@@ -217,35 +223,36 @@ public class StartUp2 {
 				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
 				System.out.println("Post-Iter " + i + " Cost: " + aBetterSolution.getCost());
 			}
-			aBetterOutput = aBetterSolution.reConstruct();
+			aBetterOutput = aBetterSolution.reConstruct2();
 			aBetterOutput.refreshCost(true);
 			aBetterOutput.generateOutput("cc");
+			aBetterSolution.setCost(aBetterOutput.getCost());
 			main = new Main();
 			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_cc.csv");
 			
 			//step3d, single improvement
 			//XiaMengAirlineSolution finalSolution = aBetterSolution.getBestSolution();
 			//re-adjust
-//			aBetterSolution = aBetterSolution.getBestSolution();
-//			if (aBetterSolution.validAlternativeflightNumers(InitData.originalSolution))
-//				System.out.println("Pass Iter Single!!!");
-//			else
-//				System.out.println("Failed Iter Single!!!");
-//			aBetterOutput = aBetterSolution.reConstruct();
-//			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
-//				System.out.println("Pass Iter Single Constructed!");
-//			else
-//				System.out.println("Failed Iter Single Cosntructed!");
+			aBetterSolution = aBetterSolution.getBestSolution();
+			if (aBetterSolution.validAlternativeflightNumers(InitData.originalSolution))
+				System.out.println("Pass Iter Single!!!");
+			else
+				System.out.println("Failed Iter Single!!!");
+			aBetterOutput = aBetterSolution.reConstruct2();
+			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
+				System.out.println("Pass Iter Single Constructed!");
+			else
+				System.out.println("Failed Iter Single Cosntructed!");
 			
 
 			long endTime = System.currentTimeMillis();
 			long mins = (endTime - startTime) / (1000 * 60);
 			System.out.println("Consumed ... " + mins);
 			
-//			aBetterOutput.refreshCost(true);
-//			aBetterOutput.generateOutput("ee");
-//			main = new Main();
-//			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_ee.csv");
+			aBetterOutput.refreshCost(true);
+			aBetterOutput.generateOutput("ee");
+			main = new Main();
+			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_ee.csv");
 
 		} catch (SolutionNotValid ex) {
 			ex.printStackTrace();

@@ -1,5 +1,9 @@
 package xiaMengAirline.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,7 +16,6 @@ import java.util.List;
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.collections4.ComparatorUtils;
 import org.apache.commons.collections4.comparators.ComparableComparator;
-import org.openqa.selenium.internal.seleniumemulation.IsChecked;
 
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
@@ -260,5 +263,23 @@ public class Utils {
 		}
 		return aKey;
 	}
+	
+	/**
+	 * This method makes a "deep clone" of any Java object it is given.
+	 */
+	 public static Object deepClone(Object object) {
+	   try {
+	     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	     ObjectOutputStream oos = new ObjectOutputStream(baos);
+	     oos.writeObject(object);
+	     ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+	     ObjectInputStream ois = new ObjectInputStream(bais);
+	     return ois.readObject();
+	   }
+	   catch (Exception e) {
+	     e.printStackTrace();
+	     return null;
+	   }
+	 }
 
 }
