@@ -149,8 +149,6 @@ public class ExchangeSearch {
 											true);
 									Aircraft cancelledAir = air2Cancelled.clone();
 
-									logger.debug("Ongoing xx " + xx + " air2 " + air2.getId() + " " 
-											+ " air szie " + newAircraft2.getFlightChain().size());
 									Flight sFlight = newAircraft2.getFlight(xx);
 									Flight dFlight = newAircraft2.getFlight(air2.getFlightChain().indexOf(destFlight));
 
