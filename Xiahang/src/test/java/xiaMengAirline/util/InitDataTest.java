@@ -517,6 +517,9 @@ public class InitDataTest {
 		Aircraft airl3 = InitData.originalSolution.getAircraft("3", "4", false, false).clone();
 		Aircraft airl4 = InitData.originalSolution.getAircraft("4", "4", false, false).clone();
 		Aircraft airl69 = InitData.originalSolution.getAircraft("69", "2", false, false).clone();
+		Aircraft airl6 = InitData.originalSolution.getAircraft("6", "2", false, false).clone();
+		Aircraft airl129 = InitData.originalSolution.getAircraft("129", "2", false, false).clone();
+		Aircraft airl74 = InitData.originalSolution.getAircraft("74", "2", false, false).clone();
 		a234Solution.replaceOrAddNewAircraft(airl2);
 		a234Solution.replaceOrAddNewAircraft(airl3);
 		a234Solution.replaceOrAddNewAircraft(airl4);
@@ -606,6 +609,15 @@ public class InitDataTest {
 		isAdjusted = BusinessDomain.calcuateDepartureTimebyArrival(f734, f557, Utils.stringFormatToTime2("07/05/2017 17:00:00"), 48, false);
 		assertEquals(true, isAdjusted);
 		
+		//clone test
+		Aircraft airl6test = airl6.clone();
+		airl6test.setCancel(true);
+		assertEquals(true, airl6test.isCancel());
+		assertEquals(false, airl6.isCancel());
+		
+		
+		fail("stop");
+		
 		
 
 		SelfSearch aInitEngine = new SelfSearch();
@@ -618,8 +630,11 @@ public class InitDataTest {
 		
 		XiaMengAirlineSolution a23Solution = new XiaMengAirlineSolution();
 		//a23Solution.replaceOrAddNewAircraft(airl4);
-		a23Solution.replaceOrAddNewAircraft(airl2);
-		a23Solution.replaceOrAddNewAircraft(airl3);
+		//a23Solution.replaceOrAddNewAircraft(airl2);
+		//a23Solution.replaceOrAddNewAircraft(airl3);
+		a23Solution.replaceOrAddNewAircraft(airl6);
+		a23Solution.replaceOrAddNewAircraft(airl74);
+		a23Solution.replaceOrAddNewAircraft(airl129);
 		ExchangeSearch aSearch = new ExchangeSearch();
 		
 		
@@ -634,10 +649,18 @@ public class InitDataTest {
 		aStragety.setAbortWhenImproved(false);
 		XiaMengAirlineSolution aBetterSolution1 = aAdjEngine.constructInitialSolution(a23Solution);
 		aBetterSolution1.printOutSolution();
+		if (!BusinessDomain.validateDuplicatedFlight(aBetterSolution1))
+			fail("Stop - duplicated");
 		for (int i = 0; i < 2;i++) {
 			aBetterSolution1 = aSearch.discoverBetterSolution(aBetterSolution1);
 			aBetterSolution1.printOutSolution();
+			if (!BusinessDomain.validateDuplicatedFlight(aBetterSolution1))
+				fail("Stop - duplicated");
 		}
+		aBetterSolution1.refreshCost(true);
+		aBetterSolution1.generateOutput(String.valueOf("test"));
+		
+		Main.evalutor("数据森林_" + aBetterSolution1.getStrCost() + "_test.csv");
 		
 		
 		fail("stop");

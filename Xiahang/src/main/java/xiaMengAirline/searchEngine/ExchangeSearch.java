@@ -55,7 +55,8 @@ public class ExchangeSearch {
 					air2 = aSelector.selectAircraft(air1);
 
 					if (air2 == null) {
-						System.out.println("Completed air ... " + air1.getId() + " on batch " + currentBatch);
+						System.out.println("Completed air ... " + air1.getId() + " Cancel: " + air1.isCancel()  
+					+" on batch " + currentBatch);
 						logger.debug("Completed air ... " + air1.getId() + " on batch " + currentBatch);
 						break;
 					}

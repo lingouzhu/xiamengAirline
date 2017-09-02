@@ -18,6 +18,7 @@ public class OptimizationController {
 		
 		//step1, construct initial solution
 		XiaMengAirlineSolution solutionVersion1 = selfEngine.constructInitialSolution(aRawSolution);
+		solutionVersion1.printOutSolution();	
 		
 		//step2, iteration for exchange
 		IterativeMethod aBatchDriver = new IterativeBatchMethod();

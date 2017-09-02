@@ -33,8 +33,12 @@ public class IterativeMostOverlappedAirports implements IterativeMethod {
 		int bottomOverlapped = Integer.MAX_VALUE;
 		int queueSize = aStragety.getTopQueueSize();
 		for (Aircraft aAir : airList) {
+			if (aAir.getFlightChain().isEmpty())
+				continue;
 			int numberOfOverLapped = 0;
 			for (Aircraft bAir : airList) {
+				if (bAir.getFlightChain().isEmpty())
+					continue;
 				if (!aAir.getId().equals(bAir.getId())) {
 					String aKey = Utils.build2AirKey(aAir.getId(),aAir.isCancel(), bAir.getId(), bAir.isCancel());
 					if (overlappedMap.containsKey(aKey)) {

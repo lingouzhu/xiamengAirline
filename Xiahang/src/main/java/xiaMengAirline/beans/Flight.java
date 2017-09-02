@@ -131,7 +131,7 @@ public class Flight implements Cloneable {
 		newFlight.setSeatNum(seatNum);
 		newFlight.setSourceAirPort(sourceAirPort);
 		newFlight.setTransferInfo(transferInfo);
-		newFlight.setAssignedAir(null);
+		newFlight.setAssignedAir(assignedAir);
 		newFlight.setPlannedFlight(getPlannedFlight());
 		newFlight.setPlannedAir(getPlannedAir());
 		return newFlight;

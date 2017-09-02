@@ -25,7 +25,12 @@ public class IterativeSingleMethod implements IterativeMethod {
 
 	@Override
 	public void setupIterationContent(XiaMengAirlineSolution aSolution) {
-		airList = new ArrayList<Aircraft>(aSolution.getSchedule().values());
+		airList = new ArrayList<Aircraft> ();
+		List<Aircraft> aList = new ArrayList<Aircraft>(aSolution.getSchedule().values());
+		for (Aircraft air:aList) {
+			if (!air.getFlightChain().isEmpty())
+				airList.add(air);
+		}
 		isFresh = true;
 		
 	}

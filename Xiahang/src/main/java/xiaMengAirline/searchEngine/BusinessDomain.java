@@ -7,11 +7,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
-import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
@@ -175,6 +175,23 @@ public class BusinessDomain {
 		else
 			return Flight.GroundingTime;
 
+	}
+	
+	public static boolean validateDuplicatedFlight (XiaMengAirlineSolution aSolution) {
+		List<Aircraft> airList = new ArrayList<Aircraft> (aSolution.getSchedule().values());
+		Map<Integer, Flight> flightMap = new HashMap<Integer, Flight> ();
+		for (Aircraft air:airList) {
+			for (Flight aFlight:air.getFlightChain()) {
+				if (flightMap.containsKey(aFlight.getFlightId())) {
+					logger.error("Duplicated flight flightId: " + aFlight.getFlightId());
+					logger.error(" first flight: air-" + air.getId());
+					logger.error(" second flight: air-" + flightMap.get(aFlight.getFlightId()).getAssignedAir().getId());
+					return false;
+				} else
+					flightMap.put(aFlight.getFlightId(), aFlight);
+			}
+		}
+		return true;
 	}
 
 	public static boolean validateFlights(Aircraft oldAir1, Aircraft oldAir2, Aircraft newAir1, Aircraft newAir2) {
