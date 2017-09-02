@@ -30,8 +30,10 @@ public class SolutionSearch {
 	
 	public XiaMengAirlineSolution search(XiaMengAirlineSolution oldSolution) {
 		XiaMengAirlineSolution solution;
+		
 		try {
 			solution = oldSolution.clone();
+			HashMap<String, Aircraft> schedule = new HashMap<String, Aircraft>();
 			for (Aircraft aircraft : solution.getSchedule().values()) {
 				if (!aircraft.isCancel()) {
 					for (Flight flight : aircraft.getFlightChain()) {
@@ -141,6 +143,7 @@ public class SolutionSearch {
 						adjustedAircraft.setFlightChain(ssn.getFlightList());
 						aircraft.setAlternativeAircraft(adjustedAircraft);
 						timeload = ssn.getTimeLoad();
+						schedule.put(aircraft.getId(), adjustedAircraft);
 					} catch (AircraftNotAdjustable anj) {
 						System.out.println(aircraft.getId() + " not adjustable");
 					} catch (Exception e) {
@@ -148,7 +151,33 @@ public class SolutionSearch {
 					}
 					
 				}
+				
 			}
+			
+			solution.setSchedule(schedule);
+			ArrayList<Integer> allFlightIds = new ArrayList<Integer>();
+			Aircraft cancelAir = null;
+			for (Aircraft aircraft : schedule.values()) {
+				if (cancelAir == null) {
+					cancelAir = aircraft.clone();
+					cancelAir.setCancel(true);
+					cancelAir.setAlternativeAircraft(null);
+				}
+				for (Flight flight : aircraft.getFlightChain()) {
+					allFlightIds.add(flight.getFlightId());
+				}
+			}
+			
+			ArrayList<Flight> cancelFlights = new ArrayList<Flight>();
+			for (Aircraft aircraft : oldSolution.getSchedule().values()) {
+				for (Flight flight : aircraft.getFlightChain()) {
+					if (!allFlightIds.contains(flight.getFlightId())) {
+						cancelFlights.add(flight);
+					}
+				}
+			}
+			cancelAir.setFlightChain(cancelFlights);
+			solution.replaceOrAddNewAircraft(cancelAir);
 			return solution;
 		} catch (CloneNotSupportedException e1) {
 			e1.printStackTrace();

@@ -920,7 +920,7 @@ public class BusinessDomain {
 								} else {
 									possibleTime = BusinessDomain.addHours(AirportClosetime, i * 5);
 									if (BusinessDomain.isValidDelay(planTime, possibleTime, isInternational)) {
-										timeload.get(airport.getId()).get(startTimePoint).add(flightId);
+										timeload.get(airport.getId()).get(i).add(flightId);
 										return possibleTime;
 									}
 								}
