@@ -56,7 +56,7 @@ public class InitData {
 	public static List<String> domesticAirportList = new ArrayList<String>();
 
 	public static int maxFligthId = 9000;
-	public static int plannedMaxFligthId = 0;
+	public static int plannedMaxFligthId = 9000;
 
 	public static Random rndNumbers = new Random();
 	public static Random rndRcl = new Random();
@@ -109,9 +109,6 @@ public class InitData {
 				}
 				Flight aFlight = new Flight();
 				int aFlightId = (int) row.getCell(0).getNumericCellValue();
-				if (aFlightId > maxFligthId) {
-					plannedMaxFligthId = maxFligthId;
-				}
 
 				aFlight.setFlightId(aFlightId);
 				aFlight.setSchdDate(row.getCell(1).getDateCellValue());
