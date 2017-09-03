@@ -90,7 +90,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 			if (!aAir.isCancel()) {
 				for (Flight newFlight : aAir.getFlightChain()) {
 
-					if (newFlight.getFlightId() > InitData.plannedMaxFligthId) {
+					if (newFlight.getFlightId() > InitData.maxFligthId) {
 						cost = cost.add(new BigDecimal("5000"));
 						empty++;
 						if (refreshOut) {
