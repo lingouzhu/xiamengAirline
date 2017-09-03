@@ -55,7 +55,7 @@ public class InitData {
 	/** domestic airports list **/
 	public static List<String> domesticAirportList = new ArrayList<String>();
 
-	public static int maxFligthId = 0;
+	public static int maxFligthId = 9000;
 	public static int plannedMaxFligthId = 0;
 
 	public static Random rndNumbers = new Random();
@@ -110,7 +110,6 @@ public class InitData {
 				Flight aFlight = new Flight();
 				int aFlightId = (int) row.getCell(0).getNumericCellValue();
 				if (aFlightId > maxFligthId) {
-					maxFligthId = aFlightId;
 					plannedMaxFligthId = maxFligthId;
 				}
 
