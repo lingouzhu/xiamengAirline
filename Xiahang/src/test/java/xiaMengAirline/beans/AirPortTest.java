@@ -1051,7 +1051,6 @@ public class AirPortTest {
 
 		try {
 			air1.adjustFlightTime(0);
-			assertEquals(false, air1.hasFlight(f103));
 			assertEquals(Utils.addMinutes(f102.getDepartureTime(), 120), f102.getArrivalTime());
 			System.out.println("f101 Actual Depart:" + Utils.timeFormatToString2(f101.getDepartureTime()) + " port: "
 					+ f101.getSourceAirPort().getId());

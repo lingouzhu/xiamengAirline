@@ -661,14 +661,14 @@ public class XiaMengAirlineSolution implements Cloneable {
 						}
 
 						// 5.7 border limited
-						if (i == 0) {
-							if (!flight.getSourceAirPort().getId().equals(
-									InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
-								System.out.println("5.7 error wrong start airpot: flightID" + flight.getFlightId());
-								return false;
-							}
-
-						}
+//						if (i == 0) {
+//							if (!flight.getSourceAirPort().getId().equals(
+//									InitData.firstFlightMap.contains).get(airID).getPlannedFlight().getSourceAirPort().getId())) {
+//								System.out.println("5.7 error wrong start airpot: flightID" + flight.getFlightId());
+//								return false;
+//							}
+//
+//						}
 
 //						if (i == flightChain.size() - 1) {
 //							if (!flight.getSourceAirPort().getId().equals(

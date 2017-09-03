@@ -66,12 +66,37 @@ public class SelfSearch implements AdjustmentEngine {
 			aFlight.setCanceled(false);
 			aFlight.setFirstJoined(false);
 			aFlight.setSecondJoined(false);
+			aFlight.setPossibleConnected(false);
 			aFlight.setArrivalTime(aFlight.getPlannedFlight().getArrivalTime());
 			aFlight.setDepartureTime(aFlight.getPlannedFlight().getDepartureTime());
 			aFlight.setDesintationAirport(aFlight.getPlannedFlight().getDesintationAirport());
 		}
 		// aAircraft.sortFlights();
 
+	}
+
+	private void costFlight(Aircraft altAir, Flight flight, BigDecimal baseCost) {
+		// now cost it
+		if (flight.isCanceled()) {
+			baseCost = baseCost.add(CostDomain.cancelCost(flight).multiply(new BigDecimal(2)));
+		} else {
+			// delay cost
+			if (flight.getDepartureTime().after(flight.getPlannedFlight().getDepartureTime()))
+				baseCost = baseCost.add(CostDomain.delayCost(flight));
+			else
+				baseCost = baseCost.add(CostDomain.earlierCost(flight));
+			// change air
+			if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
+				baseCost = baseCost.add(CostDomain.changeAirCost(flight));
+			}
+			// connect flight cost
+			if (flight.isFirstJoined() && !flight.isCanceled()) {
+				Flight nextFlight = altAir.getFlight(altAir.getFlightChain().indexOf(flight) + 1);
+				if (nextFlight.isCanceled() && nextFlight.isSecondJoined()) {
+					baseCost = baseCost.add(CostDomain.connectedFlightCost(flight));
+				}
+			}
+		}
 	}
 
 	@Override
@@ -82,8 +107,18 @@ public class SelfSearch implements AdjustmentEngine {
 		// check if adjustable in cancel
 		for (Flight aFlight : itsCancelled.getFlightChain()) {
 			if (!aFlight.isAdjustable()) {
-				logger.warn("Flight shall not adjust but cancelled after exchange air: " + itsCancelled.getId()
-						+ " flightId:" + aFlight.getFlightId());
+				logger.warn("8.6 Non-adjustable flight shall not cancelled air: " + itsCancelled.getId() + " flightId:"
+						+ aFlight.getFlightId());
+				return false;
+			}
+			if (InitData.firstFlightMap.containsKey(aFlight.getFlightId())) {
+				logger.warn("5.7 First flight shall not be cancelled air: " + itsCancelled.getId() + " flightId:"
+						+ aFlight.getFlightId());
+				return false;
+			}
+			if (InitData.lastFlightMap.containsKey(aFlight.getFlightId())) {
+				logger.warn("5.7 Last flight shall not be cancelled air: " + itsCancelled.getId() + " flightId:"
+						+ aFlight.getFlightId());
 				return false;
 			}
 			cost = cost.add(CostDomain.cancelCost(aFlight));
@@ -94,174 +129,247 @@ public class SelfSearch implements AdjustmentEngine {
 		preprocessAircraft(altAir);
 
 		for (int i = 0; i < altAir.getFlightChain().size(); i++) {
+			boolean isLastFligt = false;
+			boolean isFirstFlight = false;
 
 			Flight flight = altAir.getFlightChain().get(i);
 			if (!flight.isAdjustable()) {
 
 				if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
-					logger.warn("Non-adjustable flight changed air! flightId: " + flight.getFlightId() + " changed to Air: " + altAir.getId());
+					logger.warn("8.6 Non-adjustable flight changed air! flightId: " + flight.getFlightId()
+							+ " changed to Air: " + altAir.getId());
 					return false;
 				}
 
 				if (lastAdjustablePos + 1 != i) {
-					logger.warn("Non-adjustable flights not in continuous range flightId: " + flight.getFlightId() + " last non adjustable flightId: " + altAir.getFlight(lastAdjustablePos).getFlightId());
+					logger.warn("8.6 Non-adjustable flights not in continuous range flightId: " + flight.getFlightId()
+							+ " last non adjustable flightId: " + altAir.getFlight(lastAdjustablePos).getFlightId());
 					return false;
 				}
 				lastAdjustablePos = i;
 			} else {
 
-				// first flight, we process it in hard code style to ensure if flyable
+				if (!BusinessDomain.isValidFlightPath(altAir, flight)) {
+					logger.warn(
+							"5.2 Invalid flight path flightId: " + flight.getFlightId() + " Air: " + altAir.getId());
+					return false;
+				}
+
+				// first flight, we process it in hard code style to ensure if
+				// flyable
 				if (i == 0) {
-					logger.warn("First flight detected adjustable flightId: " + flight.getFlightId() + " Air: " + altAir.getId());
-					if (!BusinessDomain.isTyphoon(flight.getSourceAirPort(), flight.getDepartureTime())) {
-						//wait till end of typoon
-						flight.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 17:00:00"));
-					}
-				} else {
-					// last flight
-					if (InitData.lastFlightMap.contains(flight.getFlightId())
-							&& (!flight.getPlannedAir().getType().equals(altAir.getType()) || !flight.getPlannedFlight()
-									.getDesintationAirport().getId().equals(flight.getDesintationAirport().getId()))) {
-						logger.warn("Last flight shall not change aircraft type or airport flightId: " + flight.getFlightId() + " Air: " + altAir.getId()
-						+ " new airport: " + flight.getDesintationAirport().getId());
+					if (!InitData.firstFlightMap.containsKey(flight.getFlightId())) {
+						logger.warn("5.7 First flight shall fly first " + flight.getFlightId());
 						return false;
-					}
-
-					// I dont adjust & cost last flight
-					if (i == altAir.getFlightChain().size() - 1)
-						continue;
-
-					if (!BusinessDomain.isValidFlightPath(altAir, flight)) {
-						logger.warn("Invalid flight path flightId: " + flight.getFlightId() + " Air: "+ altAir.getId());
-						return false;
-					}
-						
-
-					// joint flight we love joined flight
-					// join status table
-					// firstJoined True, SecondJoined True, flight1_cancelled False,
-					// flight2_cancelled False, JoinedFlight
-					// firstJoined True, SecondJoined True, flight1_cancelled False,
-					// flight2_cancelled True, ConnectedFlight
-					// firstJoined False, SecondJoined False, flight1_cancelled
-					// False, flight2_cancelled False, flight 1 normal
-					// firstJoined False, SecondJoined False, flight1_cancelled
-					// True, flight2_cancelled False, flight 2 normal
-					int joinPos = BusinessDomain.getJointFlightPosition(flight);
-					// if 1st flight of join
-					if (joinPos == 1) {
-						// if flight is already last,
-						if (i == altAir.getFlightChain().size() - 1) {
-							logger.warn("First joined flight shall not be as last flight flightId: " + flight.getFlightId() + " Air: "+ altAir.getId());
+					} else {
+						if (!flight.getSourceAirPort().getId()
+								.equals(flight.getPlannedFlight().getSourceAirPort().getId())) {
+							logger.warn("5.7 error wrong start airpot: flightId " + flight.getFlightId());
 							return false;
 						}
-						// we move back destination, and think 2nd part shall be
-						// treated as changed
-						flight.setDesintationAirport(flight.getPlannedFlight().getDesintationAirport());
-						// then check if 2nd joined next to him
-						Flight nextFlight = altAir.getFlight(i + 1);
-						if (BusinessDomain.getJointFlight(flight).getFlightId() != nextFlight.getFlightId()) {
-							// if 2nd flight not there, then it shall be cancelled
-							if (!itsCancelled.hasFlight(nextFlight)) {
-								logger.warn("Joined flight shall not break flightId: " + flight.getFlightId() + " Air: "+ altAir.getId());
-								return false;
+					}
+
+					logger.warn("First flight detected adjustable flightId: " + flight.getFlightId() + " Air: "
+							+ altAir.getId());
+					isFirstFlight = true;
+				}
+
+				// last flight
+				if (InitData.lastFlightMap.containsKey(flight.getFlightId())) {
+					// not at last position
+					if (i != altAir.getFlightChain().size() - 1) {
+						logger.warn("5.7 Last flight is not at last position. flight " + flight.getFlightId() + " Air: "
+								+ altAir.getId());
+						return false;
+					}
+					if (!flight.getPlannedAir().getType().equals(altAir.getType()) || !flight.getPlannedFlight()
+							.getDesintationAirport().getId().equals(flight.getDesintationAirport().getId())) {
+						logger.warn("5.7 Last flight shall not change aircraft type or airport flightId: "
+								+ flight.getFlightId() + " Air: " + altAir.getId() + " new airport: "
+								+ flight.getDesintationAirport().getId());
+						return false;
+					}
+
+					isLastFligt = true;
+
+				}
+
+				// airport check - forward check
+				if (!isLastFligt) {
+					Flight nextFlight = altAir.getFlightChain().get(i + 1);
+					if (!flight.getDesintationAirport().getId().equals(nextFlight.getSourceAirPort().getId())) {
+						logger.warn("5.1 Airports are not connected flight: " + flight.getFlightId() + " nextFlight "
+								+ nextFlight.getFlightId());
+						logger.warn(" flight1 destination airport " + flight.getDesintationAirport().getId());
+						logger.warn(" flight2 source airport " + nextFlight.getSourceAirPort().getId());
+						return false;
+					}
+				}
+				// joint flight we love joined flight
+				// join status table
+				// Status 1 - Joined
+				// 1, firstJoined=True,
+				// 2, SecondJoined=True,
+				// 3, flight1_cancelled=False,
+				// 4, flight2_cancelled=False,
+				// Status 2 - Connected Flight or normal flight1
+				// 1, isPossibleConnected
+				// Status 3 - Flight1/2 Normal flight, not joined flight
+				// 1, firstJoined=False,
+				// 2, SecondJoined=False,
+				// 3, flight1_cancelled=False,
+				// 4, flight2_cancelled=False,
+				// 5, flight1 & flight2 not in joined map
+				// Status 4 - flight 1 cancelled, flight 2 normal
+				// firstJoined False,
+				// SecondJoined False,
+				// flight1_cancelled=True, or in Cancel Queue
+				// flight2_cancelled False
+				// 4, flight2_cancelled=False,
+				// Status 5 - flight 1 cancelled, flight 2 cancelled
+				// firstJoined False,
+				// SecondJoined False,
+				// flight1_cancelled=True, or in Cancel Queue
+				// flight2_cancelled=True, or in Cancel Queue
+				int joinPos = BusinessDomain.getJointFlightPosition(flight);
+				// check if joined or not joined
+				// if 1st flight of join
+				if (joinPos == 1) {
+					// if flight is already last,
+					if (isLastFligt) {
+						logger.warn("8.3 + 5.7, First joined flight shall not be as last flight flightId: "
+								+ flight.getFlightId() + " Air: " + altAir.getId());
+						return false;
+					}
+					// then check if 2nd joined next to him
+					Flight nextFlight = altAir.getFlight(i + 1);
+					if (BusinessDomain.getJointFlight(flight).getFlightId() != nextFlight.getFlightId()) {
+						// if 2nd flight not there, then it shall be
+						// cancelled
+						Flight cancelledSecond = itsCancelled
+								.getFlight(BusinessDomain.getJointFlight(flight).getFlightId());
+						if (cancelledSecond == null) {
+							logger.warn("8.3 Joined flight shall not break flightId: " + flight.getFlightId() + " Air: "
+									+ altAir.getId());
+							return false;
+						}
+						// connected flight detected, this need more check
+						if (BusinessDomain.isValidConnectedForJoin(flight, cancelledSecond)) {
+							flight.setPossibleConnected(true);
+							flight.setFirstJoined(true);
+							flight.setDesintationAirport(cancelledSecond.getDesintationAirport());
+						}
+
+					} else {
+						// joined flight detected
+						flight.setFirstJoined(true);
+						nextFlight.setSecondJoined(true);
+					}
+
+				} else if (joinPos == 2) {
+					if (isFirstFlight) {
+						// 1st flight must be cancelled
+						boolean firstJoinedFound = false;
+						for (Flight aCFlight : itsCancelled.getFlightChain()) {
+							if (BusinessDomain.getJointFlightPosition(aCFlight) == 1
+									&& BusinessDomain.getJointFlight(aCFlight).getFlightId() == flight.getFlightId()) {
+								firstJoinedFound = true;
+								break;
 							}
-								
+						}
+						if (!firstJoinedFound) {
+							logger.warn("8.3 Joined flight shall not break flightId: " + flight.getFlightId() + " Air: "
+									+ altAir.getId());
+							return false;
+						} else {
+							// 1st flight already cancelled, take it as
+							// normal flight
 							flight.setCanceled(false);
 							flight.setFirstJoined(false);
 							flight.setSecondJoined(false);
-						} else {
-							flight.setCanceled(false);
-							flight.setFirstJoined(true);
-							flight.setSecondJoined(false);
-							nextFlight.setCanceled(false);
-							nextFlight.setFirstJoined(false);
-							nextFlight.setSecondJoined(true);
+							;
 						}
 
-					} else if (joinPos == 2) {
+					} else {
 						// if 2nd flight of join
 						// if first joined already setup, its my turn
 						// then check if 1st joined prev to him
 						Flight prevFlight = altAir.getFlight(i - 1);
 						if (prevFlight.isFirstJoined() && flight.isSecondJoined()) {
 							if (prevFlight.isCanceled()) {
-								// 1st flight already cancelled
+								// 1st flight already cancelled, treat it as
+								// normal flight
 								flight.setCanceled(false);
 								flight.setFirstJoined(false);
 								flight.setSecondJoined(false);
-							} else if (flight.isCanceled()) {
-								// 2nd flight already processed & cancelled as
-								// connected flight
+							} else if (prevFlight.isPossibleConnected() && flight.isCanceled()) {
+								// 2nd flight already processed & cancelled
+								// as connected flight
 								// already costed
 								continue;
 							} else {
-								// 2nd flight still valid join
-								flight.setCanceled(false);
-								flight.setSecondJoined(true);
-								flight.setFirstJoined(false);
+								// 2nd flight still valid join & processed
+								continue;
 							}
 
 						} else {
-							// it sounds first joined already cancelled by outside
-							if (BusinessDomain.getJointFlight(prevFlight) == null ||
-									BusinessDomain.getJointFlight(prevFlight).getFlightId() != flight.getFlightId()) {
-								// if 1st flight not there, then it shall be
-								// cancelled
-								if (!itsCancelled.hasFlight(prevFlight)) {
-									logger.warn("Joined flight shall not break flightId: " + flight.getFlightId() + " Air: "+ altAir.getId());
-									return false;
+							// it sounds first joined already cancelled by
+							// outside
+							boolean firstJoinedFound = false;
+							for (Flight aCFlight : itsCancelled.getFlightChain()) {
+								if (BusinessDomain.getJointFlightPosition(aCFlight) == 1 && BusinessDomain
+										.getJointFlight(aCFlight).getFlightId() == flight.getFlightId()) {
+									firstJoinedFound = true;
+									break;
 								}
-									
-								else {
-									// 1st flight already cancelled
-									flight.setCanceled(false);
-									flight.setFirstJoined(false);
-									flight.setSecondJoined(false);
-								}
-
+							}
+							if (!firstJoinedFound) {
+								logger.warn("8.3 Joined flight shall not break flightId: " + flight.getFlightId()
+										+ " Air: " + altAir.getId());
+								return false;
 							} else {
-								// then 1st flight must be cancelled
-								logger.warn("Joined flight looks strage " + prevFlight.getFlightId() + " : "
-										+ flight.getFlightId());
+								// 1st flight already cancelled
 								flight.setCanceled(false);
 								flight.setFirstJoined(false);
 								flight.setSecondJoined(false);
 							}
 						}
-					} else {
-						// reset normal flights
-						flight.setCanceled(false);
-						flight.setFirstJoined(false);
-						flight.setSecondJoined(false);
 					}
 
-					// we need setup dep/arr time
-					// we prefer fly as early as possible even different with
-					// original schedule
-					Flight prevFligt = null;
-					Date initialArrivalTime = null;
-					Date selectedDepartureTime = null;
+				} else {
+					// reset normal flights
+					flight.setCanceled(false);
+					flight.setFirstJoined(false);
+					flight.setSecondJoined(false);
+				}
 
+				// we need setup dep/arr time
+				// we prefer fly as early as possible
+				Flight prevFligt = null;
+				Date initialArrivalTime = null;
+				Date selectedDepartureTime = null;
+				Date earliestDepartureTime = null;
+
+				int currentGroundingTime = Flight.GroundingTime;
+				if (!isFirstFlight) {
 					prevFligt = altAir.getFlight(i - 1);
-					int currentGroundingTime = BusinessDomain.getGroundingTime(prevFligt, flight);
+				}
+				if (isFirstFlight || prevFligt.isCanceled()) {
+					// not care when arrival if previous flight is
+					// cancelled.
+					selectedDepartureTime = flight.getPlannedFlight().getDepartureTime();
+					flight.setDepartureTime(selectedDepartureTime);
 
-					if (prevFligt.isCanceled()) {
-						// not care when arrival if previous flight is cancelled.
-						initialArrivalTime = BusinessDomain.addMinutes2(flight.getPlannedFlight().getDepartureTime(),
-								currentGroundingTime * -1);
-						prevFligt.setArrivalTime(initialArrivalTime);
-					} else {
-						initialArrivalTime = prevFligt.getArrivalTime();
-					}
-					Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
-
+				} else {
+					currentGroundingTime = BusinessDomain.getGroundingTime(prevFligt, flight);
+					initialArrivalTime = prevFligt.getArrivalTime();
+					earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
 					if (flight.getPlannedFlight().getDepartureTime().before(earliestDepartureTime)) {
 						selectedDepartureTime = earliestDepartureTime;
 					} else {
-						// we need see how long we like grounding, I dont want to
-						// ground too long to impact others
-						Date newDepartureTime = BusinessDomain.addHours(initialArrivalTime, aStragety.getMaxGrounding());
+						// we need see how long we like grounding
+						Date newDepartureTime = BusinessDomain.addHours(initialArrivalTime,
+								aStragety.getMaxGrounding());
 						if (newDepartureTime.before(earliestDepartureTime))
 							selectedDepartureTime = earliestDepartureTime;
 						else if (newDepartureTime.after(flight.getPlannedFlight().getDepartureTime())) {
@@ -270,123 +378,112 @@ public class SelfSearch implements AdjustmentEngine {
 							selectedDepartureTime = newDepartureTime;
 
 					}
-
 					flight.setDepartureTime(selectedDepartureTime);
+				}
 
-					// check if this departure/arrival time feasible
-					if (BusinessDomain.isFeasibleDepartureTime(prevFligt, flight, aStragety.isIgnoreParking())) {
+				// check if this departure/arrival time feasible
+				if (BusinessDomain.isFeasibleDepartureTime(prevFligt, flight, aStragety.isIgnoreParking())) {
+					try {
+						flight.setArrivalTime(flight.calcuateNextArrivalTime());
+					} catch (FlightDurationNotFound e) {
+						logger.warn("Unable to find flight duration for " + flight.getFlightId());
+						return false;
+					}
+				} else {
+					flight.setCanceled(true);
+					;
+				}
+
+				// now check arrival
+				if (!flight.isCanceled()) {
+					Flight nextFlight = null;
+					Flight prevFlight = null;
+					if (!isFirstFlight)
+						prevFlight = altAir.getFlight(i - 1);
+					if (!isLastFligt)
+						nextFlight = altAir.getFlight(i + 1);
+
+					boolean needTryConnectOption = false;
+					if (BusinessDomain.isFeasibleArrivalTime(prevFlight, flight, isLastFligt,
+							aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
 						try {
 							flight.setArrivalTime(flight.calcuateNextArrivalTime());
 						} catch (FlightDurationNotFound e) {
 							logger.warn("Unable to find flight duration for " + flight.getFlightId());
 							return false;
 						}
-						Flight nextFlight = altAir.getFlight(i + 1);
-						currentGroundingTime = BusinessDomain.getGroundingTime(flight, nextFlight);
-						RequestTime myRequest = new RequestTime();
-						RequestTime feasibleRequest = null;
-						myRequest.setArrivalTime(flight.getArrivalTime());
-						myRequest.setDepartureTime(null);
-						try {
-							feasibleRequest = flight.getDesintationAirport().requestAirport(myRequest,
-									currentGroundingTime, aStragety.isIgnoreParking());
-							if (feasibleRequest != null) {
-								boolean joinedOption = false;
-								// how about joined option?
-								// if first join, then we can cancel the 2nd join
-								if (flight.isFirstJoined() && nextFlight.isSecondJoined()) {
-									// check if we can count it as connect flight
-									// cost
-									if (BusinessDomain.isValidConnectedForJoin(flight, nextFlight)) {
-										// now check if new airport works fine
-										nextFlight.setCanceled(true);
-										flight.setDesintationAirport(nextFlight.getDesintationAirport());
-										try {
-											flight.setArrivalTime(flight.calcuateNextArrivalTime());
-											myRequest = new RequestTime();
-											myRequest.setArrivalTime(flight.getArrivalTime());
-											myRequest.setDepartureTime(null);
-											RequestTime joinfeasibleRequest = flight.getDesintationAirport()
-													.requestAirport(myRequest, Flight.GroundingTime, aStragety.isIgnoreParking());
-											if (joinfeasibleRequest != null) {
-												// try suggestion
-												if (BusinessDomain.calcuateDepartureTimebyArrival(prevFligt, flight,
-														joinfeasibleRequest.getArrivalTime(),
-														aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
-													flight.setArrivalTime(joinfeasibleRequest.getArrivalTime());
-													joinedOption = true;
-												} else {
-													nextFlight.setCanceled(false);
-													flight.setDesintationAirport(
-															flight.getPlannedFlight().getDesintationAirport());
-													joinedOption = false;
-												}
-											} else {
-												joinedOption = true;
-											}
-										} catch (FlightDurationNotFound e) {
-											logger.warn("Unable to find flight duration for " + flight.getFlightId());
-											nextFlight.setCanceled(false);
-											flight.setDesintationAirport(flight.getPlannedFlight().getDesintationAirport());
-											joinedOption = false;
-										} catch (AirportNotAcceptDepartureTime2 e1) {
-											logger.warn(" Not possible to have AirportNotAcceptDepartureTime2 "
-													+ e1.getAirport().getId() + " flight " + flight.getFlightId());
-											nextFlight.setCanceled(false);
-											flight.setDesintationAirport(flight.getPlannedFlight().getDesintationAirport());
-											joinedOption = false;
-										}
-
+						if (!isLastFligt) {
+							if (flight.isFirstJoined() && nextFlight.isSecondJoined()) {
+								// check 2nd joined flight
+								if (BusinessDomain.isFeasibleDepartureTime(flight, nextFlight,
+										aStragety.isIgnoreParking())) {
+									try {
+										nextFlight.setArrivalTime(nextFlight.calcuateNextArrivalTime());
+									} catch (FlightDurationNotFound e) {
+										logger.warn("Unable to find flight duration for " + nextFlight.getFlightId());
+										needTryConnectOption = true;
 									}
-								}
-								if (!joinedOption) {
-									// try suggestion
-									if (BusinessDomain.calcuateDepartureTimebyArrival(prevFligt, flight,
-											feasibleRequest.getArrivalTime(), aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
-										flight.setArrivalTime(feasibleRequest.getArrivalTime());
+									if (BusinessDomain.isFeasibleArrivalTime(flight, nextFlight,
+											InitData.lastFlightMap.get(nextFlight.getFlightId()) != null,
+											aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
+										; // all good
 									} else {
-										flight.setCanceled(true);
+										needTryConnectOption = true;
 									}
+								} else {
+									needTryConnectOption = true;
 								}
+
 							}
-						} catch (AirportNotAcceptDepartureTime2 e1) {
-							logger.warn(" Not possible to have AirportNotAcceptDepartureTime2 " + e1.getAirport().getId()
-									+ " flight " + flight.getFlightId());
-							flight.setCanceled(true);
 						}
 					} else {
 						flight.setCanceled(true);
-						;
-					}					
-				}
-					
-
-				// now cost it
-				if (flight.isCanceled()) {
-					cost = cost.add(CostDomain.cancelCost(flight).multiply(new BigDecimal(2)));
-				} else {
-					// delay cost
-					if (flight.getDepartureTime().after(flight.getPlannedFlight().getDepartureTime()))
-						cost = cost.add(CostDomain.delayCost(flight));
-					else
-						cost = cost.add(CostDomain.earlierCost(flight));
-					// change air
-					if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
-						cost = cost.add(CostDomain.changeAirCost(flight));
-					}
-					// connect flight cost
-					if (flight.isFirstJoined() && !flight.isCanceled()) {
-						Flight nextFlight = altAir.getFlight(i + 1);
-						if (nextFlight.isCanceled() && nextFlight.isSecondJoined()) {
-							cost = cost.add(CostDomain.connectedFlightCost(flight));
+						if (!isLastFligt) {
+							if (flight.isFirstJoined() && nextFlight.isSecondJoined()) {
+								needTryConnectOption = true;
+								flight.setCanceled(false);
+							}
 						}
 					}
+					if (needTryConnectOption) {
+						flight.setPossibleConnected(true);
+						nextFlight.setCanceled(true);
+						flight.setDesintationAirport(nextFlight.getDesintationAirport());
+					}
+					if (flight.isPossibleConnected()) {
+
+						try {
+							flight.setArrivalTime(flight.calcuateNextArrivalTime());
+							if (BusinessDomain.isFeasibleArrivalTime(prevFlight, flight, isLastFligt,
+									aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
+								; // all good
+							} else {
+								// rollback change for the 2nd flight
+								if (needTryConnectOption) {
+									nextFlight.setCanceled(false);
+									flight.setDesintationAirport(flight.getPlannedFlight().getDesintationAirport());
+								}
+									
+								flight.setPossibleConnected(false);
+								flight.setCanceled(true);
+							}
+						} catch (FlightDurationNotFound e) {
+							logger.warn("Unable to find flight duration for " + flight.getFlightId());
+							if (needTryConnectOption) {
+								nextFlight.setCanceled(false);
+								flight.setDesintationAirport(flight.getPlannedFlight().getDesintationAirport());
+							}
+							flight.setPossibleConnected(false);
+							flight.setCanceled(true);
+						}
+						
+					}
 				}
+				costFlight(altAir, flight, cost);
 
 			}
 
 		}
-		
 
 		altAir.setCost(cost.floatValue());
 		return true;
@@ -728,8 +825,8 @@ public class SelfSearch implements AdjustmentEngine {
 				RequestTime tempFlightTime = new RequestTime();
 				tempFlightTime.setArrivalTime(lastFlight.getArrivalTime());
 				tempFlightTime.setDepartureTime(nextFlight.getDepartureTime());
-				if (nextFlight.getSourceAirPort().requestAirport(tempFlightTime,
-						nextFlight.getGroundingTime(i - 1, i), false) == null) {
+				if (nextFlight.getSourceAirPort().requestAirport(tempFlightTime, nextFlight.getGroundingTime(i - 1, i),
+						false) == null) {
 					tempFlightTime.setArrivalTime(nextFlight.getArrivalTime());
 					if (i < flightChain.size() - 2) {
 						tempFlightTime.setDepartureTime(flightChain.get(i + 1).getDepartureTime());

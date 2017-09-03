@@ -100,9 +100,6 @@ public class Aircraft implements Cloneable {
 		flightChain.add(index, aFlight);
 	}
 	
-	public boolean hasFlight(Flight aFlight) {
-		return flightChain.contains(aFlight);
-	}
 
 	/**
 	 * The aircraft's insertFlight method inserts a flight into aircraft's
@@ -334,7 +331,7 @@ public class Aircraft implements Cloneable {
 			String currentSourceAirport = aFlight.getSourceAirPort().getId();
 			for (int j = currentPos + 1; j < flightChain.size(); j++) {
 				if (!flightChain.get(j).isAdjustable() 
-						|| InitData.lastFlightMap.contains(flightChain.get(j).getFlightId()))
+						|| InitData.lastFlightMap.containsKey(flightChain.get(j).getFlightId()))
 					continue;
 				String nextDestAirport = flightChain.get(j).getDesintationAirport().getId();
 				if (currentSourceAirport.equals(nextDestAirport)) {
@@ -365,12 +362,12 @@ public class Aircraft implements Cloneable {
 				if (sourceAirPortAir1.equals(sourceAirPortAir2)) {
 					for (int i = flightChain.indexOf(aFlight); i < flightChain.size(); i++) {
 						if (!getFlight(i).isAdjustable()
-								|| InitData.lastFlightMap.contains(flightChain.get(i).getFlightId()))
+								|| InitData.lastFlightMap.containsKey(flightChain.get(i).getFlightId()))
 							continue;
 						String airPortA = getFlight(i).getDesintationAirport().getId();
 						for (int j = air2.getFlightChain().indexOf(bFlight); j < air2.getFlightChain().size(); j++) {
 							if (!air2.getFlight(j).isAdjustable()
-									|| InitData.lastFlightMap.contains(air2.getFlight(j).getFlightId()))
+									|| InitData.lastFlightMap.containsKey(air2.getFlight(j).getFlightId()))
 								continue;
 							String airPortB = air2.getFlight(j).getDesintationAirport().getId();
 							if (airPortA.equals(airPortB)) {
@@ -448,12 +445,12 @@ public class Aircraft implements Cloneable {
 			}
 			
 			//  5.7  border limited
-			if (i == 0) {
-				if (!flight.getSourceAirPort().getId().equals(InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
-					return false;
-				}
-				
-			}
+//			if (i == 0) {
+//				if (!flight.getSourceAirPort().getId().equals(InitData.firstFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())) {
+//					return false;
+//				}
+//				
+//			}
 			
 //			if (i == flightChain.size() - 1) {
 //				if (!flight.getSourceAirPort().getId().equals(InitData.lastFlightMap.get(airID).getPlannedFlight().getSourceAirPort().getId())

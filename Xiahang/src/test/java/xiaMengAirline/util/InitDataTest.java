@@ -506,7 +506,7 @@ public class InitDataTest {
 		assertEquals(1, aBatchDriver.getCurrentIterationNumber());
 		assertEquals(50, aBatchDriver.getNextDriveForIterative().size());
 		assertEquals(2, aBatchDriver.getCurrentIterationNumber());
-		assertEquals(43, aBatchDriver.getNextDriveForIterative().size());
+		assertEquals(42, aBatchDriver.getNextDriveForIterative().size());
 		assertEquals(3, aBatchDriver.getCurrentIterationNumber());
 		assertEquals(null, aBatchDriver.getNextDriveForIterative());
 		
@@ -599,7 +599,8 @@ public class InitDataTest {
 		aStragety.setMaxBestSolution(50);
 		aStragety.setMaxGrounding(48);
 		aAdjEngine.setaStragety(aStragety);
-		boolean isAdjusted = aAdjEngine.adjust(airl2Test, new Aircraft());
+		boolean isAdjusted = aAdjEngine.adjust(airl2Test, InitData.originalSolution.getAircraft
+				(airl2Test.getId(), airl2Test.getType(), true, true));
 		BusinessDomain.printOutAircraft(airl2Test);
 		assertEquals(true, isAdjusted);
 		assertEquals(false, f557.isCanceled());
@@ -616,8 +617,7 @@ public class InitDataTest {
 		assertEquals(false, airl6.isCancel());
 		
 		
-		fail("stop");
-		
+	
 		
 
 		SelfSearch aInitEngine = new SelfSearch();
@@ -630,11 +630,11 @@ public class InitDataTest {
 		
 		XiaMengAirlineSolution a23Solution = new XiaMengAirlineSolution();
 		//a23Solution.replaceOrAddNewAircraft(airl4);
-		//a23Solution.replaceOrAddNewAircraft(airl2);
-		//a23Solution.replaceOrAddNewAircraft(airl3);
-		a23Solution.replaceOrAddNewAircraft(airl6);
-		a23Solution.replaceOrAddNewAircraft(airl74);
-		a23Solution.replaceOrAddNewAircraft(airl129);
+		a23Solution.replaceOrAddNewAircraft(airl2);
+		a23Solution.replaceOrAddNewAircraft(airl3);
+		//a23Solution.replaceOrAddNewAircraft(airl6);
+		//a23Solution.replaceOrAddNewAircraft(airl74);
+		//a23Solution.replaceOrAddNewAircraft(airl129);
 		ExchangeSearch aSearch = new ExchangeSearch();
 		
 		

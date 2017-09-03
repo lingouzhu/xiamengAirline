@@ -35,6 +35,7 @@ public class Flight implements Cloneable {
 	private boolean isCanceled = false;  
 	private boolean isFirstJoined = false; //only used in adjustment
 	private boolean isSecondJoined = false; //only used in adjustment
+	private boolean isPossibleConnected = false; //only used in adjustment
 	
 	private String isTransfer = "0";
 	private String transferInfo = "";
@@ -261,6 +262,12 @@ public class Flight implements Cloneable {
 	}
 	public void setSecondJoined(boolean isSecondJoined) {
 		this.isSecondJoined = isSecondJoined;
+	}
+	public boolean isPossibleConnected() {
+		return isPossibleConnected;
+	}
+	public void setPossibleConnected(boolean isPossibleConnected) {
+		this.isPossibleConnected = isPossibleConnected;
 	}
 
 

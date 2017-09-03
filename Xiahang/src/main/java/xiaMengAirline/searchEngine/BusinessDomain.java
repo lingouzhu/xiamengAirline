@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
+import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.beans.AirPort;
 import xiaMengAirline.beans.AirPortClose;
 import xiaMengAirline.beans.Aircraft;
@@ -1030,9 +1031,13 @@ public class BusinessDomain {
 	
 		RequestTime myRequest = new RequestTime();
 
-		int currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
-
-		myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
+		int currentGroundingTime = Flight.GroundingTime;
+		if (arrivalFlight !=  null) {
+			BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
+			myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
+		} else {
+			myRequest.setArrivalTime(null);
+		}
 		myRequest.setDepartureTime(departureFlight.getDepartureTime());
 		RequestTime feasibleRequest = null;
 		try {
@@ -1052,15 +1057,15 @@ public class BusinessDomain {
 			// let's try suggested time
 			departureFlight.setDepartureTime(feasibleRequest.getDepartureTime());
 		}
-		// cancel if not valid move
+		// cancel if valid move
 		boolean isTyphoon = isTyphoon(departureFlight.getSourceAirPort(), departureFlight.getDepartureTime());
 		if (departureFlight.getDepartureTime().before(departureFlight.getPlannedFlight().getDepartureTime())) {
 			if (!BusinessDomain.isValidEarlier(departureFlight, isTyphoon)) {
 				return false;
-			} else {
-				if (!BusinessDomain.isValidDelay(departureFlight)) {
-					return false;
-				}
+			} 
+		} else {
+			if (!BusinessDomain.isValidDelay(departureFlight)) {
+				return false;
 			}
 		}
 		return true;
@@ -1068,31 +1073,46 @@ public class BusinessDomain {
 
 	public static boolean calcuateDepartureTimebyArrival(Flight arrivalFlight, Flight departureFlight, Date newArrival,
 			int maxGroudingTime, boolean ignoreParking) {
-		Date initialArrivalTime = arrivalFlight.getArrivalTime();
-		int currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
-		Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
-		Date latestDepartureTime = BusinessDomain.addHours(initialArrivalTime, maxGroudingTime);
+		
+		if (arrivalFlight == null) {
+			if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
+				Calendar cl = Calendar.getInstance();
+				cl.setTime(departureFlight.getDepartureTime());
+				cl.add(Calendar.MINUTE,
+						(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
+				Date newDepurature = cl.getTime();
 
-		if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
-			Calendar cl = Calendar.getInstance();
-			cl.setTime(departureFlight.getDepartureTime());
-			cl.add(Calendar.MINUTE,
-					(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
-			Date newDepurature = cl.getTime();
-
-			if (newDepurature.before(departureFlight.getDepartureTime())) {
-				if (newDepurature.before(earliestDepartureTime))
-					return false;
-				else {
-					departureFlight.setDepartureTime(newDepurature);
-				}
-			} else {
-				if (newDepurature.after(latestDepartureTime))
-					return false;
-				else
-					departureFlight.setDepartureTime(newDepurature);
+				departureFlight.setDepartureTime(newDepurature);
+				
 			}
+		} else {
+			Date initialArrivalTime = arrivalFlight.getArrivalTime();
+			int currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
+			Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
+			Date latestDepartureTime = BusinessDomain.addHours(initialArrivalTime, maxGroudingTime);
+
+			if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
+				Calendar cl = Calendar.getInstance();
+				cl.setTime(departureFlight.getDepartureTime());
+				cl.add(Calendar.MINUTE,
+						(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
+				Date newDepurature = cl.getTime();
+
+				if (newDepurature.before(departureFlight.getDepartureTime())) {
+					if (newDepurature.before(earliestDepartureTime))
+						return false;
+					else {
+						departureFlight.setDepartureTime(newDepurature);
+					}
+				} else {
+					if (newDepurature.after(latestDepartureTime))
+						return false;
+					else
+						departureFlight.setDepartureTime(newDepurature);
+				}
+			}		
 		}
+
 
 		if (!BusinessDomain.isFeasibleDepartureTime(arrivalFlight, departureFlight, ignoreParking)) {
 			return false;
@@ -1100,6 +1120,50 @@ public class BusinessDomain {
 
 		return true;
 
+	}
+	
+	public static boolean isFeasibleArrivalTime (Flight prevFlight, Flight arrivalFlight, boolean isLastFlight
+			,int maxGroudingTime, boolean ignoreParking) {
+		try {
+			arrivalFlight.setArrivalTime(arrivalFlight.calcuateNextArrivalTime());
+		} catch (FlightDurationNotFound e) {
+			arrivalFlight.setArrivalTime(arrivalFlight.getPlannedFlight().getArrivalTime());
+			logger.warn("Unable to find flight duration for " + arrivalFlight.getFlightId());
+			return false;
+		} 
+		
+		if (isLastFlight) {
+			return true;
+		} else {
+			RequestTime myRequest = new RequestTime();
+			myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
+			myRequest.setDepartureTime(null);
+			try {
+				myRequest = arrivalFlight.getDesintationAirport().requestAirport(myRequest,
+						Flight.GroundingTime, ignoreParking);
+				if (myRequest!=null) {
+					if (BusinessDomain.calcuateDepartureTimebyArrival(prevFlight, arrivalFlight,
+							myRequest.getArrivalTime(), maxGroudingTime,
+							ignoreParking)) {
+						;
+					} else {
+						logger.warn("Unable to find right arrival time " + arrivalFlight.getFlightId());
+						return false;
+					}
+				}
+				
+			} catch (AirportNotAcceptDepartureTime2 e1) {
+				logger.warn(" Not possible to have AirportNotAcceptDepartureTime2 "
+						+ e1.getAirport().getId() + " flight " + arrivalFlight.getFlightId());
+				return false;
+			} catch (ParseException e1) {
+				logger.warn(" Not possible to have Parse error "
+						+ " flight " + arrivalFlight.getFlightId());
+				return false;
+			}
+			return true;
+		}
+		
 	}
 
 	public static void printOutAircraft(Aircraft aAir) {
@@ -1116,5 +1180,6 @@ public class BusinessDomain {
 			logger.debug("assigned air" + aFlight.getAssignedAir().getId());
 		}
 	}
+	
 
 }
