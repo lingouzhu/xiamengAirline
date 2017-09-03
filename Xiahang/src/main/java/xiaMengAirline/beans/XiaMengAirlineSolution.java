@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 
 import xiaMengAirline.Exception.AircraftNotAdjustable;
 import xiaMengAirline.searchEngine.SingleAircraftSearch;
+import xiaMengAirline.searchEngine.SolutionSearch;
 import xiaMengAirline.utils.CSVUtils;
 import xiaMengAirline.utils.InitData;
 import xiaMengAirline.utils.Utils;
@@ -980,6 +981,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 		XiaMengAirlineSolution bestSolution = this.clone();
 		List<Aircraft> airListBase = new ArrayList<Aircraft>(bestSolution.getSchedule().values());
 		// must reset alternative first
+		/*
 		for (Aircraft aAir : airListBase) {
 			if (aAir.getAlternativeAircraft() != null)
 				aAir.getAlternativeAircraft().clear();
@@ -1012,7 +1014,11 @@ public class XiaMengAirlineSolution implements Cloneable {
 			}
 		}
 		
-
+		*/
+		SolutionSearch ss = new SolutionSearch();
+		ss.search(bestSolution);
+		
+		
 		if (!bestSolution.validAlternativeflightNumers(this)) {
 			System.out.println("Not pass!");
 		}
