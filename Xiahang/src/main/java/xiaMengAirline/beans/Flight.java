@@ -125,7 +125,7 @@ public class Flight implements Cloneable {
 		newFlight.setAdjustable(isAdjustable);
 		newFlight.setFirstJoined(isFirstJoined);
 		newFlight.setSecondJoined(isSecondJoined);
-		newFlight.setTransferInfo(isTransfer);
+		newFlight.setIsTransfer(isTransfer);
 		newFlight.setNumberOfJoinedPassenger(numberOfJoinedPassenger);
 		newFlight.setNumberOfPassenger(numberOfPassenger);
 		newFlight.setSchdDate(schdDate);

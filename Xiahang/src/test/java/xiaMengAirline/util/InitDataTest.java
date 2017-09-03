@@ -672,7 +672,7 @@ public class InitDataTest {
 		
 		Main.evalutor("数据森林_" + aBetterSolution1.getStrCost() + "_test.csv");
 		
-		
+		aBetterSolution1.refreshPassenger();
 		fail("stop");
 		XiaMengAirlineSolution aBSol = aSol.getBestSolution();
 		
@@ -771,7 +771,10 @@ public class InitDataTest {
 		long mins = (endTime - startTime)/(1000* 60);
 		System.out.println("Consumed ... " + mins);
 		aBetterOutput = aBetterSolution.reConstruct();
+		aBetterOutput.refreshPassenger();
 		aBetterOutput.refreshCost(true);
+		
+		
 		aBetterOutput.generateOutput("b");
 		main = new Main();
 		main.evalutor("数据森林_"+aBetterOutput.getStrCost()+"_b.csv");

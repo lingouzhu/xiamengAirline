@@ -146,7 +146,7 @@ public class StartUp3 {
 		try {
 			long startTime = System.currentTimeMillis();
 			// Step1, Load all data & initialize
-			String initDatafile = "XiahangData20170809.xlsx";
+			String initDatafile = "XiahangData20170814.xlsx";
 			InitData.initData(initDatafile);
 
 			LocalSearch2 localEngine = new LocalSearch2();
