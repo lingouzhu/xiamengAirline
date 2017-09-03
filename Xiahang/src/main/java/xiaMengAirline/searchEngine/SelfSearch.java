@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.print.attribute.ResolutionSyntax;
+
 import org.apache.log4j.Logger;
 
 import xiaMengAirline.Exception.AircraftNotAdjustable;
@@ -395,7 +397,7 @@ public class SelfSearch implements AdjustmentEngine {
 					}
 
 					// check if this departure/arrival time feasible
-					if (BusinessDomain.isFeasibleDepartureTime(prevFligt, flight, aStragety.isIgnoreParking())) {
+					if (BusinessDomain.isFeasibleDepartureTime(altAir, prevFligt, flight, aStragety.isIgnoreParking())) {
 						try {
 							flight.setArrivalTime(flight.calcuateNextArrivalTime());
 						} catch (FlightDurationNotFound e) {
@@ -422,7 +424,7 @@ public class SelfSearch implements AdjustmentEngine {
 						Date firstFlightBackupArrival = null;
 						selectedDepartureTime = null;
 						earliestDepartureTime = null;
-						if (BusinessDomain.isFeasibleArrivalTime(prevFlight, flight, isLastFligt,
+						if (BusinessDomain.isFeasibleArrivalTime(altAir, prevFlight, flight,
 								aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
 
 							if (!isLastFligt) {
@@ -453,7 +455,7 @@ public class SelfSearch implements AdjustmentEngine {
 
 									}
 									nextFlight.setDepartureTime(selectedDepartureTime);
-									if (BusinessDomain.isFeasibleDepartureTime(flight, nextFlight,
+									if (BusinessDomain.isFeasibleDepartureTime(altAir, flight, nextFlight,
 											aStragety.isIgnoreParking())) {
 										try {
 											nextFlight.setArrivalTime(nextFlight.calcuateNextArrivalTime());
@@ -462,8 +464,7 @@ public class SelfSearch implements AdjustmentEngine {
 													"Unable to find flight duration for " + nextFlight.getFlightId());
 											needTryConnectOption = true;
 										}
-										if (BusinessDomain.isFeasibleArrivalTime(flight, nextFlight,
-												InitData.lastFlightMap.get(nextFlight.getFlightId()) != null,
+										if (BusinessDomain.isFeasibleArrivalTime(altAir, flight, nextFlight,
 												aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
 											; // all good
 										} else {
@@ -497,11 +498,13 @@ public class SelfSearch implements AdjustmentEngine {
 									flight.setDesintationAirport(flight.getPlannedFlight().getDesintationAirport());
 									flight.setPossibleConnected(false);
 									nextFlight.setCanceled(true);
+									restorePlannedData(nextFlight);
 								} else {
 									flight.setCanceled(true);
 									restorePlannedData(flight);
 									flight.setPossibleConnected(false);
 									nextFlight.setCanceled(false);
+									restorePlannedData(nextFlight);
 								}
 
 							}
@@ -511,7 +514,7 @@ public class SelfSearch implements AdjustmentEngine {
 
 							try {
 								flight.setArrivalTime(flight.calcuateNextArrivalTime());
-								if (BusinessDomain.isFeasibleArrivalTime(prevFlight, flight, isLastFligt,
+								if (BusinessDomain.isFeasibleArrivalTime(altAir, prevFlight, flight,
 										aStragety.getMaxGrounding(), aStragety.isIgnoreParking())) {
 									; // all good
 								} else {
@@ -524,11 +527,13 @@ public class SelfSearch implements AdjustmentEngine {
 											flight.setDesintationAirport(flight.getPlannedFlight().getDesintationAirport());
 											flight.setPossibleConnected(false);
 											nextFlight.setCanceled(true);
+											restorePlannedData(nextFlight);
 										} else {
 											flight.setCanceled(true);
 											restorePlannedData(flight);
 											flight.setPossibleConnected(false);
 											nextFlight.setCanceled(false);
+											restorePlannedData(nextFlight);
 										}
 										
 									} else {

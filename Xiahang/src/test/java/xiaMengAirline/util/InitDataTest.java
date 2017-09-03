@@ -532,6 +532,9 @@ public class InitDataTest {
 		Aircraft airl74 = InitData.originalSolution.getAircraft("74", "2", false, false).clone();
 		Aircraft airl110 = InitData.originalSolution.getAircraft("110", "2", false, false).clone();
 		Aircraft airl88 = InitData.originalSolution.getAircraft("88", "2", false, false).clone();
+		Aircraft airl111 = InitData.originalSolution.getAircraft("111", "2", false, false).clone();
+		Aircraft airl114 = InitData.originalSolution.getAircraft("114", "2", false, false).clone();
+		Aircraft airl18 = InitData.originalSolution.getAircraft("18", "2", false, false).clone();
 		a234Solution.replaceOrAddNewAircraft(airl2);
 		a234Solution.replaceOrAddNewAircraft(airl3);
 		a234Solution.replaceOrAddNewAircraft(airl4);
@@ -619,7 +622,7 @@ public class InitDataTest {
 		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), airl2Test.getFlightByFlightId(737).getDepartureTime());
 		
 		f557.setCanceled(false);
-		isAdjusted = BusinessDomain.calcuateDepartureTimebyArrival(f734, f557, Utils.stringFormatToTime2("07/05/2017 17:00:00"), 48, false);
+		isAdjusted = BusinessDomain.calcuateDepartureTimebyArrival(airl2Test, f734, f557, Utils.stringFormatToTime2("07/05/2017 17:00:00"), 48, false);
 		assertEquals(true, isAdjusted);
 		
 		//clone test
@@ -628,6 +631,18 @@ public class InitDataTest {
 		assertEquals(true, airl6test.isCancel());
 		assertEquals(false, airl6.isCancel());
 		
+		Flight f505 = airl111.getFlightByFlightId(505);
+		f505.setDepartureTime(Utils.stringFormatToTime2("09/05/2017 02:50:00"));
+		f505.setArrivalTime(Utils.stringFormatToTime2("09/05/2017 04:20:00"));
+		RequestTime aReqTime = new RequestTime();
+		aReqTime.setArrivalTime(null);
+		aReqTime.setDepartureTime(f505.getDepartureTime());
+		RequestTime aReqRespTime = f505.getSourceAirPort().requestAirport(aReqTime, 50, false);
+		assertEquals(null, aReqRespTime);
+		aReqTime.setArrivalTime(f505.getArrivalTime());
+		aReqTime.setDepartureTime(null);
+		aReqRespTime = f505.getDesintationAirport().requestAirport(aReqTime, 50, false);
+		assertEquals(Utils.stringFormatToTime2("09/05/2017 06:10:00"), aReqRespTime.getArrivalTime());
 		
 	
 		
@@ -636,7 +651,7 @@ public class InitDataTest {
 		
 		aInitEngine.setaStragety(aStragety);
 		XiaMengAirlineSolution a3Solution = new XiaMengAirlineSolution();
-		a3Solution.replaceOrAddNewAircraft(airl88);
+		a3Solution.replaceOrAddNewAircraft(airl18);
 		XiaMengAirlineSolution testSolution = aInitEngine.constructInitialSolution(a3Solution);
 		testSolution.printOutSolution();			
 		fail("stop");

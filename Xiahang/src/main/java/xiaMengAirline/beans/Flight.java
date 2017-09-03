@@ -137,6 +137,8 @@ public class Flight implements Cloneable {
 		newFlight.setPlannedFlight(getPlannedFlight());
 		newFlight.setPlannedAir(getPlannedAir());
 		newFlight.setExtraNonAdjustable(isExtraNonAdjustable);
+		newFlight.setCanceled(isCanceled);
+		newFlight.setPossibleConnected(isPossibleConnected);
 		return newFlight;
 	}
 	

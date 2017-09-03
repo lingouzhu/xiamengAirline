@@ -285,7 +285,7 @@ public class BusinessDomain {
 	 * @return
 	 * @throws ParseException
 	 */
-	public static Date getPossibleArrivalTime(Flight flight, AirPort airport, 
+	public static Date getPossibleArrivalTime(Flight flight, AirPort airport,
 			HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload) throws ParseException {
 		for (AirPortClose aClose : airport.getCloseSchedule()) {
 			if (flight.getArrivalTime().after(aClose.getStartTime())
@@ -829,8 +829,9 @@ public class BusinessDomain {
 		}
 		return null;
 	}
-	
-	public static int getNextEmptyTimePoint(HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload, AirPort airport, int flightId) {
+
+	public static int getNextEmptyTimePoint(HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload,
+			AirPort airport, int flightId) {
 		int startTimePoint = 7;
 		boolean done = false;
 		while (!done) {
@@ -859,8 +860,8 @@ public class BusinessDomain {
 		return startTimePoint;
 	}
 
-	public static Date getPossibleLoadTime(AirPort airport, Date AirportClosetime, Date planTime, boolean isInternational,
-			HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload, int flightId) {
+	public static Date getPossibleLoadTime(AirPort airport, Date AirportClosetime, Date planTime,
+			boolean isInternational, HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload, int flightId) {
 		int startTimePoint = 7;
 		boolean done = false;
 		while (!done) {
@@ -870,7 +871,7 @@ public class BusinessDomain {
 					return delayTime;
 				}
 			}
-			
+
 			if (timeload.containsKey(airport.getId())) {
 				if (timeload.get(airport.getId()).containsKey(startTimePoint)) {
 					if (timeload.get(airport.getId()).get(startTimePoint).size() > 1) {
@@ -978,7 +979,7 @@ public class BusinessDomain {
 		cal.add(Calendar.HOUR, hours);
 		return cal.getTime();
 	}
-	
+
 	/**
 	 * add minutes to date
 	 * 
@@ -1100,27 +1101,46 @@ public class BusinessDomain {
 		return closeFlg;
 	}
 
-	public static boolean isFeasibleDepartureTime(Flight arrivalFlight, Flight departureFlight, boolean ignoreParking) {
-		
-	
+	public static boolean isFeasibleDepartureTime(Aircraft air, Flight arrivalFlight, Flight departureFlight,
+			boolean ignoreParking) {
+
 		RequestTime myRequest = new RequestTime();
 
 		int currentGroundingTime = Flight.GroundingTime;
-		if (arrivalFlight !=  null && !arrivalFlight.isCanceled()) {
-			BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
-			myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
+		if (arrivalFlight != null) {
+			int pos = air.getFlightChain().indexOf(arrivalFlight);
+			Flight prevFlight = null;
+			int startPos = pos;
+			do {
+				prevFlight = air.getFlight(startPos);
+				startPos--;
+			} while (prevFlight.isCanceled() && startPos >= 0);
+			if (pos == startPos + 1) {
+				currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
+				myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
+			} else if (!prevFlight.isCanceled()) {
+				long flightTime = BusinessDomain.getFlightTime(prevFlight.getSourceAirPort().getId(),
+						departureFlight.getSourceAirPort().getId(), air);
+				if (flightTime == 0)
+					flightTime = 180; // assuming 180 min for connect flight
+				Date newArrivalTime = BusinessDomain.addMinutes(prevFlight.getDepartureTime(), flightTime);
+				myRequest.setArrivalTime(newArrivalTime);
+			} else {
+				myRequest.setArrivalTime(null);
+			}
+
 		} else {
 			myRequest.setArrivalTime(null);
 		}
 		myRequest.setDepartureTime(departureFlight.getDepartureTime());
 		RequestTime feasibleRequest = null;
 		try {
-			feasibleRequest = departureFlight.getSourceAirPort().requestAirport(myRequest, currentGroundingTime, ignoreParking);
+			feasibleRequest = departureFlight.getSourceAirPort().requestAirport(myRequest, currentGroundingTime,
+					ignoreParking);
 		} catch (AirportNotAcceptDepartureTime2 ex) {
 			logger.debug("Airport not acepts departure, airport " + ex.getAirport().getId() + " flight "
 					+ departureFlight.getFlightId() + " departure time "
-					+ Utils.timeFormatter2(ex.getPlannedDeparture())
-					+ " due to " + ex.getCasue());
+					+ Utils.timeFormatter2(ex.getPlannedDeparture()) + " due to " + ex.getCasue());
 			return false;
 		} catch (ParseException ex) {
 			ex.printStackTrace();
@@ -1136,7 +1156,7 @@ public class BusinessDomain {
 		if (departureFlight.getDepartureTime().before(departureFlight.getPlannedFlight().getDepartureTime())) {
 			if (!BusinessDomain.isValidEarlier(departureFlight, isTyphoon)) {
 				return false;
-			} 
+			}
 		} else {
 			if (!BusinessDomain.isValidDelay(departureFlight)) {
 				return false;
@@ -1145,10 +1165,10 @@ public class BusinessDomain {
 		return true;
 	}
 
-	public static boolean calcuateDepartureTimebyArrival(Flight arrivalFlight, Flight departureFlight, Date newArrival,
-			int maxGroudingTime, boolean ignoreParking) {
-		
-		if (arrivalFlight == null || arrivalFlight.isCanceled()) {
+	public static boolean calcuateDepartureTimebyArrival(Aircraft air, Flight arrivalFlight, Flight departureFlight,
+			Date newArrival, int maxGroudingTime, boolean ignoreParking) {
+
+		if (arrivalFlight == null) {
 			if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(departureFlight.getDepartureTime());
@@ -1157,92 +1177,118 @@ public class BusinessDomain {
 				Date newDepurature = cl.getTime();
 
 				departureFlight.setDepartureTime(newDepurature);
-				
+
 			}
 		} else {
-			Date initialArrivalTime = arrivalFlight.getArrivalTime();
-			int currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
-			Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
-			Date latestDepartureTime = BusinessDomain.addHours(initialArrivalTime, maxGroudingTime);
+			int pos = air.getFlightChain().indexOf(arrivalFlight);
+			Flight prevFlight = null;
+			int startPos = pos;
+			do {
+				prevFlight = air.getFlight(startPos);
+				startPos--;
+			} while (prevFlight.isCanceled() && startPos >= 0);
+			Date initialArrivalTime = null;
+			int currentGroundingTime = Flight.GroundingTime;
+			if (pos == startPos + 1) {
+				initialArrivalTime = arrivalFlight.getArrivalTime();
+				currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
+			} else if (!prevFlight.isCanceled()) {
+				long flightTime = BusinessDomain.getFlightTime(prevFlight.getSourceAirPort().getId(),
+						departureFlight.getSourceAirPort().getId(), air);
+				if (flightTime == 0)
+					flightTime = 180; // assuming 180 min for connect flight
+				initialArrivalTime = BusinessDomain.addMinutes(prevFlight.getDepartureTime(), flightTime);
+			}
+			if (initialArrivalTime != null) {
+				Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
+				Date latestDepartureTime = BusinessDomain.addHours(initialArrivalTime, maxGroudingTime);
 
-			if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
-				Calendar cl = Calendar.getInstance();
-				cl.setTime(departureFlight.getDepartureTime());
-				cl.add(Calendar.MINUTE,
-						(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
-				Date newDepurature = cl.getTime();
+				if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
+					Calendar cl = Calendar.getInstance();
+					cl.setTime(departureFlight.getDepartureTime());
+					cl.add(Calendar.MINUTE,
+							(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
+					Date newDepurature = cl.getTime();
 
-				if (newDepurature.before(departureFlight.getDepartureTime())) {
-					if (newDepurature.before(earliestDepartureTime))
-						return false;
-					else {
-						departureFlight.setDepartureTime(newDepurature);
+					if (newDepurature.before(departureFlight.getDepartureTime())) {
+						if (newDepurature.before(earliestDepartureTime))
+							return false;
+						else {
+							departureFlight.setDepartureTime(newDepurature);
+						}
+					} else {
+						if (newDepurature.after(latestDepartureTime))
+							return false;
+						else
+							departureFlight.setDepartureTime(newDepurature);
 					}
-				} else {
-					if (newDepurature.after(latestDepartureTime))
-						return false;
-					else
-						departureFlight.setDepartureTime(newDepurature);
 				}
-			}		
+			} else {
+				if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
+					Calendar cl = Calendar.getInstance();
+					cl.setTime(departureFlight.getDepartureTime());
+					cl.add(Calendar.MINUTE,
+							(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
+					Date newDepurature = cl.getTime();
+
+					departureFlight.setDepartureTime(newDepurature);
+
+				}
+			}
+			
+
 		}
 
-
-		if (!BusinessDomain.isFeasibleDepartureTime(arrivalFlight, departureFlight, ignoreParking)) {
+		if (!BusinessDomain.isFeasibleDepartureTime(air, arrivalFlight, departureFlight, ignoreParking)) {
 			return false;
 		}
 
 		return true;
 
 	}
-	
-	public static boolean isFeasibleArrivalTime (Flight prevFlight, Flight arrivalFlight, boolean isLastFlight
-			,int maxGroudingTime, boolean ignoreParking) {
 
-		
-		if (isLastFlight) {
-			return true;
-		} else {
-			RequestTime myRequest = new RequestTime();
-			myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
-			myRequest.setDepartureTime(null);
-			try {
-				myRequest = arrivalFlight.getDesintationAirport().requestAirport(myRequest,
-						Flight.GroundingTime, ignoreParking);
-				if (myRequest!=null) {
-					if (BusinessDomain.calcuateDepartureTimebyArrival(prevFlight, arrivalFlight,
-							myRequest.getArrivalTime(), maxGroudingTime,
-							ignoreParking)) {
-						arrivalFlight.setArrivalTime(myRequest.getArrivalTime());;
-					} else {
-						logger.warn("Unable to find right arrival time " + arrivalFlight.getFlightId());
-						return false;
-					}
+	public static boolean isFeasibleArrivalTime(Aircraft air, Flight prevFlight, Flight arrivalFlight,
+			int maxGroudingTime, boolean ignoreParking) {
+
+		RequestTime myRequest = new RequestTime();
+		myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
+		myRequest.setDepartureTime(null);
+		try {
+			myRequest = arrivalFlight.getDesintationAirport().requestAirport(myRequest, Flight.GroundingTime,
+					ignoreParking);
+			if (myRequest != null) {
+				if (BusinessDomain.calcuateDepartureTimebyArrival(air, prevFlight, arrivalFlight,
+						myRequest.getArrivalTime(), maxGroudingTime, ignoreParking)) {
+					arrivalFlight.setArrivalTime(myRequest.getArrivalTime());
+					;
+				} else {
+					logger.warn("Unable to find right arrival time " + arrivalFlight.getFlightId());
+					return false;
 				}
-				
-			} catch (AirportNotAcceptDepartureTime2 e1) {
-				logger.warn(" Not possible to have AirportNotAcceptDepartureTime2 "
-						+ e1.getAirport().getId() + " flight " + arrivalFlight.getFlightId());
-				return false;
-			} catch (ParseException e1) {
-				logger.warn(" Not possible to have Parse error "
-						+ " flight " + arrivalFlight.getFlightId());
-				return false;
 			}
-			return true;
+
+		} catch (AirportNotAcceptDepartureTime2 e1) {
+			logger.warn(" Not possible to have AirportNotAcceptDepartureTime2 " + e1.getAirport().getId() + " flight "
+					+ arrivalFlight.getFlightId());
+			return false;
+		} catch (ParseException e1) {
+			logger.warn(" Not possible to have Parse error " + " flight " + arrivalFlight.getFlightId());
+			return false;
 		}
-		
+		return true;
+
 	}
-	
-	public static boolean validateDuplicatedFlight (XiaMengAirlineSolution aSolution) {
-		List<Aircraft> airList = new ArrayList<Aircraft> (aSolution.getSchedule().values());
-		Map<Integer, Flight> flightMap = new HashMap<Integer, Flight> ();
-		for (Aircraft air:airList) {
-			for (Flight aFlight:air.getFlightChain()) {
+
+	public static boolean validateDuplicatedFlight(XiaMengAirlineSolution aSolution) {
+		List<Aircraft> airList = new ArrayList<Aircraft>(aSolution.getSchedule().values());
+		Map<Integer, Flight> flightMap = new HashMap<Integer, Flight>();
+		for (Aircraft air : airList) {
+			for (Flight aFlight : air.getFlightChain()) {
 				if (flightMap.containsKey(aFlight.getFlightId())) {
 					logger.error("Duplicated flight flightId: " + aFlight.getFlightId());
 					logger.error(" first flight: air-" + air.getId());
-					logger.error(" second flight: air-" + flightMap.get(aFlight.getFlightId()).getAssignedAir().getId());
+					logger.error(
+							" second flight: air-" + flightMap.get(aFlight.getFlightId()).getAssignedAir().getId());
 					return false;
 				} else
 					flightMap.put(aFlight.getFlightId(), aFlight);
@@ -1253,7 +1299,7 @@ public class BusinessDomain {
 
 	public static void printOutAircraft(Aircraft aAir) {
 
-		logger.debug("Aircraft in details: " + aAir.getId() + " cost: " +aAir.getCost());
+		logger.debug("Aircraft in details: " + aAir.getId() + " cost: " + aAir.getCost());
 		for (Flight aFlight : aAir.getFlightChain()) {
 			logger.debug("Flight " + aFlight.getFlightId());
 			boolean isCancelled = aAir.isCancel() || aFlight.isCanceled();
@@ -1265,6 +1311,5 @@ public class BusinessDomain {
 			logger.debug("assigned air" + aFlight.getAssignedAir().getId());
 		}
 	}
-	
 
 }
