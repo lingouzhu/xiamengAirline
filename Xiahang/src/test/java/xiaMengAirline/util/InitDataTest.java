@@ -157,6 +157,16 @@ public class InitDataTest {
 		f325.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 08:31:00"));
 		assertEquals(false, BusinessDomain.isValidDelay(f325));
 		
+		Aircraft air24 = InitData.originalSolution.getAircraft("24", "4", false, false);
+		Flight f69 = air24.getFlightByFlightId(69);
+		Flight f73 = air24.getFlightByFlightId(73);
+		assertEquals(73, (BusinessDomain.getJointFlight(f69).getFlightId()));
+		assertEquals(f73, air24.getFlight(air24.getFlightChain().indexOf(f69)+1));
+		assertEquals(1, BusinessDomain.getJointFlightPosition(f69));
+		assertEquals(2, BusinessDomain.getJointFlightPosition(f73));
+		assertEquals(false, f69.isAdjustable());
+		assertEquals(true, f73.isExtraNonAdjustable());
+		
 		//airport close
 		AirPort port6 = InitData.airportList.getAirport("6");
 		assertEquals(true, port6.isInternational());

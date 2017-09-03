@@ -30,7 +30,6 @@ import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.RequestTime;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 import xiaMengAirline.utils.InitData;
-import xiaMengAirline.utils.Utils;
 
 public class SelfSearch implements AdjustmentEngine {
 	private static final Logger logger = Logger.getLogger(SelfSearch.class);
@@ -75,28 +74,31 @@ public class SelfSearch implements AdjustmentEngine {
 
 	}
 
-	private void costFlight(Aircraft altAir, Flight flight, BigDecimal baseCost) {
+	private BigDecimal costFlight(Aircraft altAir, Flight flight, BigDecimal baseCost) {
+		BigDecimal cost = new BigDecimal("0");
+		cost = baseCost;
 		// now cost it
 		if (flight.isCanceled()) {
-			baseCost = baseCost.add(CostDomain.cancelCost(flight).multiply(new BigDecimal(2)));
+			cost = cost.add(CostDomain.cancelCost(flight).multiply(new BigDecimal(2)));
 		} else {
 			// delay cost
 			if (flight.getDepartureTime().after(flight.getPlannedFlight().getDepartureTime()))
-				baseCost = baseCost.add(CostDomain.delayCost(flight));
+				cost = cost.add(CostDomain.delayCost(flight));
 			else
-				baseCost = baseCost.add(CostDomain.earlierCost(flight));
+				cost = cost.add(CostDomain.earlierCost(flight));
 			// change air
 			if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
-				baseCost = baseCost.add(CostDomain.changeAirCost(flight));
+				cost = cost.add(CostDomain.changeAirCost(flight));
 			}
 			// connect flight cost
 			if (flight.isFirstJoined() && !flight.isCanceled()) {
 				Flight nextFlight = altAir.getFlight(altAir.getFlightChain().indexOf(flight) + 1);
 				if (nextFlight.isCanceled() && nextFlight.isSecondJoined()) {
-					baseCost = baseCost.add(CostDomain.connectedFlightCost(flight));
+					cost = cost.add(CostDomain.connectedFlightCost(flight));
 				}
 			}
 		}
+		return cost;
 	}
 
 	@Override
@@ -106,7 +108,7 @@ public class SelfSearch implements AdjustmentEngine {
 
 		// check if adjustable in cancel
 		for (Flight aFlight : itsCancelled.getFlightChain()) {
-			if (!aFlight.isAdjustable()) {
+			if (!aFlight.isAdjustable() || aFlight.isExtraNonAdjustable()) {
 				logger.warn("8.6 Non-adjustable flight shall not cancelled air: " + itsCancelled.getId() + " flightId:"
 						+ aFlight.getFlightId());
 				return false;
@@ -131,9 +133,9 @@ public class SelfSearch implements AdjustmentEngine {
 		for (int i = 0; i < altAir.getFlightChain().size(); i++) {
 			boolean isLastFligt = false;
 			boolean isFirstFlight = false;
-
+			
 			Flight flight = altAir.getFlightChain().get(i);
-			if (!flight.isAdjustable()) {
+			if (!flight.isAdjustable() || flight.isExtraNonAdjustable()) {
 
 				if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
 					logger.warn("8.6 Non-adjustable flight changed air! flightId: " + flight.getFlightId()
@@ -247,10 +249,11 @@ public class SelfSearch implements AdjustmentEngine {
 						// if 2nd flight not there, then it shall be
 						// cancelled
 						Flight cancelledSecond = itsCancelled
-								.getFlight(BusinessDomain.getJointFlight(flight).getFlightId());
+								.getFlightByFlightId(BusinessDomain.getJointFlight(flight).getFlightId());
 						if (cancelledSecond == null) {
 							logger.warn("8.3 Joined flight shall not break flightId: " + flight.getFlightId() + " Air: "
 									+ altAir.getId());
+							logger.warn(" joined flights " + flight.getFlightId() + "-" + BusinessDomain.getJointFlight(flight).getFlightId());
 							return false;
 						}
 						// connected flight detected, this need more check
@@ -280,6 +283,7 @@ public class SelfSearch implements AdjustmentEngine {
 						if (!firstJoinedFound) {
 							logger.warn("8.3 Joined flight shall not break flightId: " + flight.getFlightId() + " Air: "
 									+ altAir.getId());
+							logger.warn(" joined flights Unknown -" + flight.getFlightId());
 							return false;
 						} else {
 							// 1st flight already cancelled, take it as
@@ -291,10 +295,11 @@ public class SelfSearch implements AdjustmentEngine {
 						}
 
 					} else {
+						Flight prevFlight = altAir.getFlight(i - 1);
 						// if 2nd flight of join
 						// if first joined already setup, its my turn
 						// then check if 1st joined prev to him
-						Flight prevFlight = altAir.getFlight(i - 1);
+						
 						if (prevFlight.isFirstJoined() && flight.isSecondJoined()) {
 							if (prevFlight.isCanceled()) {
 								// 1st flight already cancelled, treat it as
@@ -326,6 +331,7 @@ public class SelfSearch implements AdjustmentEngine {
 							if (!firstJoinedFound) {
 								logger.warn("8.3 Joined flight shall not break flightId: " + flight.getFlightId()
 										+ " Air: " + altAir.getId());
+								logger.warn(" joined flights Unknown -" + flight.getFlightId());
 								return false;
 							} else {
 								// 1st flight already cancelled
@@ -479,7 +485,7 @@ public class SelfSearch implements AdjustmentEngine {
 						
 					}
 				}
-				costFlight(altAir, flight, cost);
+				cost = costFlight(altAir, flight, cost);
 
 			}
 
