@@ -447,7 +447,7 @@ public class SelfSearch implements AdjustmentEngine {
 											selectedDepartureTime = earliestDepartureTime;
 										else if (newDepartureTime
 												.after(nextFlight.getPlannedFlight().getDepartureTime())) {
-											selectedDepartureTime = flight.getPlannedFlight().getDepartureTime();
+											selectedDepartureTime = nextFlight.getPlannedFlight().getDepartureTime();
 										} else
 											selectedDepartureTime = newDepartureTime;
 
