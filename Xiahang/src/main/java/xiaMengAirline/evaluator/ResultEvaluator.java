@@ -795,6 +795,12 @@ public class ResultEvaluator implements Cloneable{
                         System.out.println("签转旅客到某航班，必须满足该航班的座位数限制 : " + originFlight.getFlightId());
                         isFeasible = false;
                     }
+                    double delayHour = 1.0 * (resultFlight.getStartDateTime().getTime() - originFlight.getStartDateTime().getTime()) / 1000 / 60 / 60;
+                    if(originFlight.getConnectPassengerNum() > 0 && delayHour > 0.0) {
+                        passengerDelayScore += originFlight.getConnectPassengerNum() * Configuration.getNormalPassengerDelayParam(delayHour);
+                    }
+                    //获得签转旅客的延迟开销
+                    signChangePassengerDelayScore += getSignChangePassengerDelayCost(flightId, passTransInfo);
                 }
                 else{
                     int totalPassengerNum = originFlight.getPassengerNum() + originFlight.getConnectPassengerNum();
@@ -834,7 +840,7 @@ public class ResultEvaluator implements Cloneable{
                     }
                     if(totalPassengerNum + totalSignInChangePassNum > seatNum){//签转旅客到某航班，必须满足该航班的座位数限制
                         constraintViolationNum += 1;
-                        System.out.println("签转旅客到某航班，必须满足该航班的座位数限制 : ");
+                        System.out.println("签转旅客到某航班，必须满足该航班的座位数限制 : " + originFlight.getFlightId());
                         isFeasible = false;
                     }
                 }

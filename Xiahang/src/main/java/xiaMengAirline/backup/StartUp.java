@@ -170,59 +170,66 @@ public class StartUp {
 			Main main = new Main();
 			main.evalutor("数据森林_" + initialOutput.getStrCost() + "_aa.csv");
 
-			XiaMengAirlineSolution aBetterSolution = initialSolution;
-			// step3a, small iteration on most important data
-			List<Aircraft> airList = new ArrayList<Aircraft>(aBetterSolution.getSchedule().values());
-			TreeMap<Integer, List<Aircraft>> topAirList = searchTopList(airList);
-
-			int currentSize = localEngine.getBATCH_SIZE();
-
-			List<Aircraft> importantAirList = new ArrayList<Aircraft>();
-			for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
-				importantAirList.addAll(entry.getValue());
-			}
-			localEngine.setBATCH_SIZE(importantAirList.size());
-
-			for (int i = 0; i < preiterLength; i++) {
-				List<Aircraft> preIterList = new ArrayList<Aircraft>(importantAirList);
-				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
-				System.out.println("Pre-Iter " + i + " Cost: " + aBetterSolution.getCost());
-			}
-			XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct();
-			
-			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
-				System.out.println("Pass Pre-Iter!");
-			else
-				System.out.println("Failed Pre-Iter!");
-
-			localEngine.setBATCH_SIZE(currentSize);
-			// Step3b, loop through to search optimized solutions
-			
-			for (int i = 0; i < iterLength; i++) {
-				aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
-				System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
-			}
-
-			// step3c, small post iteration on most searchable data
-			airList = new ArrayList<Aircraft>(aBetterSolution.getSchedule().values());
-
-			topAirList = searchHeavyList(airList);
-
-			importantAirList = new ArrayList<Aircraft>();
-			for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
-				importantAirList.addAll(entry.getValue());
-			}
-			localEngine.setBATCH_SIZE(importantAirList.size());
-			for (int i = 0; i < postiterLength; i++) {
-				List<Aircraft> preIterList = new ArrayList<Aircraft>(importantAirList);
-				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
-				System.out.println("Post-Iter " + i + " Cost: " + aBetterSolution.getCost());
-			}
-			aBetterOutput = aBetterSolution.reConstruct();
-			aBetterOutput.refreshCost(true);
-			aBetterOutput.generateOutput("cc");
-			main = new Main();
-			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_cc.csv");
+//			XiaMengAirlineSolution aBetterSolution = initialSolution;
+//			// step3a, small iteration on most important data
+//			List<Aircraft> airList = new ArrayList<Aircraft>(aBetterSolution.getSchedule().values());
+//			TreeMap<Integer, List<Aircraft>> topAirList = searchTopList(airList);
+//
+//			int currentSize = localEngine.getBATCH_SIZE();
+//
+//			List<Aircraft> importantAirList = new ArrayList<Aircraft>();
+//			for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
+//				importantAirList.addAll(entry.getValue());
+//			}
+//			localEngine.setBATCH_SIZE(importantAirList.size());
+//
+//			for (int i = 0; i < preiterLength; i++) {
+//				List<Aircraft> preIterList = new ArrayList<Aircraft>(importantAirList);
+//				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
+//				System.out.println("Pre-Iter " + i + " Cost: " + aBetterSolution.getCost());
+//			}
+//			XiaMengAirlineSolution aBetterOutput = aBetterSolution.reConstruct();
+//			
+//			if (aBetterOutput.validflightNumers3(InitData.originalSolution))
+//				System.out.println("Pass Pre-Iter!");
+//			else
+//				System.out.println("Failed Pre-Iter!");
+//
+//			localEngine.setBATCH_SIZE(currentSize);
+//			// Step3b, loop through to search optimized solutions
+//			
+//			for (int i = 0; i < iterLength; i++) {
+//				aBetterSolution = localEngine.constructNewSolution(aBetterSolution);
+//				System.out.println("Current Iter " + i + " Cost: " + aBetterSolution.getCost());
+//			}
+//
+//			// step3c, small post iteration on most searchable data
+//			airList = new ArrayList<Aircraft>(aBetterSolution.getSchedule().values());
+//
+//			topAirList = searchHeavyList(airList);
+//
+//			importantAirList = new ArrayList<Aircraft>();
+//			for (Map.Entry<Integer, List<Aircraft>> entry : topAirList.entrySet()) {
+//				importantAirList.addAll(entry.getValue());
+//			}
+//			localEngine.setBATCH_SIZE(importantAirList.size());
+//			for (int i = 0; i < postiterLength; i++) {
+//				List<Aircraft> preIterList = new ArrayList<Aircraft>(importantAirList);
+//				aBetterSolution = localEngine.buildSolution(preIterList, aBetterSolution);
+//				System.out.println("Post-Iter " + i + " Cost: " + aBetterSolution.getCost());
+//			}
+//			aBetterOutput = aBetterSolution.reConstruct();
+//			
+//			
+//			
+//			
+//			
+//			
+//			
+//			aBetterOutput.refreshCost(true);
+//			aBetterOutput.generateOutput("cc");
+//			main = new Main();
+//			main.evalutor("数据森林_" + aBetterOutput.getStrCost() + "_cc.csv");
 			
 			//step3d, single improvement
 			//XiaMengAirlineSolution finalSolution = aBetterSolution.getBestSolution();

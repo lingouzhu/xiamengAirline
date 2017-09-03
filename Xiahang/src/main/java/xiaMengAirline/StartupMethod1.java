@@ -43,6 +43,7 @@ public class StartupMethod1 {
 		if (!BusinessDomain.validateDuplicatedFlight(aGoodSolution))
 			System.out.println("Duplicated flight!");
 		
+		aGoodSolution.refreshPassenger();
 		aGoodSolution.refreshCost(true);
 		aGoodSolution.generateOutput(String.valueOf("test"));
 		long endTime = System.currentTimeMillis();

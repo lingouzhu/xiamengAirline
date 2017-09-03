@@ -18,7 +18,7 @@ public class Configuration {
     }
     //获取取消航班参数
     public static double getCancelFlightParam(){
-        return 1000;
+        return 1200;
     }
     //获取机型变换参数
     public static double getFlightTypeChangeParam(String typeOne, String typeTwo){
@@ -95,17 +95,23 @@ public class Configuration {
     }
     //获取签转旅客延误参数
     public static double getSignChangePassengerDelayParam(double delayHour) {
-        if(delayHour >= 6.0 && delayHour < 24) {
-            return 0.5;
+        if(delayHour >= 0.0 && delayHour < 6.0){
+            return 1.0 / 30.0 * delayHour;
         }
-        else if(delayHour >= 24.0 && delayHour <= 48){
-            return 1.0;
+        else if(delayHour >= 6.0 && delayHour < 12.0) {
+            return 1.0 / 24.0 * delayHour;
         }
-        else if(delayHour > 48){
-            return maxValue;
+        else if(delayHour >= 12.0 && delayHour < 24.0){
+            return 1.0 / 24.0 * delayHour;
+        }
+        else if(delayHour >= 24.0 && delayHour < 36.0){
+            return 1.0 / 18.0 * delayHour;
+        }
+        else if(delayHour >= 36.0 && delayHour <= 48.0){
+            return 1.0 / 16.0 * delayHour;
         }
         else {
-            return 0.0;
+            return maxValue;
         }
     }
     //非可行解的惩罚值参数
