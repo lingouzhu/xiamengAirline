@@ -48,10 +48,10 @@ public class InitData {
 	public static Map<Integer, Flight> jointFlightMap = new HashMap<Integer, Flight>();
 	
 	/** fist flight*/
-	public static Map<String, Flight> firstFlightMap = new HashMap<String, Flight>();
+	public static Map<Integer, Flight> firstFlightMap = new HashMap<Integer, Flight>();
 	
 	/** last flight*/
-	public static List<Integer> lastFlightMap = new ArrayList<Integer>();
+	public static Map<Integer, Flight> lastFlightMap = new HashMap<Integer, Flight>();
 	
 	/** flight < 50 mins*/
 	public static Map<String, Integer> specialFlightMap = new HashMap<String, Integer>();
@@ -176,7 +176,7 @@ public class InitData {
 				for (int i = 0; i < flightList.size(); i++) {
 					Flight aFlight = flightList.get(i);
 					if (i == 0) {
-						firstFlightMap.put(aAir.getId(), aFlight);
+						firstFlightMap.put(aFlight.getFlightId(), aFlight);
 					} else {
 						Flight pFlight = flightList.get(i - 1);
 						int bTime = Utils.minutiesBetweenTime(aFlight.getDepartureTime(), pFlight.getArrivalTime()).intValue();
@@ -190,7 +190,7 @@ public class InitData {
 					}
 					
 					if (i == flightList.size() - 1) {
-						lastFlightMap.add(aFlight.getFlightId());
+						lastFlightMap.put(aFlight.getFlightId(), aFlight);
 					}
 					
 					String aKey = Integer.toString(aFlight.getSchdNo());
