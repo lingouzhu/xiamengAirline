@@ -18,7 +18,7 @@ public class OptimizationController {
 		
 		//step1, construct initial solution
 		XiaMengAirlineSolution solutionVersion1 = selfEngine.constructInitialSolution(aRawSolution);
-		solutionVersion1.printOutSolution();	
+		System.out.println("Initial solution generated, cost " + solutionVersion1.getCost());	
 		
 		//step2, iteration for exchange
 		IterativeMethod aBatchDriver = new IterativeBatchMethod();
@@ -41,6 +41,8 @@ public class OptimizationController {
 //		for (int i =0 ; i < aStragety.getNumberOfSolutions(); i++) {
 //			selectedSolutions.add(allTopSolutions.remove(InitData.rndRcl.nextInt(allTopSolutions.size())));
 //		}
+		
+		aBetterSolution.printOutSolution();
 		
 		return aBetterSolution;
 		

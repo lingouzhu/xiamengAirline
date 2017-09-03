@@ -1106,7 +1106,7 @@ public class BusinessDomain {
 		RequestTime myRequest = new RequestTime();
 
 		int currentGroundingTime = Flight.GroundingTime;
-		if (arrivalFlight !=  null) {
+		if (arrivalFlight !=  null && !arrivalFlight.isCanceled()) {
 			BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
 			myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
 		} else {
@@ -1148,7 +1148,7 @@ public class BusinessDomain {
 	public static boolean calcuateDepartureTimebyArrival(Flight arrivalFlight, Flight departureFlight, Date newArrival,
 			int maxGroudingTime, boolean ignoreParking) {
 		
-		if (arrivalFlight == null) {
+		if (arrivalFlight == null || arrivalFlight.isCanceled()) {
 			if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(departureFlight.getDepartureTime());
@@ -1198,13 +1198,7 @@ public class BusinessDomain {
 	
 	public static boolean isFeasibleArrivalTime (Flight prevFlight, Flight arrivalFlight, boolean isLastFlight
 			,int maxGroudingTime, boolean ignoreParking) {
-		try {
-			arrivalFlight.setArrivalTime(arrivalFlight.calcuateNextArrivalTime());
-		} catch (FlightDurationNotFound e) {
-			arrivalFlight.setArrivalTime(arrivalFlight.getPlannedFlight().getArrivalTime());
-			logger.warn("Unable to find flight duration for " + arrivalFlight.getFlightId());
-			return false;
-		} 
+
 		
 		if (isLastFlight) {
 			return true;
@@ -1219,7 +1213,7 @@ public class BusinessDomain {
 					if (BusinessDomain.calcuateDepartureTimebyArrival(prevFlight, arrivalFlight,
 							myRequest.getArrivalTime(), maxGroudingTime,
 							ignoreParking)) {
-						;
+						arrivalFlight.setArrivalTime(myRequest.getArrivalTime());;
 					} else {
 						logger.warn("Unable to find right arrival time " + arrivalFlight.getFlightId());
 						return false;

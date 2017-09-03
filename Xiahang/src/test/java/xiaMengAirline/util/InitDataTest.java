@@ -530,6 +530,7 @@ public class InitDataTest {
 		Aircraft airl6 = InitData.originalSolution.getAircraft("6", "2", false, false).clone();
 		Aircraft airl129 = InitData.originalSolution.getAircraft("129", "2", false, false).clone();
 		Aircraft airl74 = InitData.originalSolution.getAircraft("74", "2", false, false).clone();
+		Aircraft airl110 = InitData.originalSolution.getAircraft("110", "2", false, false).clone();
 		a234Solution.replaceOrAddNewAircraft(airl2);
 		a234Solution.replaceOrAddNewAircraft(airl3);
 		a234Solution.replaceOrAddNewAircraft(airl4);
@@ -634,9 +635,10 @@ public class InitDataTest {
 		
 		aInitEngine.setaStragety(aStragety);
 		XiaMengAirlineSolution a3Solution = new XiaMengAirlineSolution();
-		a3Solution.replaceOrAddNewAircraft(airl69);
-		aInitEngine.constructInitialSolution(a3Solution);
-					
+		a3Solution.replaceOrAddNewAircraft(airl110);
+		XiaMengAirlineSolution testSolution = aInitEngine.constructInitialSolution(a3Solution);
+		testSolution.printOutSolution();			
+		fail("stop");
 		
 		XiaMengAirlineSolution a23Solution = new XiaMengAirlineSolution();
 		//a23Solution.replaceOrAddNewAircraft(airl4);
@@ -668,11 +670,11 @@ public class InitDataTest {
 				fail("Stop - duplicated");
 		}
 		aBetterSolution1.refreshCost(true);
-		aBetterSolution1.generateOutput(String.valueOf("test"));
+		aBetterSolution1.generateOutput(String.valueOf("testJ"));
 		
-		Main.evalutor("数据森林_" + aBetterSolution1.getStrCost() + "_test.csv");
+		Main.evalutor("数据森林_" + aBetterSolution1.getStrCost() + "_testJ.csv");
 		
-		aBetterSolution1.refreshPassenger();
+		
 		fail("stop");
 		XiaMengAirlineSolution aBSol = aSol.getBestSolution();
 		
@@ -771,10 +773,7 @@ public class InitDataTest {
 		long mins = (endTime - startTime)/(1000* 60);
 		System.out.println("Consumed ... " + mins);
 		aBetterOutput = aBetterSolution.reConstruct();
-		aBetterOutput.refreshPassenger();
 		aBetterOutput.refreshCost(true);
-		
-		
 		aBetterOutput.generateOutput("b");
 		main = new Main();
 		main.evalutor("数据森林_"+aBetterOutput.getStrCost()+"_b.csv");
