@@ -285,7 +285,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 //				System.out.println("transit failed by flight1 canceled. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId());
 				flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
 			} else if (!flight1.isCanceled() && !flight2.isCanceled()) {
-				if (Utils.minutiesBetweenTime(flight2.getDepartureTime(), flight2.getArrivalTime()).intValue() < transit.getTransitMins()) {
+				if (Utils.minutiesBetweenTime(flight2.getDepartureTime(), flight1.getArrivalTime()).intValue() < transit.getTransitMins()) {
 //					System.out.println("transit failed by limited time. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId() + ",failed person:" + transit.getTransitPersons());
 					flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
 				}
