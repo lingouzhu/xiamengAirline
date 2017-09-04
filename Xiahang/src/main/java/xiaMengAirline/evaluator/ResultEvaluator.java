@@ -80,8 +80,12 @@ public class ResultEvaluator implements Cloneable{
                     System.out.println("不能存在重复航班: " + constraintViolationNum);
                     isFeasible = false;
                 }
+                if ("1602".equals(resultFlight.getFlightId())) {
+                	System.out.println((resultFlight.getFlightId()));
+                }
                 resultFlightMap.put(resultFlight.getFlightId(), resultFlight);
             }
+            System.out.println(resultFlightMap.size());
             reader.close();
         }
         catch (Exception e){
@@ -514,6 +518,9 @@ public class ResultEvaluator implements Cloneable{
                 String outFlightId = iter.next();
                 TransferLimitation transferLimitation = transferInInfoMap.get(outFlightId);
                 ResultFlight transferRF = resultFlightMap.get(outFlightId);
+                if (transferRF == null) {
+                	System.out.println(outFlightId);
+                }
                 if(transferRF.getStartDateTime().getTime() - resultFlight.getEndDateTime().getTime()
                         < transferLimitation.getMinTransferTime()) {
                     //中转失败，则从下一个航班删除正常旅客数量（数据中保证了转旅客数量不大于正常旅客数量）
@@ -608,24 +615,24 @@ public class ResultEvaluator implements Cloneable{
             ResultFlight signChangeResultFlight = resultFlightMap.get(signChangeFlightId);
             if (signChangeResultFlight.isCancel()) { //接受签转旅客的航班不能取消
                 constraintViolationNum += 1;
-                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
+                System.out.println("接受签转旅客的航班不能取消 : " + signChangeFlightId);
                 isFeasible = false;
             }
             if(signChangeResultFlight.getStartDateTime().getTime()
                     < originFlight.getStartDateTime().getTime()){ //签转旅客只能延误
                 constraintViolationNum += 1;
-                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
+                System.out.println("签转旅客只能延误 : " + signChangeFlightId);
                 isFeasible = false;
             }
             if(!signChangeResultFlight.getStartAirport().equals(originFlight.getStartAirport())
                     || !signChangeResultFlight.getEndAirport().equals(originFlight.getEndAirport())){ //签转航班要与原航班的起飞降落机场一致
                 constraintViolationNum += 1;
-                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
+                System.out.println("签转航班要与原航班的起飞降落机场一致 : " + signChangeFlightId);
                 isFeasible = false;
             }
             if(signChangeResultFlight.getSignChangePassInfo().size() > 0){//接受签转旅客的航班不能签转旅客到其他航班
                 constraintViolationNum += 1;
-                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
+                System.out.println("接受签转旅客的航班不能签转旅客到其他航班 : " + signChangeFlightId);
                 isFeasible = false;
             }
             totalSignChangePassNum += signChangePassInfoOfFlight.get(signChangeFlightId);
@@ -644,7 +651,7 @@ public class ResultEvaluator implements Cloneable{
             int transferCancelPassNum =  getPassengerNum(flightId, passTransInfo, 1);
             if(totalSignChangePassNum > originFlight.getNormalPassengerNum() - transferCancelPassNum){//签转旅客数量不能大于剩余的普通旅客数量
                 constraintViolationNum += 1;
-                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
+                System.out.println("签转旅客数量不能大于剩余的普通旅客数量 : " + flightId);
                 isFeasible = false;
             }
         }
@@ -662,6 +669,11 @@ public class ResultEvaluator implements Cloneable{
                 signChangeLegalityFlag = true;
                 totalPassengerNum -= transferFailPassNum;
             }
+            if(!signChangeLegalityFlag){
+                constraintViolationNum += 1;
+                System.out.println("中转失败 : " + originFlight.getFlightId());
+                isFeasible = false;
+            }
             if(resultFlight.isStraighten()){ //如果航班拉直
                 totalPassengerNum = originFlight.getConnectPassengerNum();
                 signChangeLegalityFlag = true;
@@ -673,6 +685,11 @@ public class ResultEvaluator implements Cloneable{
                     totalPassengerNum -= originFlight.getConnectPassengerNum();
                 }
             }
+            if(!signChangeLegalityFlag){
+                constraintViolationNum += 1;
+                System.out.println("如果是没有拉直的联程航班 : " + originFlight.getFlightId());
+                isFeasible = false;
+            }
             int seatNum = inputData.getAirLineMap().get(resultFlight.getAirplaneId()).get(0).getSeatNum();
             if(totalPassengerNum > seatNum){//换飞机、机型变化、超售（其实就是乘客数量大于座位数量）
                 signChangeLegalityFlag = true;
@@ -680,12 +697,12 @@ public class ResultEvaluator implements Cloneable{
             }
             if(!signChangeLegalityFlag){
                 constraintViolationNum += 1;
-                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
+                System.out.println("换飞机、机型变化、超售（其实就是乘客数量大于座位数量）: " + originFlight.getFlightId());
                 isFeasible = false;
             }
             if(totalSignChangePassNum > availableSignChangePassNum){//签转旅客数量不能大于可以签转的旅客数量
                 constraintViolationNum += 1;
-                System.out.println("全局判断基地平衡 : " + constraintViolationNum);
+                System.out.println("签转旅客数量不能大于可以签转的旅客数量 : " + originFlight.getFlightId());
                 isFeasible = false;
             }
         }
