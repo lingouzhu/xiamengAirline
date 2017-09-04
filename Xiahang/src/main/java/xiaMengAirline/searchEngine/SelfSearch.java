@@ -369,15 +369,14 @@ public class SelfSearch implements AdjustmentEngine {
 					if (!isFirstFlight) {
 						prevFligt = altAir.getFlight(i - 1);
 					}
-					if (isFirstFlight || prevFligt.isCanceled()) {
-						// not care when arrival if previous flight is
-						// cancelled.
+					
+					initialArrivalTime = BusinessDomain.calcuateInitialArrivalTime(altAir, prevFligt, flight);
+					if (initialArrivalTime == null) {
 						selectedDepartureTime = flight.getPlannedFlight().getDepartureTime();
 						flight.setDepartureTime(selectedDepartureTime);
-
 					} else {
-						currentGroundingTime = BusinessDomain.getGroundingTime(prevFligt, flight);
-						initialArrivalTime = prevFligt.getArrivalTime();
+						if (!prevFligt.isCanceled())
+							currentGroundingTime = BusinessDomain.getGroundingTime(prevFligt, flight);
 						earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
 						if (flight.getPlannedFlight().getDepartureTime().before(earliestDepartureTime)) {
 							selectedDepartureTime = earliestDepartureTime;
@@ -395,7 +394,7 @@ public class SelfSearch implements AdjustmentEngine {
 						}
 						flight.setDepartureTime(selectedDepartureTime);
 					}
-
+					
 					// check if this departure/arrival time feasible
 					if (BusinessDomain.isFeasibleDepartureTime(altAir, prevFligt, flight, aStragety.isIgnoreParking())) {
 						try {

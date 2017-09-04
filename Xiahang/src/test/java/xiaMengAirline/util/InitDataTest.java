@@ -535,6 +535,8 @@ public class InitDataTest {
 		Aircraft airl111 = InitData.originalSolution.getAircraft("111", "2", false, false).clone();
 		Aircraft airl114 = InitData.originalSolution.getAircraft("114", "2", false, false).clone();
 		Aircraft airl18 = InitData.originalSolution.getAircraft("18", "2", false, false).clone();
+		Aircraft airl90 = InitData.originalSolution.getAircraft("90", "2", false, false).clone();
+		Aircraft airl44 = InitData.originalSolution.getAircraft("44", "1", false, false).clone();
 		a234Solution.replaceOrAddNewAircraft(airl2);
 		a234Solution.replaceOrAddNewAircraft(airl3);
 		a234Solution.replaceOrAddNewAircraft(airl4);
@@ -645,13 +647,16 @@ public class InitDataTest {
 		assertEquals(Utils.stringFormatToTime2("09/05/2017 06:10:00"), aReqRespTime.getArrivalTime());
 		
 	
-		
+		Flight f1018 = airl44.getFlightByFlightId(1018);
+		Flight f257 = airl44.getFlightByFlightId(257);
+		f1018.setCanceled(true);
+		f257.setCanceled(true);
 
 		SelfSearch aInitEngine = new SelfSearch();
 		
 		aInitEngine.setaStragety(aStragety);
 		XiaMengAirlineSolution a3Solution = new XiaMengAirlineSolution();
-		a3Solution.replaceOrAddNewAircraft(airl18);
+		a3Solution.replaceOrAddNewAircraft(airl44);
 		XiaMengAirlineSolution testSolution = aInitEngine.constructInitialSolution(a3Solution);
 		testSolution.printOutSolution();			
 		fail("stop");

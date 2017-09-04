@@ -1104,34 +1104,18 @@ public class BusinessDomain {
 	public static boolean isFeasibleDepartureTime(Aircraft air, Flight arrivalFlight, Flight departureFlight,
 			boolean ignoreParking) {
 
-		RequestTime myRequest = new RequestTime();
-
+		Date initialArrivalTime = calcuateInitialArrivalTime(air, arrivalFlight, departureFlight);
 		int currentGroundingTime = Flight.GroundingTime;
-		if (arrivalFlight != null) {
-			int pos = air.getFlightChain().indexOf(arrivalFlight);
-			Flight prevFlight = null;
-			int startPos = pos;
-			do {
-				prevFlight = air.getFlight(startPos);
-				startPos--;
-			} while (prevFlight.isCanceled() && startPos >= 0);
-			if (pos == startPos + 1) {
-				currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
-				myRequest.setArrivalTime(arrivalFlight.getArrivalTime());
-			} else if (!prevFlight.isCanceled()) {
-				long flightTime = BusinessDomain.getFlightTime(prevFlight.getSourceAirPort().getId(),
-						departureFlight.getSourceAirPort().getId(), air);
-				if (flightTime == 0)
-					flightTime = 180; // assuming 180 min for connect flight
-				Date newArrivalTime = BusinessDomain.addMinutes(prevFlight.getDepartureTime(), flightTime);
-				myRequest.setArrivalTime(newArrivalTime);
-			} else {
-				myRequest.setArrivalTime(null);
-			}
-
-		} else {
+		
+		RequestTime myRequest = new RequestTime();
+		if (initialArrivalTime == null) {
 			myRequest.setArrivalTime(null);
+		} else {
+			if (!arrivalFlight.isCanceled())
+				currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
+			myRequest.setArrivalTime(initialArrivalTime);
 		}
+		
 		myRequest.setDepartureTime(departureFlight.getDepartureTime());
 		RequestTime feasibleRequest = null;
 		try {
@@ -1168,7 +1152,9 @@ public class BusinessDomain {
 	public static boolean calcuateDepartureTimebyArrival(Aircraft air, Flight arrivalFlight, Flight departureFlight,
 			Date newArrival, int maxGroudingTime, boolean ignoreParking) {
 
-		if (arrivalFlight == null) {
+		Date initialArrivalTime = calcuateInitialArrivalTime(air, arrivalFlight, departureFlight);
+		
+		if (initialArrivalTime == null) {
 			if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
 				Calendar cl = Calendar.getInstance();
 				cl.setTime(departureFlight.getDepartureTime());
@@ -1180,63 +1166,32 @@ public class BusinessDomain {
 
 			}
 		} else {
-			int pos = air.getFlightChain().indexOf(arrivalFlight);
-			Flight prevFlight = null;
-			int startPos = pos;
-			do {
-				prevFlight = air.getFlight(startPos);
-				startPos--;
-			} while (prevFlight.isCanceled() && startPos >= 0);
-			Date initialArrivalTime = null;
 			int currentGroundingTime = Flight.GroundingTime;
-			if (pos == startPos + 1) {
-				initialArrivalTime = arrivalFlight.getArrivalTime();
+			if (!arrivalFlight.isCanceled())			
 				currentGroundingTime = BusinessDomain.getGroundingTime(arrivalFlight, departureFlight);
-			} else if (!prevFlight.isCanceled()) {
-				long flightTime = BusinessDomain.getFlightTime(prevFlight.getSourceAirPort().getId(),
-						departureFlight.getSourceAirPort().getId(), air);
-				if (flightTime == 0)
-					flightTime = 180; // assuming 180 min for connect flight
-				initialArrivalTime = BusinessDomain.addMinutes(prevFlight.getDepartureTime(), flightTime);
-			}
-			if (initialArrivalTime != null) {
-				Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
-				Date latestDepartureTime = BusinessDomain.addHours(initialArrivalTime, maxGroudingTime);
+			Date earliestDepartureTime = BusinessDomain.addMinutes(initialArrivalTime, currentGroundingTime);
+			Date latestDepartureTime = BusinessDomain.addHours(initialArrivalTime, maxGroudingTime);
 
-				if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
-					Calendar cl = Calendar.getInstance();
-					cl.setTime(departureFlight.getDepartureTime());
-					cl.add(Calendar.MINUTE,
-							(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
-					Date newDepurature = cl.getTime();
+			if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
+				Calendar cl = Calendar.getInstance();
+				cl.setTime(departureFlight.getDepartureTime());
+				cl.add(Calendar.MINUTE,
+						(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
+				Date newDepurature = cl.getTime();
 
-					if (newDepurature.before(departureFlight.getDepartureTime())) {
-						if (newDepurature.before(earliestDepartureTime))
-							return false;
-						else {
-							departureFlight.setDepartureTime(newDepurature);
-						}
-					} else {
-						if (newDepurature.after(latestDepartureTime))
-							return false;
-						else
-							departureFlight.setDepartureTime(newDepurature);
+				if (newDepurature.before(departureFlight.getDepartureTime())) {
+					if (newDepurature.before(earliestDepartureTime))
+						return false;
+					else {
+						departureFlight.setDepartureTime(newDepurature);
 					}
-				}
-			} else {
-				if (newArrival.compareTo(departureFlight.getArrivalTime()) != 0) {
-					Calendar cl = Calendar.getInstance();
-					cl.setTime(departureFlight.getDepartureTime());
-					cl.add(Calendar.MINUTE,
-							(int) BusinessDomain.getMinuteDifference(newArrival, departureFlight.getArrivalTime()));
-					Date newDepurature = cl.getTime();
-
-					departureFlight.setDepartureTime(newDepurature);
-
+				} else {
+					if (newDepurature.after(latestDepartureTime))
+						return false;
+					else
+						departureFlight.setDepartureTime(newDepurature);
 				}
 			}
-			
-
 		}
 
 		if (!BusinessDomain.isFeasibleDepartureTime(air, arrivalFlight, departureFlight, ignoreParking)) {
@@ -1277,6 +1232,34 @@ public class BusinessDomain {
 		}
 		return true;
 
+	}
+	
+	public static Date calcuateInitialArrivalTime (Aircraft currentAir, Flight arrivalFlight, Flight departureFlight) {
+		if (arrivalFlight == null)
+			return null;
+		
+		Date initialArrivalTime = null;
+		
+		int pos = currentAir.getFlightChain().indexOf(arrivalFlight);
+		Flight prevFlight = null;
+		int startPos = pos;
+		do {
+			prevFlight = currentAir.getFlight(startPos);
+			startPos--;
+		} while (prevFlight.isCanceled() && startPos >= 0);
+
+		if (!prevFlight.isCanceled() && (pos == startPos + 1)) {
+			initialArrivalTime = prevFlight.getArrivalTime();
+
+		} else if (!prevFlight.isCanceled()) {
+			long flightTime = BusinessDomain.getFlightTime(prevFlight.getSourceAirPort().getId(),
+					departureFlight.getSourceAirPort().getId(), currentAir);
+			if (flightTime == 0)
+				flightTime = 180; // assuming 180 min for connect flight
+			initialArrivalTime = BusinessDomain.addMinutes(prevFlight.getDepartureTime(), flightTime);
+		}
+		
+		return initialArrivalTime;
 	}
 
 	public static boolean validateDuplicatedFlight(XiaMengAirlineSolution aSolution) {
