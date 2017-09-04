@@ -547,6 +547,7 @@ public class InitDataTest {
 		Aircraft airl90 = InitData.originalSolution.getAircraft("90", "2", false, false).clone();
 		Aircraft airl44 = InitData.originalSolution.getAircraft("44", "1", false, false).clone();
 		Aircraft airl82 = InitData.originalSolution.getAircraft("82", "2", false, false).clone();
+		Aircraft airl25 = InitData.originalSolution.getAircraft("25", "2", false, false).clone();
 		a234Solution.replaceOrAddNewAircraft(airl2);
 		a234Solution.replaceOrAddNewAircraft(airl3);
 		a234Solution.replaceOrAddNewAircraft(airl4);
@@ -585,6 +586,18 @@ public class InitDataTest {
 					assertEquals(20, aSize);
 				}
 			}
+			
+		}
+		
+		Flight f633 = airl25.getFlightByFlightId(633);
+		f633.setArrivalTime(Utils.stringFormatToTime2("07/05/2017 05:00:00"));
+		f633.setDepartureTime(Utils.stringFormatToTime2("07/05/2017 07:00:00"));
+		RequestTime aRtime = new RequestTime();
+		aRtime.setArrivalTime(f633.getArrivalTime());
+		aRtime.setDepartureTime(f633.getDepartureTime());
+		try {
+			RequestTime aRtimeResp = f633.getDesintationAirport().requestAirport(aRtime, 50, false);
+		} catch (AirportNotAcceptDepartureTime2 ex) {
 			
 		}
 		

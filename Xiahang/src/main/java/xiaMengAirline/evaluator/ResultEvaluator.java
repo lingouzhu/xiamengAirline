@@ -2,10 +2,14 @@ package xiaMengAirline.evaluator;
 
 import org.apache.commons.lang3.tuple.Triple;
 
+import xiaMengAirline.utils.Utils;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+
+import javax.rmi.CORBA.Util;
 
 /**
  * Created by peicheng on 17/6/29.
@@ -973,6 +977,9 @@ public class ResultEvaluator implements Cloneable{
                 if(num > scene.getStopAirplaneNum()){
                     constraintViolationNum += 1;
                     System.out.println("判断停机位数量限制 : " + constraintViolationNum);
+                    System.out.println("判断停机位数量限制 : airport Id: " + scene.getAirport() + " max " + num + " actual " + scene.getStopAirplaneNum());
+                    System.out.println("判断停机位数量限制 : scene start: " + Utils.timeFormatter2(scene.getStartDateTime()) + " end " 
+                    		+ Utils.timeFormatToString2(scene.getEndDateTime()));
                     isFeasible = false;
                 }
             }

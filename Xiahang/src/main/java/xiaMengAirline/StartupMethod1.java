@@ -25,9 +25,9 @@ public class StartupMethod1 {
 		InitData.initData(initDatafile);
 		
 		OptimizerStragety myStragety = new OptimizerStragety();
-		myStragety.setAbortWhenImproved(false);
+		myStragety.setAbortWhenImproved(true);
 		myStragety.setDebug(false);
-		myStragety.setBatchSize(100);
+		myStragety.setBatchSize(20);
 		myStragety.setIgnoreParking(false);
 		myStragety.setMaxBestSolution(10);
 		myStragety.setMaxGrounding(48);
@@ -44,7 +44,7 @@ public class StartupMethod1 {
 		if (!BusinessDomain.validateDuplicatedFlight(aGoodSolution))
 			System.out.println("Duplicated flight!");
 		
-		aGoodSolution.refreshPassenger();
+		//aGoodSolution.refreshPassenger();
 		aGoodSolution.refreshCost(true);
 		aGoodSolution.generateOutput(String.valueOf("test"));
 		aGoodSolution.generateSolutionOutput(String.valueOf("test"));

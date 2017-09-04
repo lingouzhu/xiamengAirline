@@ -197,18 +197,18 @@ public class SelfSearch implements AdjustmentEngine {
 								+ altAir.getId());
 						return false;
 					}
-//					if (!flight.getPlannedAir().getType().equals(altAir.getType()) || !flight.getPlannedFlight()
-//							.getDesintationAirport().getId().equals(flight.getDesintationAirport().getId())) {
-//						logger.warn("5.7 Last flight shall not change aircraft type or airport flightId: "
-//								+ flight.getFlightId() + " Air: " + altAir.getId() + " new airport: "
-//								+ flight.getDesintationAirport().getId());
-//						return false;
-//					}
-					if (i!=altAir.getFlightChain().size()-1) {
-						logger.warn("5.7 Last flight will not be changed position "
-								+ flight.getFlightId());
+					if (!flight.getPlannedAir().getType().equals(altAir.getType()) || !flight.getPlannedFlight()
+							.getDesintationAirport().getId().equals(flight.getDesintationAirport().getId())) {
+						logger.warn("5.7 Last flight shall not change aircraft type or airport flightId: "
+								+ flight.getFlightId() + " Air: " + altAir.getId() + " new airport: "
+								+ flight.getDesintationAirport().getId());
 						return false;
 					}
+//					if (i!=altAir.getFlightChain().size()-1) {
+//						logger.warn("5.7 Last flight will not be changed position "
+//								+ flight.getFlightId());
+//						return false;
+//					}
 
 					isLastFligt = true;
 
