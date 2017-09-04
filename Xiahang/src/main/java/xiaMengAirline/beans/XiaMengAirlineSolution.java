@@ -213,15 +213,19 @@ public class XiaMengAirlineSolution implements Cloneable {
 
 	
 	public void refreshPassenger() {
-		
+		int count = 0;
 		Map<String, List<Flight>> flightInfoForPassenger = new HashMap<String, List<Flight>>();
+		Map<Integer, Flight> flightInfoMap = new HashMap<Integer, Flight>();
 		List<String> transitFailedList = new ArrayList<String>();
 		
 		// init passenger data
 		List<Aircraft> airList = new ArrayList<Aircraft>(schedule.values());
 		for (Aircraft aAir : airList) {
+			
 			if (!aAir.isCancel()) {
 				for (Flight flight : aAir.getFlightChain()) {
+					count++;
+					flightInfoMap.put(flight.getFlightId(), flight);
 					flight.setSeatNum(aAir.getNumberOfSeats());
 //					System.out.println("====0  flight :" + flight.getFlightId() +  "transitinfo"  + flight.getTransferInfo());
 //					System.out.println(flight.getSourceAirPort().getId());
@@ -243,6 +247,8 @@ public class XiaMengAirlineSolution implements Cloneable {
 				
 			} else {
 				for (Flight flight : aAir.getFlightChain()) {
+					count++;
+					flightInfoMap.put(flight.getFlightId(), flight);
 //					System.out.println("====1  flight :" + flight.getFlightId() +  "transitinfo"  + flight.getTransferInfo());
 					flight.setCanceled(true);
 					if (flightInfoForPassenger.get(flight.getSourceAirPort().getId() + "_" +  flight.getDesintationAirport().getId()) == null ) {
@@ -259,12 +265,14 @@ public class XiaMengAirlineSolution implements Cloneable {
 			}
 		}
 		
+		System.out.println(" total filght No.(include cancel & new) :" + count);
+		
 		// InitData.transitList
 		
 		
 		for (Transit transit : InitData.transitList) {
-			Flight flight1 = getFlightByFlightId(transit.getFlightID1());
-			Flight flight2 = getFlightByFlightId(transit.getFlightID2());
+			Flight flight1 = flightInfoMap.get(transit.getFlightID1());
+			Flight flight2 = flightInfoMap.get(transit.getFlightID2());
 			if (flight1 == null ) {
 				System.out.println("flight1 :" + transit.getFlightID1());
 			}
