@@ -308,9 +308,9 @@ public class XiaMengAirlineSolution implements Cloneable {
 							if (flight.getNumberOfJoinedPassenger() < flight.getSeatNum()) {
 //								System.out.println("6666666666666666666");
 								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfJoinedPassenger(), flight.getDepartureTime()));
-								if (flight.getFlightId() == 243){
-									System.out.println("7777777777 + " + String.valueOf(flight.getSeatNum() - flight.getNumberOfJoinedPassenger()));
-								}
+//								if (flight.getFlightId() == 243){
+//									System.out.println("7777777777 + " + String.valueOf(flight.getSeatNum() - flight.getNumberOfJoinedPassenger()));
+//								}
 //								System.out.println("7777777777 + " + emptyList.size());
 							}
 						} else {
@@ -319,13 +319,18 @@ public class XiaMengAirlineSolution implements Cloneable {
 							
 							if (flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() <= flight.getSeatNum()) {
 								emptyList.add(new FlightWithEmptySeat(flight.getFlightId(), flight.getSeatNum() - flight.getNumberOfPassenger() - flight.getNumberOfJoinedPassenger(), flight.getDepartureTime()));
-								if (flight.getFlightId() == 243){
-									System.out.println("888888888 + " + String.valueOf(flight.getSeatNum() - flight.getNumberOfPassenger() - flight.getNumberOfJoinedPassenger()));
-								}
+//								if (flight.getFlightId() == 243){
+//									System.out.println("888888888 + " + String.valueOf(flight.getSeatNum() - flight.getNumberOfPassenger() - flight.getNumberOfJoinedPassenger()));
+//								}
 							} else {
 								int overPNo = 0;
 								if (InitData.jointFlightMap.get(flight.getFlightId()) != null) {
-									overPNo = flight.getNumberOfPassenger() - flight.getSeatNum();
+									if (flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() - flight.getSeatNum() > flight.getNumberOfPassenger()) {
+										overPNo = flight.getNumberOfPassenger();
+									} else {
+										overPNo = flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() - flight.getSeatNum();
+									}
+									
 								} else {
 									overPNo = flight.getNumberOfPassenger() + flight.getNumberOfJoinedPassenger() - flight.getSeatNum();
 								}
@@ -343,6 +348,7 @@ public class XiaMengAirlineSolution implements Cloneable {
 												flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + String.valueOf(overPNo));
 												break;
 											} else {
+												
 												flight.setIsTransfer("1");
 												flight.setTransferInfo(flight.getTransferInfo() + "&" + String.valueOf(flightWithEmptySeat.getFlightID()) + ":" + flightWithEmptySeat.getEmptySeatNo());
 												// hour check + 中转
