@@ -225,6 +225,8 @@ public class XiaMengAirlineSolution implements Cloneable, java.io.Serializable {
 			
 			if (!aAir.isCancel()) {
 				for (Flight flight : aAir.getFlightChain()) {
+					flight.setIsTransfer("0");
+					flight.setTransferInfo("");
 					count++;
 					flightInfoMap.put(flight.getFlightId(), flight);
 					flight.setSeatNum(aAir.getNumberOfSeats());
@@ -248,6 +250,8 @@ public class XiaMengAirlineSolution implements Cloneable, java.io.Serializable {
 				
 			} else {
 				for (Flight flight : aAir.getFlightChain()) {
+					flight.setIsTransfer("0");
+					flight.setTransferInfo("");
 					count++;
 					flightInfoMap.put(flight.getFlightId(), flight);
 //					System.out.println("====1  flight :" + flight.getFlightId() +  "transitinfo"  + flight.getTransferInfo());
@@ -271,28 +275,28 @@ public class XiaMengAirlineSolution implements Cloneable, java.io.Serializable {
 		// InitData.transitList
 		
 		
-		for (Transit transit : InitData.transitList) {
-			Flight flight1 = flightInfoMap.get(transit.getFlightID1());
-			Flight flight2 = flightInfoMap.get(transit.getFlightID2());
-			if (flight1 == null ) {
-				System.out.println("flight1 :" + transit.getFlightID1());
-			}
-			
-			if (flight2 == null ) {
-				System.out.println("flight2 :" + transit.getFlightID2());
-			}
-			
-			if (flight1.isCanceled() && !flight2.isCanceled()) {
-//				System.out.println("transit failed by flight1 canceled. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId());
-				flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
-			} else if (!flight1.isCanceled() && !flight2.isCanceled()) {
-				if (Utils.minutiesBetweenTime(flight2.getDepartureTime(), flight1.getArrivalTime()).intValue() < transit.getTransitMins()) {
-//					System.out.println("transit failed by limited time. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId() + ",failed person:" + transit.getTransitPersons());
-					flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
-				}
-			}
-			
-		}
+//		for (Transit transit : InitData.transitList) {
+//			Flight flight1 = flightInfoMap.get(transit.getFlightID1());
+//			Flight flight2 = flightInfoMap.get(transit.getFlightID2());
+//			if (flight1 == null ) {
+//				System.out.println("flight1 :" + transit.getFlightID1());
+//			}
+//			
+//			if (flight2 == null ) {
+//				System.out.println("flight2 :" + transit.getFlightID2());
+//			}
+//			
+//			if (flight1.isCanceled() && !flight2.isCanceled()) {
+////				System.out.println("transit failed by flight1 canceled. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId());
+//				flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
+//			} else if (!flight1.isCanceled() && !flight2.isCanceled()) {
+//				if (Utils.minutiesBetweenTime(flight2.getDepartureTime(), flight1.getArrivalTime()).intValue() < transit.getTransitMins()) {
+////					System.out.println("transit failed by limited time. flight1 : " + flight1.getFlightId() + ",flight2: + " +  flight2.getFlightId() + ",failed person:" + transit.getTransitPersons());
+//					flight2.setSeatNum(flight2.getSeatNum() + transit.getTransitPersons());
+//				}
+//			}
+//			
+//		}
 		
 		
 		// sort flight desc
