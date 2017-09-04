@@ -1,7 +1,6 @@
 package xiaMengAirline.searchEngine;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,7 +12,8 @@ import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.SingleSearchNode;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
 
-public class SolutionSearch {
+public class SolutionSearch implements java.io.Serializable {
+	private static final long serialVersionUID = -3015890356402530690L;
 	private HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeload = new HashMap<String, HashMap<Integer, ArrayList<Integer>>>();
 	private Date closeStart;
 	private Date openStart;

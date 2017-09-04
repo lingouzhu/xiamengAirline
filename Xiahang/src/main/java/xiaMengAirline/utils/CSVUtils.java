@@ -17,7 +17,7 @@ import xiaMengAirline.beans.Flight;
  *
  * @author Data Forest
  */
-public class CSVUtils {
+public class CSVUtils implements java.io.Serializable {
     
     /**
      * 导出

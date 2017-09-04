@@ -2,7 +2,8 @@ package xiaMengAirline.beans;
 
 import java.util.Date;
 
-public class AirPortClose {
+public class AirPortClose implements java.io.Serializable {
+	private static final long serialVersionUID = 2767216672272535960L;
 	private Date startTime;
 	private Date endTime;
 	private boolean allowForTakeoff = true;

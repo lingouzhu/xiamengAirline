@@ -2,7 +2,8 @@ package xiaMengAirline.Exception;
 
 import xiaMengAirline.beans.Aircraft;
 
-public class AircraftNotAdjustable extends Exception {
+public class AircraftNotAdjustable  extends Exception implements java.io.Serializable {
+	private static final long serialVersionUID = 591757790964775407L;
 	Aircraft air;
 
 	public Aircraft getAir() {

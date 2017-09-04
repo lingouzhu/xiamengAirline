@@ -1,6 +1,7 @@
 package xiaMengAirline.beans;
 
-public class Transit {
+public class Transit implements java.io.Serializable {
+  	private static final long serialVersionUID = -4555285920666738147L;
 	private int flightID1;
 	private int flightID2;
 	private int transitMins;

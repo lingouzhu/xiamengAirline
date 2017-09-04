@@ -2,6 +2,10 @@ package xiaMengAirline.utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
@@ -20,7 +24,7 @@ import org.apache.commons.collections4.comparators.ComparableComparator;
 import xiaMengAirline.beans.Aircraft;
 import xiaMengAirline.beans.Flight;
 
-public class Utils {
+public class Utils implements java.io.Serializable {
 
 	public static boolean isEmpty(String str) {
 		if (str == null || "".equals(str)) {
@@ -281,5 +285,47 @@ public class Utils {
 	     return null;
 	   }
 	 }
+	 
+	 
+	 /**
+		 * This method makes a "deep clone" of any Java object it is given.
+		 */
+		 public static void ObjToFile(Object object, String str) {
+	        FileOutputStream fos = null;
+	        try {
+	            fos = new FileOutputStream(new File(str));
+	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	            // Put data in your baos
+	            ObjectOutputStream objectOutputStream = new ObjectOutputStream(baos);
+	            objectOutputStream.writeObject(object);
+	            objectOutputStream.flush();
+	            objectOutputStream.close();
+	            baos.writeTo(fos);
+	            baos.flush();
+	            baos.close();
+	             
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        } finally {
+	 
+	        }
+	    }
+		 
+		 
+		 public static Object FileToObj(String str) {
+		        FileOutputStream fos = null;
+		        Object obj = null;
+		        try {
+		             
+		            ObjectInputStream objectinputStream = new ObjectInputStream(new FileInputStream(new File(str)));
+		            obj = objectinputStream.readObject();
+		            
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+		        return obj;
+		    }
+		 
+		 
 
 }

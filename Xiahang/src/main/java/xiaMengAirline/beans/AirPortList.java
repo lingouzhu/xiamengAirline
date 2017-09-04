@@ -3,7 +3,8 @@ package xiaMengAirline.beans;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AirPortList {
+public class AirPortList implements java.io.Serializable {
+	private static final long serialVersionUID = -4048228187442383793L;
 	/** airport list */
 	private Map<String, AirPort> airPortList = new HashMap<String, AirPort> ();
 

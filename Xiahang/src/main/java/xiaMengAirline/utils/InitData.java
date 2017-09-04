@@ -24,9 +24,8 @@ import xiaMengAirline.beans.Flight;
 import xiaMengAirline.beans.RegularAirPortClose;
 import xiaMengAirline.beans.Transit;
 import xiaMengAirline.beans.XiaMengAirlineSolution;
-import xiaMengAirline.searchEngine.BusinessDomain;
 
-public class InitData {
+public class InitData implements java.io.Serializable {
 	private static final Logger logger = Logger.getLogger(InitData.class);
 
 	/** air limitation list air_startPort_endPort */

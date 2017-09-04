@@ -20,7 +20,8 @@ import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.utils.InitData;
 import xiaMengAirline.utils.Utils;
 
-public class Aircraft implements Cloneable {
+public class Aircraft implements Cloneable, java.io.Serializable {
+	private static final long serialVersionUID = 5841776933047071248L;
 	private static final Logger logger = Logger.getLogger(Aircraft.class);
 	final static private int MAXIMUM_EARLIER_TIME = 6; // HOUR
 	final static public int DOMESTIC_MAXIMUM_DELAY_TIME = 24; // HOUR

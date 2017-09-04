@@ -13,6 +13,7 @@ import xiaMengAirline.searchEngine.OptimizationController;
 import xiaMengAirline.searchEngine.OptimizerStragety;
 import xiaMengAirline.searchEngine.OptimizerStragety.SELECTION;
 import xiaMengAirline.utils.InitData;
+import xiaMengAirline.utils.Utils;
 
 public class StartupMethod1 {
 
@@ -46,6 +47,13 @@ public class StartupMethod1 {
 		aGoodSolution.refreshPassenger();
 		aGoodSolution.refreshCost(true);
 		aGoodSolution.generateOutput(String.valueOf("test"));
+		aGoodSolution.generateSolutionOutput(String.valueOf("test"));
+		
+		// save solution
+		Utils.ObjToFile(aGoodSolution, "testObj");
+		XiaMengAirlineSolution testObj = (XiaMengAirlineSolution) Utils.FileToObj("testObj");
+		testObj.generateSolutionOutput(String.valueOf("test2"));
+		
 		long endTime = System.currentTimeMillis();
 		long mins = (endTime - startTime) / (1000 * 60);
 		System.out.println("Consumed ... " + mins);

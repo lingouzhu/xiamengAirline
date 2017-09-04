@@ -109,6 +109,7 @@ public class ResultFlight implements Comparable{
             String flightId = transferInfo[0].trim();
             int passNum = Integer.parseInt(transferInfo[1].trim());
             if(passNum <= 0){
+            	System.out.println("transferInfo[0]:" +  transferInfo[0]);
                 throw new RuntimeException("签转旅客数量不能为空!");
             }
             infos.put(flightId, passNum);

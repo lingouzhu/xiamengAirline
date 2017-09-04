@@ -11,7 +11,9 @@ import xiaMengAirline.Exception.FlightDurationNotFound;
 import xiaMengAirline.utils.InitData;
 import xiaMengAirline.utils.Utils;
 
-public class Flight implements Cloneable {
+public class Flight implements Cloneable, java.io.Serializable {
+	private static final long serialVersionUID = 4427583034160520861L;
+
 	private static final Logger logger = Logger.getLogger(Flight.class);
 	
 	final public static int GroundingTime = 50;

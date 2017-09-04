@@ -4,8 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class RegularAirPortClose {
+public class RegularAirPortClose implements java.io.Serializable {
 	
+	private static final long serialVersionUID = 1932349471600378623L;
 	private int port;
 	private String closeTime;
 	private String openTime;

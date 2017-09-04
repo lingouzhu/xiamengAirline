@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class SingleSearchNode {
+public class SingleSearchNode implements java.io.Serializable {
+	private static final long serialVersionUID = -3279603301125480971L;
 	private HashMap<String, HashMap<Integer, ArrayList<Integer>>> timeLoad;
 	private ArrayList<Flight> flightList;
 	

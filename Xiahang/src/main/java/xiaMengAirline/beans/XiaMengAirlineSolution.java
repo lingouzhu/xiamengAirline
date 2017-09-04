@@ -13,13 +13,14 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import xiaMengAirline.Exception.AircraftNotAdjustable;
-import xiaMengAirline.searchEngine.SingleAircraftSearch;
 import xiaMengAirline.searchEngine.SolutionSearch;
 import xiaMengAirline.utils.CSVUtils;
 import xiaMengAirline.utils.InitData;
 import xiaMengAirline.utils.Utils;
 
-public class XiaMengAirlineSolution implements Cloneable {
+public class XiaMengAirlineSolution implements Cloneable, java.io.Serializable {
+	private static final long serialVersionUID = 7482618907586669445L;
+	
 	private static final Logger logger = Logger.getLogger(XiaMengAirlineSolution.class);
 	private BigDecimal cost = new BigDecimal("0");
 	private String strCost = "";
