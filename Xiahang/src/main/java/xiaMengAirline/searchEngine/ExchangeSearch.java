@@ -39,9 +39,13 @@ public class ExchangeSearch {
 			System.out.println("Processing batch ... " + currentBatch);
 			logger.debug("Processing batch ... " + currentBatch);
 			List<String> processedList = new ArrayList<String>();
-			for (Aircraft air1 : aBatch) {
-				logger.debug("Processing first air " + air1.getId());
+			for (Aircraft air1Driver : aBatch) {
+				logger.debug("Processing first air " + air1Driver.getId());
 				boolean isImproved = false;
+				Aircraft air1 = aSolution.getAircraft(air1Driver.getId(), air1Driver.getType(), 
+						air1Driver.isCancel(), true);
+				if (air1.getFlightChain().isEmpty())
+					continue;
 				Aircraft air2 = null;
 				if (aStragety.getSelectionRule() == SELECTION.RANDOM)
 					aSelector = new IterativeRadomSelector();
@@ -106,7 +110,10 @@ public class ExchangeSearch {
 													+ aF.getFlightId());
 										}
 										logger.debug("Method 1 Complete exchange...");
+										BusinessDomain.validateFlightSize(aSolution, "Method1_"+currentBatch);
 									}
+									
+									
 
 									// only update solution when new change
 									// goes better
@@ -122,7 +129,7 @@ public class ExchangeSearch {
 												aBetterSolution.refreshCost(
 														new BigDecimal(newAircraft1.getCost() - air1.getCost()));
 												neighboursResult.addSolution(aBetterSolution);
-												logger.debug("Better Solution exists! Method 1 : "
+												logger.info("Better Solution exists! Method 1 : "
 														+ aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air1.getId());
@@ -156,7 +163,7 @@ public class ExchangeSearch {
 									cancelledAir.insertFlightChain(air2, flightAir2, destFlight,
 											cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
 									newAircraft2.removeFlightChain(sFlight, dFlight);
-
+									
 									if (aStragety.isDebug()) {
 										logger.debug("Method 2 After exchange ...");
 										List<Flight> updateList1 = newAircraft2.getFlightChain();
@@ -170,6 +177,7 @@ public class ExchangeSearch {
 													+ aF.getFlightId());
 										}
 										logger.debug("Method 2 Complete exchange...");
+										BusinessDomain.validateFlightSize(aSolution, "Method2_"+currentBatch);
 									}
 
 									// only update solution when new change
@@ -186,7 +194,7 @@ public class ExchangeSearch {
 												aBetterSolution.refreshCost(
 														new BigDecimal(newAircraft2.getCost() - air2.getCost()));
 												neighboursResult.addSolution(aBetterSolution);
-												logger.debug("Better Solution exists! Method 2 : "
+												logger.info("Better Solution exists! Method 2 : "
 														+ aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air2.getId());
@@ -225,7 +233,8 @@ public class ExchangeSearch {
 
 								newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
 								newAircraft2.removeFlightChain(air2SourceFlight, air2DestFlight);
-
+								
+								
 								if (aStragety.isDebug()) {
 									logger.debug("Method 3 After exchange...");
 									List<Flight> updateList1 = newAircraft1.getFlightChain();
@@ -239,6 +248,7 @@ public class ExchangeSearch {
 												+ newAircraft2.isCancel() + " flight " + aF.getFlightId());
 									}
 									logger.debug("Method 3 Complete exchange...");
+									BusinessDomain.validateFlightSize(aSolution, "Method3_"+currentBatch);
 								}
 
 								// only update solution when new change
@@ -290,7 +300,7 @@ public class ExchangeSearch {
 											aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 											aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
 											neighboursResult.addSolution(aBetterSolution);
-											logger.debug(
+											logger.info(
 													"Better Solution exists! Method 3 : " + aBetterSolution.getCost());
 										} else {
 											logger.warn("Invalid aircraft after exchange " + air2.getId());
@@ -326,6 +336,7 @@ public class ExchangeSearch {
 
 										newAircraft2.insertFlightChain(air1, flightAir1, destFlight, air2Flight, true);
 										newAircraft1.removeFlightChain(air1SourceFlight, air1DestFlight);
+										
 
 										if (aStragety.isDebug()) {
 											logger.debug("Method 4 After exchange ...");
@@ -340,6 +351,7 @@ public class ExchangeSearch {
 														"Air " + newAircraft2.getId() + "Flights: " + aF.getFlightId());
 											}
 											logger.debug("Method 4 Complete exchange ...");
+											BusinessDomain.validateFlightSize(aSolution, "Method4_"+currentBatch);
 										}
 
 										// only update solution when new
@@ -392,7 +404,7 @@ public class ExchangeSearch {
 													aBetterSolution.replaceOrAddNewAircraft(newAircraft1);
 													aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 													aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
-													logger.debug("Better Solution exists! Method 4 : "
+													logger.info("Better Solution exists! Method 4 : "
 															+ aBetterSolution.getCost());
 													neighboursResult.addSolution(aBetterSolution);
 												} else {
@@ -442,6 +454,7 @@ public class ExchangeSearch {
 															+ aF.getFlightId());
 												}
 												logger.debug("Method 5 Complete exchange ...");
+												BusinessDomain.validateFlightSize(aSolution, "Method5_"+currentBatch);
 											}
 
 											// only update solution when new
@@ -495,7 +508,7 @@ public class ExchangeSearch {
 														aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 														aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
 														neighboursResult.addSolution(aBetterSolution);
-														logger.debug("Better Solution exists! Method 5 : "
+														logger.info("Better Solution exists! Method 5 : "
 																+ aBetterSolution.getCost());
 													} else {
 														logger.warn("Invalid aircraft after exchange " + air2.getId());
@@ -551,6 +564,7 @@ public class ExchangeSearch {
 													"Air " + newAircraft2.getId() + " Flights: " + aF.getFlightId());
 										}
 										logger.debug("Method 6 Complete exchange ...");
+										BusinessDomain.validateFlightSize(aSolution, "Method6_"+currentBatch);
 									}
 
 									// only update solution when new change
@@ -604,7 +618,7 @@ public class ExchangeSearch {
 												aBetterSolution.replaceOrAddNewAircraft(newAircraft2);
 												aBetterSolution.refreshCost(new BigDecimal(newCost - oldCost));
 												neighboursResult.addSolution(aBetterSolution);
-												logger.debug("Better Solution exists! Method 6 : "
+												logger.info("Better Solution exists! Method 6 : "
 														+ aBetterSolution.getCost());
 											} else {
 												logger.warn("Invalid aircraft after exchange " + air2.getId());

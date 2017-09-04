@@ -9,7 +9,6 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 
 import xiaMengAirline.searchEngine.OptimizerStragety;
-import xiaMengAirline.searchEngine.SelfSearch;
 import xiaMengAirline.utils.InitData;
 
 public class RestrictedCandidateList {
@@ -23,6 +22,7 @@ public class RestrictedCandidateList {
 	private OptimizerStragety aStragety;
 	
 	public boolean addSolution (XiaMengAirlineSolution aNewSolution) {
+
 		if (bestSolutionList.size() < maxBestSolutions) {
 			if (bestSolutionList.containsKey(aNewSolution.getCost())) {
 				bestSolutionList.get(aNewSolution.getCost()).add(aNewSolution);

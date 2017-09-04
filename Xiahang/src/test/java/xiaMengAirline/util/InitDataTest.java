@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -217,6 +218,14 @@ public class InitDataTest {
 		Flight f760 = air134.getFlightByFlightId(760);
 		assertEquals(45, BusinessDomain.getGroundingTime(337,399));
 		assertEquals(50, BusinessDomain.getGroundingTime(57,760));
+		
+		//total flight
+		List<Aircraft> airList = new ArrayList<Aircraft> (InitData.originalSolution.getSchedule().values());
+		int totalFlights = 0;
+		for (Aircraft air:airList) {
+			totalFlights += air.getFlightChain().size();
+		}
+		assertEquals(2364, totalFlights);
 		
 //		Aircraft air116 = InitData.originalSolution.getAircraft("116", "2", false, false).clone();
 //		try {
@@ -516,7 +525,7 @@ public class InitDataTest {
 		assertEquals(1, aBatchDriver.getCurrentIterationNumber());
 		assertEquals(50, aBatchDriver.getNextDriveForIterative().size());
 		assertEquals(2, aBatchDriver.getCurrentIterationNumber());
-		assertEquals(42, aBatchDriver.getNextDriveForIterative().size());
+		assertEquals(43, aBatchDriver.getNextDriveForIterative().size());
 		assertEquals(3, aBatchDriver.getCurrentIterationNumber());
 		assertEquals(null, aBatchDriver.getNextDriveForIterative());
 		
@@ -537,6 +546,7 @@ public class InitDataTest {
 		Aircraft airl18 = InitData.originalSolution.getAircraft("18", "2", false, false).clone();
 		Aircraft airl90 = InitData.originalSolution.getAircraft("90", "2", false, false).clone();
 		Aircraft airl44 = InitData.originalSolution.getAircraft("44", "1", false, false).clone();
+		Aircraft airl82 = InitData.originalSolution.getAircraft("82", "2", false, false).clone();
 		a234Solution.replaceOrAddNewAircraft(airl2);
 		a234Solution.replaceOrAddNewAircraft(airl3);
 		a234Solution.replaceOrAddNewAircraft(airl4);
@@ -549,6 +559,62 @@ public class InitDataTest {
 		assertEquals(2, aLeastList.size());
 		assertEquals("4", aLeastList.get(0).getId());
 		assertEquals("3", aLeastList.get(1).getId());
+		
+		Aircraft newAircraft1 = null;
+		Aircraft cancelledAir = null;
+		HashMap<Flight, List<Flight>> circuitFlightsAir82 = airl82.getCircuitFlights();
+		int m = airl82.getFlightChain().size();
+		assertEquals(20, m);
+		for (int uu = 0; uu <= m - 1; uu++) {
+			Flight flightAir1 = airl82.getFlight(uu);
+			if (circuitFlightsAir82.containsKey(flightAir1)) {
+				for (Flight destFlight : circuitFlightsAir82.get(flightAir1)) {
+					newAircraft1 = airl82.clone();
+					Aircraft air1Cancelled = a234Solution.getAircraft(airl82.getId(), airl82.getType(), true,
+							true);
+					cancelledAir = air1Cancelled.clone();
+
+					Flight sFlight = newAircraft1.getFlight(uu);
+					Flight dFlight = newAircraft1.getFlight(airl82.getFlightChain().indexOf(destFlight));
+
+					cancelledAir.insertFlightChain(airl82, flightAir1, destFlight,
+							cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
+					newAircraft1.removeFlightChain(sFlight, dFlight);
+					
+					int aSize = cancelledAir.getFlightChain().size() + newAircraft1.getFlightChain().size();
+					assertEquals(20, aSize);
+				}
+			}
+			
+		}
+		
+//		airl82 = a234Solution.getAircraft("82", "2", false, false);
+//		circuitFlightsAir82 = airl82.getCircuitFlights();
+//		m = airl82.getFlightChain().size();
+//		for (int uu = 0; uu <= m - 1; uu++) {
+//			Flight flightAir1 = airl82.getFlight(uu);
+//			if (circuitFlightsAir82.containsKey(flightAir1)) {
+//				for (Flight destFlight : circuitFlightsAir82.get(flightAir1)) {
+//					newAircraft1 = airl82.clone();
+//					Aircraft air1Cancelled = a234Solution.getAircraft(airl82.getId(), airl82.getType(), true,
+//							true);
+//					cancelledAir = air1Cancelled.clone();
+//
+//					Flight sFlight = newAircraft1.getFlight(uu);
+//					Flight dFlight = newAircraft1.getFlight(airl82.getFlightChain().indexOf(destFlight));
+//
+//					cancelledAir.insertFlightChain(airl82, flightAir1, destFlight,
+//							cancelledAir.getFlight(cancelledAir.getFlightChain().size() - 1), false);
+//					newAircraft1.removeFlightChain(sFlight, dFlight);
+//					
+//					int aSize = cancelledAir.getFlightChain().size() + newAircraft1.getFlightChain().size();
+//					assertEquals(20, aSize);
+//				}
+//				a234Solution.replaceOrAddNewAircraft(newAircraft1);
+//				a234Solution.replaceOrAddNewAircraft(cancelledAir);
+//			}
+//			
+//		}
 		
 		
 		IterativeMethod aMostDriver = new IterativeMostOverlappedAirports();
@@ -564,7 +630,7 @@ public class InitDataTest {
 		aSingleDriver.setupIterationStragety(aStragety);
 		aSingleDriver.setupIterationContent(a234Solution);
 		List<Aircraft> oneList = aSingleDriver.getNextDriveForIterative();
-		assertEquals(3, oneList.size());
+		assertEquals(4, oneList.size());
 
 		
 		List<Aircraft> testSelection = new ArrayList<Aircraft> ();

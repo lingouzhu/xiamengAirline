@@ -1261,6 +1261,18 @@ public class BusinessDomain {
 		
 		return initialArrivalTime;
 	}
+	
+
+	public static void validateFlightSize (XiaMengAirlineSolution aSolution, String stage) {
+		//check flight size
+		List<Aircraft> airList = new ArrayList<Aircraft> (aSolution.getSchedule().values());
+		int totalFlights = 0;
+		for (Aircraft air:airList) {
+			totalFlights += air.getFlightChain().size();
+		}
+		if (totalFlights!=2364)
+			logger.error("Total flight size is not correct,  actual " + totalFlights + " at " + stage);
+	}
 
 	public static boolean validateDuplicatedFlight(XiaMengAirlineSolution aSolution) {
 		List<Aircraft> airList = new ArrayList<Aircraft>(aSolution.getSchedule().values());

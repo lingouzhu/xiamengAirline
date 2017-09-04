@@ -28,8 +28,7 @@ public class IterativeSingleMethod implements IterativeMethod {
 		airList = new ArrayList<Aircraft> ();
 		List<Aircraft> aList = new ArrayList<Aircraft>(aSolution.getSchedule().values());
 		for (Aircraft air:aList) {
-			if (!air.getFlightChain().isEmpty())
-				airList.add(air);
+			airList.add(air);
 		}
 		isFresh = true;
 		

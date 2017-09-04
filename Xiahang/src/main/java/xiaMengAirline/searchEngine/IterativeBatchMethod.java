@@ -35,11 +35,8 @@ public class IterativeBatchMethod implements IterativeMethod {
 			List<Aircraft> airBatch = new ArrayList<Aircraft>();
 			while (noOfSelected <= aStragety.getBatchSize() && airList.size() > 0) {
 				Aircraft air1 = airList.remove(InitData.rndNumbers.nextInt(airList.size()));
-				if (!air1.getFlightChain().isEmpty()) {
-					airBatch.add(air1);
-					noOfSelected++;					
-				}
-
+				airBatch.add(air1);
+				noOfSelected++;					
 			}
 			airBatchList.put(batchNo, airBatch);
 		}

@@ -58,6 +58,8 @@ public class SelfSearch implements AdjustmentEngine {
 
 		myNewSolution.setCost(new BigDecimal(String.valueOf(cost)));
 		logger.debug("Total intial solution cost : " + myNewSolution.getCost());
+		
+		BusinessDomain.validateFlightSize(myNewSolution, "inital");
 
 		return myNewSolution;
 	}
