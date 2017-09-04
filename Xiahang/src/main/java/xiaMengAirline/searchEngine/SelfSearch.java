@@ -59,7 +59,8 @@ public class SelfSearch implements AdjustmentEngine {
 		myNewSolution.setCost(new BigDecimal(String.valueOf(cost)));
 		logger.debug("Total intial solution cost : " + myNewSolution.getCost());
 		
-		BusinessDomain.validateFlightSize(myNewSolution, "inital");
+		if (aStragety.isDebug())
+			BusinessDomain.validateFlightSize(myNewSolution, "inital");
 
 		return myNewSolution;
 	}
@@ -196,11 +197,17 @@ public class SelfSearch implements AdjustmentEngine {
 								+ altAir.getId());
 						return false;
 					}
-					if (!flight.getPlannedAir().getType().equals(altAir.getType()) || !flight.getPlannedFlight()
-							.getDesintationAirport().getId().equals(flight.getDesintationAirport().getId())) {
-						logger.warn("5.7 Last flight shall not change aircraft type or airport flightId: "
-								+ flight.getFlightId() + " Air: " + altAir.getId() + " new airport: "
-								+ flight.getDesintationAirport().getId());
+//					if (!flight.getPlannedAir().getType().equals(altAir.getType()) || !flight.getPlannedFlight()
+//							.getDesintationAirport().getId().equals(flight.getDesintationAirport().getId())) {
+//						logger.warn("5.7 Last flight shall not change aircraft type or airport flightId: "
+//								+ flight.getFlightId() + " Air: " + altAir.getId() + " new airport: "
+//								+ flight.getDesintationAirport().getId());
+//						return false;
+//					}
+					if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
+						logger.warn("5.7 Last flight will not be changed to another aircraft"
+								+ flight.getFlightId() + "new Air: " + altAir.getId() + " planned Air: "
+								+ flight.getPlannedAir().getId());
 						return false;
 					}
 
