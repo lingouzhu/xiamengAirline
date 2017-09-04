@@ -204,10 +204,9 @@ public class SelfSearch implements AdjustmentEngine {
 //								+ flight.getDesintationAirport().getId());
 //						return false;
 //					}
-					if (!flight.getPlannedAir().getId().equals(altAir.getId())) {
-						logger.warn("5.7 Last flight will not be changed to another aircraft"
-								+ flight.getFlightId() + "new Air: " + altAir.getId() + " planned Air: "
-								+ flight.getPlannedAir().getId());
+					if (i!=altAir.getFlightChain().size()-1) {
+						logger.warn("5.7 Last flight will not be changed position "
+								+ flight.getFlightId());
 						return false;
 					}
 

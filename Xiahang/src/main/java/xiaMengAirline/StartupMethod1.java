@@ -50,9 +50,9 @@ public class StartupMethod1 {
 		aGoodSolution.generateSolutionOutput(String.valueOf("test"));
 		
 		// save solution
-		Utils.ObjToFile(aGoodSolution, "testObj");
-		XiaMengAirlineSolution testObj = (XiaMengAirlineSolution) Utils.FileToObj("testObj");
-		testObj.generateSolutionOutput(String.valueOf("test2"));
+		Utils.ObjToFile(aGoodSolution, "testObj2");
+//		XiaMengAirlineSolution testObj = (XiaMengAirlineSolution) Utils.FileToObj("testObj");
+//		testObj.generateSolutionOutput(String.valueOf("test2"));
 		
 		long endTime = System.currentTimeMillis();
 		long mins = (endTime - startTime) / (1000 * 60);
