@@ -700,11 +700,11 @@ public class InitDataTest {
 		BusinessDomain.printOutAircraft(airl2Test);
 		assertEquals(true, isAdjusted);
 		assertEquals(false, f557.isCanceled());
-		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:50:00"), airl2Test.getFlightByFlightId(737).getDepartureTime());
+		assertEquals(Utils.stringFormatToTime2("07/05/2017 17:00:00"), airl2Test.getFlightByFlightId(737).getDepartureTime());
 		
 		f557.setCanceled(false);
 		isAdjusted = BusinessDomain.calcuateDepartureTimebyArrival(airl2Test, f734, f557, Utils.stringFormatToTime2("07/05/2017 17:00:00"), 48, false);
-		assertEquals(true, isAdjusted);
+		assertEquals(false, isAdjusted);
 		
 		//clone test
 		Aircraft airl6test = airl6.clone();

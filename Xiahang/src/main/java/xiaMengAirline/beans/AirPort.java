@@ -12,7 +12,12 @@ import java.util.Map;
 import xiaMengAirline.Exception.AirportNotAcceptDepartureTime2;
 import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.SolutionNotValid;
-
+/**
+* @startuml
+* autonumber
+* SelfSearch -> AirPort: requestAirport
+* @enduml
+*/
 public class AirPort implements java.io.Serializable {
 	private static final long serialVersionUID = 356197399732169821L;
 	private String id;
