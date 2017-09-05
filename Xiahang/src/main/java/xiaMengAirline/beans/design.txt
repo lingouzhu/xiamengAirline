@@ -1,0 +1,6 @@
+@startuml
+package "Basic Object" {
+	component AirPort
+	component AirPortClose
+}
+@enduml

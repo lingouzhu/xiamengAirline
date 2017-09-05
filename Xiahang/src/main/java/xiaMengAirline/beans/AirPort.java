@@ -14,6 +14,9 @@ import xiaMengAirline.Exception.AirportNotAvailable;
 import xiaMengAirline.Exception.SolutionNotValid;
 /**
 * @startuml
+* component basicobject
+* @enduml
+* @startuml
 * autonumber
 * SelfSearch -> AirPort: requestAirport
 * @enduml
